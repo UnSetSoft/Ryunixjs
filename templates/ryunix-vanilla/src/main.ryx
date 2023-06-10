@@ -1,0 +1,7 @@
+/* Don't rename main.ryx to *.jsx|*.ts|*.js */
+
+import Ryunix from "@unsetsoft/ryunixjs";
+import App from "./pages/App";
+import "./styles/global.css"
+
+Ryunix.render(<App />, document.querySelector("[data-root]"));
