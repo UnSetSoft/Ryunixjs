@@ -1,0 +1,12 @@
+{
+  "name": "@unsetsoft/ryunixjs",
+  "version": "1.0.0-alpha.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup ./lib/ryunix.js --file ./dist/Ryunix.js --format umd --name Ryunix",
+    "prepublishOnly": "yarn build"
+  },
+  "devDependencies": {
+    "rollup": "3.24.0"
+  }
+}
