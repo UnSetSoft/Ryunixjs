@@ -12,7 +12,6 @@
     "kg:bump": "gmvu bump"
   },
   "dependencies": {
-    "@s-ui/mono": "2.35.0",
     "@kagarisoft/gmvu-cli": "1.0.4"
   }
 }
