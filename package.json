@@ -9,9 +9,12 @@
   "license": "MIT",
   "scripts": {
     "co": "sui-mono commit",
-    "re": "sui-mono release"
+    "re": "sui-mono release",
+    "kg:init": "gmvu init",
+    "kg:bump": "gmvu bump"
   },
   "dependencies": {
-    "@s-ui/mono": "^2.35.0"
+    "@s-ui/mono": "2.35.0",
+    "@kagarisoft/gmvu-cli": "1.0.4"
   }
 }
