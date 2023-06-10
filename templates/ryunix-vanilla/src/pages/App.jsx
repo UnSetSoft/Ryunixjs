@@ -6,9 +6,14 @@ class App extends Component {
   }
   render() {
     return (
-      <div>
-        <h2>This is my ReactJS Clone</h2>
-      </div>
+      <header className="App-header">
+
+        <p>Hello RyunixJS!</p>
+
+        <p>
+          Edit <code>App.jsx</code> and save to test HMR updates.
+        </p>
+      </header>
     );
   }
 }
