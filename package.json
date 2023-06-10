@@ -8,8 +8,6 @@
   ],
   "license": "MIT",
   "scripts": {
-    "co": "sui-mono commit",
-    "re": "sui-mono release",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump"
   },
