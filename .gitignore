@@ -1,6 +1,6 @@
-/node_modules
-/yarn.lock
+node_modules
+yarn.lock
 /app
 
-/.vscode
-/.github
+.vscode
+.github

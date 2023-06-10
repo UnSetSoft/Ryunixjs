@@ -1,13 +1,15 @@
 {
   "name": "RyunixJS",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "main": "index.js",
+  "private": true,
   "workspaces": [
     "packages/*"
   ],
   "license": "MIT",
   "scripts": {
-    "co": "sui-mono commit"
+    "co": "sui-mono commit",
+    "re": "sui-mono release"
   },
   "dependencies": {
     "@s-ui/mono": "^2.35.0"
