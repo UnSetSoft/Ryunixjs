@@ -4,16 +4,13 @@ class App extends Component {
   constructor(props) {
     super(props);
   }
+
   render() {
+    const click = () => {
+      alert('Click')
+    }
     return (
-      <header className="App-header">
-
-        <p>Hello RyunixJS!</p>
-
-        <p>
-          Edit <code>App.jsx</code> and save!
-        </p>
-      </header>
+      <button onClick={click}>Click</button>
     );
   }
 }
