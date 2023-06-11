@@ -1,8 +1,8 @@
 import { render } from "./reconciler";
 import { createElement } from "./element";
 import { Component } from "./component";
-import { useStore } from "./hooks";
-export { createElement, render, Component, useStore };
+import { useLoaded } from "./hooks";
+export { createElement, render, Component, useLoaded };
 export default {
   render,
   createElement,

@@ -6,6 +6,7 @@ export function render(element, parentDom) {
   const nextInstance = reconcile(parentDom, prevInstance, element);
   rootInstance = nextInstance;
 }
+
 export function reconcile(parentDom, instance, element) {
   if (instance === null) {
     const newInstance = instantiate(element);

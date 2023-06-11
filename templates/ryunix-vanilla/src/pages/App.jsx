@@ -1,16 +1,19 @@
-import Ryunix, { Component } from "@unsetsoft/ryunixjs";
+import Ryunix from "@unsetsoft/ryunixjs";
 
-class App extends Component {
+class App extends Ryunix.Component {
   constructor(props) {
     super(props);
   }
-
   render() {
-    const click = () => {
-      alert('Click')
-    }
     return (
-      <button onClick={click}>Click</button>
+      <header className="App-header">
+
+        <p>Hello RyunixJS!</p>
+
+        <p>
+          Edit <code>App.jsx</code> and save!
+        </p>
+      </header>
     );
   }
 }
