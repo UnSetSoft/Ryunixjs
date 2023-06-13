@@ -8,7 +8,7 @@ import { Octokit } from "@octokit/rest";
 import makeDir from "make-dir";
 import zip from "extract-zip";
 import fs from "fs";
- 
+import fse from "fs-extra";
 import { DownloaderHelper } from "node-downloader-helper";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,11 +33,20 @@ const extractAndMove = async (dirname, template) => {
 
   await fs.renameSync(
     __dirname + `/temp/Ryunixjs-master/templates/${template}`,
-    dirname,
+    __dirname + `/temp/Ryunixjs-master/templates/${template}`,
     async (err) => {
       if (error) {
         extractAndMove(dirname, template);
       }
+
+      await fse.move(
+        __dirname + `/temp/Ryunixjs-master/templates/${template}`,
+        dirname`/${template}`,
+        (err) => {
+          if (err) return console.error(err);
+          logger.ok("the directory was moved!");
+        }
+      );
     }
   );
 
