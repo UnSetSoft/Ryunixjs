@@ -3,6 +3,10 @@
   "version": "0.1.4",
   "main": "index.js",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
+  },
+  "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "bin": {
     "create-ryunix-app": "index.js"
   },
@@ -17,5 +21,8 @@
     "node-downloader-helper": "^2.1.7",
     "terminal-log": "^1.0.1",
     "yargs": "^17.7.2"
+  },
+  "engines": {
+    "node": ">=18.16.0"
   }
 }
