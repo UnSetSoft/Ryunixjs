@@ -31,33 +31,30 @@ const extractAndMove = async (dirname, template) => {
     }
   );
 
-  await fs.renameSync(
+  await fse.move(
     __dirname + `/temp/Ryunixjs-master/templates/${template}`,
-    __dirname + `/temp/Ryunixjs-master/templates/${template}`,
+    `${template}`,
     async (err) => {
-      if (error) {
-        extractAndMove(dirname, template);
-      }
+      if (err) return logger.error(err);
 
-      await fse.move(
-        __dirname + `/temp/Ryunixjs-master/templates/${template}`,
-        dirname`/${template}`,
-        (err) => {
-          if (err) return console.error(err);
-          logger.ok("the directory was moved!");
+      logger.ok("the directory was moved!");
+
+      await fs.renameSync(`${template}`, `${dirname}`, async (error) => {
+        if (error) {
+          return logger.error(err);
         }
+      });
+
+      await fs.rmSync(__dirname + "/temp", {
+        recursive: true,
+        force: true,
+      });
+
+      logger.ok(
+        "Everything is ready!",
+        `$ cd ${dirname} | yarn install && yarn dev / npm install && npm run dev`
       );
     }
-  );
-
-  await fs.rmSync(__dirname + "/temp", {
-    recursive: true,
-    force: true,
-  });
-
-  logger.ok(
-    "Everything is ready!",
-    `$ cd ${dirname} | yarn install && yarn dev / npm install && npm run dev`
   );
 };
 
