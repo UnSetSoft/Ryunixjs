@@ -457,8 +457,8 @@ export function scheduleUpdate(instance, partialState) {
  */
 export function render(elements, parentDom) {
   workQueue.push({
-    from: HOST_ROOT, // the root/parent fiber
-    dom: parentDom, // document.getElementById("app") just a dom node where this fiber will be appended to as a child
+    from: HOST_ROOT, 
+    dom: parentDom, 
     newProps: { children: elements },
   });
   requestIdleCallback(performWork);
