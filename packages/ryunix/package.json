@@ -1,14 +1,21 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "private": false,
+  "bugs": {
+    "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
+  },
+  "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
     "build": "rollup ./lib/ryunix.js --file ./dist/Ryunix.js --format umd --name Ryunix",
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
     "rollup": "3.24.0"
+  },
+  "engines": {
+    "node": ">=18.16.0"
   }
 }
