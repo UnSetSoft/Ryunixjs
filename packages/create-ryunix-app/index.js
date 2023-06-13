@@ -8,7 +8,7 @@ import { Octokit } from "@octokit/rest";
 import makeDir from "make-dir";
 import zip from "extract-zip";
 import fs from "fs";
- 
+import fse from "fs-extra";
 import { DownloaderHelper } from "node-downloader-helper";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,24 +31,30 @@ const extractAndMove = async (dirname, template) => {
     }
   );
 
-  await fs.renameSync(
+  await fse.move(
     __dirname + `/temp/Ryunixjs-master/templates/${template}`,
-    dirname,
+    `${template}`,
     async (err) => {
-      if (error) {
-        extractAndMove(dirname, template);
-      }
+      if (err) return logger.error(err);
+
+      logger.ok("the directory was moved!");
+
+      await fs.renameSync(`${template}`, `${dirname}`, async (error) => {
+        if (error) {
+          return logger.error(err);
+        }
+      });
+
+      await fs.rmSync(__dirname + "/temp", {
+        recursive: true,
+        force: true,
+      });
+
+      logger.ok(
+        "Everything is ready!",
+        `$ cd ${dirname} | yarn install && yarn dev / npm install && npm run dev`
+      );
     }
-  );
-
-  await fs.rmSync(__dirname + "/temp", {
-    recursive: true,
-    force: true,
-  });
-
-  logger.ok(
-    "Everything is ready!",
-    `$ cd ${dirname} | yarn install && yarn dev / npm install && npm run dev`
   );
 };
 
