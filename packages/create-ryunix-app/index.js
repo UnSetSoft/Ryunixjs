@@ -60,19 +60,39 @@ const downloadAndExtract = async (dirname, template) => {
   await dl.start().catch((err) => logger.error(err));
 };
 
+const SUPPORTED_TEMPLATES = [
+  "ryunix-ts",
+  "ryunix-tsx",
+  "ryunix-jsx",
+  "ryunix-js",
+  "ryunix-ryx",
+];
+
 const version = {
   command: "get",
   describe: "Get the template",
   handler: async (arg) => {
-    const template = "ryunix-vanilla";
-    const dirname = arg.dirname || "ryunix-project";
-
+    let sub_title;
     try {
+      if (arg.template && !SUPPORTED_TEMPLATES.includes(arg.template)) {
+        sub_title =
+          "Supported templates [ryunix-ts|ryunix-tsx|ryunix-js|ryunix-jsx|ryunix-ryx]";
+        throw Error("This template is not supported");
+      }
+
+      const template = arg.template || "ryunix-ryx";
+
+      const dirname = arg.dirname || "ryunix-project";
+
       await validateRepoFolder(template);
       await makeDir(__dirname + "/temp");
       await downloadAndExtract(dirname, template);
     } catch (error) {
-      logger.error(error);
+      if (sub_title) {
+        logger.error(error);
+      } else {
+        logger.error(error, sub_title);
+      }
     }
   },
 };
