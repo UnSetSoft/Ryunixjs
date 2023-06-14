@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "0.1.11",
+  "version": "0.1.12-beta.0",
   "main": "index.js",
   "private": true,
   "workspaces": [
@@ -10,7 +10,9 @@
   "license": "MIT",
   "scripts": {
     "kg:init": "gmvu init",
-    "kg:bump": "gmvu bump"
+    "kg:bump": "gmvu bump",
+    "publish:ryunix": "cd ./packages/ryunix && npm publish",
+    "publish:cr": "cd./packages/create-ryunix-app && npm publish"
   },
   "dependencies": {
     "@kagarisoft/gmvu-cli": "1.0.4"
