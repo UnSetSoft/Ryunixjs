@@ -10,9 +10,7 @@
   "license": "MIT",
   "scripts": {
     "kg:init": "gmvu init",
-    "kg:bump": "gmvu bump",
-    "publish:ryunix": "cd ./packages/ryunix && npm publish",
-    "publish:cr": "cd./packages/create-ryunix-app && npm publish"
+    "kg:bump": "gmvu bump"
   },
   "dependencies": {
     "@kagarisoft/gmvu-cli": "1.0.4"
