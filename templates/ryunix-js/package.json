@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@unsetsoft/ryunixjs": "^0.1.4",
+    "@unsetsoft/ryunixjs": "^0.1.11",
     "eslint": "8.36.0"
   },
   "scripts": {
