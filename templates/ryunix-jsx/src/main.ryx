@@ -4,4 +4,6 @@ import Ryunix from "@unsetsoft/ryunixjs";
 import App from "./App";
 import "./styles/global.css"
 
-Ryunix.render(<App />, document.querySelector("[data-root]"));
+
+Ryunix.createRoot(document.querySelector("[data-root]"));
+Ryunix.rootClient(<App />);
