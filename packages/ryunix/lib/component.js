@@ -1,4 +1,5 @@
 import { scheduleUpdate } from "./reconciler";
+
 export class Component {
   constructor(props) {
     this.props = props;
@@ -10,5 +11,15 @@ export class Component {
     throw Error(
       "This function is not implemented yet, has a lot of bugs. You can check https://github.com/UnSetSoft/Ryunixjs/issues/10 for more information."
     );
+  }
+}
+
+export class Fragment {
+  constructor(props) {
+    this.props = props;
+  }
+
+  render() {
+    return this.props.children;
   }
 }

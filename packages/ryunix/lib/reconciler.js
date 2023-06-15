@@ -448,6 +448,12 @@ export function scheduleUpdate(instance, partialState) {
   });
 }
 
+let rootElement;
+
+export const createRoot = (parentDom) => {
+  rootElement = parentDom;
+};
+
 /**
  * The `render` function takes in elements and a parent DOM node, and schedules a reconciliation
  * process to update the DOM with the new elements.
@@ -455,6 +461,16 @@ export function scheduleUpdate(instance, partialState) {
  * @param parentDom - parentDom is a reference to the DOM element where the rendered elements will be
  * appended as children. It is the container element for the rendered components.
  */
+
+export function rootClient(elements) {
+  workQueue.push({
+    from: "root",
+    dom: rootElement,
+    newProps: { children: elements },
+  });
+  requestIdleCallback(performWork);
+}
+
 export function render(elements, parentDom) {
   workQueue.push({
     from: HOST_ROOT, 
