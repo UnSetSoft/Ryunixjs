@@ -8,6 +8,5 @@ Include a list of package.json, for example:
 */
 module.exports = [
   "packages/ryunix/package.json",
-  "packages/create-ryunix-app/package.json",
-  "packages/ryunix-router/package.json",
+  "packages/create-ryunix-app/package.json"
 ];

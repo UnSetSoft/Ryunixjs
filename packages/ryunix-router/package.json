@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-router",
-  "version": "0.2.5",
+  "version": "0.2.5-alpha",
   "license": "MIT",
   "main": "./lib/main.js",
   "private": false,
