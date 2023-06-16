@@ -1,19 +1,25 @@
-import Ryunix from "@unsetsoft/ryunixjs";
+import Ryunix, { useStore } from "@unsetsoft/ryunixjs";
 
-class App extends Ryunix.Component {
-  constructor(props) {
-    super(props);
-  }
-  render() {
-    return (
-      <header className="App-header">
-        <p>Hello RyunixJS!</p>
-        <p>
-          Edit <code>App.tsx</code> and save!
-        </p>
-      </header>
-    );
-  }
+function App() {
+  const [count, setCount] = useStore(0);
+
+  const handleButtonClick = () => {
+    setCount((c) => c + 1);
+  };
+
+  return (
+    <div className="main">
+      <h1>Hello from RyunixJS v0.2.0!</h1>
+      <h2>State Update!</h2>
+      <p>
+        Edit <code>App.js</code> and save!
+      </p>
+      <p>Clicks {count}!</p>
+      <button className="button" onClick={handleButtonClick}>
+        Click to increment
+      </button>
+    </div>
+  );
 }
 
 export default App;
