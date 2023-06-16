@@ -19,9 +19,11 @@ function createElement(type, props, ...children) {
     type,
     props: {
       ...props,
-      children: children.map((child) =>
-        typeof child === "object" ? child : createTextElement(child)
-      ),
+      children: children
+        .flat()
+        .map((child) =>
+          typeof child === "object" ? child : createTextElement(child)
+        ),
     },
   };
 }
@@ -118,8 +120,42 @@ function commitRoot() {
 }
 
 /**
+ * The function cancels all effect hooks in a given fiber.
+ * @param fiber - The "fiber" parameter is likely referring to a data structure used in React.js to
+ * represent a component and its state. It contains information about the component's props, state, and
+ * children, as well as metadata used by React to manage updates and rendering. The function
+ * "cancelEffects" is likely intended
+ */
+function cancelEffects(fiber) {
+  if (fiber.hooks) {
+    fiber.hooks
+      .filter((hook) => hook.tag === "effect" && hook.cancel)
+      .forEach((effectHook) => {
+        effectHook.cancel();
+      });
+  }
+}
+
+/**
+ * The function runs all effect hooks in a given fiber.
+ * @param fiber - The "fiber" parameter is likely referring to a data structure used in the
+ * implementation of a fiber-based reconciliation algorithm, such as the one used in React. A fiber
+ * represents a unit of work that needs to be performed by the reconciliation algorithm, and it
+ * contains information about a component and its children, as
+ */
+function runEffects(fiber) {
+  if (fiber.hooks) {
+    fiber.hooks
+      .filter((hook) => hook.tag === "effect" && hook.effect)
+      .forEach((effectHook) => {
+        effectHook.cancel = effectHook.effect();
+      });
+  }
+}
+
+/**
  * The function commits changes made to the DOM based on the effect tag of the fiber.
- * @param fiber - A fiber is a unit of work in React's reconciliation process. It represents a
+ * @param fiber - A fiber is a unit of work in Ryunix's reconciliation process. It represents a
  * component and its state at a particular point in time. The `commitWork` function takes a fiber as a
  * parameter to commit the changes made during the reconciliation process to the actual DOM.
  * @returns The function does not return anything, it performs side effects by manipulating the DOM.
@@ -135,11 +171,19 @@ function commitWork(fiber) {
   }
   const domParent = domParentFiber.dom;
 
-  if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
-    domParent.appendChild(fiber.dom);
-  } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
-    updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+  if (fiber.effectTag === "PLACEMENT") {
+    if (fiber.dom != null) {
+      domParent.appendChild(fiber.dom);
+    }
+    runEffects(fiber);
+  } else if (fiber.effectTag === "UPDATE") {
+    cancelEffects(fiber);
+    if (fiber.dom != null) {
+      updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+    }
+    runEffects(fiber);
   } else if (fiber.effectTag === "DELETION") {
+    cancelEffects(fiber);
     commitDeletion(fiber, domParent);
   }
 
@@ -150,7 +194,7 @@ function commitWork(fiber) {
 /**
  * The function removes a fiber's corresponding DOM node from its parent node or recursively removes
  * its child's DOM node until it finds a node to remove.
- * @param fiber - a fiber node in a fiber tree, which represents a component or an element in the React
+ * @param fiber - a fiber node in a fiber tree, which represents a component or an element in the Ryunix
  * application.
  * @param domParent - The parent DOM element from which the fiber's DOM element needs to be removed.
  */
@@ -178,7 +222,7 @@ function createRoot(root) {
 /**
  * The function renders an element into a container using a work-in-progress root.
  * @param element - The element parameter is the component or element that needs to be rendered in the
- * container. It could be a React component or a DOM element.
+ * container. It could be a Ryunix component or a DOM element.
  * @param container - The container parameter is the DOM element where the rendered element will be
  * appended to. this parameter is optional if you use createRoot().
  */
@@ -226,7 +270,7 @@ requestIdleCallback(workLoop);
 /**
  * The function performs a unit of work by updating either a function component or a host component and
  * returns the next fiber to be processed.
- * @param fiber - A fiber is a unit of work in React that represents a component and its state. It
+ * @param fiber - A fiber is a unit of work in Ryunix that represents a component and its state. It
  * contains information about the component's type, props, and children, as well as pointers to its
  * parent, child, and sibling fibers. The `performUnitOfWork` function takes a fiber as a parameter and
  * performs work
@@ -274,7 +318,7 @@ function updateFunctionComponent(fiber) {
 
 /**
  * This function updates a host component's DOM element and reconciles its children.
- * @param fiber - A fiber is a unit of work in React that represents a component and its state. It
+ * @param fiber - A fiber is a unit of work in Ryunix that represents a component and its state. It
  * contains information about the component's type, props, and children, as well as pointers to other
  * fibers in the tree.
  */
@@ -348,7 +392,7 @@ function reconcileChildren(wipFiber, elements) {
 // Hooks
 
 /**
- * The function creates a state hook for a React-like framework.
+ * The function creates a state hook for a Ryunix-like framework.
  * @param initial - The initial value of the state for the hook.
  * @returns The `useStore` function returns an array with two elements: the current state value and a
  * `setState` function that can be used to update the state.
@@ -365,12 +409,11 @@ function useStore(initial) {
 
   const actions = oldHook ? oldHook.queue : [];
   actions.forEach((action) => {
-    console.log(action);
-    hook.state = action(hook.state);
+    hook.state = typeof action === "function" ? action(hook.state) : action;
   });
 
   /**
-   * The function `setState` updates the state of a component in React by adding an action to a queue
+   * The function `setState` updates the state of a component in Ryunix by adding an action to a queue
    * and setting up a new work-in-progress root.
    * @param action - The `action` parameter is an object that represents a state update to be performed
    * on a component. It contains information about the type of update to be performed and any new data
@@ -396,6 +439,48 @@ function Fragment() {
   return null;
 }
 
+/**
+ * The function checks if the previous dependencies are different from the next dependencies.
+ * @param prevDeps - The previous dependencies, which could be an array of values or objects that a
+ * function or component depends on.
+ * @param nextDeps - `nextDeps` is an array of dependencies that are being checked for changes. These
+ * dependencies are typically used in React's `useEffect` and `useCallback` hooks to determine when a
+ * component should re-render or when a function should be re-created.
+ */
+const hasDepsChanged = (prevDeps, nextDeps) =>
+  !prevDeps ||
+  !nextDeps ||
+  prevDeps.length !== nextDeps.length ||
+  prevDeps.some((dep, index) => dep !== nextDeps[index]);
+
+/**
+ * This is a function that creates a hook for managing side effects in React components.
+ * @param effect - The effect function that will be executed after the component has rendered or when
+ * the dependencies have changed. It can perform side effects such as fetching data, updating the DOM,
+ * or subscribing to events.
+ * @param deps - An array of dependencies that the effect depends on. If any of the dependencies change
+ * between renders, the effect will be re-run. If the array is empty, the effect will only run once on
+ * mount and never again.
+ */
+function useEffect(effect, deps) {
+  const oldHook =
+    wipFiber.alternate &&
+    wipFiber.alternate.hooks &&
+    wipFiber.alternate.hooks[hookIndex];
+
+  const hasChanged = hasDepsChanged(oldHook ? oldHook.deps : undefined, deps);
+
+  const hook = {
+    tag: "effect",
+    effect: hasChanged ? effect : null,
+    cancel: hasChanged && oldHook && oldHook.cancel,
+    deps,
+  };
+
+  wipFiber.hooks.push(hook);
+  hookIndex++;
+}
+
 // export
 
 export {
@@ -406,4 +491,5 @@ export {
   // Hooks
   useStore,
   Fragment,
+  useEffect,
 };
