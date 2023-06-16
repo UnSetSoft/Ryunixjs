@@ -1,4 +1,4 @@
-import Ryunix, { useStore, useEffect } from "../../../ryunix/dist/Ryunix"
+import Ryunix, { useStore, useEffect } from "@unsetsoft/ryunixjs";
 
 const Router = ({ path, component }) => {
   const [currentPath, setCurrentPath] = useStore(window.location.pathname);
@@ -10,12 +10,11 @@ const Router = ({ path, component }) => {
     window.addEventListener("pushsatate", onLocationChange);
     window.addEventListener("popstate", onLocationChange);
 
-
     return () => {
       window.removeEventListener("navigate", onLocationChange);
       window.removeEventListener("pushsatate", onLocationChange);
       window.removeEventListener("popstate", onLocationChange);
-    }
+    };
   }, [currentPath]);
 
   return currentPath === path ? component() : null;
