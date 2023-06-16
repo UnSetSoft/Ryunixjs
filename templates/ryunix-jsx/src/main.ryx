@@ -5,5 +5,6 @@ import App from "./App";
 import "./styles/global.css"
 
 
-Ryunix.createRoot(document.querySelector("[data-root]"));
-Ryunix.rootClient(<App />);
+Ryunix.createRoot(document.getElementById("root"))
+
+Ryunix.render(<App />);
