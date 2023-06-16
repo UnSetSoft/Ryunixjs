@@ -326,7 +326,7 @@ function updateHostComponent(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber);
   }
-  reconcileChildren(fiber, fiber.props.children);
+  reconcileChildren(fiber, fiber.props.children.flat());
 }
 
 /**
@@ -435,10 +435,6 @@ function useStore(initial) {
   return [hook.state, setState];
 }
 
-function Fragment() {
-  return null;
-}
-
 /**
  * The function checks if the previous dependencies are different from the next dependencies.
  * @param prevDeps - The previous dependencies, which could be an array of values or objects that a
@@ -490,6 +486,5 @@ export {
   createRoot,
   // Hooks
   useStore,
-  Fragment,
   useEffect,
 };

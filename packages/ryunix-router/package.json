@@ -1,19 +1,18 @@
 {
-  "name": "@unsetsoft/ryunixjs",
+  "name": "@unsetsoft/ryunix-router",
   "version": "0.2.0",
   "license": "MIT",
-  "main": "./dist/Ryunix.js",
+  "main": "./dist/Ryunix-router.js",
   "private": false,
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
-    "build": "rollup ./lib/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
+    "build": "rollup ./lib/main.js --file ./dist/Ryunix-router.js --format umd --name RyunixRouter",
     "postinstall": "yarn build"
   },
   "dependencies": {
-    "@unsetsoft/ryunix-router": "^0.2.0",
     "rollup": "3.24.0"
   },
   "engines": {
