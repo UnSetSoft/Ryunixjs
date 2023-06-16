@@ -1,5 +1,5 @@
-import Link from "./components/Link";
-import Router from "./components/Router";
+import Link from "./Link";
+import Router from "./Router";
 
 export { Router, Link };
 

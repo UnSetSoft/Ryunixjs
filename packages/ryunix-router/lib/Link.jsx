@@ -1,4 +1,4 @@
-import Ryunix from "../../../ryunix/dist/Ryunix"
+import Ryunix from "@unsetsoft/ryunixjs";
 
 const Link = ({ to, children }) => {
   const preventReload = (event) => {
@@ -10,9 +10,9 @@ const Link = ({ to, children }) => {
     }
   };
   return (
-    <a href={to} onClick={preventReload}>
-      {children}
-    </a>
-  );
+    <div>
+      <a href={to} onClick={preventReload}>{children}</a>
+    </div>
+  )
 };
 export default Link;
