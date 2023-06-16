@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-router",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "license": "MIT",
   "main": "./lib/main.js",
   "private": false,
@@ -10,5 +10,8 @@
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "engines": {
     "node": ">=18.16.0"
+  },
+  "dependencies": {
+    "@unsetsoft/ryunixjs": "^0.2.5"
   }
 }

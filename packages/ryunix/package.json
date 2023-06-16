@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "private": false,
@@ -13,7 +13,6 @@
     "postinstall": "yarn build"
   },
   "dependencies": {
-    "@unsetsoft/ryunix-router": "^0.2.3",
     "rollup": "3.24.0"
   },
   "engines": {

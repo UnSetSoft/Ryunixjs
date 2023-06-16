@@ -9,6 +9,10 @@ const Link = ({ to, children }) => {
       window.dispatchEvent(navigationEvent);
     }
   };
-  return <a href={to} onClick={preventReload}>{children}</a>
+  return (
+    <div>
+      <a href={to} onClick={preventReload}>{children}</a>
+    </div>
+  )
 };
 export default Link;
