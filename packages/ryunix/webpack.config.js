@@ -2,12 +2,17 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
 
+const dir = path.dirname(require.main.filename);
+
 module.exports = {
   mode: process.env.NODE_ENV !== "production" ? "development" : "production",
-  entry: path.join(__dirname, "src", "main.ryx"),
+  entry: path.join(dir, "src", "main.ryx"),
   output: {
-    path: path.resolve(__dirname, "app"),
+    path: path.resolve(dir, ".ryunix"),
     filename: "./assets/js/[chunkhash].bundle.js",
+  },
+  devServer: {
+    port: 3000,
   },
   module: {
     rules: [
@@ -36,7 +41,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "template", "index.html"),
+      template: path.join(dir, "public", "index.html"),
+      //favicon: path.join(dir, "public", "favicon.ico"),
     }),
     new ErrorOverlayPlugin(),
   ],
