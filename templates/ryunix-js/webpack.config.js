@@ -9,9 +9,6 @@ module.exports = {
     path: path.resolve(__dirname, "app"),
     filename: "./assets/js/[chunkhash].bundle.js",
   },
-  devServer: {
-    port: 3030, // you can change the port
-  },
   module: {
     rules: [
       {
