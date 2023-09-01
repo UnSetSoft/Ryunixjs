@@ -1,6 +1,6 @@
 # RyunixJS
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNeyunse%2Fryunixjs-vercel&project-name=ryunixjs-vercel&repository-name=ryunixjs-vercel&demo-title=My%20RyunixJS&demo-description=A%20statically%20generated%20page%20exaple%20using%20RyunixJS)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FUnSetSoft%2FRyunixjs%2Ftree%2Fmaster%2Ftemplates%2Fryunix-jsx&project-name=my-awesome-ryunix-jsx-project&repository-name=my-awesome-ryunix-jsx-project)
 
 
 ## What is RyunixJS?
