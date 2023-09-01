@@ -9,6 +9,9 @@ module.exports = {
     path: path.resolve(__dirname, "app"),
     filename: "./assets/js/[chunkhash].bundle.js",
   },
+  devServer: {
+    port: 3030, // you can change the port
+  },
   module: {
     rules: [
       {
@@ -22,12 +25,17 @@ module.exports = {
         },
       },
       {
-        test: /\.(css|scss)$/,
-        use: ["style-loader", "css-loader"],
+        test: /\.(sa|sc|c)ss$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
         test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4)$/,
         use: ["file-loader"],
+      },
+      {
+        test: /\.(png|woff|woff2|eot|ttf|svg)$/, // to import images and fonts
+        loader: "url-loader",
+        options: { limit: false },
       },
     ],
   },
