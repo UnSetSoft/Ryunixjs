@@ -1,10 +1,7 @@
-import { createElement, render, createRoot } from "./dom";
-import { useStore, useEffect } from "./dom";
+import Ryunix from "./dom";
 
-export { useStore, useEffect, createElement, render, createRoot };
+export { useStore, useEffect, createElement, render, createRoot } from "./dom";
 
-export default {
-  createElement,
-  render,
-  createRoot,
-};
+window.Ryunix = Ryunix;
+
+export default Ryunix;

@@ -51,4 +51,7 @@ module.exports = {
     }),
     new ErrorOverlayPlugin(),
   ],
+  externals: {
+    ryunix: "Ryunix",
+  },
 };
