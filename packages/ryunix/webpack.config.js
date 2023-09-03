@@ -2,13 +2,19 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
 
+const dir = path.dirname(path.resolve(path.join(__dirname, "/../", "../")));
+console.log(path.join(dir, "src", "main.ryx"), __dirname);
+
 module.exports = {
-  mode: process.env.NODE_ENV !== "production" ? "development" : "production",
-  entry: path.join(__dirname, "src", "main.ryx"),
+  mode: "production",
+  entry: path.join(dir, "src", "main.ryx"),
   output: {
-    path: path.resolve(__dirname, "app"),
+    path: path.join(dir, ".ryunix"),
+
     filename: "./assets/js/[chunkhash].bundle.js",
+    devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
   },
+
   module: {
     rules: [
       {
@@ -41,7 +47,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "template", "index.html"),
+      template: path.join(dir, "public", "index.html"),
     }),
     new ErrorOverlayPlugin(),
   ],

@@ -185,6 +185,7 @@ function commitWork(fiber) {
   } else if (fiber.effectTag === "DELETION") {
     cancelEffects(fiber);
     commitDeletion(fiber, domParent);
+    return;
   }
 
   commitWork(fiber.child);
