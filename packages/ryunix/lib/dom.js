@@ -246,7 +246,7 @@ function createRoot(root) {
 
 /**
  * The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
- * @example Ryunix.createRoot("root") -> <div id="root" />
+ * @example Ryunix.init("root") -> <div id="root" />
  * @param root - The parameter "root" is the id of the HTML element that will serve as the container
  * for the root element.
 */
