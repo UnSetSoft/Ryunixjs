@@ -16,6 +16,7 @@
     "ryunix": "./bin/index.js"
   },
   "dependencies": {
+    "terminal-log": "^1.0.1",
     "sass": "^1.66.1",
     "url-loader": "^4.1.1",
     "rollup": "3.24.0",

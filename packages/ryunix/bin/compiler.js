@@ -1,8 +1,6 @@
 // Can be imported from webpack package
 const webpack = require("webpack");
-const config = require("../webpack.config.js");
-const compiler = new webpack.Compiler();
-new webpack.WebpackOptionsDefaulter().process(config);
-compiler.options = config;
+const webpackConfig = require("../webpack.config.js");
+const compiler = webpack(webpackConfig);
 
 module.exports = { compiler };
