@@ -210,6 +210,7 @@ function commitDeletion(fiber, domParent) {
 let containerRoot = null;
 
 /**
+ * @deprecated use Ryunix.init(root) instead.
  * The function creates a root container for a web application.
  * @param root - The parameter `root` is likely referring to an HTML element that will serve as the
  * root or container for a web application or component. The `createRoot` function takes this element
@@ -218,6 +219,17 @@ let containerRoot = null;
  */
 function createRoot(root) {
   containerRoot = root;
+}
+
+
+/**
+ * The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
+ * @param root - The parameter "root" is the id of the HTML element that will serve as the container
+ * for the root element.
+ * @example createRoot("root") -> <div id="root" />
+*/
+function init(root) {
+  containerRoot = document.getElementById(root);
 }
 
 /**
@@ -485,6 +497,7 @@ export {
   createElement,
   render,
   createRoot,
+  init,
   // Hooks
   useStore,
   useEffect,
