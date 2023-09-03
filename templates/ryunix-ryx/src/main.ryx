@@ -1,6 +1,6 @@
 /* Don't rename main.ryx to *.jsx|*.ts|*.js */
 
-import Ryunix from "@unsetsoft/ryunixjs";
+import * as Ryunix from "@unsetsoft/ryunixjs";
 import App from "./App";
 import "./styles/global.css"
 
