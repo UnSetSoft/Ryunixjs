@@ -489,3 +489,8 @@ export {
   useStore,
   useEffect,
 };
+
+export default {
+  createElement,
+  render,
+};
