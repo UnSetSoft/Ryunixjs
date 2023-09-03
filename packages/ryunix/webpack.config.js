@@ -4,6 +4,7 @@ const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
 
 const dir = path.dirname(path.resolve(path.join(__dirname, "/../", "../")));
 console.log(path.join(dir, "src", "main.ryx"), __dirname);
+
 module.exports = {
   mode: process.env.NODE_ENV !== "production" ? "development" : "production",
   entry: path.join(dir, "src", "main.ryx"),
