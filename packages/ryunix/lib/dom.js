@@ -68,7 +68,7 @@ function createDom(fiber) {
 const isEvent = (key) => key.startsWith("on");
 const isProperty = (key) => key !== "children" && !isEvent(key);
 const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (prev, next) => (key) => !(key in next);
+const isGone = (next) => (key) => !(key in next);
 
 /**
  * The function updates the DOM by removing old event listeners and properties, and adding new ones
@@ -80,7 +80,7 @@ const isGone = (prev, next) => (key) => !(key in next);
 function updateDom(dom, prevProps, nextProps) {
   Object.keys(prevProps)
     .filter(isEvent)
-    .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
+    .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2);
       dom.removeEventListener(eventType, prevProps[name]);
@@ -88,7 +88,7 @@ function updateDom(dom, prevProps, nextProps) {
 
   Object.keys(prevProps)
     .filter(isProperty)
-    .filter(isGone(prevProps, nextProps))
+    .filter(isGone(nextProps))
     .forEach((name) => {
       dom[name] = "";
     });
@@ -97,7 +97,15 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = nextProps[name];
+      if (name === "style") {
+        DomStyle(dom, nextProps.style);
+      } else if (name === "className") {
+        prevProps.className &&
+          dom.classList.remove(...prevProps.className.split(/\s+/));
+        dom.classList.add(...nextProps.className.split(/\s+/));
+      } else {
+        dom[name] = nextProps[name];
+      }
     });
 
   Object.keys(nextProps)
@@ -108,6 +116,18 @@ function updateDom(dom, prevProps, nextProps) {
       dom.addEventListener(eventType, nextProps[name]);
     });
 }
+
+const reg = /[A-Z]/g;
+function DomStyle(dom, style) {
+  dom.style = Object.keys(style).reduce((acc, styleName) => {
+    const key = styleName.replace(reg, function (v) {
+      return "-" + v.toLowerCase();
+    });
+    acc += `${key}: ${style[styleName]};`;
+    return acc;
+  }, "");
+}
+
 
 /**
  * The function commits changes made to the virtual DOM to the actual DOM.
