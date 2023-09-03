@@ -45,8 +45,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(dir, "public", "index.html"),
-      //favicon: path.join(dir, "public", "favicon.ico"),
+      template: path.join(__dirname, "template", "index.html"),
     }),
     new ErrorOverlayPlugin(),
   ],
