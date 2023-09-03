@@ -1,10 +1,10 @@
 /* Don't rename main.ryx to *.jsx|*.ts|*.js */
 
-import * as Ryunix from "@unsetsoft/ryunixjs";
+import Ryunix from "@unsetsoft/ryunixjs";
 import App from "./App";
 import "./styles/global.css"
 
 
-Ryunix.createRoot(document.getElementById("root"))
+Ryunix.init(document.getElementById("root"));
 
 Ryunix.render(<App />);

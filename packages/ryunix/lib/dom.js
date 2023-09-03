@@ -236,6 +236,7 @@ let containerRoot = null;
  * root or container for a web application or component. The `createRoot` function takes this element
  * as an argument and assigns it to a variable called `containerRoot`. This variable can then be used
  * to manipulate the contents
+ * @example Ryunix.init(document.getElementById("root");)
  */
 function createRoot(root) {
   containerRoot = root;
@@ -512,18 +513,11 @@ function useEffect(effect, deps) {
 
 // export
 
-export {
-  // Main functions
-  createElement,
-  render,
-  createRoot,
-  init,
-  // Hooks
-  useStore,
-  useEffect,
-};
+export { useStore, useEffect };
 
 export default {
   createElement,
   render,
+  createRoot,
+  init,
 };

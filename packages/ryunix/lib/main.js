@@ -1,6 +1,6 @@
 import Ryunix from "./dom";
 
-export { useStore, useEffect, createElement, render, createRoot } from "./dom";
+export { useStore, useEffect } from "./dom";
 
 window.Ryunix = Ryunix;
 
