@@ -232,11 +232,12 @@ let containerRoot = null;
 /**
  * @deprecated use Ryunix.init(root) instead.
  * The function creates a root container for a web application.
+ * @example Ryunix.createRoot(document.getElementById("root")) -> <div id="root" />
  * @param root - The parameter `root` is likely referring to an HTML element that will serve as the
  * root or container for a web application or component. The `createRoot` function takes this element
  * as an argument and assigns it to a variable called `containerRoot`. This variable can then be used
  * to manipulate the contents
- * @example Ryunix.init(document.getElementById("root");)
+ * 
  */
 function createRoot(root) {
   containerRoot = root;
@@ -245,9 +246,9 @@ function createRoot(root) {
 
 /**
  * The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
+ * @example Ryunix.createRoot("root") -> <div id="root" />
  * @param root - The parameter "root" is the id of the HTML element that will serve as the container
  * for the root element.
- * @example createRoot("root") -> <div id="root" />
 */
 function init(root) {
   containerRoot = document.getElementById(root);
