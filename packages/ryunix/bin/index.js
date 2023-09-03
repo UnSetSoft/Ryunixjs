@@ -2,6 +2,8 @@
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
 const { server } = require("./serve");
+const { compiler } = require("./compiler");
+
 const serv = {
   command: "server",
   describe: "Run server",
@@ -9,4 +11,13 @@ const serv = {
     await server.start();
   },
 };
-yargs(hideBin(process.argv)).command(serv).parse();
+
+const build = {
+  command: "build",
+  describe: "Run builder",
+  handler: async (arg) => {
+    compiler.run(() => {});
+  },
+};
+
+yargs(hideBin(process.argv)).command(serv).command(build).parse();
