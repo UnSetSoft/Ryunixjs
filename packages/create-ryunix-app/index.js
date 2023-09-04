@@ -103,11 +103,11 @@ const extractAndMove = async (dirname, template, branch) => {
           if (branch !== "master") {
             logger.ok(
               "Everything is ready!",
-              `
+              ```
               Info: You downloaded from the "${branch}" branch, not from the "master" branch, which means that the files are probably not stable.
 
               $ cd ${dirname} | yarn dev / npm run dev
-              `
+              ```
             );
           } else {
             logger.ok(
