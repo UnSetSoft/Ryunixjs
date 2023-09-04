@@ -10,7 +10,13 @@
   "license": "MIT",
   "scripts": {
     "kg:init": "gmvu init",
-    "kg:bump": "gmvu bump"
+    "kg:bump": "gmvu bump",
+    "ry:pub": "cd ./packages/ryunix && npm publish",
+    "ry:nightly": "cd ./packages/ryunix && npm publish --tag nightly",
+    "rn:pub": "cd ./packages/ryuni-navigationx && npm publish",
+    "rn:nightly": "cd ./packages/ryuni-navigationx && npm publish --tag nightly",
+    "pub": "yarn ry:pub && yarn rn:pub",
+    "pub:nightly": "yarn ry:nightly && yarn rn:nightly"
   },
   "dependencies": {
     "@kagarisoft/gmvu-cli": "1.0.4"
