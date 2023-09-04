@@ -513,61 +513,9 @@ function useEffect(effect, deps) {
   hookIndex++;
 }
 
-/**
- * The Router component is responsible for rendering a specific component based on the current path in
- * the browser's URL.
- * @returns The `Router` component returns the `component` if the `currentPath` matches the specified
- * `path`, otherwise it returns `null`.
- */
-const Router = ({ path, component }) => {
-  const [currentPath, setCurrentPath] = useStore(window.location.pathname);
-
-  useEffect(() => {
-    const onLocationChange = () => {
-      setCurrentPath(() => window.location.pathname);
-    };
-
-    window.addEventListener("navigate", onLocationChange);
-    window.addEventListener("pushsatate", onLocationChange);
-    window.addEventListener("popstate", onLocationChange);
-
-    return () => {
-      window.removeEventListener("navigate", onLocationChange);
-      window.removeEventListener("pushsatate", onLocationChange);
-      window.removeEventListener("popstate", onLocationChange);
-    };
-  }, [currentPath]);
-
-  return currentPath === path ? component() : null;
-};
-
-/**
- * The Link function is a Ryunix component that prevents page reload when a link is clicked and updates
- * the browser's history and local storage.
- * @param props - The `props` parameter is an object that contains the properties passed to the `Link`
- * component. These properties can include the following:
- * @returns The Link component is being returned.
- */
-const Link = (props) => {
-  const preventReload = (event) => {
-    event.preventDefault();
-    if (window.location.pathname !== props.to) {
-      window.history.pushState({}, "", props.to);
-      const navigationEvent = new Event("pushsatate");
-      window.dispatchEvent(navigationEvent);
-      localStorage.setItem("pathname", props.to);
-    }
-  };
-  return (
-    <a href={props.to} onClick={preventReload} {...props}>
-      {props.children}
-    </a>
-  );
-};
-
 // export
 
-export { useStore, useEffect, Router, Link };
+export { useStore, useEffect };
 
 export default {
   createElement,
