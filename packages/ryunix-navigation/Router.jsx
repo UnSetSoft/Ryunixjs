@@ -1,4 +1,4 @@
-import { useEffect, useStore } from "../lib/dom";
+import { useEffect, useStore } from "../../ryunix/lib/dom";
 /**
  * The Router component is responsible for rendering a specific component based on the current path in
  * the browser's URL.
