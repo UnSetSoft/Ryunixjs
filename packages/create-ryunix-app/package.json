@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/create-ryunix-app",
-  "version": "1.0.0-nightly.2",
+  "version": "1.0.0-nightly.3",
   "main": "index.js",
   "license": "MIT",
   "bugs": {
