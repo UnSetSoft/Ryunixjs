@@ -51,8 +51,6 @@ const Install = (root) => {
         "--loglevel",
         "error",
       ].concat(dependencies);
-
-      args.push(root);
     }
 
     const child = spawn(command, args, { stdio: "inherit" });
