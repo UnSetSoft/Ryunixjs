@@ -1,12 +1,9 @@
 {
-  "name": "ryunix-jsx",
+  "name": "ryunix-vanilla",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "homepage": "./",
-  "dependencies": {
-    "@unsetsoft/ryunixjs": "^0.2.12"
-  },
   "scripts": {
     "dev": "ryunix server",
     "build": "ryunix build"

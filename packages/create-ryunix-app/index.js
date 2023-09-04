@@ -10,15 +10,61 @@ import zip from "extract-zip";
 import fs from "fs";
 import fse from "fs-extra";
 import { DownloaderHelper } from "node-downloader-helper";
+import spawn from "cross-spawn";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const __isUsingYarn = () =>
+  (process.env.npm_config_user_agent || "").indexOf("yarn") === 0;
+
+const templateFolder = "cra-templates";
+
+const dependencies = ["@unsetsoft/ryunixjs"];
 
 const validateRepoFolder = async (template) => {
   await new Octokit().repos.getContent({
     owner: "UnSetSoft",
     repo: "Ryunixjs",
-    ref: "master",
-    path: `templates/${template}/package.json`,
+    ref: "dev",
+    path: `${templateFolder}/${template}/package.json`,
+  });
+};
+
+const Install = (root) => {
+  return new Promise((resolve, reject) => {
+    let command;
+    let args;
+    if (__isUsingYarn()) {
+      command = "yarnpkg";
+      args = ["add", "--exact"];
+      [].push.apply(args, dependencies);
+
+      args.push("--cwd");
+      args.push(root);
+    } else {
+      command = "npm";
+      args = [
+        "install",
+        "--no-audit",
+        "--save",
+        "--save-exact",
+        "--loglevel",
+        "error",
+      ].concat(dependencies);
+
+      args.push(root);
+    }
+
+    const child = spawn(command, args, { stdio: "inherit" });
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject({
+          command: `${command} ${args.join(" ")}`,
+        });
+        return;
+      }
+      resolve();
+    });
   });
 };
 
@@ -32,7 +78,7 @@ const extractAndMove = async (dirname, template) => {
   );
 
   await fse.move(
-    __dirname + `/temp/Ryunixjs-master/templates/${template}`,
+    __dirname + `/temp/Ryunixjs-master/${templateFolder}/${template}`,
     `${template}`,
     async (err) => {
       if (err) return logger.error(err);
@@ -50,10 +96,16 @@ const extractAndMove = async (dirname, template) => {
         force: true,
       });
 
-      logger.ok(
-        "Everything is ready!",
-        `$ cd ${dirname} | yarn install && yarn dev / npm install && npm run dev`
-      );
+      await Install(dirname)
+        .then(() => {
+          logger.ok(
+            "Everything is ready!",
+            `$ cd ${dirname} | yarn dev / npm run dev`
+          );
+        })
+        .catch((err) => {
+          logger.error("Error", err.message);
+        });
     }
   );
 };
