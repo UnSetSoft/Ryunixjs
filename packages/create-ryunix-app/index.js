@@ -14,8 +14,31 @@ import { exec } from "child_process";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const __isUsingYarn = () =>
-  (process.env.npm_config_user_agent || "").indexOf("yarn") === 0;
+function getPackageManager() {
+  const agent = process.env.npm_config_user_agent;
+
+  if (!agent) {
+    const parent = process.env._;
+
+    if (!parent) {
+      return "npm";
+    }
+
+    if (parent.endsWith("pnpx") || parent.endsWith("pnpm")) return "pnpm";
+    if (parent.endsWith("yarn")) return "yarn";
+
+    return "npm";
+  }
+
+  const [program] = agent.split("/");
+
+  if (program === "yarn") return "yarn";
+  if (program === "pnpm") return "pnpm";
+
+  return "npm";
+}
+
+const manager = getPackageManager();
 
 const templateFolder = "cra-templates";
 
@@ -32,22 +55,41 @@ const validateRepoFolder = async (template, branch) => {
 
 const Install = async (root) => {
   return await new Promise((resolve, reject) => {
-    exec(
-      "npm i @unsetsoft/ryunixjs",
-      {
-        cwd: path.join(root),
-        stdio: "inherit",
-      },
-      (error) => {
-        if (error) {
-          reject({
-            err: error,
-          });
-          return error;
+    if (manager === "yarn") {
+      exec(
+        "yarn add @unsetsoft/ryunixjs",
+        {
+          cwd: path.join(root),
+          stdio: "inherit",
+        },
+        (error) => {
+          if (error) {
+            reject({
+              err: error,
+            });
+            return error;
+          }
+          resolve();
         }
-        resolve();
-      }
-    );
+      );
+    } else {
+      exec(
+        "npm i @unsetsoft/ryunixjs",
+        {
+          cwd: path.join(root),
+          stdio: "inherit",
+        },
+        (error) => {
+          if (error) {
+            reject({
+              err: error,
+            });
+            return error;
+          }
+          resolve();
+        }
+      );
+    }
   });
 };
 
@@ -144,6 +186,11 @@ const version = {
   describe: "Get the template",
   handler: async (arg) => {
     let sub_title;
+
+    if (manager === "pnpm") {
+      return logger.error("Manager not supported", "pnpm is not supported.");
+    }
+
     try {
       if (arg.template && !SUPPORTED_TEMPLATES.includes(arg.template)) {
         sub_title =
