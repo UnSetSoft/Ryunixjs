@@ -70,7 +70,7 @@ const Install = (root) => {
 
 const extractAndMove = async (dirname, template, branch) => {
   await zip(
-    path.join(__dirname + "/temp", "Ryunixjs-master.zip"),
+    path.join(__dirname + "/temp", `Ryunixjs-${branch}.zip`),
     { dir: __dirname + "/temp" },
     function (err) {
       logger.error(err);
@@ -78,7 +78,7 @@ const extractAndMove = async (dirname, template, branch) => {
   );
 
   await fse.move(
-    __dirname + `/temp/Ryunixjs-master/${templateFolder}/${template}`,
+    __dirname + `/temp/Ryunixjs-${branch}/${templateFolder}/${template}`,
     `${template}`,
     async (err) => {
       if (err) return logger.error(err);
