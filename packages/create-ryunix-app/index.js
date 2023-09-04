@@ -93,7 +93,7 @@ const extractAndMove = async (dirname, template, branch) => {
         recursive: true,
         force: true,
       });
-
+      logger.ok("Installing packages, this may take a few minutes");
       await Install(dirname)
         .then(() => {
           if (branch !== "master") {
