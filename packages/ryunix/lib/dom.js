@@ -231,6 +231,7 @@ let containerRoot = null;
 
 /**
  * @deprecated use Ryunix.init(root) instead.
+ * 
  * The function creates a root container for a web application.
  * @example Ryunix.createRoot(document.getElementById("root")) -> <div id="root" />
  * @param root - The parameter `root` is likely referring to an HTML element that will serve as the
