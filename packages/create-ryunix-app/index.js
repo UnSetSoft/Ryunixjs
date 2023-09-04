@@ -55,41 +55,22 @@ const validateRepoFolder = async (template, branch) => {
 
 const Install = async (root) => {
   return await new Promise((resolve, reject) => {
-    if (manager === "yarn") {
-      exec(
-        "yarn add @unsetsoft/ryunixjs",
-        {
-          cwd: path.join(root),
-          stdio: "inherit",
-        },
-        (error) => {
-          if (error) {
-            reject({
-              err: error,
-            });
-            return error;
-          }
-          resolve();
+    exec(
+      "npm i @unsetsoft/ryunixjs",
+      {
+        cwd: path.join(root),
+        stdio: "inherit",
+      },
+      (error) => {
+        if (error) {
+          reject({
+            err: error,
+          });
+          return error;
         }
-      );
-    } else {
-      exec(
-        "npm i @unsetsoft/ryunixjs",
-        {
-          cwd: path.join(root),
-          stdio: "inherit",
-        },
-        (error) => {
-          if (error) {
-            reject({
-              err: error,
-            });
-            return error;
-          }
-          resolve();
-        }
-      );
-    }
+        resolve();
+      }
+    );
   });
 };
 
@@ -138,7 +119,10 @@ const extractAndMove = async (dirname, template, branch) => {
         }
       );
 
-      logger.ok("Installing packages, this may take a few minutes");
+      logger.ok(
+        "Installing packages, this may take a few minutes",
+        `Using the ${manager} manager`
+      );
 
       await Install(dirname)
         .then(() => {
@@ -188,7 +172,15 @@ const version = {
     let sub_title;
 
     if (manager === "pnpm") {
-      return logger.error("Manager not supported", "pnpm is not supported.");
+      return logger.error(
+        "Manager not supported",
+        "pnpm is not supported, use 'npx' instead."
+      );
+    } else if (manager === "yarn") {
+      return logger.error(
+        "Manager not supported",
+        "yarn is not supported, use 'npx' instead."
+      );
     }
 
     try {
