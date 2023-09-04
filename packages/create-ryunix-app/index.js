@@ -147,11 +147,11 @@ const version = {
         throw Error("This template is not supported");
       }
 
+      const branch = "master";
+
       const template = arg.template || "ryunix-ryx";
 
       const dirname = arg.dirname || "ryunix-project";
-
-      const branch = arg.branch || "master";
 
       await validateRepoFolder(template, branch);
       await makeDir(__dirname + "/temp");
