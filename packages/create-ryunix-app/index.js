@@ -21,11 +21,11 @@ const templateFolder = "cra-templates";
 
 const dependencies = ["@unsetsoft/ryunixjs"];
 
-const validateRepoFolder = async (template) => {
+const validateRepoFolder = async (template, branch) => {
   await new Octokit().repos.getContent({
     owner: "UnSetSoft",
     repo: "Ryunixjs",
-    ref: "dev",
+    ref: branch,
     path: `${templateFolder}/${template}/package.json`,
   });
 };
@@ -68,7 +68,7 @@ const Install = (root) => {
   });
 };
 
-const extractAndMove = async (dirname, template) => {
+const extractAndMove = async (dirname, template, branch) => {
   await zip(
     path.join(__dirname + "/temp", "Ryunixjs-master.zip"),
     { dir: __dirname + "/temp" },
@@ -98,10 +98,21 @@ const extractAndMove = async (dirname, template) => {
 
       await Install(dirname)
         .then(() => {
-          logger.ok(
-            "Everything is ready!",
-            `$ cd ${dirname} | yarn dev / npm run dev`
-          );
+          if (branch !== "master") {
+            logger.ok(
+              "Everything is ready!",
+              ```
+              Info: You downloaded from the "${branch}" branch, not from the "master" branch, which means that the files are probably not stable.
+
+              $ cd ${dirname} | yarn dev / npm run dev
+              ```
+            );
+          } else {
+            logger.ok(
+              "Everything is ready!",
+              `$ cd ${dirname} | yarn dev / npm run dev`
+            );
+          }
         })
         .catch((err) => {
           logger.error("Error", err.message);
@@ -110,10 +121,10 @@ const extractAndMove = async (dirname, template) => {
   );
 };
 
-const downloadAndExtract = async (dirname, template) => {
-  const mainUrl = `https://codeload.github.com/UnSetSoft/Ryunixjs/zip/master`;
+const downloadAndExtract = async (dirname, template, branch) => {
+  const mainUrl = `https://codeload.github.com/UnSetSoft/Ryunixjs/zip/${branch}`;
   const dl = new DownloaderHelper(mainUrl, __dirname + "/temp");
-  dl.on("end", async () => extractAndMove(dirname, template));
+  dl.on("end", async () => extractAndMove(dirname, template, branch));
   dl.on("error", (err) => logger.error("Download Failed", err));
   await dl.start().catch((err) => logger.error(err));
 };
@@ -142,9 +153,11 @@ const version = {
 
       const dirname = arg.dirname || "ryunix-project";
 
-      await validateRepoFolder(template);
+      const branch = arg.branch || "master";
+
+      await validateRepoFolder(template, branch);
       await makeDir(__dirname + "/temp");
-      await downloadAndExtract(dirname, template);
+      await downloadAndExtract(dirname, template, branch);
     } catch (error) {
       if (sub_title) {
         logger.error(error);
