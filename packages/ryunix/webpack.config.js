@@ -14,7 +14,10 @@ module.exports = {
     filename: "./assets/js/[chunkhash].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
   },
-
+  devServer: {
+    port: 3000,
+    historyApiFallback: { index: "/", disableDotRule: true },
+  },
   module: {
     rules: [
       {

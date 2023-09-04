@@ -1,0 +1,6 @@
+ 
+.eslintignore
+.eslintrc
+.gitignore
+config
+src
