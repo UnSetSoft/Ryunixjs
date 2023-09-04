@@ -30,8 +30,8 @@ const validateRepoFolder = async (template, branch) => {
   });
 };
 
-const Install = (root) => {
-  return new Promise((resolve, reject) => {
+const Install = async (root) => {
+  return await new Promise((resolve, reject) => {
     let command;
     let args;
     if (__isUsingYarn()) {
