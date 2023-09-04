@@ -19,15 +19,15 @@ const build = {
     compiler.run((err, stats) => {
       if (err || stats.hasErrors()) {
         // ...
-        logger.error(err);
+        console.error(err);
       }
 
-      logger.ok("Deployment completed");
+      console.log("Deployment completed");
 
       compiler.close((closeErr) => {
         if (closeErr) {
           // ...
-          logger.error(closeErr);
+          console.error(closeErr);
         }
       });
     });

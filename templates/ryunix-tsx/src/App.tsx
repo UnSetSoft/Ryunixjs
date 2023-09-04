@@ -9,7 +9,7 @@ function App() {
 
   return (
     <div className="main">
-      <h1>Hello from RyunixJS v0.2.11!</h1>
+      <h1>Hello from RyunixJS v0.2.12!</h1>
       <h2>Webpack Update!</h2>
       <p>
         Edit <code>App.tsx</code> and save!
