@@ -10,7 +10,8 @@
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
     "build": "rollup ./lib/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
-    "postinstall": "yarn build"
+    "cp:build": "babel lib/components --out-dir ./dist/components --copy-files",
+    "postinstall": "yarn build && yarn cp:build"
   },
   "bin": {
     "ryunix": "./bin/index.js"
@@ -21,7 +22,9 @@
     "url-loader": "^4.1.1",
     "rollup": "3.24.0",
     "yargs": "^17.7.2",
+    "@babel/cli": "7.19.3",
     "@babel/core": "^7.22.11",
+    "@babel/polyfill": "7.12.1",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-transform-react-jsx": "^7.22.5",
     "@babel/preset-env": "^7.22.14",
