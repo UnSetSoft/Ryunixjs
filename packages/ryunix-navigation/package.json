@@ -8,7 +8,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@unsetsoft/ryunixjs": "^0.2.9-nightly.5"
+    "@unsetsoft/ryunixjs": "0.2.9-nightly.5"
   },
   "engines": {
     "node": ">=18.16.0"
