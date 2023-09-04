@@ -232,7 +232,7 @@ let containerRoot = null;
 /**
  * @deprecated use Ryunix.init(root) instead.
  * 
- * The function creates a root container for a web application.
+ * @description The function creates a root container for a web application.
  * @example Ryunix.createRoot(document.getElementById("root")) -> <div id="root" />
  * @param root - The parameter `root` is likely referring to an HTML element that will serve as the
  * root or container for a web application or component. The `createRoot` function takes this element
@@ -246,7 +246,7 @@ function createRoot(root) {
 
 
 /**
- * The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
+ * @description The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
  * @example Ryunix.init("root") -> <div id="root" />
  * @param root - The parameter "root" is the id of the HTML element that will serve as the container
  * for the root element.
@@ -428,7 +428,7 @@ function reconcileChildren(wipFiber, elements) {
 // Hooks
 
 /**
- * The function creates a state hook for a Ryunix-like framework.
+ * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
  * @returns The `useStore` function returns an array with two elements: the current state value and a
  * `setState` function that can be used to update the state.
@@ -486,7 +486,7 @@ const hasDepsChanged = (prevDeps, nextDeps) =>
   prevDeps.some((dep, index) => dep !== nextDeps[index]);
 
 /**
- * This is a function that creates a hook for managing side effects in React components.
+ * This is a function that creates a hook for managing side effects in Ryunix components.
  * @param effect - The effect function that will be executed after the component has rendered or when
  * the dependencies have changed. It can perform side effects such as fetching data, updating the DOM,
  * or subscribing to events.
