@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/create-ryunix-app",
-  "version": "0.2.1",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "bin": {
-    "create-ryunix-app": "index.js"
+    "create-ryunix-app": "index.js",
+    "cra": "index.js"
   },
   "scripts": {
     "start": "node ."
@@ -16,6 +17,7 @@
   "type": "module",
   "dependencies": {
     "@octokit/rest": "19.0.11",
+    "cross-spawn": "^7.0.3",
     "extract-zip": "^2.0.1",
     "fs-extra": "11.1.1",
     "make-dir": "3.1.0",

@@ -6,4 +6,5 @@ import "./styles/global.css"
 
 
 Ryunix.init("root");
+
 Ryunix.render(<App />);

@@ -10,21 +10,73 @@ import zip from "extract-zip";
 import fs from "fs";
 import fse from "fs-extra";
 import { DownloaderHelper } from "node-downloader-helper";
+import { exec } from "child_process";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const validateRepoFolder = async (template) => {
+function getPackageManager() {
+  const agent = process.env.npm_config_user_agent;
+
+  if (!agent) {
+    const parent = process.env._;
+
+    if (!parent) {
+      return "npm";
+    }
+
+    if (parent.endsWith("pnpx") || parent.endsWith("pnpm")) return "pnpm";
+    if (parent.endsWith("yarn")) return "yarn";
+
+    return "npm";
+  }
+
+  const [program] = agent.split("/");
+
+  if (program === "yarn") return "yarn";
+  if (program === "pnpm") return "pnpm";
+
+  return "npm";
+}
+
+const manager = getPackageManager();
+
+const templateFolder = "cra-templates";
+
+const dependencies = ["@unsetsoft/ryunixjs"];
+
+const validateRepoFolder = async (template, branch) => {
   await new Octokit().repos.getContent({
     owner: "UnSetSoft",
     repo: "Ryunixjs",
-    ref: "master",
-    path: `templates/${template}/package.json`,
+    ref: branch,
+    path: `${templateFolder}/${template}/package.json`,
   });
 };
 
-const extractAndMove = async (dirname, template) => {
+const Install = async (root) => {
+  return await new Promise((resolve, reject) => {
+    exec(
+      "npm i @unsetsoft/ryunixjs",
+      {
+        cwd: path.join(root),
+        stdio: "inherit",
+      },
+      (error) => {
+        if (error) {
+          reject({
+            err: error,
+          });
+          return error;
+        }
+        resolve();
+      }
+    );
+  });
+};
+
+const extractAndMove = async (dirname, template, branch) => {
   await zip(
-    path.join(__dirname + "/temp", "Ryunixjs-master.zip"),
+    path.join(__dirname + "/temp", `Ryunixjs-${branch}.zip`),
     { dir: __dirname + "/temp" },
     function (err) {
       logger.error(err);
@@ -32,67 +84,114 @@ const extractAndMove = async (dirname, template) => {
   );
 
   await fse.move(
-    __dirname + `/temp/Ryunixjs-master/templates/${template}`,
+    __dirname + `/temp/Ryunixjs-${branch}/${templateFolder}/${template}`,
     `${template}`,
     async (err) => {
       if (err) return logger.error(err);
 
-      logger.ok("the directory was moved!");
+      logger.ok("The directory was moved!", path.join(template));
 
-      await fs.renameSync(`${template}`, `${dirname}`, async (error) => {
-        if (error) {
-          return logger.error(err);
+      if (fs.existsSync(dirname)) {
+        logger.info(
+          `Error: The folder "${template}" could not be renamed, as the folder "${dirname}" exists and may have content inside.`,
+          `${path.join(template)}`
+        );
+      } else {
+        await fs.renameSync(`${template}`, `${dirname}`, async (error) => {
+          if (error) {
+            return logger.error(err);
+          }
+        });
+      }
+
+      await fs.rmSync(
+        __dirname + "/temp",
+        {
+          recursive: true,
+          force: true,
+        },
+        (err) => {
+          if (err) {
+            return logger.error(err);
+          }
+
+          logger.ok("Temporary folder deleted");
         }
-      });
-
-      await fs.rmSync(__dirname + "/temp", {
-        recursive: true,
-        force: true,
-      });
+      );
 
       logger.ok(
-        "Everything is ready!",
-        `$ cd ${dirname} | yarn install && yarn dev / npm install && npm run dev`
+        "Installing packages, this may take a few minutes",
+        `Using the ${manager} manager`
       );
+
+      await Install(dirname)
+        .then(() => {
+          if (branch !== "master") {
+            logger.info(
+              "Info",
+              `You downloaded from the "${branch}" branch, not from the "master" branch, which means that the files are probably not stable.`
+            );
+            logger.ok(
+              "Everything is ready!",
+              `$ cd ${dirname} | yarn dev / npm run dev`
+            );
+          } else {
+            logger.ok(
+              "Everything is ready!",
+              `$ cd ${dirname} | yarn dev / npm run dev`
+            );
+          }
+        })
+        .catch((err) => {
+          logger.error("Error installing required packages", err);
+        });
     }
   );
 };
 
-const downloadAndExtract = async (dirname, template) => {
-  const mainUrl = `https://codeload.github.com/UnSetSoft/Ryunixjs/zip/master`;
+const downloadAndExtract = async (dirname, template, branch) => {
+  const mainUrl = `https://codeload.github.com/UnSetSoft/Ryunixjs/zip/${branch}`;
   const dl = new DownloaderHelper(mainUrl, __dirname + "/temp");
-  dl.on("end", async () => extractAndMove(dirname, template));
+  dl.on("end", async () => extractAndMove(dirname, template, branch));
   dl.on("error", (err) => logger.error("Download Failed", err));
   await dl.start().catch((err) => logger.error(err));
 };
 
-const SUPPORTED_TEMPLATES = [
-  "ryunix-ts",
-  "ryunix-tsx",
-  "ryunix-jsx",
-  "ryunix-js",
-  "ryunix-ryx",
-];
+const SUPPORTED_TEMPLATES = ["ryunix-jsx", "ryunix-js", "ryunix-ryx"];
 
 const version = {
   command: "get",
   describe: "Get the template",
   handler: async (arg) => {
     let sub_title;
+
+    if (manager === "pnpm") {
+      return logger.error(
+        "Manager not supported",
+        "pnpm is not supported, use 'npx' instead."
+      );
+    } else if (manager === "yarn") {
+      return logger.error(
+        "Manager not supported",
+        "yarn is not supported, use 'npx' instead."
+      );
+    }
+
     try {
       if (arg.template && !SUPPORTED_TEMPLATES.includes(arg.template)) {
-        sub_title =
-          "Supported templates [ryunix-ts|ryunix-tsx|ryunix-js|ryunix-jsx|ryunix-ryx]";
+        sub_title = "Supported templates [ryunix-js|ryunix-jsx|ryunix-ryx]";
         throw Error("This template is not supported");
       }
+
+      const branch = arg.branch || "master";
 
       const template = arg.template || "ryunix-ryx";
 
       const dirname = arg.dirname || "ryunix-project";
 
-      await validateRepoFolder(template);
+      await validateRepoFolder(template, branch);
       await makeDir(__dirname + "/temp");
-      await downloadAndExtract(dirname, template);
+      await downloadAndExtract(dirname, template, branch);
     } catch (error) {
       if (sub_title) {
         logger.error(error);

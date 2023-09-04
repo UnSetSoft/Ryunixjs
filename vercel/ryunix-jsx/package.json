@@ -1,11 +1,11 @@
 {
-  "name": "ryunix-tsx",
+  "name": "ryunix-jsx",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "homepage": "./",
   "dependencies": {
-    "@unsetsoft/ryunixjs": "^0.2.12"
+    "@unsetsoft/ryunixjs": "latest"
   },
   "scripts": {
     "dev": "ryunix server",

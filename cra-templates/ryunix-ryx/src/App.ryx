@@ -9,10 +9,10 @@ function App() {
 
   return (
     <div className="main">
-      <h1>Hello from RyunixJS v0.2.12!</h1>
-      <h2>Webpack Update!</h2>
+      <h1>Hello from RyunixJS!</h1>
+
       <p>
-        Edit <code>App.tsx</code> and save!
+        Edit <code>App.ryx</code> and save!
       </p>
       <p>Clicks {count}!</p>
       <button className="button" onClick={handleButtonClick}>
