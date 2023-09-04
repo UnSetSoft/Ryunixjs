@@ -5,7 +5,7 @@
   "license": "MIT",
   "homepage": "./",
   "dependencies": {
-    "@unsetsoft/ryunixjs": "^0.2.7"
+    "@unsetsoft/ryunixjs": "^0.2.8"
   },
   "scripts": {
     "dev": "ryunix server",
