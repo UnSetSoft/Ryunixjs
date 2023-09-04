@@ -5,7 +5,7 @@
 
 ## What is RyunixJS?
 
-Is a ReactJS Clone! Even lighter, however, at a very early stage for production use. 
+Is a ReactJS Clone! Even lighter.
 
 ## Install & Usage
 
