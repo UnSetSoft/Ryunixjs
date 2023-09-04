@@ -68,7 +68,7 @@ function createDom(fiber) {
 const isEvent = (key) => key.startsWith("on");
 const isProperty = (key) => key !== "children" && !isEvent(key);
 const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (prev, next) => (key) => !(key in next);
+const isGone = (next) => (key) => !(key in next);
 
 /**
  * The function updates the DOM by removing old event listeners and properties, and adding new ones
@@ -80,7 +80,7 @@ const isGone = (prev, next) => (key) => !(key in next);
 function updateDom(dom, prevProps, nextProps) {
   Object.keys(prevProps)
     .filter(isEvent)
-    .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
+    .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2);
       dom.removeEventListener(eventType, prevProps[name]);
@@ -88,7 +88,7 @@ function updateDom(dom, prevProps, nextProps) {
 
   Object.keys(prevProps)
     .filter(isProperty)
-    .filter(isGone(prevProps, nextProps))
+    .filter(isGone(nextProps))
     .forEach((name) => {
       dom[name] = "";
     });
@@ -97,7 +97,15 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = nextProps[name];
+      if (name === "style") {
+        DomStyle(dom, nextProps.style);
+      } else if (name === "className") {
+        prevProps.className &&
+          dom.classList.remove(...prevProps.className.split(/\s+/));
+        dom.classList.add(...nextProps.className.split(/\s+/));
+      } else {
+        dom[name] = nextProps[name];
+      }
     });
 
   Object.keys(nextProps)
@@ -108,6 +116,18 @@ function updateDom(dom, prevProps, nextProps) {
       dom.addEventListener(eventType, nextProps[name]);
     });
 }
+
+const reg = /[A-Z]/g;
+function DomStyle(dom, style) {
+  dom.style = Object.keys(style).reduce((acc, styleName) => {
+    const key = styleName.replace(reg, function (v) {
+      return "-" + v.toLowerCase();
+    });
+    acc += `${key}: ${style[styleName]};`;
+    return acc;
+  }, "");
+}
+
 
 /**
  * The function commits changes made to the virtual DOM to the actual DOM.
@@ -210,14 +230,29 @@ function commitDeletion(fiber, domParent) {
 let containerRoot = null;
 
 /**
- * The function creates a root container for a web application.
+ * @deprecated use Ryunix.init(root) instead.
+ * 
+ * @description The function creates a root container for a web application.
+ * @example Ryunix.createRoot(document.getElementById("root")) -> <div id="root" />
  * @param root - The parameter `root` is likely referring to an HTML element that will serve as the
  * root or container for a web application or component. The `createRoot` function takes this element
  * as an argument and assigns it to a variable called `containerRoot`. This variable can then be used
  * to manipulate the contents
+ * 
  */
 function createRoot(root) {
   containerRoot = root;
+}
+
+
+/**
+ * @description The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
+ * @example Ryunix.init("root") -> <div id="root" />
+ * @param root - The parameter "root" is the id of the HTML element that will serve as the container
+ * for the root element.
+*/
+function init(root) {
+  containerRoot = document.getElementById(root);
 }
 
 /**
@@ -393,7 +428,7 @@ function reconcileChildren(wipFiber, elements) {
 // Hooks
 
 /**
- * The function creates a state hook for a Ryunix-like framework.
+ * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
  * @returns The `useStore` function returns an array with two elements: the current state value and a
  * `setState` function that can be used to update the state.
@@ -451,7 +486,7 @@ const hasDepsChanged = (prevDeps, nextDeps) =>
   prevDeps.some((dep, index) => dep !== nextDeps[index]);
 
 /**
- * This is a function that creates a hook for managing side effects in React components.
+ * This is a function that creates a hook for managing side effects in Ryunix components.
  * @param effect - The effect function that will be executed after the component has rendered or when
  * the dependencies have changed. It can perform side effects such as fetching data, updating the DOM,
  * or subscribing to events.
@@ -480,17 +515,11 @@ function useEffect(effect, deps) {
 
 // export
 
-export {
-  // Main functions
-  createElement,
-  render,
-  createRoot,
-  // Hooks
-  useStore,
-  useEffect,
-};
+export { useStore, useEffect };
 
 export default {
   createElement,
   render,
+  createRoot,
+  init,
 };

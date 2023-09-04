@@ -1,4 +1,4 @@
-import Ryunix, { useStore } from "@unsetsoft/ryunixjs";
+import { useStore } from "@unsetsoft/ryunixjs";
 
 function App() {
   const [count, setCount] = useStore(0);
@@ -9,7 +9,7 @@ function App() {
 
   return (
     <div className="main">
-      <h1>Hello from RyunixJS v0.2.7!</h1>
+      <h1>Hello from RyunixJS v0.2.8!</h1>
       <h2>Webpack Update!</h2>
       <p>
         Edit <code>App.tsx</code> and save!
