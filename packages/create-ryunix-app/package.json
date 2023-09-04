@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/create-ryunix-app",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "bin": {
-    "create-ryunix-app": "index.js"
+    "create-ryunix-app": "index.js",
+    "cra": "index.js"
   },
   "scripts": {
     "start": "node ."
