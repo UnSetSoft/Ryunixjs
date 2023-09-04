@@ -127,13 +127,13 @@ const extractAndMove = async (dirname, template, branch) => {
       await Install(dirname)
         .then(() => {
           if (branch !== "master") {
+            logger.info(
+              "Info",
+              `You downloaded from the "${branch}" branch, not from the "master" branch, which means that the files are probably not stable.`
+            );
             logger.ok(
               "Everything is ready!",
-              ```
-              Info: You downloaded from the "${branch}" branch, not from the "master" branch, which means that the files are probably not stable.
-
-              $ cd ${dirname} | yarn dev / npm run dev
-              ```
+              `$ cd ${dirname} | yarn dev / npm run dev`
             );
           } else {
             logger.ok(
@@ -157,13 +157,7 @@ const downloadAndExtract = async (dirname, template, branch) => {
   await dl.start().catch((err) => logger.error(err));
 };
 
-const SUPPORTED_TEMPLATES = [
-  "ryunix-ts",
-  "ryunix-tsx",
-  "ryunix-jsx",
-  "ryunix-js",
-  "ryunix-ryx",
-];
+const SUPPORTED_TEMPLATES = ["ryunix-jsx", "ryunix-js", "ryunix-ryx"];
 
 const version = {
   command: "get",
@@ -185,8 +179,7 @@ const version = {
 
     try {
       if (arg.template && !SUPPORTED_TEMPLATES.includes(arg.template)) {
-        sub_title =
-          "Supported templates [ryunix-ts|ryunix-tsx|ryunix-js|ryunix-jsx|ryunix-ryx]";
+        sub_title = "Supported templates [ryunix-js|ryunix-jsx|ryunix-ryx]";
         throw Error("This template is not supported");
       }
 
