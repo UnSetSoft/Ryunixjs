@@ -10,7 +10,7 @@ import zip from "extract-zip";
 import fs from "fs";
 import fse from "fs-extra";
 import { DownloaderHelper } from "node-downloader-helper";
-import spawn from "cross-spawn";
+import { exec } from "child_process";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -32,37 +32,22 @@ const validateRepoFolder = async (template, branch) => {
 
 const Install = async (root) => {
   return await new Promise((resolve, reject) => {
-    let command;
-    let args;
-    if (__isUsingYarn()) {
-      command = "yarnpkg";
-      args = ["add", "--exact"];
-      [].push.apply(args, dependencies);
-
-      args.push("--cwd");
-      args.push(root);
-    } else {
-      command = "npm";
-      args = [
-        "install",
-        "--no-audit",
-        "--save",
-        "--save-exact",
-        "--loglevel",
-        "error",
-      ].concat(dependencies);
-    }
-
-    const child = spawn(command, args, { stdio: "inherit" });
-    child.on("close", (code) => {
-      if (code !== 0) {
-        reject({
-          command: `${command} ${args.join(" ")}`,
-        });
-        return;
+    exec(
+      "npm i @unsetsoft/ryunixjs",
+      {
+        cwd: path.join(root),
+        stdio: "inherit",
+      },
+      (error) => {
+        if (error) {
+          reject({
+            err: error,
+          });
+          return error;
+        }
+        resolve();
       }
-      resolve();
-    });
+    );
   });
 };
 
@@ -81,29 +66,48 @@ const extractAndMove = async (dirname, template, branch) => {
     async (err) => {
       if (err) return logger.error(err);
 
-      logger.ok("the directory was moved!");
+      logger.ok("The directory was moved!", path.join(template));
 
-      await fs.renameSync(`${template}`, `${dirname}`, async (error) => {
-        if (error) {
-          return logger.error(err);
+      if (fs.existsSync(dirname)) {
+        logger.info(
+          `Error: The folder "${template}" could not be renamed, as the folder "${dirname}" exists and may have content inside.`,
+          `${path.join(template)}`
+        );
+      } else {
+        await fs.renameSync(`${template}`, `${dirname}`, async (error) => {
+          if (error) {
+            return logger.error(err);
+          }
+        });
+      }
+
+      await fs.rmSync(
+        __dirname + "/temp",
+        {
+          recursive: true,
+          force: true,
+        },
+        (err) => {
+          if (err) {
+            return logger.error(err);
+          }
+
+          logger.ok("Temporary folder deleted");
         }
-      });
+      );
 
-      await fs.rmSync(__dirname + "/temp", {
-        recursive: true,
-        force: true,
-      });
       logger.ok("Installing packages, this may take a few minutes");
+
       await Install(dirname)
         .then(() => {
           if (branch !== "master") {
             logger.ok(
               "Everything is ready!",
-              ```
+              `
               Info: You downloaded from the "${branch}" branch, not from the "master" branch, which means that the files are probably not stable.
 
               $ cd ${dirname} | yarn dev / npm run dev
-              ```
+              `
             );
           } else {
             logger.ok(
@@ -113,7 +117,7 @@ const extractAndMove = async (dirname, template, branch) => {
           }
         })
         .catch((err) => {
-          logger.error("Error", err.message);
+          logger.error("Error installing required packages", err);
         });
     }
   );
@@ -147,7 +151,7 @@ const version = {
         throw Error("This template is not supported");
       }
 
-      const branch = "master";
+      const branch = arg.branch || "master";
 
       const template = arg.template || "ryunix-ryx";
 
