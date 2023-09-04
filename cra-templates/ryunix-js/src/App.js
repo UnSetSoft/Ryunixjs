@@ -10,7 +10,7 @@ function App() {
   return (
     <div className="main">
       <h1>Hello from RyunixJS!</h1>
-      <h2>Webpack Update!</h2>
+
       <p>
         Edit <code>App.js</code> and save!
       </p>
