@@ -15,7 +15,6 @@ module.exports = {
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
   },
   devServer: {
-    port: 3000,
     historyApiFallback: { index: "/", disableDotRule: true },
   },
   module: {
