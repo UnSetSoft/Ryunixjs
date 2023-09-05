@@ -160,7 +160,7 @@ const downloadAndExtract = async (dirname, template, branch) => {
 };
 
 const SUPPORTED_TEMPLATES = ["ryunix-jsx", "ryunix-js", "ryunix-ryx"];
-const UNSUPPORTED_BRANCHS = ["0.2.8-nightly.4"];
+const SUPPORTED_BRANCHS = ["master", "dev"];
 
 const version = {
   command: "get",
@@ -186,7 +186,7 @@ const version = {
         throw Error("This template is not supported");
       }
 
-      if (arg.branch && UNSUPPORTED_BRANCHS.includes(arg.branch)) {
+      if (arg.branch && !SUPPORTED_BRANCHS.includes(arg.branch)) {
         throw Error("This branch is not supported");
       }
 
