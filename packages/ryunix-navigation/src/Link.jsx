@@ -16,11 +16,15 @@ const Link = (props) => {
     }
   };
 
-  const isCurrentPath = () =>
-    window.location.pathname === props.to ? true : false;
-
+  const isCurrentPath = window.location.pathname === props.to ? true : false;
+  const activeClassName = props.activeClassName || "";
   return (
-    <a href={props.to} onClick={preventReload} {...props}>
+    <a
+      href={props.to}
+      className={isCurrentPath ? `${props.className} ${activeClassName}` : ""}
+      onClick={preventReload}
+      {...props}
+    >
       {props.children}
     </a>
   );
