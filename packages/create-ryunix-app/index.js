@@ -42,8 +42,6 @@ const manager = getPackageManager();
 
 const templateFolder = "cra-templates";
 
-const dependencies = ["@unsetsoft/ryunixjs"];
-
 const validateRepoFolder = async (template, branch) => {
   await new Octokit().repos.getContent({
     owner: "UnSetSoft",
@@ -53,10 +51,12 @@ const validateRepoFolder = async (template, branch) => {
   });
 };
 
-const Install = async (root) => {
+const Install = async (root, branch) => {
+  const dep =
+    branch === "dev" ? "@unsetsoft/ryunixjs" : "@unsetsoft/ryunixjs@latest";
   return await new Promise((resolve, reject) => {
     exec(
-      "npm i @unsetsoft/ryunixjs",
+      `npm i ${dep}`,
       {
         cwd: path.join(root),
         stdio: "inherit",
@@ -124,7 +124,7 @@ const extractAndMove = async (dirname, template, branch) => {
         `Using the ${manager} manager`
       );
 
-      await Install(dirname)
+      await Install(dirname, branch)
         .then(() => {
           if (branch !== "master") {
             logger.info(
