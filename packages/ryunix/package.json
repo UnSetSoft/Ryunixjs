@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "private": false,
@@ -10,7 +10,7 @@
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
     "build": "rollup ./lib/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
-    "postinstall": "yarn build",
+    "postinstall": "npm build",
     "cli": "node ./bin/index.js"
   },
   "bin": {
