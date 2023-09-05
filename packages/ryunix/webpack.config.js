@@ -3,8 +3,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
 
 const dir = path.dirname(path.resolve(path.join(__dirname, "/../", "../")));
-console.log(path.join(dir, "src", "main.ryx"), __dirname);
-
 module.exports = {
   mode: "production",
   entry: path.join(dir, "src", "main.ryx"),
@@ -15,8 +13,19 @@ module.exports = {
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
   },
   devServer: {
-    port: 3000,
     historyApiFallback: { index: "/", disableDotRule: true },
+  },
+  stats: {
+    assets: false,
+    children: false,
+    chunks: false,
+    chunkModules: false,
+    colors: true,
+    entrypoints: false,
+    hash: false,
+    modules: false,
+    timings: false,
+    version: false,
   },
   module: {
     rules: [

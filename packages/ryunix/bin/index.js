@@ -1,14 +1,21 @@
 #! /usr/bin/env node
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
-const { server } = require("./serve");
+const { StartServer } = require("./serve");
 const { compiler } = require("./compiler");
 const logger = require("terminal-log");
 const serv = {
   command: "server",
   describe: "Run server",
   handler: async (arg) => {
-    await server.start();
+    const port = arg.port || 3000;
+    const open = Boolean(arg.browser) || false;
+    const settings = {
+      port: port,
+      open,
+    };
+
+    StartServer(settings);
   },
 };
 
