@@ -53,7 +53,9 @@ const validateRepoFolder = async (template, branch) => {
 
 const Install = async (root, branch) => {
   const dep =
-    branch === "dev" ? "@unsetsoft/ryunixjs" : "@unsetsoft/ryunixjs@latest";
+    branch === "dev"
+      ? "@unsetsoft/ryunixjs@nightly"
+      : "@unsetsoft/ryunixjs@latest";
   return await new Promise((resolve, reject) => {
     exec(
       `npm i ${dep}`,
