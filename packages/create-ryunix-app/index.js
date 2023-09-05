@@ -42,8 +42,6 @@ const manager = getPackageManager();
 
 const templateFolder = "cra-templates";
 
-const dependencies = ["@unsetsoft/ryunixjs"];
-
 const validateRepoFolder = async (template, branch) => {
   await new Octokit().repos.getContent({
     owner: "UnSetSoft",
@@ -53,10 +51,14 @@ const validateRepoFolder = async (template, branch) => {
   });
 };
 
-const Install = async (root) => {
+const Install = async (root, branch) => {
+  const dep =
+    branch === "dev"
+      ? "@unsetsoft/ryunixjs@nightly"
+      : "@unsetsoft/ryunixjs@latest";
   return await new Promise((resolve, reject) => {
     exec(
-      "npm i @unsetsoft/ryunixjs",
+      `npm i ${dep}`,
       {
         cwd: path.join(root),
         stdio: "inherit",
@@ -124,7 +126,7 @@ const extractAndMove = async (dirname, template, branch) => {
         `Using the ${manager} manager`
       );
 
-      await Install(dirname)
+      await Install(dirname, branch)
         .then(() => {
           if (branch !== "master") {
             logger.info(
@@ -158,6 +160,7 @@ const downloadAndExtract = async (dirname, template, branch) => {
 };
 
 const SUPPORTED_TEMPLATES = ["ryunix-jsx", "ryunix-js", "ryunix-ryx"];
+const SUPPORTED_BRANCHS = ["master", "dev"];
 
 const version = {
   command: "get",
@@ -183,6 +186,10 @@ const version = {
         throw Error("This template is not supported");
       }
 
+      if (arg.branch && !SUPPORTED_BRANCHS.includes(arg.branch)) {
+        throw Error("This branch is not supported");
+      }
+
       const branch = arg.branch || "master";
 
       const template = arg.template || "ryunix-ryx";
@@ -193,7 +200,7 @@ const version = {
       await makeDir(__dirname + "/temp");
       await downloadAndExtract(dirname, template, branch);
     } catch (error) {
-      if (sub_title) {
+      if (!sub_title) {
         logger.error(error);
       } else {
         logger.error(error, sub_title);
