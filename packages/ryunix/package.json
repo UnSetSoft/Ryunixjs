@@ -10,8 +10,7 @@
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
     "build": "rollup ./lib/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
-    "components": "babel lib/components --out-dir dist/components --copy-files",
-    "postinstall": "yarn build && yarn components"
+    "postinstall": "yarn build"
   },
   "bin": {
     "ryunix": "./bin/index.js"
