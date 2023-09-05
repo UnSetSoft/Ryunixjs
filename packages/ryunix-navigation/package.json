@@ -1,11 +1,11 @@
 {
   "name": "@unsetsoft/ryunix-navigation",
-  "version": "0.2.16",
+  "version": "0.2.17",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
     "build": "babel src/ --out-dir dist --copy-files",
-    "postinstall": "npm build"
+    "postinstall": "npm run build"
   },
   "browserslist": {
     "production": [
