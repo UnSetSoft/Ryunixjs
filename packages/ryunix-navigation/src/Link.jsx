@@ -15,6 +15,10 @@ const Link = (props) => {
       localStorage.setItem("pathname", props.to);
     }
   };
+
+  const isCurrentPath = () =>
+    window.location.pathname === props.to ? true : false;
+
   return (
     <a href={props.to} onClick={preventReload} {...props}>
       {props.children}
