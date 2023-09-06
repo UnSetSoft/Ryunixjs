@@ -15,6 +15,7 @@ const Link = (props) => {
       localStorage.setItem("pathname", props.to);
     }
   };
+
   return (
     <a href={props.to} onClick={preventReload} {...props}>
       {props.children}

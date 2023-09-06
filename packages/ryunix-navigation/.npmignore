@@ -3,4 +3,5 @@
 .eslintrc
 .gitignore
 config
-src
+build
+dist

@@ -6,14 +6,25 @@ const dir = path.dirname(path.resolve(path.join(__dirname, "/../", "../")));
 module.exports = {
   mode: "production",
   entry: path.join(dir, "src", "main.ryx"),
+  devtool: "nosources-source-map",
   output: {
     path: path.join(dir, ".ryunix"),
-
-    filename: "./assets/js/[chunkhash].bundle.js",
+    chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
+    filename: "./assets/js/[name].[fullhash:8].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
+    clean: true,
   },
   devServer: {
+    hot: true,
     historyApiFallback: { index: "/", disableDotRule: true },
+  },
+  optimization: {
+    runtimeChunk: "single",
+    splitChunks: {
+      chunks: "all",
+      maxInitialRequests: Infinity,
+      minSize: 0,
+    },
   },
   stats: {
     assets: false,
@@ -40,15 +51,23 @@ module.exports = {
         },
       },
       {
-        test: /\.(sa|sc|c)ss$/,
+        test: /\.sass|css$/,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4)$/,
-        use: ["file-loader"],
+        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf)$/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              name: "[name].[ext]",
+              outputPath: "files/",
+            },
+          },
+        ],
       },
       {
-        test: /\.(png|woff|woff2|eot|ttf|svg)$/, // to import images and fonts
+        test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
       },

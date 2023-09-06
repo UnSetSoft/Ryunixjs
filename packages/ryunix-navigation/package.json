@@ -1,10 +1,11 @@
 {
   "name": "@unsetsoft/ryunix-navigation",
-  "version": "0.2.15",
+  "version": "0.2.24",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
-    "build": "babel src/ --out-dir dist --copy-files"
+    "build": "babel src/ --out-dir dist --copy-files",
+    "postinstall": "npm run build"
   },
   "browserslist": {
     "production": [
@@ -30,5 +31,8 @@
   },
   "engines": {
     "node": ">=18.16.0"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.22.15"
   }
 }
