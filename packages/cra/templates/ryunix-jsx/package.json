@@ -1,0 +1,14 @@
+{
+  "name": "ryunix-jsx",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "homepage": "./",
+  "scripts": {
+    "dev": "ryunix server",
+    "build": "ryunix build"
+  },
+  "engines": {
+    "node": ">=18.16.0"
+  }
+}
