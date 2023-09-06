@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-navigation",
-  "version": "0.2.23-nightly.4",
+  "version": "0.2.23",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
