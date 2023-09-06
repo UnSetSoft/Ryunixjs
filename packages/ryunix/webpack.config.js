@@ -44,11 +44,18 @@ module.exports = {
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4)$/,
-        use: ["file-loader"],
+        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf)$/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              name: "[name].[ext]",
+            },
+          },
+        ],
       },
       {
-        test: /\.(png|woff|woff2|eot|ttf|svg)$/, // to import images and fonts
+        test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
       },
