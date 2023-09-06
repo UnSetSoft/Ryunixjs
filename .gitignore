@@ -1,9 +1,4 @@
 node_modules
 yarn.lock
-/app
-
-.vscode
-.github
-dist
-test
-old_lib
+.ryunix
+package-lock.json
