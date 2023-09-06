@@ -1,5 +1,4 @@
 node_modules
+.ryunix
+package-lock.json
 yarn.lock
-dist
-test
-old_lib
