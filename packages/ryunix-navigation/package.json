@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-navigation",
-  "version": "0.2.22",
+  "version": "0.2.23-nightly.4",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
@@ -31,5 +31,8 @@
   },
   "engines": {
     "node": ">=18.16.0"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.22.15"
   }
 }

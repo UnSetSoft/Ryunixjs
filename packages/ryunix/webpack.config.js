@@ -6,14 +6,25 @@ const dir = path.dirname(path.resolve(path.join(__dirname, "/../", "../")));
 module.exports = {
   mode: "production",
   entry: path.join(dir, "src", "main.ryx"),
+  devtool: "nosources-source-map",
   output: {
     path: path.join(dir, ".ryunix"),
-
-    filename: "./assets/js/[chunkhash].bundle.js",
+    chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
+    filename: "./assets/js/[name].[fullhash:8].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
+    lean: true,
   },
   devServer: {
+    hot: true,
     historyApiFallback: { index: "/", disableDotRule: true },
+  },
+  optimization: {
+    runtimeChunk: "single",
+    splitChunks: {
+      chunks: "all",
+      maxInitialRequests: Infinity,
+      minSize: 0,
+    },
   },
   stats: {
     assets: false,
@@ -40,7 +51,7 @@ module.exports = {
         },
       },
       {
-        test: /\.(sa|sc|c)ss$/,
+        test: /\.sass|css$/,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
@@ -50,6 +61,7 @@ module.exports = {
             loader: "file-loader",
             options: {
               name: "[name].[ext]",
+              outputPath: "files/",
             },
           },
         ],
