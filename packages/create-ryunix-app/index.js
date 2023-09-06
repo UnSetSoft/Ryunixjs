@@ -160,7 +160,7 @@ const downloadAndExtract = async (dirname, template, branch) => {
 };
 
 const SUPPORTED_TEMPLATES = ["ryunix-jsx", "ryunix-js", "ryunix-ryx"];
-const SUPPORTED_BRANCHS = ["master", "dev"];
+const SUPPORTED_BRANCHS = ["historical/0.2.24"];
 
 const version = {
   command: "get",
@@ -190,7 +190,7 @@ const version = {
         throw Error("This branch is not supported");
       }
 
-      const branch = arg.branch || "master";
+      const branch = arg.branch || "historical/0.2.24";
 
       const template = arg.template || "ryunix-ryx";
 
