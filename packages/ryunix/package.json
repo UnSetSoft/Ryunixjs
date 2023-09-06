@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.2.24",
+  "version": "0.2.25",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "private": false,
@@ -44,5 +44,8 @@
   },
   "engines": {
     "node": ">=18.16.0"
-  }
+  },
+  "keywords": [
+    "ryunixjs"
+  ]
 }
