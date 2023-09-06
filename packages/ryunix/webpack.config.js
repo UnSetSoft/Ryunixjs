@@ -12,7 +12,7 @@ module.exports = {
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
-    lean: true,
+    clean: true,
   },
   devServer: {
     hot: true,
