@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/cra",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Create Ryunix app",
   "main": "./bin/index.js",
@@ -12,10 +12,12 @@
     "ryunixjs"
   ],
   "bin": {
-    "create-manu-app": "./bin/index.js"
+    "cra": "./bin/index.js"
   },
   "scripts": {
-    "dev": "node ./bin/index.js"
+    "dev": "node ./bin/index.js",
+    "nightly:release": "npm publish --tag nightly",
+    "release": "npm publish"
   },
   "engines": {
     "node": ">=18.16.0"

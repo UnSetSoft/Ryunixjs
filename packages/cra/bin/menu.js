@@ -27,8 +27,8 @@ const MENU = async () =>
             "Which version do you want to use? Please note that, the nightly version may not work."
           ),
           options: [
-            { value: "latest", label: "Latest" },
-            { value: "nightly", label: "Nightly" },
+            { value: "latest", label: colors.green("Latest") },
+            { value: "nightly", label: colors.red("Nightly") },
           ],
         }),
       addAddons: () =>

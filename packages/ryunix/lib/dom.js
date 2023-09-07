@@ -423,7 +423,53 @@ function reconcileChildren(wipFiber, elements) {
   }
 }
 
+
+/**
+ * The function createContext creates a context object with a default value and methods to set and get
+ * the context value.
+ * @param defaultValue - The `defaultValue` parameter is the initial value that will be assigned to the
+ * `contextValue` variable if no value is provided when creating the context.
+ * @returns a context object.
+ */
+function createContext(defaultValue) {
+  let contextValue = defaultValue || null;
+
+  const context = {
+    tag: "RYUNIX_CONTEXT",
+    Value: contextValue,
+    Provider: null,
+  };
+
+  context.Provider = (value) => (context.Value = value);
+
+  return context;
+}
+
 // Hooks
+
+/**
+ * The function `useContext` is used to read and subscribe to context from your component.
+ * @param ref - The `ref` parameter is a reference to a context object.
+ * @returns The `Value` property of the `hook` object is being returned.
+ */
+function useContext(ref) {
+  hookIndex++;
+
+  const oldHook =
+    wipFiber.alternate &&
+    wipFiber.alternate.hooks &&
+    wipFiber.alternate.hooks[hookIndex];
+
+  const hasOld = oldHook ? oldHook : undefined;
+  const Context = hasOld ? hasOld : ref;
+  const hook = {
+    ...Context,
+  };
+
+  wipFiber.hooks.push(hook);
+
+  return hook.Value;
+}
 
 /**
  * @description The function creates a state.
@@ -513,7 +559,7 @@ function useEffect(effect, deps) {
 
 // export
 
-export { useStore, useEffect };
+export { useStore, useEffect, createContext, useContext };
 
 export default {
   createElement,
