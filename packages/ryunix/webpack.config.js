@@ -41,19 +41,14 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx|ryx|mdx)$/,
+        test: /\.(js|jsx|ts|tsx|ryx|)$/,
         exclude: /node_modules/,
-        use: [
-          {
-            loader: "babel-loader",
-            options: {
-              presets: ["@babel/preset-env", "@babel/preset-react"],
-            },
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env", "@babel/preset-react"],
           },
-          {
-            loader: "@mdx-js/loader",
-          },
-        ],
+        },
       },
       {
         test: /\.sass|css$/,
