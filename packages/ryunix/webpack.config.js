@@ -41,14 +41,21 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx|ryx|)$/,
+        test: /\.(js|jsx|ts|tsx|ryx|mdx)$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-env", "@babel/preset-react"],
+            },
           },
-        },
+          {
+            loader: "@mdx-js/loader",
+            /** @type {import('@mdx-js/loader').Options} */
+            options: {},
+          },
+        ],
       },
       {
         test: /\.sass|css$/,
@@ -70,10 +77,6 @@ module.exports = {
         test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
-      },
-      {
-        test: /\.mdx$/,
-        use: ["@mdx-js/loader"],
       },
     ],
   },
