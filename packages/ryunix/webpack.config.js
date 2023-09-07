@@ -79,7 +79,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ["*", ".js", ".jsx", ".ts", ".tsx", ".ryx"],
+    extensions: [".*", ".js", ".jsx", ".ts", ".tsx", ".ryx"],
   },
   plugins: [
     new HtmlWebpackPlugin({
