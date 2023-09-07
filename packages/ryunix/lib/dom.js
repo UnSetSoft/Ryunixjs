@@ -423,7 +423,48 @@ function reconcileChildren(wipFiber, elements) {
   }
 }
 
+
+ 
+/**
+ * The above function creates a context in JavaScript that allows for sharing data between components.
+ * @param defaultValue - The `defaultValue` parameter is the initial value of the context. If no value
+ * is provided, the `EMPTY_CONTEXT` symbol is used as the default value.
+ * @returns The `createContext` function returns an object with two properties: `Provider` and
+ * `Consumer`.
+ */
+const EMPTY_CONTEXT = Symbol();
+
+function createContext(defaultValue) {
+  let contextValue = defaultValue || EMPTY_CONTEXT;
+
+  const Provider = (value, callback) => {
+    contextValue = value;
+    const currentValue = contextValue;
+    callback();
+    contextValue = currentValue;
+  };
+
+  const Consumer = () => {
+    return contextValue;
+  };
+
+  return {
+    Provider,
+    Consumer,
+  };
+}
+
 // Hooks
+
+/**
+ * The useContext function returns the Consumer component of a given reference.
+ * @param ref - The "ref" parameter is a reference to a Ryunix context object.
+ * @returns The `useContext` function is returning the result of calling the `Consumer` method on the
+ * `ref` object.
+ */
+function useContext(ref) {
+  return ref.Consumer();
+}
 
 /**
  * @description The function creates a state.
