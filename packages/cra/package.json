@@ -12,7 +12,7 @@
     "ryunixjs"
   ],
   "bin": {
-    "create-manu-app": "./bin/index.js"
+    "cra": "./bin/index.js"
   },
   "scripts": {
     "dev": "node ./bin/index.js"
