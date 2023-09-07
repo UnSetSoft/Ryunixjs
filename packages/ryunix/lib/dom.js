@@ -445,6 +445,10 @@ function createContext(defaultValue) {
   return context;
 }
 
+function Fragments(props) {
+  return createElement("div", props, props.children);
+}
+
 // Hooks
 
 /**
@@ -559,11 +563,12 @@ function useEffect(effect, deps) {
 
 // export
 
-export { useStore, useEffect, createContext, useContext };
+export { useStore, useEffect, createContext, useContext, Fragments };
 
 export default {
   createElement,
   render,
   createRoot,
   init,
+  Fragments,
 };
