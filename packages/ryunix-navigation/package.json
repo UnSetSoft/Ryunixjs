@@ -5,7 +5,9 @@
   "module": "dist/index.js",
   "scripts": {
     "build": "babel src/ --out-dir dist --copy-files",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "nightly:release": "npm publish --tag nightly",
+    "release": "npm publish"
   },
   "browserslist": {
     "production": [

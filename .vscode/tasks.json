@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "nightly:release",
+      "path": "packages/ryunix",
+      "problemMatcher": [],
+      "label": "npm: nightly:release - packages/ryunix",
+      "detail": "npm publish --tag nightly"
+    },
+    {
+      "type": "npm",
+      "script": "release",
+      "path": "packages/ryunix-navigation",
+      "problemMatcher": [],
+      "label": "npm: release - packages/ryunix-navigation",
+      "detail": "npm publish"
+    },
+    {
+      "type": "npm",
+      "script": "kg:bump",
+      "problemMatcher": [],
+      "label": "npm: kg:bump",
+      "detail": "gmvu bump"
+    }
+  ]
+}

@@ -11,7 +11,9 @@
   "scripts": {
     "build": "rollup ./lib/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
     "postinstall": "npm run build",
-    "cli": "node ./bin/index.js"
+    "cli": "node ./bin/index.js",
+    "nightly:release": "npm publish --tag nightly",
+    "release": "npm publish"
   },
   "bin": {
     "ryunix": "./bin/index.js"
