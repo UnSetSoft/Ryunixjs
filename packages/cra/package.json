@@ -15,7 +15,9 @@
     "cra": "./bin/index.js"
   },
   "scripts": {
-    "dev": "node ./bin/index.js"
+    "dev": "node ./bin/index.js",
+    "nightly:release": "npm publish --tag nightly",
+    "release": "npm publish"
   },
   "engines": {
     "node": ">=18.16.0"
