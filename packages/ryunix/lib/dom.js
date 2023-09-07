@@ -424,46 +424,46 @@ function reconcileChildren(wipFiber, elements) {
 }
 
 
- 
 /**
- * The above function creates a context in JavaScript that allows for sharing data between components.
- * @param defaultValue - The `defaultValue` parameter is the initial value of the context. If no value
- * is provided, the `EMPTY_CONTEXT` symbol is used as the default value.
- * @returns The `createContext` function returns an object with two properties: `Provider` and
- * `Consumer`.
+ * The function createContext creates a context object with a default value and methods to set and get
+ * the context value.
+ * @param defaultValue - The `defaultValue` parameter is the initial value that will be assigned to the
+ * `contextValue` variable if no value is provided when creating the context.
+ * @returns a context object.
  */
-const EMPTY_CONTEXT = Symbol();
-
 function createContext(defaultValue) {
-  let contextValue = defaultValue || EMPTY_CONTEXT;
+  let contextValue = defaultValue || null;
 
-  const Provider = (value, callback) => {
-    contextValue = value;
-    const currentValue = contextValue;
-    callback();
-    contextValue = currentValue;
+  const context = {
+    tag: "RYUNIX_CONTEXT",
+    Value: contextValue,
+    Provider: null,
   };
 
-  const Consumer = () => {
-    return contextValue;
-  };
+  context.Provider = (value) => (context.Value = value);
 
-  return {
-    Provider,
-    Consumer,
-  };
+  return context;
 }
 
 // Hooks
 
-/**
- * The useContext function returns the Consumer component of a given reference.
- * @param ref - The "ref" parameter is a reference to a Ryunix context object.
- * @returns The `useContext` function is returning the result of calling the `Consumer` method on the
- * `ref` object.
- */
 function useContext(ref) {
-  return ref.Consumer();
+  hookIndex++;
+
+  const oldHook =
+    wipFiber.alternate &&
+    wipFiber.alternate.hooks &&
+    wipFiber.alternate.hooks[hookIndex];
+
+  const hasOld = oldHook ? oldHook : undefined;
+  const Context = hasOld ? hasOld : ref;
+  const hook = {
+    ...Context,
+  };
+
+  wipFiber.hooks.push(hook);
+
+  return hook.Value;
 }
 
 /**
@@ -554,7 +554,7 @@ function useEffect(effect, deps) {
 
 // export
 
-export { useStore, useEffect };
+export { useStore, useEffect, createContext, useContext };
 
 export default {
   createElement,
