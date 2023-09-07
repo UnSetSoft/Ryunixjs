@@ -41,7 +41,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx|ryx)$/,
+        test: /\.(js|jsx|ts|tsx|ryx|)$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
@@ -70,6 +70,10 @@ module.exports = {
         test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
+      },
+      {
+        test: /\.mdx$/,
+        use: ["@mdx-js/loader"],
       },
     ],
   },
