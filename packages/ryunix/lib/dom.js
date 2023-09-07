@@ -447,6 +447,11 @@ function createContext(defaultValue) {
 
 // Hooks
 
+/**
+ * The function `useContext` is used to read and subscribe to context from your component.
+ * @param ref - The `ref` parameter is a reference to a context object.
+ * @returns The `Value` property of the `hook` object is being returned.
+ */
 function useContext(ref) {
   hookIndex++;
 
