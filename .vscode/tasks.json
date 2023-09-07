@@ -12,10 +12,26 @@
     {
       "type": "npm",
       "script": "release",
+      "path": "packages/ryunix",
+      "problemMatcher": [],
+      "label": "npm: release - packages/ryunix",
+      "detail": "npm publish"
+    },
+    {
+      "type": "npm",
+      "script": "release",
       "path": "packages/ryunix-navigation",
       "problemMatcher": [],
       "label": "npm: release - packages/ryunix-navigation",
       "detail": "npm publish"
+    },
+    {
+      "type": "npm",
+      "script": "nightly:release",
+      "path": "packages/ryunix-navigation",
+      "problemMatcher": [],
+      "label": "npm: nightly:release - packages/ryunix-navigation",
+      "detail": "npm publish --tag nightly"
     },
     {
       "type": "npm",
