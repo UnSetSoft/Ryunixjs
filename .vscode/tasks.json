@@ -35,6 +35,22 @@
     },
     {
       "type": "npm",
+      "script": "release",
+      "path": "packages/cra",
+      "problemMatcher": [],
+      "label": "npm: release - packages/cra",
+      "detail": "npm publish"
+    },
+    {
+      "type": "npm",
+      "script": "nightly:release",
+      "path": "packages/cra",
+      "problemMatcher": [],
+      "label": "npm: nightly:release - packages/cra",
+      "detail": "npm publish --tag nightly"
+    },
+    {
+      "type": "npm",
       "script": "kg:bump",
       "problemMatcher": [],
       "label": "npm: kg:bump",
