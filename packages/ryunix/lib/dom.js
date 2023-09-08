@@ -100,6 +100,9 @@ function updateDom(dom, prevProps, nextProps) {
       if (name === "style") {
         DomStyle(dom, nextProps.style);
       } else if (name === "className") {
+        if (nextProps.className === "") {
+          throw new Error("className cannot be empty.");
+        }
         prevProps.className &&
           dom.classList.remove(...prevProps.className.split(/\s+/));
         dom.classList.add(...nextProps.className.split(/\s+/));
@@ -423,7 +426,6 @@ function reconcileChildren(wipFiber, elements) {
   }
 }
 
-
 /**
  * The function createContext creates a context object with a default value and methods to set and get
  * the context value.
@@ -443,6 +445,16 @@ function createContext(defaultValue) {
   context.Provider = (value) => (context.Value = value);
 
   return context;
+}
+
+function Fragments(props) {
+  if (props.style) {
+    throw new Error("The style attribute is not supported");
+  }
+  if (props.className === "") {
+    throw new Error("className cannot be empty.");
+  }
+  return createElement("div", props, props.children);
 }
 
 // Hooks
@@ -559,11 +571,12 @@ function useEffect(effect, deps) {
 
 // export
 
-export { useStore, useEffect, createContext, useContext };
+export { useStore, useEffect, createContext, useContext, Fragments };
 
 export default {
   createElement,
   render,
   createRoot,
   init,
+  Fragments,
 };
