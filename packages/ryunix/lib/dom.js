@@ -5,8 +5,29 @@ let wipRoot = null;
 let deletions = null;
 let wipFiber = null;
 let hookIndex = null;
+
+const RYUNIX_TYPES = {
+  TEXT_ELEMENT: Symbol(),
+  RYUNIX_EFFECT: Symbol(),
+  RYUNIX_CONTEXT: Symbol(),
+};
+
+const STRINGS = {
+  object: Symbol(),
+  function: Symbol(),
+  style: Symbol(),
+  className: Symbol(),
+  children: Symbol(),
+};
+
+const EFFECT_TAGS = {
+  PLACEMENT: Symbol(),
+  UPDATE: Symbol(),
+  DELETION: Symbol(),
+};
+
 const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== "children" && !isEvent(key);
+const isProperty = (key) => key !== STRINGS.children && !isEvent(key);
 const isNew = (prev, next) => (key) => prev[key] !== next[key];
 const isGone = (next) => (key) => !(key in next);
 const reg = /[A-Z]/g;
@@ -40,7 +61,7 @@ function createElement(type, props, ...children) {
       children: children
         .flat()
         .map((child) =>
-          typeof child === "object" ? child : createTextElement(child)
+          typeof child === STRINGS.object ? child : createTextElement(child)
         ),
     },
   };
@@ -54,7 +75,7 @@ function createElement(type, props, ...children) {
  */
 function createTextElement(text) {
   return {
-    type: "TEXT_ELEMENT",
+    type: RYUNIX_TYPES.TEXT_ELEMENT,
     props: {
       nodeValue: text,
       children: [],
@@ -74,7 +95,7 @@ function createTextElement(text) {
  */
 function createDom(fiber) {
   const dom =
-    fiber.type == "TEXT_ELEMENT"
+    fiber.type == RYUNIX_TYPES.TEXT_ELEMENT
       ? document.createTextNode("")
       : document.createElement(fiber.type);
 
@@ -110,9 +131,9 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      if (name === "style") {
+      if (name === STRINGS.style) {
         DomStyle(dom, nextProps.style);
-      } else if (name === "className") {
+      } else if (name === STRINGS.className) {
         if (nextProps.className === "") {
           throw new Error("className cannot be empty.");
         }
@@ -163,7 +184,7 @@ function commitRoot() {
 function cancelEffects(fiber) {
   if (fiber.hooks) {
     fiber.hooks
-      .filter((hook) => hook.tag === "effect" && hook.cancel)
+      .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.cancel)
       .forEach((effectHook) => {
         effectHook.cancel();
       });
@@ -180,7 +201,7 @@ function cancelEffects(fiber) {
 function runEffects(fiber) {
   if (fiber.hooks) {
     fiber.hooks
-      .filter((hook) => hook.tag === "effect" && hook.effect)
+      .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.effect)
       .forEach((effectHook) => {
         effectHook.cancel = effectHook.effect();
       });
@@ -205,18 +226,18 @@ function commitWork(fiber) {
   }
   const domParent = domParentFiber.dom;
 
-  if (fiber.effectTag === "PLACEMENT") {
+  if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
     if (fiber.dom != null) {
       domParent.appendChild(fiber.dom);
     }
     runEffects(fiber);
-  } else if (fiber.effectTag === "UPDATE") {
+  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber);
     if (fiber.dom != null) {
       updateDom(fiber.dom, fiber.alternate.props, fiber.props);
     }
     runEffects(fiber);
-  } else if (fiber.effectTag === "DELETION") {
+  } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
     cancelEffects(fiber);
     commitDeletion(fiber, domParent);
     return;
@@ -395,7 +416,7 @@ function reconcileChildren(wipFiber, elements) {
         dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
-        effectTag: "UPDATE",
+        effectTag: EFFECT_TAGS.UPDATE,
       };
     }
     if (element && !sameType) {
@@ -405,11 +426,11 @@ function reconcileChildren(wipFiber, elements) {
         dom: null,
         parent: wipFiber,
         alternate: null,
-        effectTag: "PLACEMENT",
+        effectTag: EFFECT_TAGS.PLACEMENT,
       };
     }
     if (oldFiber && !sameType) {
-      oldFiber.effectTag = "DELETION";
+      oldFiber.effectTag = EFFECT_TAGS.DELETION;
       deletions.push(oldFiber);
     }
 
@@ -439,7 +460,7 @@ function createContext(defaultValue) {
   let contextValue = defaultValue || null;
 
   const context = {
-    tag: "RYUNIX_CONTEXT",
+    tag: RYUNIX_TYPES.RYUNIX_CONTEXT,
     Value: contextValue,
     Provider: null,
   };
@@ -503,7 +524,8 @@ function useStore(initial) {
 
   const actions = oldHook ? oldHook.queue : [];
   actions.forEach((action) => {
-    hook.state = typeof action === "function" ? action(hook.state) : action;
+    hook.state =
+      typeof action === STRINGS.function ? action(hook.state) : action;
   });
 
   /**
@@ -547,7 +569,7 @@ function useEffect(effect, deps) {
   const hasChanged = hasDepsChanged(oldHook ? oldHook.deps : undefined, deps);
 
   const hook = {
-    tag: "effect",
+    tag: RYUNIX_TYPES.RYUNIX_EFFECT,
     effect: hasChanged ? effect : null,
     cancel: hasChanged && oldHook && oldHook.cancel,
     deps,
