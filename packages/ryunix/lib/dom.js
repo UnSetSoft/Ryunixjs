@@ -7,17 +7,17 @@ let wipFiber = null;
 let hookIndex = null;
 
 const RYUNIX_TYPES = {
-  TEXT_ELEMENT: Symbol(),
-  RYUNIX_EFFECT: Symbol(),
-  RYUNIX_CONTEXT: Symbol(),
+  TEXT_ELEMENT: Symbol("text.element"),
+  RYUNIX_EFFECT: Symbol("ryunix.effect"),
+  RYUNIX_CONTEXT: Symbol("ryunix.context"),
 };
 
 const STRINGS = {
-  object: Symbol(),
-  function: Symbol(),
-  style: Symbol(),
-  className: Symbol(),
-  children: Symbol(),
+  object: "object",
+  function: "function",
+  style: "style",
+  className: "className",
+  children: "children",
 };
 
 const EFFECT_TAGS = {
