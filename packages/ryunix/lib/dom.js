@@ -1,3 +1,21 @@
+let containerRoot = null;
+let nextUnitOfWork = null;
+let currentRoot = null;
+let wipRoot = null;
+let deletions = null;
+let wipFiber = null;
+let hookIndex = null;
+const isEvent = (key) => key.startsWith("on");
+const isProperty = (key) => key !== "children" && !isEvent(key);
+const isNew = (prev, next) => (key) => prev[key] !== next[key];
+const isGone = (next) => (key) => !(key in next);
+const reg = /[A-Z]/g;
+const hasDepsChanged = (prevDeps, nextDeps) =>
+  !prevDeps ||
+  !nextDeps ||
+  prevDeps.length !== nextDeps.length ||
+  prevDeps.some((dep, index) => dep !== nextDeps[index]);
+
 /**
  * The function creates a new element with the given type, props, and children.
  * @param type - The type of the element to be created, such as "div", "span", "h1", etc.
@@ -65,11 +83,6 @@ function createDom(fiber) {
   return dom;
 }
 
-const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== "children" && !isEvent(key);
-const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (next) => (key) => !(key in next);
-
 /**
  * The function updates the DOM by removing old event listeners and properties, and adding new ones
  * based on the previous and next props.
@@ -120,7 +133,6 @@ function updateDom(dom, prevProps, nextProps) {
     });
 }
 
-const reg = /[A-Z]/g;
 function DomStyle(dom, style) {
   dom.style = Object.keys(style).reduce((acc, styleName) => {
     const key = styleName.replace(reg, function (v) {
@@ -229,8 +241,6 @@ function commitDeletion(fiber, domParent) {
   }
 }
 
-let containerRoot = null;
-
 /**
  * @deprecated use Ryunix.init(root) instead.
  *
@@ -274,11 +284,6 @@ function render(element, container) {
   deletions = [];
   nextUnitOfWork = wipRoot;
 }
-
-let nextUnitOfWork = null;
-let currentRoot = null;
-let wipRoot = null;
-let deletions = null;
 
 /**
  * This function uses requestIdleCallback to perform work on a fiber tree until it is complete or the
@@ -334,9 +339,6 @@ function performUnitOfWork(fiber) {
     nextFiber = nextFiber.parent;
   }
 }
-
-let wipFiber = null;
-let hookIndex = null;
 
 /**
  * This function updates a function component by setting up a work-in-progress fiber, resetting the
@@ -526,20 +528,6 @@ function useStore(initial) {
   hookIndex++;
   return [hook.state, setState];
 }
-
-/**
- * The function checks if the previous dependencies are different from the next dependencies.
- * @param prevDeps - The previous dependencies, which could be an array of values or objects that a
- * function or component depends on.
- * @param nextDeps - `nextDeps` is an array of dependencies that are being checked for changes. These
- * dependencies are typically used in React's `useEffect` and `useCallback` hooks to determine when a
- * component should re-render or when a function should be re-created.
- */
-const hasDepsChanged = (prevDeps, nextDeps) =>
-  !prevDeps ||
-  !nextDeps ||
-  prevDeps.length !== nextDeps.length ||
-  prevDeps.some((dep, index) => dep !== nextDeps[index]);
 
 /**
  * This is a function that creates a hook for managing side effects in Ryunix components.
