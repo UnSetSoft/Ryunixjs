@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.2.28-nightly.2",
+  "version": "0.2.28-nightly.9",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "private": false,
@@ -10,6 +10,7 @@
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
     "build": "rollup ./lib/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
+    "prepublish": "npm run build",
     "postinstall": "npm run build",
     "cli": "node ./bin/index.js",
     "nightly:release": "npm publish --tag nightly",

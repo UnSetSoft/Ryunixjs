@@ -21,6 +21,7 @@ function getPackageManager() {
     }
 
     if (parent.endsWith("pnpx") || parent.endsWith("pnpm")) return "pnpm";
+    if (parent.endsWith("bunx") || parent.endsWith("bun")) return "bun";
     if (parent.endsWith("yarn")) return "yarn";
 
     return "npm";
@@ -30,6 +31,7 @@ function getPackageManager() {
 
   if (program === "yarn") return "yarn";
   if (program === "pnpm") return "pnpm";
+  if (program === "bun") return "bun";
 
   return "npm";
 }
@@ -144,7 +146,9 @@ const Install = async (name, addonsArr) => {
         s.stop(colors.green("The dependencies were installed correctly!"));
 
         resolve();
-        const command = `${manager} ${manager === "npm" ? "run dev" : "dev"}`;
+        const command = `${manager} ${
+          manager === "npm" || manager === "bun" ? "run dev" : "dev"
+        }`;
         const message = `Everything is ready,${colors.italic(
           `cd ${name}`
         )} and ${colors.italic(command)}`;
