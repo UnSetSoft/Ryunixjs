@@ -1,3 +1,42 @@
+let containerRoot = null;
+let nextUnitOfWork = null;
+let currentRoot = null;
+let wipRoot = null;
+let deletions = null;
+let wipFiber = null;
+let hookIndex = null;
+
+const RYUNIX_TYPES = {
+  TEXT_ELEMENT: Symbol("text.element"),
+  RYUNIX_EFFECT: Symbol("ryunix.effect"),
+  RYUNIX_CONTEXT: Symbol("ryunix.context"),
+};
+
+const STRINGS = {
+  object: "object",
+  function: "function",
+  style: "style",
+  className: "className",
+  children: "children",
+};
+
+const EFFECT_TAGS = {
+  PLACEMENT: Symbol(),
+  UPDATE: Symbol(),
+  DELETION: Symbol(),
+};
+
+const isEvent = (key) => key.startsWith("on");
+const isProperty = (key) => key !== STRINGS.children && !isEvent(key);
+const isNew = (prev, next) => (key) => prev[key] !== next[key];
+const isGone = (next) => (key) => !(key in next);
+const reg = /[A-Z]/g;
+const hasDepsChanged = (prevDeps, nextDeps) =>
+  !prevDeps ||
+  !nextDeps ||
+  prevDeps.length !== nextDeps.length ||
+  prevDeps.some((dep, index) => dep !== nextDeps[index]);
+
 /**
  * The function creates a new element with the given type, props, and children.
  * @param type - The type of the element to be created, such as "div", "span", "h1", etc.
@@ -22,7 +61,7 @@ function createElement(type, props, ...children) {
       children: children
         .flat()
         .map((child) =>
-          typeof child === "object" ? child : createTextElement(child)
+          typeof child === STRINGS.object ? child : createTextElement(child)
         ),
     },
   };
@@ -36,7 +75,7 @@ function createElement(type, props, ...children) {
  */
 function createTextElement(text) {
   return {
-    type: "TEXT_ELEMENT",
+    type: RYUNIX_TYPES.TEXT_ELEMENT,
     props: {
       nodeValue: text,
       children: [],
@@ -56,7 +95,7 @@ function createTextElement(text) {
  */
 function createDom(fiber) {
   const dom =
-    fiber.type == "TEXT_ELEMENT"
+    fiber.type == RYUNIX_TYPES.TEXT_ELEMENT
       ? document.createTextNode("")
       : document.createElement(fiber.type);
 
@@ -64,11 +103,6 @@ function createDom(fiber) {
 
   return dom;
 }
-
-const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== "children" && !isEvent(key);
-const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (next) => (key) => !(key in next);
 
 /**
  * The function updates the DOM by removing old event listeners and properties, and adding new ones
@@ -97,9 +131,9 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      if (name === "style") {
+      if (name === STRINGS.style) {
         DomStyle(dom, nextProps.style);
-      } else if (name === "className") {
+      } else if (name === STRINGS.className) {
         if (nextProps.className === "") {
           throw new Error("className cannot be empty.");
         }
@@ -120,7 +154,6 @@ function updateDom(dom, prevProps, nextProps) {
     });
 }
 
-const reg = /[A-Z]/g;
 function DomStyle(dom, style) {
   dom.style = Object.keys(style).reduce((acc, styleName) => {
     const key = styleName.replace(reg, function (v) {
@@ -151,7 +184,7 @@ function commitRoot() {
 function cancelEffects(fiber) {
   if (fiber.hooks) {
     fiber.hooks
-      .filter((hook) => hook.tag === "effect" && hook.cancel)
+      .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.cancel)
       .forEach((effectHook) => {
         effectHook.cancel();
       });
@@ -168,7 +201,7 @@ function cancelEffects(fiber) {
 function runEffects(fiber) {
   if (fiber.hooks) {
     fiber.hooks
-      .filter((hook) => hook.tag === "effect" && hook.effect)
+      .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.effect)
       .forEach((effectHook) => {
         effectHook.cancel = effectHook.effect();
       });
@@ -193,18 +226,18 @@ function commitWork(fiber) {
   }
   const domParent = domParentFiber.dom;
 
-  if (fiber.effectTag === "PLACEMENT") {
+  if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
     if (fiber.dom != null) {
       domParent.appendChild(fiber.dom);
     }
     runEffects(fiber);
-  } else if (fiber.effectTag === "UPDATE") {
+  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber);
     if (fiber.dom != null) {
       updateDom(fiber.dom, fiber.alternate.props, fiber.props);
     }
     runEffects(fiber);
-  } else if (fiber.effectTag === "DELETION") {
+  } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
     cancelEffects(fiber);
     commitDeletion(fiber, domParent);
     return;
@@ -228,8 +261,6 @@ function commitDeletion(fiber, domParent) {
     commitDeletion(fiber.child, domParent);
   }
 }
-
-let containerRoot = null;
 
 /**
  * @deprecated use Ryunix.init(root) instead.
@@ -274,11 +305,6 @@ function render(element, container) {
   deletions = [];
   nextUnitOfWork = wipRoot;
 }
-
-let nextUnitOfWork = null;
-let currentRoot = null;
-let wipRoot = null;
-let deletions = null;
 
 /**
  * This function uses requestIdleCallback to perform work on a fiber tree until it is complete or the
@@ -335,9 +361,6 @@ function performUnitOfWork(fiber) {
   }
 }
 
-let wipFiber = null;
-let hookIndex = null;
-
 /**
  * This function updates a function component by setting up a work-in-progress fiber, resetting the
  * hook index, creating an empty hooks array, rendering the component, and reconciling its children.
@@ -393,7 +416,7 @@ function reconcileChildren(wipFiber, elements) {
         dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
-        effectTag: "UPDATE",
+        effectTag: EFFECT_TAGS.UPDATE,
       };
     }
     if (element && !sameType) {
@@ -403,11 +426,11 @@ function reconcileChildren(wipFiber, elements) {
         dom: null,
         parent: wipFiber,
         alternate: null,
-        effectTag: "PLACEMENT",
+        effectTag: EFFECT_TAGS.PLACEMENT,
       };
     }
     if (oldFiber && !sameType) {
-      oldFiber.effectTag = "DELETION";
+      oldFiber.effectTag = EFFECT_TAGS.DELETION;
       deletions.push(oldFiber);
     }
 
@@ -437,7 +460,7 @@ function createContext(defaultValue) {
   let contextValue = defaultValue || null;
 
   const context = {
-    tag: "RYUNIX_CONTEXT",
+    tag: RYUNIX_TYPES.RYUNIX_CONTEXT,
     Value: contextValue,
     Provider: null,
   };
@@ -501,7 +524,8 @@ function useStore(initial) {
 
   const actions = oldHook ? oldHook.queue : [];
   actions.forEach((action) => {
-    hook.state = typeof action === "function" ? action(hook.state) : action;
+    hook.state =
+      typeof action === STRINGS.function ? action(hook.state) : action;
   });
 
   /**
@@ -528,20 +552,6 @@ function useStore(initial) {
 }
 
 /**
- * The function checks if the previous dependencies are different from the next dependencies.
- * @param prevDeps - The previous dependencies, which could be an array of values or objects that a
- * function or component depends on.
- * @param nextDeps - `nextDeps` is an array of dependencies that are being checked for changes. These
- * dependencies are typically used in React's `useEffect` and `useCallback` hooks to determine when a
- * component should re-render or when a function should be re-created.
- */
-const hasDepsChanged = (prevDeps, nextDeps) =>
-  !prevDeps ||
-  !nextDeps ||
-  prevDeps.length !== nextDeps.length ||
-  prevDeps.some((dep, index) => dep !== nextDeps[index]);
-
-/**
  * This is a function that creates a hook for managing side effects in Ryunix components.
  * @param effect - The effect function that will be executed after the component has rendered or when
  * the dependencies have changed. It can perform side effects such as fetching data, updating the DOM,
@@ -559,7 +569,7 @@ function useEffect(effect, deps) {
   const hasChanged = hasDepsChanged(oldHook ? oldHook.deps : undefined, deps);
 
   const hook = {
-    tag: "effect",
+    tag: RYUNIX_TYPES.RYUNIX_EFFECT,
     effect: hasChanged ? effect : null,
     cancel: hasChanged && oldHook && oldHook.cancel,
     deps,

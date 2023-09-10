@@ -1,8 +1,16 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
+const { getPackageManager } = require("./utils");
 
-const dir = path.dirname(path.resolve(path.join(__dirname, "/../", "../")));
+let dir;
+const manager = getPackageManager();
+if (manager === "yarn" || manager === "npm" || manager === "bun") {
+  dir = path.dirname(path.resolve(path.join(__dirname, "..", "..")));
+} else if (manager === "pnpm") {
+  throw new Error(`The manager ${manager} is not supported.`);
+}
+
 module.exports = {
   mode: "production",
   entry: path.join(dir, "src", "main.ryx"),
