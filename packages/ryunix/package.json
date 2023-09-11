@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.2.29-nightly.1",
+  "version": "0.2.29",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "private": false,
@@ -9,7 +9,6 @@
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
-    
     "build": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
     "prepublish": "npm run build",
     "postinstall": "npm run build",
@@ -28,7 +27,6 @@
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "^7.22.14",
     "@babel/preset-react": "^7.22.5",
-    "@mdx-js/loader": "^2.3.0",
     "babel-loader": "^9.1.3",
     "css-loader": "^6.8.1",
     "error-overlay-webpack-plugin": "^1.1.1",

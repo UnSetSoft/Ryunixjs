@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-navigation",
-  "version": "0.2.29-nightly.1",
+  "version": "0.2.29",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
@@ -26,7 +26,8 @@
     "@babel/core": "7.19.3",
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.19.3",
-    "@unsetsoft/ryunixjs": "^0.2.9"
+    "@unsetsoft/ryunixjs": "^0.2.9",
+    "@babel/plugin-transform-react-jsx": "^7.22.5"
   },
   "peerDependencies": {
     "@unsetsoft/ryunixjs": "^0.2.12"
