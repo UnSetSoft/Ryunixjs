@@ -3,7 +3,7 @@
   "displayName": "RyunixJS",
   "description": "Ryunix language support",
   "publisher": "unsetsoft",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "homepage": "https://github.com/UnSetSoft/Ryunixjs",
   "bugs": {
@@ -24,6 +24,7 @@
   "categories": [
     "Snippets"
   ],
+
   "contributes": {
     "configurationDefaults": {
       "[ryunix]": {
@@ -74,7 +75,10 @@
           "entity.name.function.tagged-template": "other",
           "meta.import string.quoted": "other",
           "variable.other.jsdoc": "other"
-        }
+        },
+        "injectTo": [
+          "source.js"
+        ]
       }
     ],
     "semanticTokenScopes": [
