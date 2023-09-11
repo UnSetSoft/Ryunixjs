@@ -1,6 +1,7 @@
 import { text, select, group, cancel, multiselect } from "@clack/prompts";
 import colors from "picocolors";
 
+ 
 const MENU = async () =>
   await group(
     {
@@ -45,8 +46,8 @@ const MENU = async () =>
               message: colors.cyan("Do you want to add an addon?"),
               options: [
                 {
-                  value: `@unsetsoft/ryunix-navigation@${results.projectVersion}`,
-                  label: "Navigation",
+                  value: "unsetsoft.ryunixjs",
+                  label: "Vscode Extension (Beta)",
                 },
               ],
             })
