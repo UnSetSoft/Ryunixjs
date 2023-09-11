@@ -37,17 +37,24 @@ const Navigate = (props) => {
   if (props.label === "") {
     throw new Error("'label=' cannot be empty.");
   }
+
+  if (!props.label || !props.to) {
+    throw new Error("Missig component params.");
+  }
   const preventReload = (event) => {
     event.preventDefault();
     if (window.location.pathname !== props.to) {
       window.history.pushState({}, "", props.to);
       const navigationEvent = new Event("pushsatate");
       window.dispatchEvent(navigationEvent);
-      localStorage.setItem("pathname", props.to);
     }
   };
 
-  const anchor = { href: props.to, onClick: preventReload, ...props };
+  const anchor = {
+    href: props.to,
+    onClick: preventReload,
+    ...props,
+  };
   return createElement("a", anchor, props.label);
 };
 
