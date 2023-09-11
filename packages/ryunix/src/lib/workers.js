@@ -1,6 +1,6 @@
 import { commitRoot } from "./commits";
 import { updateFunctionComponent, updateHostComponent } from "./components";
-import { nextUnitOfWork, wipRoot } from "../utils";
+import { vars } from "../utils/index";
 
 /**
  * This function uses requestIdleCallback to perform work on a fiber tree until it is complete or the
@@ -12,12 +12,12 @@ import { nextUnitOfWork, wipRoot } from "../utils";
  */
 const workLoop = (deadline) => {
   let shouldYield = false;
-  while (nextUnitOfWork && !shouldYield) {
-    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+  while (vars.nextUnitOfWork && !shouldYield) {
+    vars.nextUnitOfWork = performUnitOfWork(vars.nextUnitOfWork);
     shouldYield = deadline.timeRemaining() < 1;
   }
 
-  if (!nextUnitOfWork && wipRoot) {
+  if (!vars.nextUnitOfWork && vars.wipRoot) {
     commitRoot();
   }
 

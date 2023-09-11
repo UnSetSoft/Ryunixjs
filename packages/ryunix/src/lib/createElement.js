@@ -1,3 +1,5 @@
+import { RYUNIX_TYPES, STRINGS } from "../utils/index";
+
 /**
  * The function creates a new element with the given type, props, and children.
  * @param type - The type of the element to be created, such as "div", "span", "h1", etc.
@@ -14,8 +16,6 @@
  * includes any additional properties passed in the `props` argument, as well as a `children` property
  * that is an array of any child elements passed in the `...children` argument
  */
-
-import { RYUNIX_TYPES, STRINGS } from "../utils";
 
 const createElement = (type, props, ...children) => {
   return {

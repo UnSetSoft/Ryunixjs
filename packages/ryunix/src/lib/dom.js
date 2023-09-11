@@ -1,5 +1,5 @@
 import { isEvent, isGone, isNew, isProperty } from "./effects";
-import { RYUNIX_TYPES, STRINGS, reg } from "../utils";
+import { RYUNIX_TYPES, STRINGS, reg } from "../utils/index";
 
 /**
  * The function creates a new DOM element based on the given fiber object and updates its properties.

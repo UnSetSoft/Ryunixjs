@@ -1,14 +1,5 @@
 import { hasDepsChanged } from "./effects";
-import {
-  RYUNIX_TYPES,
-  STRINGS,
-  currentRoot,
-  deletions,
-  hookIndex,
-  nextUnitOfWork,
-  wipFiber,
-  wipRoot,
-} from "../utils";
+import { RYUNIX_TYPES, STRINGS, vars } from "../utils/index";
 
 /**
  * The function `useContext` is used to read and subscribe to context from your component.
@@ -16,12 +7,12 @@ import {
  * @returns The `Value` property of the `hook` object is being returned.
  */
 const useContext = (ref) => {
-  hookIndex++;
+  vars.hookIndex++;
 
   const oldHook =
-    wipFiber.alternate &&
-    wipFiber.alternate.hooks &&
-    wipFiber.alternate.hooks[hookIndex];
+    vars.wipFiber.alternate &&
+    vars.wipFiber.alternate.hooks &&
+    vars.wipFiber.alternate.hooks[vars.hookIndex];
 
   const hasOld = oldHook ? oldHook : undefined;
   const Context = hasOld ? hasOld : ref;
@@ -29,7 +20,7 @@ const useContext = (ref) => {
     ...Context,
   };
 
-  wipFiber.hooks.push(hook);
+  vars.wipFiber.hooks.push(hook);
 
   return hook.Value;
 };
@@ -42,9 +33,9 @@ const useContext = (ref) => {
  */
 const useStore = (initial) => {
   const oldHook =
-    wipFiber.alternate &&
-    wipFiber.alternate.hooks &&
-    wipFiber.alternate.hooks[hookIndex];
+    vars.wipFiber.alternate &&
+    vars.wipFiber.alternate.hooks &&
+    vars.wipFiber.alternate.hooks[vars.hookIndex];
   const hook = {
     state: oldHook ? oldHook.state : initial,
     queue: [],
@@ -65,17 +56,17 @@ const useStore = (initial) => {
    */
   const setState = (action) => {
     hook.queue.push(action);
-    wipRoot = {
-      dom: currentRoot.dom,
-      props: currentRoot.props,
-      alternate: currentRoot,
+    vars.wipRoot = {
+      dom: vars.currentRoot.dom,
+      props: vars.currentRoot.props,
+      alternate: vars.currentRoot,
     };
-    nextUnitOfWork = wipRoot;
-    deletions = [];
+    vars.nextUnitOfWork = vars.wipRoot;
+    vars.deletions = [];
   };
 
-  wipFiber.hooks.push(hook);
-  hookIndex++;
+  vars.wipFiber.hooks.push(hook);
+  vars.hookIndex++;
   return [hook.state, setState];
 };
 
@@ -90,9 +81,9 @@ const useStore = (initial) => {
  */
 const useEffect = (effect, deps) => {
   const oldHook =
-    wipFiber.alternate &&
-    wipFiber.alternate.hooks &&
-    wipFiber.alternate.hooks[hookIndex];
+    vars.wipFiber.alternate &&
+    vars.wipFiber.alternate.hooks &&
+    vars.wipFiber.alternate.hooks[vars.hookIndex];
 
   const hasChanged = hasDepsChanged(oldHook ? oldHook.deps : undefined, deps);
 
@@ -103,8 +94,8 @@ const useEffect = (effect, deps) => {
     deps,
   };
 
-  wipFiber.hooks.push(hook);
-  hookIndex++;
+  vars.wipFiber.hooks.push(hook);
+  vars.hookIndex++;
 };
 
 export { useContext, useStore, useEffect };

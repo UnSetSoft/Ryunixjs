@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES } from "../utils";
+import { RYUNIX_TYPES } from "../utils/index";
 
 /**
  * The function createContext creates a context object with a default value and methods to set and get

@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, STRINGS } from "../utils";
+import { RYUNIX_TYPES, STRINGS } from "../utils/index";
 
 const isEvent = (key) => key.startsWith("on");
 const isProperty = (key) => key !== STRINGS.children && !isEvent(key);

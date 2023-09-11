@@ -1,10 +1,13 @@
-let containerRoot = null;
-let nextUnitOfWork = null;
-let currentRoot = null;
-let wipRoot = null;
-let deletions = null;
-let wipFiber = null;
-let hookIndex = null;
+const vars = {
+  containerRoot: null,
+  nextUnitOfWork: null,
+  currentRoot: null,
+  wipRoot: null,
+  deletions: null,
+  wipFiber: null,
+  hookIndex: null,
+};
+
 const reg = /[A-Z]/g;
 
 const RYUNIX_TYPES = Object.freeze({
@@ -27,16 +30,4 @@ const EFFECT_TAGS = Object.freeze({
   DELETION: Symbol(),
 });
 
-export {
-  containerRoot,
-  nextUnitOfWork,
-  currentRoot,
-  wipRoot,
-  deletions,
-  wipFiber,
-  hookIndex,
-  reg,
-  RYUNIX_TYPES,
-  EFFECT_TAGS,
-  STRINGS,
-};
+export { vars, reg, RYUNIX_TYPES, EFFECT_TAGS, STRINGS };

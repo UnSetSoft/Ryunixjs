@@ -1,15 +1,15 @@
 import { updateDom } from "./dom";
 import { cancelEffects, runEffects } from "./effects";
-import { EFFECT_TAGS, currentRoot, deletions, wipRoot } from "../utils";
+import { EFFECT_TAGS, vars } from "../utils/index";
 
 /**
  * The function commits changes made to the virtual DOM to the actual DOM.
  */
 const commitRoot = () => {
-  deletions.forEach(commitWork);
-  commitWork(wipRoot.child);
-  currentRoot = wipRoot;
-  wipRoot = null;
+  vars.deletions.forEach(commitWork);
+  commitWork(vars.wipRoot.child);
+  vars.currentRoot = vars.wipRoot;
+  vars.wipRoot = null;
 };
 
 /**

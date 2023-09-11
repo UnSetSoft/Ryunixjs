@@ -1,6 +1,6 @@
 import { createDom } from "./dom";
 import { reconcileChildren } from "./reconciler";
-import { hookIndex, wipFiber } from "../utils";
+import { vars } from "../utils/index";
 
 /**
  * This function updates a function component by setting up a work-in-progress fiber, resetting the
@@ -10,9 +10,9 @@ import { hookIndex, wipFiber } from "../utils";
  * used to update the state of the component and its children.
  */
 const updateFunctionComponent = (fiber) => {
-  wipFiber = fiber;
-  hookIndex = 0;
-  wipFiber.hooks = [];
+  vars.wipFiber = fiber;
+  vars.hookIndex = 0;
+  vars.wipFiber.hooks = [];
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
 };

@@ -1,4 +1,4 @@
-import { EFFECT_TAGS, deletions } from "../utils";
+import { EFFECT_TAGS, vars } from "../utils/index";
 
 /**
  * This function reconciles the children of a fiber node with a new set of elements, creating new
@@ -12,11 +12,11 @@ import { EFFECT_TAGS, deletions } from "../utils";
 const reconcileChildren = (wipFiber, elements) => {
   let index = 0;
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
-  let prevSibling = null;
+  let prevSibling;
 
   while (index < elements.length || oldFiber != null) {
     const element = elements[index];
-    let newFiber = null;
+    let newFiber;
 
     const sameType = oldFiber && element && element.type == oldFiber.type;
 
@@ -42,7 +42,7 @@ const reconcileChildren = (wipFiber, elements) => {
     }
     if (oldFiber && !sameType) {
       oldFiber.effectTag = EFFECT_TAGS.DELETION;
-      deletions.push(oldFiber);
+      vars.deletions.push(oldFiber);
     }
 
     if (oldFiber) {

@@ -1,10 +1,4 @@
-import {
-  containerRoot,
-  currentRoot,
-  deletions,
-  nextUnitOfWork,
-  wipRoot,
-} from "../utils";
+import { vars } from "../utils/index";
 
 /**
  * The function renders an element into a container using a work-in-progress root.
@@ -14,15 +8,15 @@ import {
  * appended to. this parameter is optional if you use createRoot().
  */
 const render = (element, container) => {
-  wipRoot = {
-    dom: containerRoot || container,
+  vars.wipRoot = {
+    dom: vars.containerRoot || container,
     props: {
       children: [element],
     },
-    alternate: currentRoot,
+    alternate: vars.currentRoot,
   };
-  deletions = [];
-  nextUnitOfWork = wipRoot;
+  vars.deletions = [];
+  vars.nextUnitOfWork = vars.wipRoot;
 };
 
 /**
@@ -32,7 +26,7 @@ const render = (element, container) => {
  * for the root element.
  */
 const init = (root) => {
-  containerRoot = document.getElementById(root);
+  vars.containerRoot = document.getElementById(root);
 };
 
 export { render, init };
