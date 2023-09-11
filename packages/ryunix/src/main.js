@@ -1,4 +1,4 @@
-import Ryunix from "./dom";
+import Ryunix from "./lib/index";
 
 export {
   useStore,
@@ -6,7 +6,7 @@ export {
   createContext,
   useContext,
   Fragments,
-} from "./dom";
+} from "./lib/index";
 
 window.Ryunix = Ryunix;
 
