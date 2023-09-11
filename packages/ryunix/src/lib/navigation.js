@@ -22,13 +22,33 @@ const Router = ({ path, component }) => {
   return currentPath === path ? component() : null;
 };
 
-const Link = (props) => {
-  const p = {
-    href: props.to,
-    ...props,
+const Navigate = (props) => {
+  if (props.style) {
+    throw new Error(
+      "The style attribute is not supported on internal components."
+    );
+  }
+  if (props.to === "") {
+    throw new Error("'to=' cannot be empty.");
+  }
+  if (props.className === "") {
+    throw new Error("className cannot be empty.");
+  }
+  if (props.label === "") {
+    throw new Error("'label=' cannot be empty.");
+  }
+  const preventReload = (event) => {
+    event.preventDefault();
+    if (window.location.pathname !== props.to) {
+      window.history.pushState({}, "", props.to);
+      const navigationEvent = new Event("pushsatate");
+      window.dispatchEvent(navigationEvent);
+      localStorage.setItem("pathname", props.to);
+    }
   };
 
-  return createElement("a", p, props.children);
+  const anchor = { href: props.to, onClick: preventReload, ...props };
+  return createElement("a", anchor, props.label);
 };
 
-export { Router, Link };
+export { Router, Navigate };

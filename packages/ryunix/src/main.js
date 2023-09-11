@@ -6,6 +6,8 @@ export {
   createContext,
   useContext,
   Fragments,
+  Navigate,
+  Router,
 } from "./lib/index";
 
 window.Ryunix = Ryunix;
