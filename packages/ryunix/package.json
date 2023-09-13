@@ -45,7 +45,8 @@
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "remark": "^14.0.3"
   },
   "engines": {
     "node": ">=18.16.0"
