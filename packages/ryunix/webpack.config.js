@@ -2,6 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
 const { getPackageManager } = require("./utils");
+const RemarkHTML = require("remark-html");
 
 let dir;
 const manager = getPackageManager();
@@ -87,6 +88,22 @@ module.exports = {
         test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
+      },
+      {
+        test: /\.md$/,
+        use: [
+          {
+            loader: "html-loader",
+          },
+          {
+            loader: "remark-loader",
+            options: {
+              remarkOptions: {
+                plugins: [RemarkHTML],
+              },
+            },
+          },
+        ],
       },
     ],
   },
