@@ -34,8 +34,7 @@
     "html-webpack-plugin": "^5.5.3",
     "image-webpack-loader": "8.1.0",
     "node-sass": "9.0.0",
-    "remark-html": "^15.0.2",
-    "remark-loader": "^5.0.0",
+ 
     "rollup": "3.24.0",
     "sass": "^1.66.1",
     "sass-loader": "^13.3.2",
@@ -46,7 +45,7 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
     "yargs": "^17.7.2",
-    "remark": "^14.0.3"
+    "mdx-loader": "3.0.2"
   },
   "engines": {
     "node": ">=18.16.0"

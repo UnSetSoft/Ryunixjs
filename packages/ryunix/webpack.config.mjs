@@ -93,22 +93,7 @@ export default {
         loader: "url-loader",
         options: { limit: false },
       },
-      {
-        test: /\.md$/,
-        use: [
-          {
-            loader: "html-loader",
-          },
-          {
-            loader: "remark-loader",
-            options: {
-              remarkOptions: {
-                plugins: [RemarkHTML],
-              },
-            },
-          },
-        ],
-      },
+      { test: /\.(mdx|md)?$/, use: ["babel-loader", "mdx-loader"] },
     ],
   },
   resolve: {
