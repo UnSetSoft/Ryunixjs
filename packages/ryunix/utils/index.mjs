@@ -24,6 +24,4 @@ function getPackageManager() {
   return "npm";
 }
 
-module.exports = {
-  getPackageManager,
-};
+export { getPackageManager };

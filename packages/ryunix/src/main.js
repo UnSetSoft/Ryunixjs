@@ -1,4 +1,4 @@
-import Ryunix from "./lib/index";
+import Ryunix from "./lib/index.js";
 
 export {
   useStore,
@@ -8,7 +8,7 @@ export {
   Fragments,
   Navigate,
   Router,
-} from "./lib/index";
+} from "./lib/index.js";
 
 window.Ryunix = Ryunix;
 

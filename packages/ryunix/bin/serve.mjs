@@ -1,7 +1,6 @@
-const Webpack = require("webpack");
-const WebpackDevServer = require("webpack-dev-server");
-const webpackConfig = require("../webpack.config.js");
-
+import Webpack from "webpack";
+import WebpackDevServer from "webpack-dev-server";
+import webpackConfig from "../webpack.config.mjs";
 
 const StartServer = async (cliSettings) => {
   const compiler = Webpack(webpackConfig);
@@ -11,4 +10,4 @@ const StartServer = async (cliSettings) => {
   await server.start();
 };
 
-module.exports = { StartServer };
+export { StartServer };

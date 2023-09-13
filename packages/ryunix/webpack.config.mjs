@@ -1,23 +1,27 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
-const { getPackageManager } = require("./utils");
-const RemarkHTML = require("remark-html");
+import { fileURLToPath } from "url";
+import { dirname, join, resolve } from "path";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import { getPackageManager } from "./utils/index.mjs";
+import RemarkHTML from "remark-html";
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = dirname(__filename);
 
 let dir;
 const manager = getPackageManager();
 if (manager === "yarn" || manager === "npm" || manager === "bun") {
-  dir = path.dirname(path.resolve(path.join(__dirname, "..", "..")));
+  dir = dirname(resolve(join(__dirname, "..", "..")));
 } else if (manager === "pnpm") {
   throw new Error(`The manager ${manager} is not supported.`);
 }
 
-module.exports = {
+export default {
   mode: "production",
-  entry: path.join(dir, "src", "main.ryx"),
+  entry: join(dir, "src", "main.ryx"),
   devtool: "nosources-source-map",
   output: {
-    path: path.join(dir, ".ryunix"),
+    path: join(dir, ".ryunix"),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
@@ -112,9 +116,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(dir, "public", "index.html"),
+      template: join(dir, "public", "index.html"),
     }),
-    new ErrorOverlayPlugin(),
   ],
   externals: {
     ryunix: "Ryunix",
