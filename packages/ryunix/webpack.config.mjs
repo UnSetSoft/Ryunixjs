@@ -2,7 +2,7 @@ import { fileURLToPath } from "url";
 import { dirname, join, resolve } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { getPackageManager } from "./utils/index.mjs";
-import RemarkHTML from "remark-html";
+ 
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -93,7 +93,6 @@ export default {
         loader: "url-loader",
         options: { limit: false },
       },
-      { test: /\.(mdx|md)?$/, use: ["babel-loader", "mdx-loader"] },
     ],
   },
   resolve: {
