@@ -95,7 +95,19 @@ export default {
       },
       {
         test: /\.md$/,
-        loader: "remark-loader",
+        use: [
+          {
+            loader: "html-loader",
+          },
+          {
+            loader: "remark-loader",
+            options: {
+              remarkOptions: {
+                plugins: [RemarkHTML],
+              },
+            },
+          },
+        ],
       },
     ],
   },
