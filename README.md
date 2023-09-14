@@ -1,4 +1,6 @@
-<img src="./extensions/ryunix/logo-dark.svg"  width="200" height="200" style="display: block;margin-left: auto;margin-right: auto;width: 50%" />
+<img src="./extensions/ryunix/logo-dark.svg"  width="200" height="200" style="
+    display: block;
+    margin: 0 auto;" />
 
 ## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs) 
 
