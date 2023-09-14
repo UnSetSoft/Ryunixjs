@@ -1,20 +1,18 @@
-# RyunixJS
+![](./extensions/ryunix/logo-dark.svg)
+
+## RyunixJS
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FUnSetSoft%2FRyunixjs%2Ftree%2Fmaster%2Fvercel%2Fryunix-jsx&project-name=ryunix-jsx-project&repository-name=ryunix-jsx-project)
 
 
-## What is RyunixJS?
+### What is RyunixJS?
 
 Is a ReactJS Clone! Even lighter.
 
-## Usage
+### Usage
 
 `npx @unsetsoft/cra@latest`
 
-## Bugs?
-
-You can create an issue on GitHub.
-
-## Do you want to contribute?
+### Do you want to contribute?
 
 Fork a send a pull request!
