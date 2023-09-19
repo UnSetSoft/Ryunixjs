@@ -119,6 +119,7 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
+      favicon: join(dir, "public", "favicon.ico"),
       template: join(dir, "public", "index.html"),
     }),
   ],
