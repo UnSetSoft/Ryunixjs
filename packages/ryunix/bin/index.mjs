@@ -1,9 +1,8 @@
 #! /usr/bin/env node
-const yargs = require("yargs");
-const { hideBin } = require("yargs/helpers");
-const { StartServer } = require("./serve");
-const { compiler } = require("./compiler");
-const logger = require("terminal-log");
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import { StartServer } from "./serve.mjs";
+import { compiler } from "./compiler.mjs";
 const serv = {
   command: "server",
   describe: "Run server",

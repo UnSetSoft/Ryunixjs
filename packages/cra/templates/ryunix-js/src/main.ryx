@@ -5,6 +5,6 @@ import App from "./App";
 import "./styles/global.css"
 
 
-Ryunix.init("root");
+Ryunix.init();
 
 Ryunix.render(<App />);

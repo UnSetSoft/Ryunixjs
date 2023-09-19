@@ -1,30 +1,48 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ErrorOverlayPlugin = require("error-overlay-webpack-plugin");
-const { getPackageManager } = require("./utils");
+import { fileURLToPath } from "url";
+import { dirname, join, resolve } from "path";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import {
+  getPackageManager,
+  ENV_HASH,
+  getEnviroment,
+  resolveApp,
+} from "./utils/index.mjs";
+import fs from "fs";
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = dirname(__filename);
 
 let dir;
 const manager = getPackageManager();
 if (manager === "yarn" || manager === "npm" || manager === "bun") {
-  dir = path.dirname(path.resolve(path.join(__dirname, "..", "..")));
+  dir = dirname(resolve(join(__dirname, "..", "..")));
 } else if (manager === "pnpm") {
   throw new Error(`The manager ${manager} is not supported.`);
 }
 
-module.exports = {
+export default {
   mode: "production",
-  entry: path.join(dir, "src", "main.ryx"),
+  entry: join(dir, "src", "main.ryx"),
   devtool: "nosources-source-map",
   output: {
-    path: path.join(dir, ".ryunix"),
+    path: join(dir, ".ryunix"),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
+    assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
     clean: true,
   },
   devServer: {
     hot: true,
-    historyApiFallback: { index: "/", disableDotRule: true },
+    historyApiFallback: {
+      index: "/",
+      disableDotRule: true,
+    },
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Allow-Headers": "*",
+    },
   },
   optimization: {
     runtimeChunk: "single",
@@ -34,18 +52,24 @@ module.exports = {
       minSize: 0,
     },
   },
-  stats: {
-    assets: false,
-    children: false,
-    chunks: false,
-    chunkModules: false,
-    colors: true,
-    entrypoints: false,
-    hash: false,
-    modules: false,
-    timings: false,
-    version: false,
+  cache: {
+    type: "filesystem",
+    version: ENV_HASH(getEnviroment()),
+    cacheDirectory: resolveApp(dir, "node_modules/.cache"),
+    store: "pack",
+    buildDependencies: {
+      defaultWebpack: ["webpack/lib/"],
+      config: [__filename],
+      tsconfig: [
+        resolveApp(dir, "tsconfig.json"),
+        resolveApp(dir, "jsconfig.json"),
+      ].filter((f) => fs.existsSync(f)),
+    },
   },
+  infrastructureLogging: {
+    level: "none",
+  },
+  stats: "errors-warnings",
   module: {
     rules: [
       {
@@ -72,7 +96,7 @@ module.exports = {
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf)$/,
+        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf|ico)$/,
         use: [
           {
             loader: "file-loader",
@@ -84,9 +108,16 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
+        test: /\.(png|woff|woff2|eot|ttf|svg|pdf|ico)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
+      },
+      {
+        test: /\.ico$/i,
+        type: "asset/resource",
+        generator: {
+          filename: "[name][ext][query]",
+        },
       },
     ],
   },
@@ -95,9 +126,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(dir, "public", "index.html"),
+      favicon: join(dir, "public", "favicon.ico"),
+      template: join(dir, "public", "index.html"),
     }),
-    new ErrorOverlayPlugin(),
   ],
   externals: {
     ryunix: "Ryunix",

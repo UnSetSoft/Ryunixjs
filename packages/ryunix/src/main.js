@@ -1,4 +1,4 @@
-import Ryunix from "./lib/index";
+import Ryunix from "./lib/index.js";
 
 export {
   useStore,
@@ -6,7 +6,9 @@ export {
   createContext,
   useContext,
   Fragments,
-} from "./lib/index";
+  Navigate,
+  Router,
+} from "./lib/index.js";
 
 window.Ryunix = Ryunix;
 

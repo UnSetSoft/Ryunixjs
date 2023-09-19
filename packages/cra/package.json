@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/cra",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "type": "module",
   "description": "Create Ryunix app",
   "main": "./bin/index.js",
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@clack/prompts": "0.7.0",
+    "command-exists-promise": "^2.0.2",
     "eslint": "8.48.0",
     "picocolors": "1.0.0"
   }
