@@ -96,7 +96,7 @@ export default {
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf)$/,
+        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf|ico)$/,
         use: [
           {
             loader: "file-loader",
@@ -108,9 +108,16 @@ export default {
         ],
       },
       {
-        test: /\.(png|woff|woff2|eot|ttf|svg|pdf)$/, // to import images and fonts
+        test: /\.(png|woff|woff2|eot|ttf|svg|pdf|ico)$/, // to import images and fonts
         loader: "url-loader",
         options: { limit: false },
+      },
+      {
+        test: /\.ico$/i,
+        type: "asset/resource",
+        generator: {
+          filename: "[name][ext][query]",
+        },
       },
     ],
   },
