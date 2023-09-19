@@ -1,9 +1,13 @@
 import { fileURLToPath } from "url";
 import { dirname, join, resolve } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import { getPackageManager } from "./utils/index.mjs";
- 
-
+import {
+  getPackageManager,
+  ENV_HASH,
+  getEnviroment,
+  resolveApp,
+} from "./utils/index.mjs";
+import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = dirname(__filename);
@@ -23,13 +27,22 @@ export default {
   output: {
     path: join(dir, ".ryunix"),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
+    assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
     clean: true,
   },
   devServer: {
     hot: true,
-    historyApiFallback: { index: "/", disableDotRule: true },
+    historyApiFallback: {
+      index: "/",
+      disableDotRule: true,
+    },
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Allow-Headers": "*",
+    },
   },
   optimization: {
     runtimeChunk: "single",
@@ -39,18 +52,24 @@ export default {
       minSize: 0,
     },
   },
-  stats: {
-    assets: false,
-    children: false,
-    chunks: false,
-    chunkModules: false,
-    colors: true,
-    entrypoints: false,
-    hash: false,
-    modules: false,
-    timings: false,
-    version: false,
+  cache: {
+    type: "filesystem",
+    version: ENV_HASH(getEnviroment()),
+    cacheDirectory: resolveApp(dir, "node_modules/.cache"),
+    store: "pack",
+    buildDependencies: {
+      defaultWebpack: ["webpack/lib/"],
+      config: [__filename],
+      tsconfig: [
+        resolveApp(dir, "tsconfig.json"),
+        resolveApp(dir, "jsconfig.json"),
+      ].filter((f) => fs.existsSync(f)),
+    },
   },
+  infrastructureLogging: {
+    level: "none",
+  },
+  stats: "errors-warnings",
   module: {
     rules: [
       {

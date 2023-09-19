@@ -1,3 +1,9 @@
+import { createHash } from "crypto";
+import { resolve } from "path";
+
+const resolveApp = (appDirectory, relativePath) =>
+  resolve(appDirectory, relativePath);
+
 function getPackageManager() {
   const agent = process.env.npm_config_user_agent;
 
@@ -24,4 +30,26 @@ function getPackageManager() {
   return "npm";
 }
 
-export { getPackageManager };
+const ENV_HASH = (env) => {
+  const hash = createHash("md5");
+  hash.update(JSON.stringify(env));
+
+  return hash.digest("hex");
+};
+
+const RYUNIX_APP = /^RYUNIX_APP_/i;
+
+const getEnviroment = () =>
+  Object.keys(process.env)
+    .filter((key) => RYUNIX_APP.test(key))
+    .reduce(
+      (env, key) => {
+        env[key] = process.env[key];
+        return env;
+      },
+      {
+        NODE_ENV: process.env.NODE_ENV || "development",
+      }
+    );
+
+export { getPackageManager, ENV_HASH, getEnviroment, resolveApp };
