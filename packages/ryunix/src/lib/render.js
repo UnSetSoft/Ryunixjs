@@ -26,7 +26,8 @@ const render = (element, container) => {
  * for the root element.
  */
 const init = (root) => {
-  vars.containerRoot = document.getElementById(root);
+  const rootElement = root || "__ryunix";
+  vars.containerRoot = document.getElementById(rootElement);
 };
 
 export { render, init };
