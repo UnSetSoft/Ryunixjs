@@ -13,9 +13,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 let dir;
+
 const manager = getPackageManager();
 if (manager === "yarn" || manager === "npm" || manager === "bun") {
-  dir = dirname(resolve(join(__dirname, "..", "..")));
+  dir = dirname(join(__dirname, "..", ".."));
 } else if (manager === "pnpm") {
   throw new Error(`The manager ${manager} is not supported.`);
 }
