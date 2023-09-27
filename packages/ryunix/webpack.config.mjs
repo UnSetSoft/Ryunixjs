@@ -1,5 +1,5 @@
 import { fileURLToPath } from "url";
-import { dirname, join, resolve } from "path";
+import { dirname, join } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import {
   getPackageManager,
@@ -8,6 +8,7 @@ import {
   resolveApp,
 } from "./utils/index.mjs";
 import fs from "fs";
+import config from "./utils/config.cjs";
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = dirname(__filename);
@@ -21,12 +22,15 @@ if (manager === "yarn" || manager === "npm" || manager === "bun") {
   throw new Error(`The manager ${manager} is not supported.`);
 }
 
+const mode = config.production ? "production" : "development";
+
 export default {
-  mode: "production",
-  entry: join(dir, "src", "main.ryx"),
+  mode,
+  context: resolveApp(dir, config.appDirectory),
+  entry: "./main.ryx",
   devtool: "nosources-source-map",
   output: {
-    path: join(dir, ".ryunix"),
+    path: resolveApp(dir, config.buildDirectory),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
     assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
@@ -127,8 +131,8 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: join(dir, "public", "favicon.ico"),
-      template: join(dir, "public", "index.html"),
+      favicon: resolveApp(dir, `${config.publicDirectory}/favicon.png`),
+      template: resolveApp(dir, `${config.publicDirectory}/index.html`),
     }),
   ],
   externals: {
