@@ -22,15 +22,15 @@ if (manager === "yarn" || manager === "npm" || manager === "bun") {
   throw new Error(`The manager ${manager} is not supported.`);
 }
 
-const mode = config.production ? "production" : "development";
+ 
 
 export default {
-  mode,
+  mode: "production",
   context: join(dir, config.appDirectory),
   entry: "./main.ryx",
   devtool: "nosources-source-map",
   output: {
-    path: join(dir, config.buildDirectory),
+    path: resolveApp(dir, config.buildDirectory),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
     assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
@@ -131,8 +131,8 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: join(dir, `${config.publicDirectory}/favicon.png`),
-      template: join(dir, `${config.publicDirectory}/index.html`),
+      favicon: join(dir, config.publicDirectory, "favicon.png"),
+      template: join(dir, config.publicDirectory, "index.html"),
     }),
   ],
   externals: {

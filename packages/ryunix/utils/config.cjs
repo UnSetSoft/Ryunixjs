@@ -1,3 +1,4 @@
+"use strict";
 const fs = require("fs");
 const path = require("path");
 const configFile = path.join(__dirname, "../../../../", "ryunix.config.js");
