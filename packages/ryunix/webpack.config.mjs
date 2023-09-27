@@ -26,11 +26,11 @@ const mode = config.production ? "production" : "development";
 
 export default {
   mode,
-  context: resolveApp(dir, config.appDirectory),
+  context: join(dir, config.appDirectory),
   entry: "./main.ryx",
   devtool: "nosources-source-map",
   output: {
-    path: resolveApp(dir, config.buildDirectory),
+    path: join(dir, config.buildDirectory),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
     assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
@@ -131,8 +131,8 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: resolveApp(dir, `${config.publicDirectory}/favicon.png`),
-      template: resolveApp(dir, `${config.publicDirectory}/index.html`),
+      favicon: join(dir, `${config.publicDirectory}/favicon.png`),
+      template: join(dir, `${config.publicDirectory}/index.html`),
     }),
   ],
   externals: {
