@@ -1,12 +1,12 @@
 {
   "name": "RyunixJS",
-  "version": "0.3.4",
-  "main": "index.js",
+  "version": "0.3.5",
   "private": true,
+  "homepage": "./",
   "workspaces": [
     "packages/*",
-    "test/*",
-    "docs/*"
+    "extensions/*",
+    "docs"
   ],
   "license": "MIT",
   "scripts": {

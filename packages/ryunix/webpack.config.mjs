@@ -26,7 +26,7 @@ if (manager === "yarn" || manager === "npm" || manager === "bun") {
 
 export default {
   mode: "production",
-  context: join(dir, config.appDirectory),
+  context: resolveApp(dir, config.appDirectory),
   entry: "./main.ryx",
   devtool: "nosources-source-map",
   output: {
