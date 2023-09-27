@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "0.2.37-nightly.4",
+  "version": "0.3.0",
   "main": "index.js",
   "private": true,
   "workspaces": [
