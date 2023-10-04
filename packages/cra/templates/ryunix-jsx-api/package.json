@@ -1,0 +1,17 @@
+{
+  "name": "ryunix-jsx-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "homepage": "./",
+  "scripts": {
+    "start": "node ./api/server.js",
+    "dev:api": "nodemon ./api/server.js",
+    "dev": "ryunix server",
+    "build": "ryunix build"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.16.0"
+  }
+}

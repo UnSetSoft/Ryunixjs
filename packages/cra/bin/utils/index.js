@@ -126,17 +126,37 @@ const Init = async (
             });
           if (projectVersion === "nightly") {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            if (template === "ryunix-jsx-api") {
+              dependencies.push("express");
+              dependencies.push("cors");
+              dependencies.push("nodemon");
+            }
             await Install(name, dependencies);
           } else {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            if (template === "ryunix-jsx-api") {
+              dependencies.push("express");
+              dependencies.push("cors");
+              dependencies.push("nodemon");
+            }
             await Install(name, dependencies);
           }
         } else {
           if (projectVersion === "nightly") {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            if (template === "ryunix-jsx-api") {
+              dependencies.push("express");
+              dependencies.push("cors");
+              dependencies.push("nodemon");
+            }
             await Install(name, dependencies);
           } else {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            if (template === "ryunix-jsx-api") {
+              dependencies.push("express");
+              dependencies.push("cors");
+              dependencies.push("nodemon");
+            }
             await Install(name, dependencies);
           }
         }

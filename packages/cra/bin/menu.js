@@ -20,6 +20,7 @@ const MENU = async () =>
             { value: "ryunix-ryx", label: "ryx" },
             { value: "ryunix-js", label: "js" },
             { value: "ryunix-jsx", label: "jsx" },
+            { value: "ryunix-jsx-api", label: "jsx (FS)" },
           ],
         }),
       projectVersion: () =>
