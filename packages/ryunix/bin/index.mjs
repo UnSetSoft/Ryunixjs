@@ -7,10 +7,8 @@ const serv = {
   command: "server",
   describe: "Run server",
   handler: async (arg) => {
-    const port = arg.port || 3000;
     const open = Boolean(arg.browser) || false;
     const settings = {
-      port: port,
       open,
     };
 

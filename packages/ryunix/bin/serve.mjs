@@ -12,7 +12,7 @@ const StartServer = async (cliSettings) => {
       return logger.error(`[error] ${err.message}`);
     }
     logger.info(
-      `[info] Dev Server is runing at: http://localhost:${cliSettings.port}`
+      `[info] Dev Server is runing at: http://localhost:${webpackConfig.devServer.port}`
     );
   });
 };

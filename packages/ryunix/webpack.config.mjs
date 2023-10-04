@@ -48,6 +48,8 @@ export default {
       "Access-Control-Allow-Methods": "*",
       "Access-Control-Allow-Headers": "*",
     },
+    port: config.server.port,
+    proxy: config.server.proxy,
   },
   optimization: {
     runtimeChunk: "single",
