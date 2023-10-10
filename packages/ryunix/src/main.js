@@ -3,7 +3,7 @@ export {
   useStore,
   useEffect,
   createContext,
-  useParams,
+  useQuery,
   useContext,
   Fragments,
   Navigate,

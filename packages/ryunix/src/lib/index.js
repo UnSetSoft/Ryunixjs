@@ -1,6 +1,6 @@
 import { createElement, Fragments } from "./createElement";
 import { render, init } from "./render";
-import { useContext, useStore, useEffect, useParams } from "./hooks";
+import { useContext, useStore, useEffect, useQuery } from "./hooks";
 import { createContext } from "./createContext";
 import { Router, Navigate } from "./navigation";
 import * as Dom from "./dom";
@@ -12,7 +12,7 @@ import * as Commits from "./commits";
 export {
   useStore,
   useEffect,
-  useParams,
+  useQuery,
   createContext,
   useContext,
   Fragments,

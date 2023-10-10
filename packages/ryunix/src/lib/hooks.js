@@ -5,8 +5,10 @@ import { RYUNIX_TYPES, STRINGS, vars } from "../utils/index";
  * The function `useContext` is used to read and subscribe to context from your component.
  * @param ref - The `ref` parameter is a reference to a context object.
  * @returns The `Value` property of the `hook` object is being returned.
+ * @deprecated
  */
 const useContext = (ref) => {
+  throw Error("useContext is bugged and will be removed");
   vars.hookIndex++;
 
   const oldHook =
@@ -98,7 +100,7 @@ const useEffect = (effect, deps) => {
   vars.hookIndex++;
 };
 
-const useParams = () => {
+const useQuery = () => {
   vars.hookIndex++;
 
   const oldHook =
@@ -122,4 +124,4 @@ const useParams = () => {
   return hook.query;
 };
 
-export { useContext, useStore, useEffect, useParams };
+export { useContext, useStore, useEffect, useQuery };
