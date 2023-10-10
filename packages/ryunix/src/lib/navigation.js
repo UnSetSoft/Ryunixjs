@@ -56,7 +56,7 @@ const Navigate = (props) => {
     ...props,
   };
 
-  const children = props.children ? props.children : props.label;
+  const children = props.label ? props.label : props.children;
 
   return createElement("a", anchor, children);
 };
