@@ -1,6 +1,7 @@
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import TerserPlugin from "terser-webpack-plugin";
 import {
   getPackageManager,
   ENV_HASH,
@@ -22,20 +23,17 @@ if (manager === "yarn" || manager === "npm" || manager === "bun") {
   throw new Error(`The manager ${manager} is not supported.`);
 }
 
- 
-
 export default {
   mode: config.production ? "production" : "development",
   context: resolveApp(dir, config.appDirectory),
   entry: "./main.ryx",
-  devtool: config.production ? "source-map" : "cheap-module-source-map",
+  devtool: "source-map",
+  target: "node",
   output: {
     path: resolveApp(dir, config.buildDirectory),
-    chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
-    assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
-    devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
     clean: true,
+    libraryTarget: "commonjs2",
   },
   devServer: {
     hot: true,
@@ -52,26 +50,24 @@ export default {
     proxy: config.server.proxy,
   },
   optimization: {
-    runtimeChunk: "single",
-    splitChunks: {
-      chunks: "all",
-      maxInitialRequests: Infinity,
-      minSize: 0,
-    },
-  },
-  cache: {
-    type: "filesystem",
-    version: ENV_HASH(getEnviroment()),
-    cacheDirectory: resolveApp(dir, "node_modules/.cache"),
-    store: "pack",
-    buildDependencies: {
-      defaultWebpack: ["webpack/lib/"],
-      config: [__filename],
-      tsconfig: [
-        resolveApp(dir, "tsconfig.json"),
-        resolveApp(dir, "jsconfig.json"),
-      ].filter((f) => fs.existsSync(f)),
-    },
+    moduleIds: "named",
+    minimize: true,
+    concatenateModules: true,
+    minimizer: [
+      new TerserPlugin({
+        minify: TerserPlugin.swcMinify,
+        terserOptions: {
+          compress: {
+            dead_code: true,
+            // Zero means no limit.
+            passes: 0,
+          },
+          format: {
+            preamble: "",
+          },
+        },
+      }),
+    ],
   },
   infrastructureLogging: {
     level: "none",
@@ -100,10 +96,12 @@ export default {
       },
       {
         test: /\.sass|css$/,
+        exclude: /(node_modules)/,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
         test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf|ico)$/,
+        exclude: /(node_modules)/,
         use: [
           {
             loader: "file-loader",
@@ -116,12 +114,14 @@ export default {
       },
       {
         test: /\.(png|woff|woff2|eot|ttf|svg|pdf|ico)$/, // to import images and fonts
+        exclude: /(node_modules)/,
         loader: "url-loader",
         options: { limit: false },
       },
       {
         test: /\.ico$/i,
         type: "asset/resource",
+        exclude: /(node_modules)/,
         generator: {
           filename: "[name][ext][query]",
         },
