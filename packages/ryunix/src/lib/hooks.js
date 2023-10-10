@@ -98,4 +98,28 @@ const useEffect = (effect, deps) => {
   vars.hookIndex++;
 };
 
-export { useContext, useStore, useEffect };
+const useParams = () => {
+  vars.hookIndex++;
+
+  const oldHook =
+    vars.wipFiber.alternate &&
+    vars.wipFiber.alternate.hooks &&
+    vars.wipFiber.alternate.hooks[vars.hookIndex];
+
+  const hasOld = oldHook ? oldHook : undefined;
+
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const Query = hasOld ? hasOld : params;
+
+  const hook = {
+    tag: RYUNIX_TYPES.RYUNIX_EFFECT,
+    query: Query,
+  };
+
+  vars.wipFiber.hooks.push(hook);
+
+  return hook.query;
+};
+
+export { useContext, useStore, useEffect, useParams };
