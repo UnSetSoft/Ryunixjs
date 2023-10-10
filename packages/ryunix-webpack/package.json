@@ -37,7 +37,7 @@
     "style-loader": "3.3.3",
     "terminal-log": "1.0.1",
     "url-loader": "4.1.1",
-    "webpack": "5.65.0",
+    "webpack": "5.76.0",
     "webpack-cli": "4.9.1",
     "webpack-dev-server": "4.7.1",
     "yargs": "17.7.2"
