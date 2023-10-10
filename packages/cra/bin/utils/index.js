@@ -212,9 +212,7 @@ const Install = async (name, addonsArr, installManager) => {
       : `${installManager} add`;
 
   s.start(
-    colors.white(
-      `Installing packages with ${installManager} manager, this may take a few seconds or minutes`
-    )
+    colors.white(`Installing packages, this may take a few seconds or minutes`)
   );
   return await new Promise((resolve, reject) => {
     exec(
