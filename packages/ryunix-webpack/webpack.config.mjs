@@ -25,10 +25,10 @@ if (manager === "yarn" || manager === "npm" || manager === "bun") {
  
 
 export default {
-  mode: "production",
+  mode: config.production ? "production" : "development",
   context: resolveApp(dir, config.appDirectory),
   entry: "./main.ryx",
-  devtool: "nosources-source-map",
+  devtool: config.production ? "source-map" : "cheap-module-source-map",
   output: {
     path: resolveApp(dir, config.buildDirectory),
     chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
