@@ -12,6 +12,7 @@ const {
   projectTemplate,
   projectAddons,
   projectVersion,
+  installManager,
   addAddons,
 } = await MENU();
 
@@ -20,5 +21,6 @@ await Init(
   projectTemplate,
   projectAddons,
   projectVersion,
+  installManager,
   addAddons
 );

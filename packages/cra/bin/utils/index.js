@@ -64,6 +64,7 @@ const Init = async (
   template,
   projectAddons,
   projectVersion,
+  installManager,
   addAddons
 ) => {
   if (!template)
@@ -127,13 +128,13 @@ const Init = async (
           if (projectVersion === "nightly") {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
             dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
-            
+
             if (template === "ryunix-jsx-api") {
               dependencies.push("express");
               dependencies.push("cors");
               dependencies.push("nodemon");
             }
-            await Install(name, dependencies);
+            await Install(name, dependencies, installManager);
           } else {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
             dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
@@ -142,7 +143,7 @@ const Init = async (
               dependencies.push("cors");
               dependencies.push("nodemon");
             }
-            await Install(name, dependencies);
+            await Install(name, dependencies, installManager);
           }
         } else {
           if (projectVersion === "nightly") {
@@ -153,7 +154,7 @@ const Init = async (
               dependencies.push("cors");
               dependencies.push("nodemon");
             }
-            await Install(name, dependencies);
+            await Install(name, dependencies, installManager);
           } else {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
             dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
@@ -162,7 +163,7 @@ const Init = async (
               dependencies.push("cors");
               dependencies.push("nodemon");
             }
-            await Install(name, dependencies);
+            await Install(name, dependencies, installManager);
           }
         }
       }
@@ -202,18 +203,22 @@ const InstallVsocodeAddon = async () => {
   });
 };
 
-const Install = async (name, addonsArr) => {
+const Install = async (name, addonsArr, installManager) => {
   const dep = addonsArr.join(" ");
-  let installMethod;
-  if (manager === "npm") {
-    installMethod = "npm i";
-  } else {
-    installMethod = `${manager} add`;
-  }
-  s.start(colors.white("Installing packages, this may take a few minutes"));
+
+  const cm =
+    installManager === "npm" || installManager === "bun"
+      ? `${installManager} install`
+      : `${installManager} add`;
+
+  s.start(
+    colors.white(
+      `Installing packages with ${installManager} manager, this may take a few seconds or minutes`
+    )
+  );
   return await new Promise((resolve, reject) => {
     exec(
-      `${installMethod} ${dep}`,
+      `${cm} ${dep}`,
       {
         cwd: path.join(name),
         stdio: "inherit",
@@ -233,10 +238,12 @@ const Install = async (name, addonsArr) => {
         s.stop(colors.green("The dependencies were installed correctly!"));
 
         resolve();
-        const command = `${manager} ${
-          manager === "npm" || manager === "bun" ? "run dev" : "dev"
+        const command = `${installManager} ${
+          installManager === "npm" || installManager === "bun"
+            ? "run dev"
+            : "dev"
         }`;
-        const message = `Everything is ready,${colors.italic(
+        const message = `Everything is ready, ${colors.italic(
           `cd ${name}`
         )} and ${colors.italic(command)}`;
 

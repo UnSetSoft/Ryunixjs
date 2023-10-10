@@ -25,12 +25,23 @@ const MENU = async () =>
         }),
       projectVersion: () =>
         select({
-          message: colors.cyan(
-            "Which version do you want to use? Please note that, the nightly version may not work."
-          ),
+          message:
+            colors.cyan("Which version do you want to use?") +
+            "  Please note that, the nightly version may not work.",
           options: [
             { value: "latest", label: colors.green("Latest") },
             { value: "nightly", label: colors.red("Nightly") },
+          ],
+        }),
+      installManager: () =>
+        select({
+          message:
+            colors.cyan("Which manager do you want to use?") +
+            " Remember that it must be installed to be used.",
+          options: [
+            { value: "npm", label: "npm" },
+            { value: "yarn", label: "yarn" },
+            { value: "bun", label: "bun" },
           ],
         }),
       addAddons: () =>
