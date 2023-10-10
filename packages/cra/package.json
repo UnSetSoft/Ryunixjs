@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/cra",
-  "version": "1.0.10",
+  "version": "1.0.12",
   "type": "module",
   "description": "Create Ryunix app",
   "main": "./bin/index.js",

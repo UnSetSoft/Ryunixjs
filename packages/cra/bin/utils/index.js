@@ -126,6 +126,8 @@ const Init = async (
             });
           if (projectVersion === "nightly") {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
+            
             if (template === "ryunix-jsx-api") {
               dependencies.push("express");
               dependencies.push("cors");
@@ -134,6 +136,7 @@ const Init = async (
             await Install(name, dependencies);
           } else {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
             if (template === "ryunix-jsx-api") {
               dependencies.push("express");
               dependencies.push("cors");
@@ -144,6 +147,7 @@ const Init = async (
         } else {
           if (projectVersion === "nightly") {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
             if (template === "ryunix-jsx-api") {
               dependencies.push("express");
               dependencies.push("cors");
@@ -152,6 +156,7 @@ const Init = async (
             await Install(name, dependencies);
           } else {
             dependencies.push(`@unsetsoft/ryunixjs@${projectVersion}`);
+            dependencies.push(`@unsetsoft/ryunix-webpack@${projectVersion}`);
             if (template === "ryunix-jsx-api") {
               dependencies.push("express");
               dependencies.push("cors");
