@@ -25,7 +25,7 @@ const Router = ({ path, component }) => {
 const Navigate = (props) => {
   if (props.style) {
     throw new Error(
-      "The style attribute is not supported on internal components."
+      "The style attribute is not supported on internal components, use className."
     );
   }
   if (props.to === "") {
@@ -34,12 +34,12 @@ const Navigate = (props) => {
   if (props.className === "") {
     throw new Error("className cannot be empty.");
   }
-  if (props.label === "") {
+  if (props.label === "" && !props.children) {
     throw new Error("'label=' cannot be empty.");
   }
 
-  if (!props.label || !props.to) {
-    throw new Error("Missig component params.");
+  if (!props.to) {
+    throw new Error("Missig 'to' param.");
   }
   const preventReload = (event) => {
     event.preventDefault();
@@ -55,7 +55,10 @@ const Navigate = (props) => {
     onClick: preventReload,
     ...props,
   };
-  return createElement("a", anchor, props.label);
+
+  const children = props.children ? props.children : props.label;
+
+  return createElement("a", anchor, children);
 };
 
 export { Router, Navigate };
