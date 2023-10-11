@@ -41,7 +41,6 @@ const MENU = async () =>
           options: [
             { value: "npm", label: "npm" },
             { value: "yarn", label: "yarn" },
-            { value: "bun", label: "bun" },
           ],
         }),
       addAddons: () =>

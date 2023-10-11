@@ -207,7 +207,7 @@ const Install = async (name, addonsArr, installManager) => {
   const dep = addonsArr.join(" ");
 
   const cm =
-    installManager === "npm" || installManager === "bun"
+    installManager === "npm"
       ? `${installManager} install`
       : `${installManager} add`;
 

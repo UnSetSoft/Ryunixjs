@@ -28,12 +28,13 @@ export default {
   context: resolveApp(dir, config.appDirectory),
   entry: "./main.ryx",
   devtool: "source-map",
-  target: "node",
   output: {
     path: resolveApp(dir, config.buildDirectory),
+    chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
+    assetModuleFilename: "./assets/media/[name].[hash][ext]",
     filename: "./assets/js/[name].[fullhash:8].bundle.js",
+    devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
     clean: true,
-    libraryTarget: "commonjs2",
   },
   devServer: {
     hot: true,
@@ -68,6 +69,20 @@ export default {
         },
       }),
     ],
+  },
+  cache: {
+    type: "filesystem",
+    version: ENV_HASH(getEnviroment()),
+    cacheDirectory: resolveApp(dir, "node_modules/.cache"),
+    store: "pack",
+    buildDependencies: {
+      defaultWebpack: ["webpack/lib/"],
+      config: [__filename],
+      tsconfig: [
+        resolveApp(dir, "tsconfig.json"),
+        resolveApp(dir, "jsconfig.json"),
+      ].filter((f) => fs.existsSync(f)),
+    },
   },
   infrastructureLogging: {
     level: "none",
