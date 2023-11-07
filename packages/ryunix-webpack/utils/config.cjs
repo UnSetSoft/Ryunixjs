@@ -28,9 +28,23 @@ const defaultSettings = {
   buildDirectory: config?.buildDirectory ? config.buildDirectory : ".ryunix",
   appDirectory: config?.appDirectory ? config.appDirectory : "src",
   publicDirectory: config?.publicDirectory ? config.publicDirectory : "public",
+  aliases: config?.aliases ? config.aliases : {},
   server: {
     port: config?.server?.port ? config?.server?.port : 3000,
     proxy: config?.server?.proxy ? config?.server?.proxy : {},
+  },
+  static: {
+    favicon: config?.static?.favicon ? config.static.favicon : false,
+    seo: {
+      title: config?.static?.seo?.title
+        ? config.static.seo.title
+        : "Ryunix App",
+      meta: config?.static?.seo?.meta
+        ? config.static.seo.meta
+        : {
+            description: "Web site created using @unsetsoft/cra",
+          },
+    },
   },
 };
 

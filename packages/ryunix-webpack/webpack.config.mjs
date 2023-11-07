@@ -2,6 +2,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
+import FileManagerPlugin from "filemanager-webpack-plugin";
 import {
   getPackageManager,
   ENV_HASH,
@@ -21,6 +22,18 @@ if (manager === "yarn" || manager === "npm" || manager === "bun") {
   dir = dirname(join(__dirname, "..", ".."));
 } else if (manager === "pnpm") {
   throw new Error(`The manager ${manager} is not supported.`);
+}
+
+function getAlias(object) {
+  const output = Object.entries(object)
+    .filter(([k, v]) => {
+      return true; // some irrelevant conditions here
+    })
+    .reduce((accum, [k, v]) => {
+      accum[k] = resolveApp(dir, v);
+      return accum;
+    }, {});
+  return output;
 }
 
 export default {
@@ -115,14 +128,27 @@ export default {
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.(jpg|jpeg|png|gif|mp3|svg|mp4|pdf|ico)$/,
+        test: /\.(jpg|jpeg|png|gif|svg|ico)$/,
         exclude: /(node_modules)/,
         use: [
           {
             loader: "file-loader",
             options: {
               name: "[name].[ext]",
-              outputPath: "files/",
+              outputPath: "assets/image/",
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(mp3|mp4|pdf)$/,
+        exclude: /(node_modules)/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              name: "[name].[ext]",
+              outputPath: "assets/files/",
             },
           },
         ],
@@ -144,12 +170,17 @@ export default {
     ],
   },
   resolve: {
+    alias: config.aliases && getAlias(config.aliases),
     extensions: [".*", ".js", ".jsx", ".ts", ".tsx", ".ryx"],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: join(dir, config.publicDirectory, "favicon.png"),
-      template: join(dir, config.publicDirectory, "index.html"),
+      title: config.static.seo.title,
+      favicon:
+        config.static.favicon &&
+        join(dir, config.publicDirectory, "favicon.png"),
+      meta: config.static.seo.meta,
+      template: join(__dirname, "template", "index.html"),
     }),
   ],
   externals: {

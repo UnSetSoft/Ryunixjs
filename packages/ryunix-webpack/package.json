@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-webpack",
-  "version": "0.4.6",
+  "version": "0.4.7-nightly.18",
   "license": "MIT",
   "private": false,
   "bugs": {
@@ -28,6 +28,7 @@
     "crypto": "1.0.1",
     "css-loader": "6.8.1",
     "file-loader": "6.2.0",
+    "filemanager-webpack-plugin": "^8.0.0",
     "glob": "10.3.7",
     "html-loader": "4.2.0",
     "html-webpack-plugin": "5.5.3",
