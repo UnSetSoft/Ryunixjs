@@ -5,7 +5,7 @@ module.exports = {
     seo: {
       title: "Ryunix App",
       meta: {
-        description: "Web site created using @unsetsoft/cra",
+        description: "Web site created using vercel template",
       },
     },
   },
