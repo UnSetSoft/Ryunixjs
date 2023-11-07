@@ -3,7 +3,7 @@
   "displayName": "RyunixJS",
   "description": "Ryunix language support",
   "publisher": "unsetsoft",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "homepage": "https://github.com/UnSetSoft/Ryunixjs",
   "bugs": {
@@ -41,7 +41,8 @@
           "ryx"
         ],
         "extensions": [
-          ".ryx"
+          ".ryx",
+          "ryunix.config.js"
         ],
         "configuration": "./language-configuration.json",
         "firstLine": "^#!\\s*/?.*\\bryunix\\b",
