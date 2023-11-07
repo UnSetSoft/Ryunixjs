@@ -2,9 +2,7 @@ import Ryunix from "./lib/index.js";
 export {
   useStore,
   useEffect,
-  createContext,
   useQuery,
-  useContext,
   Fragments,
   Navigate,
   Router,

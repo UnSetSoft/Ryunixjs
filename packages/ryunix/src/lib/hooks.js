@@ -1,31 +1,6 @@
 import { hasDepsChanged } from "./effects";
 import { RYUNIX_TYPES, STRINGS, vars } from "../utils/index";
 
-/**
- * The function `useContext` is used to read and subscribe to context from your component.
- * @param ref - The `ref` parameter is a reference to a context object.
- * @returns The `Value` property of the `hook` object is being returned.
- * @deprecated
- */
-const useContext = (ref) => {
-  throw Error("useContext is bugged and will be removed");
-  vars.hookIndex++;
-
-  const oldHook =
-    vars.wipFiber.alternate &&
-    vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex];
-
-  const hasOld = oldHook ? oldHook : undefined;
-  const Context = hasOld ? hasOld : ref;
-  const hook = {
-    ...Context,
-  };
-
-  vars.wipFiber.hooks.push(hook);
-
-  return hook.Value;
-};
 
 /**
  * @description The function creates a state.
@@ -124,4 +99,4 @@ const useQuery = () => {
   return hook.query;
 };
 
-export { useContext, useStore, useEffect, useQuery };
+export { useStore, useEffect, useQuery };
