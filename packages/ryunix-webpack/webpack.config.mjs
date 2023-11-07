@@ -2,7 +2,6 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
-import FileManagerPlugin from "filemanager-webpack-plugin";
 import {
   getPackageManager,
   ENV_HASH,
