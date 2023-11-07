@@ -28,7 +28,7 @@
   "dependencies": {
     "@clack/prompts": "0.7.0",
     "command-exists-promise": "^2.0.2",
-    "eslint": "8.48.0",
+    "eslint": "8.53.0",
     "picocolors": "1.0.0"
   },
   "publishConfig": {
