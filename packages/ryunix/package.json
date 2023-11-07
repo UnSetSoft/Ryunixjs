@@ -16,7 +16,7 @@
     "release": "npm publish"
   },
   "dependencies": {
-    "rollup": "3.24.0"
+    "rollup": "4.3.0"
   },
   "engines": {
     "node": ">=18.16.0"
