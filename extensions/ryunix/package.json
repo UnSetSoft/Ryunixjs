@@ -24,7 +24,6 @@
   "categories": [
     "Snippets"
   ],
-
   "contributes": {
     "configurationDefaults": {
       "[ryunix]": {

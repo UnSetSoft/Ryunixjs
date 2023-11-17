@@ -1,16 +1,16 @@
-import { updateDom } from "./dom";
-import { cancelEffects, runEffects } from "./effects";
-import { EFFECT_TAGS, vars } from "../utils/index";
+import { updateDom } from './dom'
+import { cancelEffects, runEffects } from './effects'
+import { EFFECT_TAGS, vars } from '../utils/index'
 
 /**
  * The function commits changes made to the virtual DOM to the actual DOM.
  */
 const commitRoot = () => {
-  vars.deletions.forEach(commitWork);
-  commitWork(vars.wipRoot.child);
-  vars.currentRoot = vars.wipRoot;
-  vars.wipRoot = null;
-};
+  vars.deletions.forEach(commitWork)
+  commitWork(vars.wipRoot.child)
+  vars.currentRoot = vars.wipRoot
+  vars.wipRoot = null
+}
 
 /**
  * The function commits changes made to the DOM based on the effect tag of the fiber.
@@ -21,35 +21,35 @@ const commitRoot = () => {
  */
 const commitWork = (fiber) => {
   if (!fiber) {
-    return;
+    return
   }
 
-  let domParentFiber = fiber.parent;
+  let domParentFiber = fiber.parent
   while (!domParentFiber.dom) {
-    domParentFiber = domParentFiber.parent;
+    domParentFiber = domParentFiber.parent
   }
-  const domParent = domParentFiber.dom;
+  const domParent = domParentFiber.dom
 
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
     if (fiber.dom != null) {
-      domParent.appendChild(fiber.dom);
+      domParent.appendChild(fiber.dom)
     }
-    runEffects(fiber);
+    runEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
-    cancelEffects(fiber);
+    cancelEffects(fiber)
     if (fiber.dom != null) {
-      updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
     }
-    runEffects(fiber);
+    runEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
-    cancelEffects(fiber);
-    commitDeletion(fiber, domParent);
-    return;
+    cancelEffects(fiber)
+    commitDeletion(fiber, domParent)
+    return
   }
 
-  commitWork(fiber.child);
-  commitWork(fiber.sibling);
-};
+  commitWork(fiber.child)
+  commitWork(fiber.sibling)
+}
 
 /**
  * The function removes a fiber's corresponding DOM node from its parent node or recursively removes
@@ -60,10 +60,10 @@ const commitWork = (fiber) => {
  */
 const commitDeletion = (fiber, domParent) => {
   if (fiber.dom) {
-    domParent.removeChild(fiber.dom);
+    domParent.removeChild(fiber.dom)
   } else {
-    commitDeletion(fiber.child, domParent);
+    commitDeletion(fiber.child, domParent)
   }
-};
+}
 
-export { commitDeletion, commitWork, commitRoot };
+export { commitDeletion, commitWork, commitRoot }

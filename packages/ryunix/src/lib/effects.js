@@ -1,14 +1,14 @@
-import { RYUNIX_TYPES, STRINGS } from "../utils/index";
+import { RYUNIX_TYPES, STRINGS } from '../utils/index'
 
-const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== STRINGS.children && !isEvent(key);
-const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (next) => (key) => !(key in next);
+const isEvent = (key) => key.startsWith('on')
+const isProperty = (key) => key !== STRINGS.children && !isEvent(key)
+const isNew = (prev, next) => (key) => prev[key] !== next[key]
+const isGone = (next) => (key) => !(key in next)
 const hasDepsChanged = (prevDeps, nextDeps) =>
   !prevDeps ||
   !nextDeps ||
   prevDeps.length !== nextDeps.length ||
-  prevDeps.some((dep, index) => dep !== nextDeps[index]);
+  prevDeps.some((dep, index) => dep !== nextDeps[index])
 
 /**
  * The function cancels all effect hooks in a given fiber.
@@ -22,10 +22,10 @@ const cancelEffects = (fiber) => {
     fiber.hooks
       .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.cancel)
       .forEach((effectHook) => {
-        effectHook.cancel();
-      });
+        effectHook.cancel()
+      })
   }
-};
+}
 
 /**
  * The function runs all effect hooks in a given fiber.
@@ -39,10 +39,10 @@ const runEffects = (fiber) => {
     fiber.hooks
       .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.effect)
       .forEach((effectHook) => {
-        effectHook.cancel = effectHook.effect();
-      });
+        effectHook.cancel = effectHook.effect()
+      })
   }
-};
+}
 
 export {
   runEffects,
@@ -52,4 +52,4 @@ export {
   isNew,
   isGone,
   hasDepsChanged,
-};
+}

@@ -1,6 +1,6 @@
-import { commitRoot } from "./commits";
-import { updateFunctionComponent, updateHostComponent } from "./components";
-import { vars } from "../utils/index";
+import { commitRoot } from './commits'
+import { updateFunctionComponent, updateHostComponent } from './components'
+import { vars } from '../utils/index'
 
 /**
  * This function uses requestIdleCallback to perform work on a fiber tree until it is complete or the
@@ -11,20 +11,20 @@ import { vars } from "../utils/index";
  * is used to determine
  */
 const workLoop = (deadline) => {
-  let shouldYield = false;
+  let shouldYield = false
   while (vars.nextUnitOfWork && !shouldYield) {
-    vars.nextUnitOfWork = performUnitOfWork(vars.nextUnitOfWork);
-    shouldYield = deadline.timeRemaining() < 1;
+    vars.nextUnitOfWork = performUnitOfWork(vars.nextUnitOfWork)
+    shouldYield = deadline.timeRemaining() < 1
   }
 
   if (!vars.nextUnitOfWork && vars.wipRoot) {
-    commitRoot();
+    commitRoot()
   }
 
-  requestIdleCallback(workLoop);
-};
+  requestIdleCallback(workLoop)
+}
 
-requestIdleCallback(workLoop);
+requestIdleCallback(workLoop)
 
 /**
  * The function performs a unit of work by updating either a function component or a host component and
@@ -39,22 +39,22 @@ requestIdleCallback(workLoop);
  * sibling of the parent. The function returns `null` if there are no more fibers to process.
  */
 const performUnitOfWork = (fiber) => {
-  const isFunctionComponent = fiber.type instanceof Function;
+  const isFunctionComponent = fiber.type instanceof Function
   if (isFunctionComponent) {
-    updateFunctionComponent(fiber);
+    updateFunctionComponent(fiber)
   } else {
-    updateHostComponent(fiber);
+    updateHostComponent(fiber)
   }
   if (fiber.child) {
-    return fiber.child;
+    return fiber.child
   }
-  let nextFiber = fiber;
+  let nextFiber = fiber
   while (nextFiber) {
     if (nextFiber.sibling) {
-      return nextFiber.sibling;
+      return nextFiber.sibling
     }
-    nextFiber = nextFiber.parent;
+    nextFiber = nextFiber.parent
   }
-};
+}
 
-export { performUnitOfWork, workLoop };
+export { performUnitOfWork, workLoop }

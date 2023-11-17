@@ -1,70 +1,70 @@
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import TerserPlugin from "terser-webpack-plugin";
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import TerserPlugin from 'terser-webpack-plugin'
 import {
   getPackageManager,
   ENV_HASH,
   getEnviroment,
   resolveApp,
-} from "./utils/index.mjs";
-import fs from "fs";
-import config from "./utils/config.cjs";
-const __filename = fileURLToPath(import.meta.url);
+} from './utils/index.mjs'
+import fs from 'fs'
+import config from './utils/config.cjs'
+const __filename = fileURLToPath(import.meta.url)
 
-const __dirname = dirname(__filename);
+const __dirname = dirname(__filename)
 
-let dir;
+let dir
 
-const manager = getPackageManager();
-if (manager === "yarn" || manager === "npm" || manager === "bun") {
-  dir = dirname(join(__dirname, "..", ".."));
-} else if (manager === "pnpm") {
-  throw new Error(`The manager ${manager} is not supported.`);
+const manager = getPackageManager()
+if (manager === 'yarn' || manager === 'npm' || manager === 'bun') {
+  dir = dirname(join(__dirname, '..', '..'))
+} else if (manager === 'pnpm') {
+  throw new Error(`The manager ${manager} is not supported.`)
 }
 
 function getAlias(object) {
   const output = Object.entries(object)
     .filter(([k, v]) => {
-      return true; // some irrelevant conditions here
+      return true // some irrelevant conditions here
     })
     .reduce((accum, [k, v]) => {
-      accum[k] = resolveApp(dir, v);
-      return accum;
-    }, {});
-  return output;
+      accum[k] = resolveApp(dir, v)
+      return accum
+    }, {})
+  return output
 }
 
 export default {
-  mode: config.production ? "production" : "development",
+  mode: config.production ? 'production' : 'development',
   context: resolveApp(dir, config.appDirectory),
-  entry: "./main.ryx",
-  devtool: "source-map",
+  entry: './main.ryx',
+  devtool: 'source-map',
   output: {
     path: resolveApp(dir, config.buildDirectory),
-    chunkFilename: "./assets/js/[name].[fullhash:8].bundle.js",
-    assetModuleFilename: "./assets/media/[name].[hash][ext]",
-    filename: "./assets/js/[name].[fullhash:8].bundle.js",
-    devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
+    chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
+    assetModuleFilename: './assets/media/[name].[hash][ext]',
+    filename: './assets/js/[name].[fullhash:8].bundle.js',
+    devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
     clean: true,
   },
   target: config.webpack.target,
   devServer: {
     hot: true,
     historyApiFallback: {
-      index: "/",
+      index: '/',
       disableDotRule: true,
     },
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "*",
-      "Access-Control-Allow-Headers": "*",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*',
     },
     port: config.server.port,
     proxy: config.server.proxy,
   },
   optimization: {
-    moduleIds: "named",
+    moduleIds: 'named',
     minimize: true,
     concatenateModules: true,
     minimizer: [
@@ -77,45 +77,45 @@ export default {
             passes: 0,
           },
           format: {
-            preamble: "",
+            preamble: '',
           },
         },
       }),
     ],
   },
   cache: {
-    type: "filesystem",
+    type: 'filesystem',
     version: ENV_HASH(getEnviroment()),
-    cacheDirectory: resolveApp(dir, "node_modules/.cache"),
-    store: "pack",
+    cacheDirectory: resolveApp(dir, 'node_modules/.cache'),
+    store: 'pack',
     buildDependencies: {
-      defaultWebpack: ["webpack/lib/"],
+      defaultWebpack: ['webpack/lib/'],
       config: [__filename],
       tsconfig: [
-        resolveApp(dir, "tsconfig.json"),
-        resolveApp(dir, "jsconfig.json"),
+        resolveApp(dir, 'tsconfig.json'),
+        resolveApp(dir, 'jsconfig.json'),
       ].filter((f) => fs.existsSync(f)),
     },
   },
   infrastructureLogging: {
-    level: "none",
+    level: 'none',
   },
-  stats: "errors-warnings",
+  stats: 'errors-warnings',
   module: {
     rules: [
       {
         test: /\.(js|jsx|ts|tsx|ryx|)$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader",
+          loader: 'babel-loader',
           options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
+            presets: ['@babel/preset-env', '@babel/preset-react'],
             plugins: [
               [
-                "@babel/plugin-transform-react-jsx",
+                '@babel/plugin-transform-react-jsx',
                 {
-                  pragma: "Ryunix.createElement",
-                  pragmaFrag: "Ryunix.Fragments",
+                  pragma: 'Ryunix.createElement',
+                  pragmaFrag: 'Ryunix.Fragments',
                 },
               ],
             ],
@@ -125,17 +125,17 @@ export default {
       {
         test: /\.sass|css$/,
         exclude: /(node_modules)/,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        use: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(jpg|jpeg|png|gif|svg|ico)$/,
         exclude: /(node_modules)/,
         use: [
           {
-            loader: "file-loader",
+            loader: 'file-loader',
             options: {
-              name: "[name].[ext]",
-              outputPath: "assets/image/",
+              name: '[name].[ext]',
+              outputPath: 'assets/image/',
             },
           },
         ],
@@ -145,10 +145,10 @@ export default {
         exclude: /(node_modules)/,
         use: [
           {
-            loader: "file-loader",
+            loader: 'file-loader',
             options: {
-              name: "[name].[ext]",
-              outputPath: "assets/files/",
+              name: '[name].[ext]',
+              outputPath: 'assets/files/',
             },
           },
         ],
@@ -156,15 +156,15 @@ export default {
       {
         test: /\.(png|woff|woff2|eot|ttf|svg|pdf|ico)$/, // to import images and fonts
         exclude: /(node_modules)/,
-        loader: "url-loader",
+        loader: 'url-loader',
         options: { limit: false },
       },
       {
         test: /\.ico$/i,
-        type: "asset/resource",
+        type: 'asset/resource',
         exclude: /(node_modules)/,
         generator: {
-          filename: "[name][ext][query]",
+          filename: '[name][ext][query]',
         },
       },
     ],
@@ -172,7 +172,7 @@ export default {
   resolve: {
     alias:
       config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
-    extensions: [".*", ".js", ".jsx", ".ts", ".tsx", ".ryx"],
+    extensions: ['.*', '.js', '.jsx', '.ts', '.tsx', '.ryx'],
     fallback: config.webpack.resolve.fallback,
   },
   plugins: [
@@ -180,12 +180,12 @@ export default {
       title: config.static.seo.title,
       favicon:
         config.static.favicon &&
-        join(dir, config.publicDirectory, "favicon.png"),
+        join(dir, config.publicDirectory, 'favicon.png'),
       meta: config.static.seo.meta,
-      template: join(__dirname, "template", "index.html"),
+      template: join(__dirname, 'template', 'index.html'),
     }),
   ],
   externals: {
-    ryunix: "Ryunix",
+    ryunix: 'Ryunix',
   },
-};
+}

@@ -1,4 +1,4 @@
-import { vars } from "../utils/index";
+import { vars } from '../utils/index'
 
 /**
  * The function renders an element into a container using a work-in-progress root.
@@ -14,10 +14,10 @@ const render = (element, container) => {
       children: [element],
     },
     alternate: vars.currentRoot,
-  };
-  vars.deletions = [];
-  vars.nextUnitOfWork = vars.wipRoot;
-};
+  }
+  vars.deletions = []
+  vars.nextUnitOfWork = vars.wipRoot
+}
 
 /**
  * @description The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
@@ -26,8 +26,8 @@ const render = (element, container) => {
  * for the root element.
  */
 const init = (root) => {
-  const rootElement = root || "__ryunix";
-  vars.containerRoot = document.getElementById(rootElement);
-};
+  const rootElement = root || '__ryunix'
+  vars.containerRoot = document.getElementById(rootElement)
+}
 
-export { render, init };
+export { render, init }

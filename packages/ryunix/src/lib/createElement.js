@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, STRINGS } from "../utils/index";
+import { RYUNIX_TYPES, STRINGS } from '../utils/index'
 
 /**
  * The function creates a new element with the given type, props, and children.
@@ -25,11 +25,11 @@ const createElement = (type, props, ...children) => {
       children: children
         .flat()
         .map((child) =>
-          typeof child === STRINGS.object ? child : createTextElement(child)
+          typeof child === STRINGS.object ? child : createTextElement(child),
         ),
     },
-  };
-};
+  }
+}
 
 /**
  * The function creates a text element with a given text value.
@@ -45,19 +45,17 @@ const createTextElement = (text) => {
       nodeValue: text,
       children: [],
     },
-  };
-};
+  }
+}
 
 const Fragments = (props) => {
   if (props.style) {
-    throw new Error("The style attribute is not supported");
+    throw new Error('The style attribute is not supported')
   }
-  if (props.className === "") {
-    throw new Error("className cannot be empty.");
+  if (props.className === '') {
+    throw new Error('className cannot be empty.')
   }
-  return createElement("div", props, props.children);
-};
+  return createElement('div', props, props.children)
+}
 
-
-
-export { createElement, createTextElement, Fragments };
+export { createElement, createTextElement, Fragments }

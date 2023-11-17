@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-"use strict";
-import { intro } from "@clack/prompts";
-import colors from "picocolors";
-import MENU from "./menu.js";
-import { Init } from "./utils/index.js";
+'use strict'
+import { intro } from '@clack/prompts'
+import colors from 'picocolors'
+import MENU from './menu.js'
+import { Init } from './utils/index.js'
 
-intro(colors.bold(colors.yellow(`~ Welcome to CRA ~`)));
+intro(colors.bold(colors.yellow(`~ Welcome to CRA ~`)))
 
 const {
   projectName,
@@ -14,7 +14,7 @@ const {
   projectVersion,
   installManager,
   addAddons,
-} = await MENU();
+} = await MENU()
 
 await Init(
   projectName,
@@ -22,5 +22,5 @@ await Init(
   projectAddons,
   projectVersion,
   installManager,
-  addAddons
-);
+  addAddons,
+)

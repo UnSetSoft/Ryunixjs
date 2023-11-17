@@ -1,5 +1,5 @@
-import { isEvent, isGone, isNew, isProperty } from "./effects";
-import { RYUNIX_TYPES, STRINGS, reg } from "../utils/index";
+import { isEvent, isGone, isNew, isProperty } from './effects'
+import { RYUNIX_TYPES, STRINGS, reg } from '../utils/index'
 
 /**
  * The function creates a new DOM element based on the given fiber object and updates its properties.
@@ -14,13 +14,13 @@ import { RYUNIX_TYPES, STRINGS, reg } from "../utils/index";
 const createDom = (fiber) => {
   const dom =
     fiber.type == RYUNIX_TYPES.TEXT_ELEMENT
-      ? document.createTextNode("")
-      : document.createElement(fiber.type);
+      ? document.createTextNode('')
+      : document.createElement(fiber.type)
 
-  updateDom(dom, {}, fiber.props);
+  updateDom(dom, {}, fiber.props)
 
-  return dom;
-};
+  return dom
+}
 
 /**
  * The function updates the DOM by removing old event listeners and properties, and adding new ones
@@ -34,52 +34,52 @@ const updateDom = (dom, prevProps, nextProps) => {
     .filter(isEvent)
     .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
     .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2);
-      dom.removeEventListener(eventType, prevProps[name]);
-    });
+      const eventType = name.toLowerCase().substring(2)
+      dom.removeEventListener(eventType, prevProps[name])
+    })
 
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(nextProps))
     .forEach((name) => {
-      dom[name] = "";
-    });
+      dom[name] = ''
+    })
 
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
       if (name === STRINGS.style) {
-        DomStyle(dom, nextProps.style);
+        DomStyle(dom, nextProps.style)
       } else if (name === STRINGS.className) {
-        if (nextProps.className === "") {
-          throw new Error("className cannot be empty.");
+        if (nextProps.className === '') {
+          throw new Error('className cannot be empty.')
         }
         prevProps.className &&
-          dom.classList.remove(...prevProps.className.split(/\s+/));
-        dom.classList.add(...nextProps.className.split(/\s+/));
+          dom.classList.remove(...prevProps.className.split(/\s+/))
+        dom.classList.add(...nextProps.className.split(/\s+/))
       } else {
-        dom[name] = nextProps[name];
+        dom[name] = nextProps[name]
       }
-    });
+    })
 
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2);
-      dom.addEventListener(eventType, nextProps[name]);
-    });
-};
+      const eventType = name.toLowerCase().substring(2)
+      dom.addEventListener(eventType, nextProps[name])
+    })
+}
 
 const DomStyle = (dom, style) => {
   dom.style = Object.keys(style).reduce((acc, styleName) => {
     const key = styleName.replace(reg, function (v) {
-      return "-" + v.toLowerCase();
-    });
-    acc += `${key}: ${style[styleName]};`;
-    return acc;
-  }, "");
-};
+      return '-' + v.toLowerCase()
+    })
+    acc += `${key}: ${style[styleName]};`
+    return acc
+  }, '')
+}
 
-export { DomStyle, createDom, updateDom };
+export { DomStyle, createDom, updateDom }

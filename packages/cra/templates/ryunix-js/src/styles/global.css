@@ -1,16 +1,16 @@
-*{
+* {
   padding: 0px;
   margin: 0px;
 }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.main{
+.main {
   width: 100vw;
   height: 100vh;
   background-color: #212121;
@@ -22,11 +22,11 @@ body {
   gap: 10px;
 }
 
-.main p{
+.main p {
   font-size: 1.3rem;
 }
 
-.button{
+.button {
   width: 300px;
   height: fit-content;
   border-radius: 5px;
@@ -38,7 +38,7 @@ body {
   transition: all 0.3s ease-in-out;
 }
 
-.button:hover{
+.button:hover {
   opacity: 0.5;
   cursor: pointer;
 }

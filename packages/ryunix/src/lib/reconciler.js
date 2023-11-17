@@ -1,4 +1,4 @@
-import { EFFECT_TAGS, vars } from "../utils/index";
+import { EFFECT_TAGS, vars } from '../utils/index'
 
 /**
  * This function reconciles the children of a fiber node with a new set of elements, creating new
@@ -10,15 +10,15 @@ import { EFFECT_TAGS, vars } from "../utils/index";
  * fiber's subtree
  */
 const reconcileChildren = (wipFiber, elements) => {
-  let index = 0;
-  let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
-  let prevSibling;
+  let index = 0
+  let oldFiber = wipFiber.alternate && wipFiber.alternate.child
+  let prevSibling
 
   while (index < elements.length || oldFiber != null) {
-    const element = elements[index];
-    let newFiber;
+    const element = elements[index]
+    let newFiber
 
-    const sameType = oldFiber && element && element.type == oldFiber.type;
+    const sameType = oldFiber && element && element.type == oldFiber.type
 
     if (sameType) {
       newFiber = {
@@ -28,7 +28,7 @@ const reconcileChildren = (wipFiber, elements) => {
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
-      };
+      }
     }
     if (element && !sameType) {
       newFiber = {
@@ -38,25 +38,25 @@ const reconcileChildren = (wipFiber, elements) => {
         parent: wipFiber,
         alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
-      };
+      }
     }
     if (oldFiber && !sameType) {
-      oldFiber.effectTag = EFFECT_TAGS.DELETION;
-      vars.deletions.push(oldFiber);
+      oldFiber.effectTag = EFFECT_TAGS.DELETION
+      vars.deletions.push(oldFiber)
     }
 
     if (oldFiber) {
-      oldFiber = oldFiber.sibling;
+      oldFiber = oldFiber.sibling
     }
 
     if (index === 0) {
-      wipFiber.child = newFiber;
+      wipFiber.child = newFiber
     } else if (element) {
-      prevSibling.sibling = newFiber;
+      prevSibling.sibling = newFiber
     }
 
-    prevSibling = newFiber;
-    index++;
+    prevSibling = newFiber
+    index++
   }
-};
-export { reconcileChildren };
+}
+export { reconcileChildren }
