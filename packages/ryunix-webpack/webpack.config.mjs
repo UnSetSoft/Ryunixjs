@@ -48,6 +48,7 @@ export default {
     devtoolModuleFilenameTemplate: "ryunix/[resource-path]",
     clean: true,
   },
+  target: config.webpack.target,
   devServer: {
     hot: true,
     historyApiFallback: {
@@ -169,8 +170,10 @@ export default {
     ],
   },
   resolve: {
-    alias: config.aliases && getAlias(config.aliases),
+    alias:
+      config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
     extensions: [".*", ".js", ".jsx", ".ts", ".tsx", ".ryx"],
+    fallback: config.webpack.resolve.fallback,
   },
   plugins: [
     new HtmlWebpackPlugin({

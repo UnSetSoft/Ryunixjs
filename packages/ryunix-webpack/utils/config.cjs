@@ -28,7 +28,6 @@ const defaultSettings = {
   buildDirectory: config?.buildDirectory ? config.buildDirectory : ".ryunix",
   appDirectory: config?.appDirectory ? config.appDirectory : "src",
   publicDirectory: config?.publicDirectory ? config.publicDirectory : "public",
-  aliases: config?.aliases ? config.aliases : {},
   server: {
     port: config?.server?.port ? config?.server?.port : 3000,
     proxy: config?.server?.proxy ? config?.server?.proxy : {},
@@ -44,6 +43,17 @@ const defaultSettings = {
         : {
             description: "Web site created using @unsetsoft/cra",
           },
+    },
+  },
+  webpack: {
+    target: config?.webpack?.target ? config.webpack.target : "web",
+    resolve: {
+      alias: config?.webpack?.resolve?.alias
+        ? config.webpack.resolve.alias
+        : {},
+      fallback: config?.webpack?.resolve?.fallback
+        ? config.webpack.resolve.fallback
+        : {},
     },
   },
 };
