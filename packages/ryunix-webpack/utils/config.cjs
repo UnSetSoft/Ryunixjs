@@ -24,16 +24,8 @@ if (fs.existsSync(defaultConfigFile)) {
 }
 
 const defaultSettings = {
-  production: config?.production ? config.production : true,
-  buildDirectory: config?.buildDirectory ? config.buildDirectory : '.ryunix',
-  appDirectory: config?.appDirectory ? config.appDirectory : 'src',
-  publicDirectory: config?.publicDirectory ? config.publicDirectory : 'public',
-  server: {
-    port: config?.server?.port ? config?.server?.port : 3000,
-    proxy: config?.server?.proxy ? config?.server?.proxy : {},
-  },
   static: {
-    favicon: config?.static?.favicon ? config.static.favicon : false,
+    favicon: config?.static?.favicon ? config.static.favicon : true,
     seo: {
       title: config?.static?.seo?.title
         ? config.static.seo.title
@@ -46,6 +38,13 @@ const defaultSettings = {
     },
   },
   webpack: {
+    production: config?.webpack?.production ? config.webpack.production : true,
+    root: config?.webpack?.root ? config.webpack.root : 'src',
+    output: {
+      buildDirectory: config?.webpack?.output?.buildDirectory
+        ? config.webpack.output.buildDirectory
+        : '.ryunix',
+    },
     target: config?.webpack?.target ? config.webpack.target : 'web',
     resolve: {
       alias: config?.webpack?.resolve?.alias
@@ -54,6 +53,10 @@ const defaultSettings = {
       fallback: config?.webpack?.resolve?.fallback
         ? config.webpack.resolve.fallback
         : {},
+    },
+    devServer: {
+      port: config?.webpack?.server?.port ? config.webpack.server.port : 3000,
+      proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : {},
     },
   },
 }

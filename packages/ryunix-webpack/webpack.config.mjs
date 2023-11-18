@@ -36,8 +36,8 @@ function getAlias(object) {
 }
 
 export default {
-  mode: config.production ? 'production' : 'development',
-  context: resolveApp(dir, config.appDirectory),
+  mode: config.webpack.production ? 'production' : 'development',
+  context: resolveApp(dir, config.webpack.output.buildDirectory),
   entry: './main.ryx',
   devtool: 'source-map',
   output: {
@@ -60,8 +60,8 @@ export default {
       'Access-Control-Allow-Methods': '*',
       'Access-Control-Allow-Headers': '*',
     },
-    port: config.server.port,
-    proxy: config.server.proxy,
+    port: config.webpack.devServer.port,
+    proxy: config.webpack.devServer.proxy,
   },
   optimization: {
     moduleIds: 'named',
@@ -100,7 +100,7 @@ export default {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx|ryx|)$/,
+        test: /\.(js|jsx|ryx|)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
@@ -168,15 +168,13 @@ export default {
   resolve: {
     alias:
       config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
-    extensions: ['.*', '.js', '.jsx', '.ts', '.tsx', '.ryx'],
+    extensions: ['.*', '.js', '.jsx', '.ryx'],
     fallback: config.webpack.resolve.fallback,
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: config.static.seo.title,
-      favicon:
-        config.static.favicon &&
-        join(dir, config.publicDirectory, 'favicon.png'),
+      favicon: config.static.favicon && join(dir, 'public', 'favicon.png'),
       meta: config.static.seo.meta,
       template: join(__dirname, 'template', 'index.html'),
     }),

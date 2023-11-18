@@ -10,7 +10,7 @@
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
     "build": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "postinstall": "npm run build",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish"
