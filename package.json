@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "0.4.10-nightly.0",
+  "version": "0.4.10",
   "private": true,
   "homepage": "./",
   "workspaces": [

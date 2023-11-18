@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-webpack",
-  "version": "0.4.10-nightly.0",
+  "version": "0.4.10",
   "license": "MIT",
   "private": false,
   "bugs": {
