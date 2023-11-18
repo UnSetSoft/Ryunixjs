@@ -1,12 +1,10 @@
 {
   "name": "RyunixJS",
-  "version": "0.4.10",
+  "version": "0.4.11-nightly.0",
   "private": true,
   "homepage": "./",
   "workspaces": [
-    "packages/*",
-    "extensions/*",
-    "docs"
+    "packages/*"
   ],
   "license": "MIT",
   "scripts": {
@@ -15,7 +13,9 @@
     "prettier-check": "prettier --check .",
     "prettier-fix": "prettier --write .",
     "kg:init": "gmvu init",
-    "kg:bump": "gmvu bump"
+    "kg:bump": "gmvu bump",
+    "nightly:release": "yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run nightly:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs",
+    "stable:release": "yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.23.3",
