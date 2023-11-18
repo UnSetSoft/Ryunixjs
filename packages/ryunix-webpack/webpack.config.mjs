@@ -91,10 +91,6 @@ export default {
     buildDependencies: {
       defaultWebpack: ['webpack/lib/'],
       config: [__filename],
-      tsconfig: [
-        resolveApp(dir, 'tsconfig.json'),
-        resolveApp(dir, 'jsconfig.json'),
-      ].filter((f) => fs.existsSync(f)),
     },
   },
   infrastructureLogging: {
