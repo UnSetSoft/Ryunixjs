@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -16,7 +16,7 @@
     "kg:bump": "gmvu bump",
     "nightly:release": "standard-version --prerelease nightly && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run nightly:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs",
     "stable:release": "standard-version && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs",
-    "log": "standard-version --header # Changelog"
+    "log": "standard-version --header '# Changelog'"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.23.3",
