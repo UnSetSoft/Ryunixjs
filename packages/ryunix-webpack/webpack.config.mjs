@@ -185,6 +185,6 @@ export default {
     {
       ryunix: '@unsetsoft/ryunixjs',
     },
-    config.webpack.externals,
+    ...config.webpack.externals,
   ],
 }

@@ -58,7 +58,7 @@ const defaultSettings = {
       port: config?.webpack?.server?.port ? config.webpack.server.port : 3000,
       proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : {},
     },
-    externals: config?.webpack?.externals ? config.webpack.externals : [],
+    externals: config?.webpack?.externals ? config.webpack.externals : [{}],
   },
 }
 
