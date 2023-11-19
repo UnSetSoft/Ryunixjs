@@ -38,7 +38,7 @@ function getAlias(object) {
 export default {
   mode: config.webpack.production ? 'production' : 'development',
   // context: src
-  context: resolveApp(dir, config.webpack.output.root),
+  context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
   devtool: 'source-map',
   output: {
