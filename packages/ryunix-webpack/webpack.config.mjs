@@ -37,11 +37,13 @@ function getAlias(object) {
 
 export default {
   mode: config.webpack.production ? 'production' : 'development',
-  context: resolveApp(dir, config.webpack.output.buildDirectory),
+  // context: src
+  context: resolveApp(dir, config.webpack.output.root),
   entry: './main.ryx',
   devtool: 'source-map',
   output: {
-    path: resolveApp(dir, config.buildDirectory),
+    // path: .ryunix
+    path: resolveApp(dir, config.webpack.output.buildDirectory),
     chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
     assetModuleFilename: './assets/media/[name].[hash][ext]',
     filename: './assets/js/[name].[fullhash:8].bundle.js',
