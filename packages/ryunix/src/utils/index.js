@@ -13,7 +13,6 @@ const reg = /[A-Z]/g
 const RYUNIX_TYPES = Object.freeze({
   TEXT_ELEMENT: Symbol('text.element'),
   RYUNIX_EFFECT: Symbol('ryunix.effect'),
-  RYUNIX_CONTEXT: Symbol('ryunix.context'),
 })
 
 const STRINGS = Object.freeze({
