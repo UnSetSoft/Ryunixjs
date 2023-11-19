@@ -14,9 +14,10 @@
     "prettier-fix": "prettier --write .",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
-    "nightly:release": "yarn log --prerelease nightly && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run nightly:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs",
-    "stable:release": "yarn log && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs",
-    "log": "standard-version --header '# Changelog'"
+    "nightly:release": "yarn log --prerelease nightly && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run nightly:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git",
+    "stable:release": "yarn log && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git",
+    "log": "standard-version --header '# Changelog'",
+    "git": "git push --follow-tags origin dev"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.23.3",
