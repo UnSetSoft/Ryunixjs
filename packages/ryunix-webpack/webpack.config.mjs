@@ -181,7 +181,10 @@ export default {
       template: join(__dirname, 'template', 'index.html'),
     }),
   ],
-  externals: {
-    ryunix: 'Ryunix',
-  },
+  externals: [
+    {
+      ryunix: '@unsetsoft/ryunixjs',
+    },
+    ...config.webpack.externals,
+  ],
 }
