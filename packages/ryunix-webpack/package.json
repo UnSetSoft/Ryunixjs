@@ -28,7 +28,7 @@
     "file-loader": "6.2.0",
     "glob": "10.3.7",
     "html-loader": "4.2.0",
-    "html-webpack-plugin": "5.5.3",
+    "html-webpack-plugin": "5.5.4",
     "image-webpack-loader": "8.1.0",
     "node-sass": "9.0.0",
     "sass": "1.66.1",
