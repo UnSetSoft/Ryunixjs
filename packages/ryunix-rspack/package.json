@@ -8,7 +8,10 @@
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
-  "scripts": {},
+  "scripts": {
+    "nightly:release": "npm publish --tag nightly",
+    "release": "npm publish"
+  },
   "devDependencies": {
     "@rspack/cli": "0.4.0",
     "@rspack/core": "0.4.0",
