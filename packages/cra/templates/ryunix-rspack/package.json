@@ -1,0 +1,13 @@
+{
+  "name": "{{kebab name}}",
+  "version": "1.0.0",
+  "private": "true",
+  "homepage": "./",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development rspack serve",
+    "build": "cross-env NODE_ENV=production rspack build"
+  },
+  "engines": {
+    "node": ">=18.16.0"
+  }
+}

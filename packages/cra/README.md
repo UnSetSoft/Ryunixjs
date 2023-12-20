@@ -1,3 +1,7 @@
-Create Ryunix app
+# Create Cra
 
-`npx @unsetsoft/cra@latest`
+```bash
+npx @unsetsoft/cra <project-name>
+```
+
+> This cli use: [create-create-app](https://github.com/uetchy/create-create-app).

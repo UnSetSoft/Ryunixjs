@@ -1,5 +1,5 @@
 {
-  "outputDirectory": ".ryunix",
+  "outputDirectory": "dist",
   "buildCommand": "yarn build",
   "devCommand": "yarn dev",
   "installCommand": "yarn install",

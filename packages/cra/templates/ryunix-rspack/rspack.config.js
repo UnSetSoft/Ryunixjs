@@ -1,16 +1,15 @@
-"use strict"
-const rspack = require("@rspack/core")
-const {dirname, join} = require("path")
-const dir = dirname(join(__dirname, '..', '..', '..', '..'))
+'use strict'
+const rspack = require('@rspack/core')
 
 /**
  * @type {import('@rspack/cli').Configuration}
  */
 
 module.exports = {
-  context: dir,
+  mode: 'production',
+  context: __dirname,
   entry: {
-    main: "./src/main.ryx",
+    main: './src/main.ryx',
   },
   experiments: {
     rspackFuture: {
@@ -21,56 +20,56 @@ module.exports = {
     rules: [
       {
         test: /\.svg$/,
-        type: "asset",
+        type: 'asset',
       },
       {
         test: /\.css$/i,
-        type: "css",
+        type: 'css',
       },
       {
         test: /\.module\.css$/i,
-        type: "css/module",
+        type: 'css/module',
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
-        type: "asset/resource",
+        type: 'asset/resource',
       },
       {
         test: /^BUILD_ID$/,
-        type: "asset/source",
+        type: 'asset/source',
       },
       {
         test: /\.jsx|.ryx$/,
         exclude: [/[\\/]node_modules[\\/]/],
         use: {
-          loader: "builtin:swc-loader",
+          loader: 'builtin:swc-loader',
           options: {
             sourceMap: true,
             jsc: {
               parser: {
-                syntax: "ecmascript",
+                syntax: 'ecmascript',
                 jsx: true,
               },
               transform: {
                 react: {
-                  pragma: "Ryunix.createElement",
-                  pragmaFrag: "Ryunix.Fragment",
+                  pragma: 'Ryunix.createElement',
+                  pragmaFrag: 'Ryunix.Fragment',
                 },
               },
             },
           },
         },
-        type: "javascript/auto",
+        type: 'javascript/auto',
       },
     ],
   },
   plugins: [
     new rspack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }),
     new rspack.ProgressPlugin({}),
     new rspack.HtmlRspackPlugin({
-      template: "./index.html",
+      template: './public/index.html',
     }),
   ].filter(Boolean),
 }
