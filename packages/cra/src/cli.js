@@ -11,7 +11,7 @@ create('create-cra', {
   promptForAuthor: false,
   promptForDescription: false,
   promptForEmail: false,
-  promptForTemplate: false,
+  promptForTemplate: true,
   promptForLicense: false,
   extra: {
     channel: {
