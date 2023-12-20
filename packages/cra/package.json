@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/cra",
   "description": "Create Ryunix app",
-  "version": "1.0.17",
+  "version": "1.0.18-nightly.0",
   "author": "Neyunse",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
   "license": "MIT",
@@ -18,7 +18,9 @@
     "templates"
   ],
   "scripts": {
-    "dev": "node ./src/cli.js"
+    "dev": "node ./src/cli.js",
+    "nightly:release": "npm publish --tag nightly",
+    "release": "npm publish"
   },
   "dependencies": {
     "create-create-app": "^7.3.0"
