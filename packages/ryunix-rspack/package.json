@@ -1,0 +1,27 @@
+{
+  "name": "@unsetsoft/ryunix-rspack",
+  "version": "0.4.13-nightly.3",
+  "license": "MIT",
+  "main": "./bundler/rspack/index.js",
+  "private": false,
+  "bugs": {
+    "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
+  },
+  "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
+  "scripts": {},
+  "devDependencies": {
+    "@rspack/cli": "0.4.0",
+    "@rspack/core": "0.4.0",
+    "@rspack/plugin-react-refresh": "0.4.0",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=18.16.0"
+  },
+  "keywords": [
+    "ryunixjs"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  }
+}
