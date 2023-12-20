@@ -30,13 +30,13 @@ create('create-cra', {
   },
   after: async ({ answers, template, installNpmPackage }) => {
     if (template === 'ryunix-rspack') {
-      if (answers.channel === 'Latest') {
-        await installNpmPackage('@unsetsoft/ryunixjs@latest')
-        await installNpmPackage(
-          ['@rspack/cli', '@rspack/core', 'cross-env'],
-          true,
-        )
-      }
+      // if (answers.channel === 'Latest') {
+      //   await installNpmPackage('@unsetsoft/ryunixjs@latest')
+      //   await installNpmPackage(
+      //     ['@rspack/cli', '@rspack/core', 'cross-env'],
+      //     true,
+      //   )
+      // }
     } else if (template === 'ryunix-webpack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
