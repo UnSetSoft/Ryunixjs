@@ -5,13 +5,6 @@ const { create } = require('create-create-app')
 
 const templateRoot = resolve(__dirname, '..', 'templates')
 
-const caveat = `
-This is a caveat!
-You can change this in \`src/cli.js\`.
-`
-
-// See https://github.com/uetchy/create-create-app/blob/master/README.md for other options.
-
 create('create-cra', {
   templateRoot,
   defaultTemplate: 'ryunix-webpack',
@@ -47,6 +40,5 @@ create('create-cra', {
       }
     }
   },
-  caveat: ({ packageDir, packageManager }) =>
-    `cd ${packageDir} && ${packageManager} start`,
+  caveat: 'Happy Coding!',
 })
