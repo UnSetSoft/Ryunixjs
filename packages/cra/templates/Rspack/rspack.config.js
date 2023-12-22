@@ -1,16 +1,15 @@
-"use strict"
-const rspack = require("@rspack/core")
-const {dirname, join} = require("path")
-const dir = dirname(join(__dirname, '..', '..', '..', '..'))
+"use strict";
+const rspack = require("@rspack/core");
 
 /**
  * @type {import('@rspack/cli').Configuration}
  */
 
 module.exports = {
-  context: dir,
+  mode: "production",
+  context: __dirname,
   entry: {
-    main: "./src/main.ryx",
+    main: "./main.ryx",
   },
   experiments: {
     rspackFuture: {
@@ -73,4 +72,4 @@ module.exports = {
       template: "./index.html",
     }),
   ].filter(Boolean),
-}
+};

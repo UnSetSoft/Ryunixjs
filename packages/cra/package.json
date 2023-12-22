@@ -1,37 +1,29 @@
 {
   "name": "@unsetsoft/cra",
-  "version": "1.0.17",
-  "type": "module",
   "description": "Create Ryunix app",
-  "main": "./bin/index.js",
-  "repository": "https://github.com/UnSetSoft/Ryunixjs",
+  "version": "1.1.1",
   "author": "Neyunse",
+  "repository": "https://github.com/UnSetSoft/Ryunixjs",
   "license": "MIT",
   "private": false,
   "keywords": [
     "ryunixjs"
   ],
+  "main": "src/cli.js",
   "bin": {
-    "cra": "./bin/index.js"
+    "cra": "src/cli.js"
   },
+  "files": [
+    "src",
+    "templates"
+  ],
   "scripts": {
-    "dev": "node ./bin/index.js",
+    "dev": "node ./src/cli.js",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish"
   },
-  "engines": {
-    "node": ">=18.16.0"
-  },
-  "devDependencies": {
-    "standard": "17.1.0"
-  },
   "dependencies": {
-    "@clack/prompts": "0.7.0",
     "command-exists-promise": "^2.0.2",
-    "eslint": "8.48.0",
-    "picocolors": "1.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "create-create-app": "^7.3.0"
   }
 }
