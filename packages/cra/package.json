@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/cra",
   "description": "Create Ryunix app",
-  "version": "1.1.1-nightly.3",
+  "version": "1.1.1",
   "author": "Neyunse",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
   "license": "MIT",
@@ -23,6 +23,7 @@
     "release": "npm publish"
   },
   "dependencies": {
+    "command-exists-promise": "^2.0.2",
     "create-create-app": "^7.3.0"
   }
 }

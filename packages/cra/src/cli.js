@@ -2,12 +2,12 @@
 
 const { resolve } = require('path')
 const { create } = require('create-create-app')
-const cmd = require('command-exists-promise')
+const { hasVscode, InstallVsocodeAddon } = require('./commands')
 const templateRoot = resolve(__dirname, '..', 'templates')
 
 create('create-cra', {
   templateRoot,
-  defaultTemplate: 'ryunix-webpack',
+  defaultTemplate: 'Webpack',
   promptForAuthor: false,
   promptForDescription: false,
   promptForEmail: false,
@@ -24,11 +24,14 @@ create('create-cra', {
       type: 'confirm',
       default: false,
       describe: 'Do you whant to add Ryunix VScode addon? (Experimental)',
-      prompt: 'if-no-arg',
+      prompt: hasVscode ? 'if-no-arg' : 'never',
     },
   },
   after: async ({ answers, template, installNpmPackage }) => {
-    // Project
+    if (answers.vscode) {
+      await InstallVsocodeAddon()
+    }
+
     if (template === 'ryunix-rspack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
@@ -47,11 +50,6 @@ create('create-cra', {
         await installNpmPackage('@unsetsoft/ryunixjs@nightly')
         await installNpmPackage('@unsetsoft/ryunix-webpack@nightly', true)
       }
-    }
-
-    // Extras
-
-    if (answers.vscode) {
     }
   },
   caveat: 'Happy Coding!',
