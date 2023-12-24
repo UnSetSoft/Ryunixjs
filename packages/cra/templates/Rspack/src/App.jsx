@@ -1,13 +1,13 @@
-import Ryunix from "@unsetsoft/ryunixjs";
-import { useStore } from "@unsetsoft/ryunixjs";
-import "./styles/app.css";
+import Ryunix from '@unsetsoft/ryunixjs'
+import { useStore } from '@unsetsoft/ryunixjs'
+import './styles/app.css'
 
 function App() {
-  const [count, setCount] = useStore(0);
+  const [count, setCount] = useStore(0)
 
   const handleButtonClick = () => {
-    setCount((c) => c + 1);
-  };
+    setCount((c) => c + 1)
+  }
 
   return (
     <div className="main">
@@ -21,7 +21,7 @@ function App() {
         Click to increment
       </button>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
