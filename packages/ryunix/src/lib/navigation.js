@@ -22,7 +22,30 @@ const Router = ({ path, component }) => {
   return currentPath === path ? component() : null
 }
 
-const Navigate = (props) => {
+const Navigate = () => {
+  /**
+   * The function `push` is used to push a new state to the browser's history and trigger a custom
+   * event called 'pushstate'.
+   * @param to - The `to` parameter is a string representing the URL path to which you want to
+   * navigate.
+   * @param [state] - The `state` parameter is an optional object that represents the state associated
+   * with the new history entry. It can be used to store any data that you want to associate with the
+   * new URL. When you navigate back or forward in the browser history, this state object will be
+   * passed to the `popstate
+   * @returns The function `push` does not have a return statement, so it returns `undefined` by
+   * default.
+   */
+  const push = (to, state = {}) => {
+    if (window.location.pathname === to) return
+    window.history.pushState(state, '', to)
+    const navigationEvent = new Event('pushsatate')
+    window.dispatchEvent(navigationEvent)
+  }
+
+  return { push }
+}
+
+const Link = (props) => {
   if (props.style) {
     throw new Error(
       'The style attribute is not supported on internal components, use className.',
@@ -43,11 +66,8 @@ const Navigate = (props) => {
   }
   const preventReload = (event) => {
     event.preventDefault()
-    if (window.location.pathname !== props.to) {
-      window.history.pushState({}, '', props.to)
-      const navigationEvent = new Event('pushsatate')
-      window.dispatchEvent(navigationEvent)
-    }
+    const { push } = Navigate()
+    push(props.to)
   }
 
   const anchor = {
@@ -61,4 +81,4 @@ const Navigate = (props) => {
   return createElement('a', anchor, children)
 }
 
-export { Router, Navigate }
+export { Router, Navigate, Link }
