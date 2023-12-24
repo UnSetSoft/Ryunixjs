@@ -61,7 +61,6 @@ module.exports = {
                 react: {
                   pragma: 'Ryunix.createElement',
                   pragmaFrag: 'Ryunix.Fragment',
-                  refresh: isDev,
                 },
               },
             },

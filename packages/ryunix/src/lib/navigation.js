@@ -19,7 +19,7 @@ const Router = ({ path, component }) => {
     }
   }, [currentPath])
 
-  return currentPath === path && component()
+  return currentPath === path ? component() : null
 }
 
 const Navigate = () => {
