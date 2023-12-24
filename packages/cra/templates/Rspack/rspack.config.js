@@ -1,12 +1,12 @@
 'use strict'
 const rspack = require('@rspack/core')
-
+const isDev = process.env.NODE_ENV === 'development'
 /**
  * @type {import('@rspack/cli').Configuration}
  */
 
 module.exports = {
-  mode: 'production',
+  mode: isDev ? 'development' : 'production',
   context: __dirname,
   entry: {
     main: './main.ryx',
@@ -14,6 +14,13 @@ module.exports = {
   experiments: {
     rspackFuture: {
       disableTransformByDefault: true,
+    },
+  },
+  devServer: {
+    hot: isDev,
+    historyApiFallback: {
+      index: '/',
+      disableDotRule: true,
     },
   },
   module: {
@@ -54,6 +61,7 @@ module.exports = {
                 react: {
                   pragma: 'Ryunix.createElement',
                   pragmaFrag: 'Ryunix.Fragment',
+                  refresh: isDev,
                 },
               },
             },

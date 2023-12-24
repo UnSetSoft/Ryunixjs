@@ -32,7 +32,7 @@ create('create-cra', {
       await InstallVsocodeAddon()
     }
 
-    if (template === 'ryunix-rspack') {
+    if (template === 'Rspack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
       } else if (answers.channel === 'Nightly') {
@@ -42,7 +42,7 @@ create('create-cra', {
         ['@rspack/cli', '@rspack/core', 'cross-env'],
         true,
       )
-    } else if (template === 'ryunix-webpack') {
+    } else if (template === 'Webpack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
         await installNpmPackage('@unsetsoft/ryunix-webpack@latest', true)
@@ -50,6 +50,8 @@ create('create-cra', {
         await installNpmPackage('@unsetsoft/ryunixjs@nightly')
         await installNpmPackage('@unsetsoft/ryunix-webpack@nightly', true)
       }
+    } else {
+      throw new Error('Missing template')
     }
   },
   caveat: 'Happy Coding!',
