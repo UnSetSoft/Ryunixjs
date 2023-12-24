@@ -6,6 +6,7 @@ export {
   Fragments,
   Navigate,
   Router,
+  Link,
 } from './lib/index.js'
 
 window.Ryunix = Ryunix
