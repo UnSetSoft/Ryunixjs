@@ -2,7 +2,7 @@
     display: block;
     margin: 0 auto;" />
 
-## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs@nightly.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs@nightly)
+## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/nightly.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/nightly)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FUnSetSoft%2FRyunixjs%2Ftree%2Fmaster%2Fvercel%2Fryunix-jsx&project-name=ryunix-jsx-project&repository-name=ryunix-jsx-project)
 
