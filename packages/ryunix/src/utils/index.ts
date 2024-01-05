@@ -1,4 +1,4 @@
-const vars = {
+const vars = Object.freeze({
   containerRoot: null,
   nextUnitOfWork: null,
   currentRoot: null,
@@ -6,13 +6,12 @@ const vars = {
   deletions: null,
   wipFiber: null,
   hookIndex: null,
-}
+})
 
 const reg = /[A-Z]/g
 
 const RYUNIX_TYPES = Object.freeze({
   TEXT_ELEMENT: Symbol('text.element'),
-
   RYUNIX_EFFECT: Symbol('ryunix.effect'),
 })
 

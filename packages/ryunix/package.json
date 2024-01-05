@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.4.13-nightly.5",
+  "version": "0.4.13-nightly.18",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "types": "./dist/Ryunix.d.ts",
@@ -10,14 +10,18 @@
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
-    "build:ts": "tslint --project . --fix --force && tsc",
+    "build:ts": "npm run lint && tsc",
     "build:js": "rollup ./src/main.js --file ./dist/cj/Ryunix.js --format umd --name Ryunix",
-    "prepublishOnly": "npm run build:ts && npm run build:js",
-    "postinstall": "npm run build:ts && npm run build:js",
+    "prepublishOnly": "npm run build:js",
+    "postinstall": "npm run build:js",
     "nightly:release": "npm publish --tag nightly",
-    "release": "npm publish"
+    "release": "npm publish",
+    "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc"
   },
   "dependencies": {
+    "eslint": "8.56.0",
+    "@typescript-eslint/parser": "6.17.0",
+    "@typescript-eslint/eslint-plugin": "6.17.0",
     "rollup": "4.9.2",
     "ts-node": "10.9.2",
     "tsup": "8.0.1",
@@ -33,20 +37,8 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "tsup": {
-    "entry": [
-      "src/main.js"
-    ],
-    "format": [
-      "cjs",
-      "esm"
-    ],
-    "dts": true,
-    "splitting": false,
-    "sourcemap": true,
-    "clean": true
-  },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ]
 }

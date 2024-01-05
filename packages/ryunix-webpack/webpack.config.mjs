@@ -171,7 +171,13 @@ export default {
   resolve: {
     alias:
       config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
-    extensions: ['.*', '.js', '.jsx', '.ryx', ...config.webpack.resolve.alias],
+    extensions: [
+      '.*',
+      '.js',
+      '.jsx',
+      '.ryx',
+      ...config.webpack.resolve.extensions,
+    ],
     fallback: config.webpack.resolve.fallback,
   },
   plugins: [

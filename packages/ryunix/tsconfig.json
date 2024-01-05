@@ -3,11 +3,11 @@
     "strict": false,
     "rootDir": "./src",
     "target": "es5",
-    "module": "AMD",
     "outFile": "./dist/Ryunix.js",
     "outDir": "./dist",
     "declaration": true,
-    "allowJs": true
+    "skipLibCheck": true,
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist"]
