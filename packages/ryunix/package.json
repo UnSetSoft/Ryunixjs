@@ -3,6 +3,7 @@
   "version": "0.4.13-nightly.5",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
+  "types": "./dist/index.d.ts",
   "private": false,
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
@@ -13,10 +14,15 @@
     "prepublishOnly": "npm run build",
     "postinstall": "npm run build",
     "nightly:release": "npm publish --tag nightly",
-    "release": "npm publish"
+    "release": "npm publish",
+    "migrate": "ts-migrate"
   },
   "dependencies": {
-    "rollup": "3.24.0"
+    "rollup": "4.9.2",
+    "ts-node": "10.9.2",
+    "tsup": "8.0.1",
+    "typescript": "5.3.3",
+    "ts-migrate": "0.1.35"
   },
   "engines": {
     "node": ">=18.16.0"
@@ -26,5 +32,21 @@
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
-  }
+  },
+  "tsup": {
+    "entry": [
+      "src/main.js"
+    ],
+    "format": [
+      "cjs",
+      "esm"
+    ],
+    "dts": true,
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
+  },
+  "files": [
+    "dist"
+  ]
 }
