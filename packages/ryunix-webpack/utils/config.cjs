@@ -53,12 +53,19 @@ const defaultSettings = {
       fallback: config?.webpack?.resolve?.fallback
         ? config.webpack.resolve.fallback
         : {},
+      extensions: config?.webpack?.resolve?.extensions
+        ? config.webpack.resolve.extensions
+        : [],
     },
+    plugins: config?.webpack?.plugins ? config.webpack.plugins : [],
     devServer: {
       port: config?.webpack?.server?.port ? config.webpack.server.port : 3000,
       proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : {},
     },
     externals: config?.webpack?.externals ? config.webpack.externals : [{}],
+    module: {
+      rules: config?.webpack?.module?.rules ? config.webpack.module.rules : [],
+    },
   },
 }
 

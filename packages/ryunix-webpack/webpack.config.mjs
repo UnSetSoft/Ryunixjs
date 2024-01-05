@@ -165,12 +165,13 @@ export default {
           filename: '[name][ext][query]',
         },
       },
+      ...config.webpack.module.rules,
     ],
   },
   resolve: {
     alias:
       config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
-    extensions: ['.*', '.js', '.jsx', '.ryx'],
+    extensions: ['.*', '.js', '.jsx', '.ryx', ...config.webpack.resolve.alias],
     fallback: config.webpack.resolve.fallback,
   },
   plugins: [
@@ -180,6 +181,7 @@ export default {
       meta: config.static.seo.meta,
       template: join(__dirname, 'template', 'index.html'),
     }),
+    ...config.webpack.plugins,
   ],
   externals: [
     {

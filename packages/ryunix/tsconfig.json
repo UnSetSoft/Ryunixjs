@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
+    "strict": false,
+    "rootDir": "./src",
     "target": "es5",
-    "module": "commonjs",
+    "module": "AMD",
+    "outFile": "./dist/Ryunix.js",
     "outDir": "./dist",
+    "declaration": true,
     "allowJs": true
   },
   "include": ["src/**/*.ts"],
