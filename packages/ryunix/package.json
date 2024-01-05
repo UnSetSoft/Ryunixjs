@@ -12,8 +12,8 @@
   "scripts": {
     "build:ts": "tslint --project . --fix --force && tsc",
     "build:js": "rollup ./src/main.js --file ./dist/cj/Ryunix.js --format umd --name Ryunix",
-    "prepublishOnly": "npm run build:ts",
-    "postinstall": "npm run build:ts",
+    "prepublishOnly": "npm run build:ts && npm run build:js",
+    "postinstall": "npm run build:ts && npm run build:js",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish"
   },
