@@ -1,4 +1,6 @@
 # Changelog
+### [0.4.13-nightly.50](https://github.com/UnSetSoft/Ryunixjs/compare/v0.4.13-nightly.49...v0.4.13-nightly.50) (2024-01-10)
+
 ### [0.4.13-nightly.49](https://github.com/UnSetSoft/Ryunixjs/compare/v0.4.13-nightly.48...v0.4.13-nightly.49) (2024-01-10)
 
 ### [0.4.13-nightly.48](https://github.com/UnSetSoft/Ryunixjs/compare/v0.4.13-nightly.47...v0.4.13-nightly.48) (2024-01-10)
