@@ -52,4 +52,4 @@ const getEnviroment = () =>
       },
     )
 
-export { getPackageManager, ENV_HASH, getEnviroment, resolveApp }
+export { getPackageManager, ENV_HASH, getEnviroment, resolveApp, RYUNIX_APP }

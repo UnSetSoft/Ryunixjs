@@ -1,5 +1,5 @@
 import { isEvent, isGone, isNew, isProperty } from './effects'
-import { RYUNIX_TYPES, STRINGS, reg } from '../utils/index'
+import { RYUNIX_TYPES, STRINGS, reg, OLD_STRINGS } from '../utils/index'
 
 /**
  * The function creates a new DOM element based on the given fiber object and updates its properties.
@@ -50,11 +50,22 @@ const updateDom = (dom, prevProps, nextProps) => {
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
       if (name === STRINGS.style) {
+        DomStyle(dom, nextProps['ryunix-style'])
+      } else if (name === OLD_STRINGS.style) {
         DomStyle(dom, nextProps.style)
       } else if (name === STRINGS.className) {
+        if (nextProps['ryunix-class'] === '') {
+          throw new Error('data-class cannot be empty.')
+        }
+
+        prevProps['ryunix-class'] &&
+          dom.classList.remove(...prevProps['ryunix-class'].split(/\s+/))
+        dom.classList.add(...nextProps['ryunix-class'].split(/\s+/))
+      } else if (name === OLD_STRINGS.className) {
         if (nextProps.className === '') {
           throw new Error('className cannot be empty.')
         }
+
         prevProps.className &&
           dom.classList.remove(...prevProps.className.split(/\s+/))
         dom.classList.add(...nextProps.className.split(/\s+/))

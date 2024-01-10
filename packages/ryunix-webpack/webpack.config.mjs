@@ -2,14 +2,18 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
+import webpack from 'webpack'
 import {
   getPackageManager,
   ENV_HASH,
   getEnviroment,
   resolveApp,
+  RYUNIX_APP,
 } from './utils/index.mjs'
 import fs from 'fs'
 import config from './utils/config.cjs'
+import Dotenv from 'dotenv-webpack'
+
 const __filename = fileURLToPath(import.meta.url)
 
 const __dirname = dirname(__filename)
@@ -34,7 +38,6 @@ function getAlias(object) {
     }, {})
   return output
 }
-
 export default {
   mode: config.webpack.production ? 'production' : 'development',
   // context: src
@@ -57,11 +60,13 @@ export default {
       index: '/',
       disableDotRule: true,
     },
+    liveReload: false,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': '*',
       'Access-Control-Allow-Headers': '*',
     },
+
     port: config.webpack.devServer.port,
     proxy: config.webpack.devServer.proxy,
   },
@@ -115,7 +120,7 @@ export default {
                   pragma: 'Ryunix.createElement',
                   pragmaFrag: 'Ryunix.Fragments',
                 },
-              ],
+              ].filter(Boolean),
             ],
           },
         },
@@ -180,15 +185,26 @@ export default {
     ],
     fallback: config.webpack.resolve.fallback,
   },
+
   plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    !!fs.existsSync(resolveApp(dir, '.env')) &&
+      new Dotenv({
+        path: resolveApp(dir, '.env'),
+        prefix: 'ryunix.env.RYUNIX_APP_',
+        safe: false,
+        allowEmptyValues: true,
+      }),
+
     new HtmlWebpackPlugin({
       title: config.static.seo.title,
       favicon: config.static.favicon && join(dir, 'public', 'favicon.png'),
       meta: config.static.seo.meta,
       template: join(__dirname, 'template', 'index.html'),
     }),
+
     ...config.webpack.plugins,
-  ],
+  ].filter(Boolean),
   externals: [
     {
       ryunix: '@unsetsoft/ryunixjs',

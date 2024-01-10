@@ -37,8 +37,9 @@ const defaultSettings = {
           },
     },
   },
+
   webpack: {
-    production: config?.webpack?.production ? config.webpack.production : true,
+    production: config?.webpack?.production ? config.webpack.production : false,
     root: config?.webpack?.root ? config.webpack.root : 'src',
     output: {
       buildDirectory: config?.webpack?.output?.buildDirectory

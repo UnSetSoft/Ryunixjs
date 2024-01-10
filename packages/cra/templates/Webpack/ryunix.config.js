@@ -9,4 +9,7 @@ module.exports = {
       },
     },
   },
+  webpack: {
+    mode: true, // use 'false' for dev mode
+  },
 }

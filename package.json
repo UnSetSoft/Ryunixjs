@@ -15,7 +15,7 @@
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
     "r:n": "yarn log --prerelease nightly && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run nightly:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git dev",
-    "r:r": "yarn log && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git stable",
+    "r:r": "yarn log && yarn kg:bump && yarn lint-fix && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git master",
     "cra:r": "npm run release --workspace=@unsetsoft/cra",
     "cra:n": "npm run nightly:release --workspace=@unsetsoft/cra",
     "log": "standard-version --header '# Changelog'",

@@ -74,6 +74,11 @@ const useEffect = (effect, deps) => {
   vars.hookIndex++
 }
 
+/**
+ * The `useQuery` function is a custom hook in JavaScript that retrieves query parameters from the URL
+ * and stores them in a hook for easy access.
+ * @returns The `useQuery` function returns the `query` property of the `hook` object.
+ */
 const useQuery = () => {
   vars.hookIndex++
 

@@ -18,9 +18,14 @@ const RYUNIX_TYPES = Object.freeze({
 const STRINGS = Object.freeze({
   object: 'object',
   function: 'function',
+  style: 'ryunix-style',
+  className: 'ryunix-class',
+  children: 'children',
+})
+
+const OLD_STRINGS = Object.freeze({
   style: 'style',
   className: 'className',
-  children: 'children',
 })
 
 const EFFECT_TAGS = Object.freeze({
@@ -29,4 +34,4 @@ const EFFECT_TAGS = Object.freeze({
   DELETION: Symbol(),
 })
 
-export { vars, reg, RYUNIX_TYPES, EFFECT_TAGS, STRINGS }
+export { vars, reg, RYUNIX_TYPES, EFFECT_TAGS, STRINGS, OLD_STRINGS }
