@@ -33,7 +33,7 @@
     "node-sass": "9.0.0",
     "sass": "1.66.1",
     "sass-loader": "13.3.2",
-    "style-loader": "3.3.3",
+    "style-loader": "3.3.4",
     "terminal-log": "1.0.1",
     "terser-webpack-plugin": "^5.3.9",
     "url-loader": "4.1.1",
