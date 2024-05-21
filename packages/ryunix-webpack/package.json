@@ -32,7 +32,7 @@
     "image-webpack-loader": "8.1.0",
     "node-sass": "9.0.0",
     "sass": "1.66.1",
-    "sass-loader": "13.3.2",
+    "sass-loader": "14.2.1",
     "style-loader": "3.3.3",
     "terminal-log": "1.0.1",
     "terser-webpack-plugin": "^5.3.9",
