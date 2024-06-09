@@ -65,7 +65,7 @@ export default {
       'Access-Control-Allow-Methods': '*',
       'Access-Control-Allow-Headers': '*',
     },
-
+    allowedHosts: config.webpack.devServer.allowedHosts,
     port: config.webpack.devServer.port,
     proxy: config.webpack.devServer.proxy,
   },
