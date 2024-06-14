@@ -24,8 +24,10 @@ const createElement = (type, props, ...children) => {
       ...props,
       children: children
         .flat()
-        .map((child) =>
-          typeof child === STRINGS.object ? child : createTextElement(child),
+        .map((child, index) =>
+          typeof child === STRINGS.object && child !== null
+            ? { ...child, key: index }
+            : createTextElement(child),
         ),
     },
   }
@@ -48,14 +50,8 @@ const createTextElement = (text) => {
   }
 }
 
-const Fragments = (props) => {
-  if (props.style) {
-    throw new Error('The style attribute is not supported')
-  }
-  if (props.className === '') {
-    throw new Error('className cannot be empty.')
-  }
-  return createElement('div', props, props.children)
+const Fragments = ({ children }) => {
+  return children
 }
 
 export { createElement, createTextElement, Fragments }
