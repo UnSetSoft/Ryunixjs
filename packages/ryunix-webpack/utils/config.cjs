@@ -62,7 +62,9 @@ const defaultSettings = {
     devServer: {
       port: config?.webpack?.server?.port ? config.webpack.server.port : 3000,
       proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : {},
-      allowedHosts: config?.webpack?.server?.allowedHosts ? config.webpack.server.allowedHosts : "auto",
+      allowedHosts: config?.webpack?.server?.allowedHosts
+        ? config.webpack.server.allowedHosts
+        : 'auto',
     },
     externals: config?.webpack?.externals ? config.webpack.externals : [{}],
     module: {

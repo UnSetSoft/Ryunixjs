@@ -14,7 +14,7 @@ const reconcileChildren = (wipFiber, elements) => {
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
   let prevSibling
 
-  while (index < elements.length || oldFiber != null) {
+  while (index < elements.length || oldFiber != undefined) {
     const element = elements[index]
     let newFiber
 
@@ -22,9 +22,9 @@ const reconcileChildren = (wipFiber, elements) => {
 
     if (sameType) {
       newFiber = {
-        type: oldFiber.type,
+        type: oldFiber ? oldFiber.type : undefined,
         props: element.props,
-        dom: oldFiber.dom,
+        dom: oldFiber ? oldFiber.dom : undefined,
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
@@ -34,9 +34,9 @@ const reconcileChildren = (wipFiber, elements) => {
       newFiber = {
         type: element.type,
         props: element.props,
-        dom: null,
+        dom: undefined,
         parent: wipFiber,
-        alternate: null,
+        alternate: undefined,
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
     }
@@ -51,7 +51,7 @@ const reconcileChildren = (wipFiber, elements) => {
 
     if (index === 0) {
       wipFiber.child = newFiber
-    } else if (element) {
+    } else if (element && prevSibling) {
       prevSibling.sibling = newFiber
     }
 

@@ -1,5 +1,33 @@
 import { RYUNIX_TYPES, STRINGS } from '../utils/index'
 
+const Fragments = (props) => {
+  return props.children
+}
+
+const childArray = (children, out) => {
+  out = out || []
+  if (children == undefined || typeof children == STRINGS.boolean) {
+    // pass
+  } else if (Array.isArray(children)) {
+    children.some((child) => {
+      childArray(child, out)
+    })
+  } else {
+    out.push(children)
+  }
+  return out
+}
+
+const cloneElement = (element, props) => {
+  return {
+    ...element,
+    props: {
+      ...element.props,
+      ...props,
+    },
+  }
+}
+
 /**
  * The function creates a new element with the given type, props, and children.
  * @param type - The type of the element to be created, such as "div", "span", "h1", etc.
@@ -18,17 +46,14 @@ import { RYUNIX_TYPES, STRINGS } from '../utils/index'
  */
 
 const createElement = (type, props, ...children) => {
+  children = childArray(children, [])
   return {
     type,
     props: {
       ...props,
-      children: children
-        .flat()
-        .map((child, index) =>
-          typeof child === STRINGS.object && child !== null
-            ? { ...child, key: index }
-            : createTextElement(child),
-        ),
+      children: children.map((child) =>
+        typeof child === STRINGS.object ? child : createTextElement(child),
+      ),
     },
   }
 }
@@ -50,8 +75,4 @@ const createTextElement = (text) => {
   }
 }
 
-const Fragments = ({ children }) => {
-  return children
-}
-
-export { createElement, createTextElement, Fragments }
+export { createElement, createTextElement, Fragments, cloneElement }

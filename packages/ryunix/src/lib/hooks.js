@@ -1,6 +1,5 @@
-import { hasDepsChanged } from './effects'
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
-
+import { isEqual } from 'lodash'
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
@@ -41,8 +40,10 @@ const useStore = (initial) => {
     vars.deletions = []
   }
 
-  vars.wipFiber.hooks.push(hook)
-  vars.hookIndex++
+  if (vars.wipFiber && vars.wipFiber.hooks) {
+    vars.wipFiber.hooks.push(hook)
+    vars.hookIndex++
+  }
   return [hook.state, setState]
 }
 
@@ -55,23 +56,31 @@ const useStore = (initial) => {
  * between renders, the effect will be re-run. If the array is empty, the effect will only run once on
  * mount and never again.
  */
-const useEffect = (effect, deps) => {
+
+const useEffect = (callback, deps) => {
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
     vars.wipFiber.alternate.hooks[vars.hookIndex]
 
-  const hasChanged = hasDepsChanged(oldHook ? oldHook.deps : undefined, deps)
-
   const hook = {
-    tag: RYUNIX_TYPES.RYUNIX_EFFECT,
-    effect: hasChanged ? effect : null,
-    cancel: hasChanged && oldHook && oldHook.cancel,
+    type: RYUNIX_TYPES.RYUNIX_EFFECT,
     deps,
   }
 
-  vars.wipFiber.hooks.push(hook)
-  vars.hookIndex++
+  if (!oldHook) {
+    // invoke callback if this is the first time
+    callback()
+  } else {
+    if (!isEqual(oldHook.deps, hook.deps)) {
+      callback()
+    }
+  }
+
+  if (vars.wipFiber.hooks) {
+    vars.wipFiber.hooks.push(hook)
+    vars.hookIndex++
+  }
 }
 
 /**
@@ -80,8 +89,6 @@ const useEffect = (effect, deps) => {
  * @returns The `useQuery` function returns the `query` property of the `hook` object.
  */
 const useQuery = () => {
-  vars.hookIndex++
-
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
@@ -94,13 +101,68 @@ const useQuery = () => {
   const Query = hasOld ? hasOld : params
 
   const hook = {
-    tag: RYUNIX_TYPES.RYUNIX_EFFECT,
+    type: RYUNIX_TYPES.RYUNIX_URL_QUERY,
     query: Query,
   }
 
-  vars.wipFiber.hooks.push(hook)
+  if (vars.wipFiber.hooks) {
+    vars.wipFiber.hooks.push(hook)
+    vars.hookIndex++
+  }
 
   return hook.query
 }
 
-export { useStore, useEffect, useQuery }
+const useRef = (initial) => {
+  const oldHook =
+    vars.wipFiber.alternate &&
+    vars.wipFiber.alternate.hooks &&
+    vars.wipFiber.alternate.hooks[vars.hookIndex]
+
+  const hook = {
+    type: RYUNIX_TYPES.RYUNIX_REF,
+    value: oldHook ? oldHook.value : { current: initial },
+  }
+
+  if (vars.wipFiber.hooks) {
+    vars.wipFiber.hooks.push(hook)
+    vars.hookIndex++
+  }
+
+  return hook.value
+}
+
+const useMemo = (comp, deps) => {
+  const oldHook =
+    vars.wipFiber.alternate &&
+    vars.wipFiber.alternate.hooks &&
+    vars.wipFiber.alternate.hooks[vars.hookIndex]
+
+  const hook = {
+    type: RYUNIX_TYPES.RYUNIX_MEMO,
+    value: null,
+    deps,
+  }
+
+  if (oldHook) {
+    if (isEqual(oldHook.deps, hook.deps)) {
+      hook.value = oldHook.value
+    } else {
+      hook.value = compute()
+    }
+  } else {
+    hook.value = compute()
+  }
+
+  if (vars.wipFiber.hooks) {
+    vars.wipFiber.hooks.push(hook)
+    vars.hookIndex++
+  }
+
+  return hook.value
+}
+const useCallback = (callback, deps) => {
+  return useMemo(() => callback, deps)
+}
+
+export { useStore, useEffect, useQuery, useRef, useMemo, useCallback }

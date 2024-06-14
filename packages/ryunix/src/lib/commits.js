@@ -7,9 +7,11 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  */
 const commitRoot = () => {
   vars.deletions.forEach(commitWork)
-  commitWork(vars.wipRoot.child)
-  vars.currentRoot = vars.wipRoot
-  vars.wipRoot = null
+  if (vars.wipRoot && vars.wipRoot.child) {
+    commitWork(vars.wipRoot.child)
+    vars.currentRoot = vars.wipRoot
+  }
+  vars.wipRoot = undefined
 }
 
 /**
@@ -31,13 +33,13 @@ const commitWork = (fiber) => {
   const domParent = domParentFiber.dom
 
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
-    if (fiber.dom != null) {
+    if (fiber.dom != undefined) {
       domParent.appendChild(fiber.dom)
     }
     runEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber)
-    if (fiber.dom != null) {
+    if (fiber.dom != undefined) {
       updateDom(fiber.dom, fiber.alternate.props, fiber.props)
     }
     runEffects(fiber)
@@ -59,9 +61,9 @@ const commitWork = (fiber) => {
  * @param domParent - The parent DOM element from which the fiber's DOM element needs to be removed.
  */
 const commitDeletion = (fiber, domParent) => {
-  if (fiber.dom) {
+  if (fiber && fiber.dom) {
     domParent.removeChild(fiber.dom)
-  } else {
+  } else if (fiber && fiber.child) {
     commitDeletion(fiber.child, domParent)
   }
 }

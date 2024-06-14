@@ -118,6 +118,7 @@ export default {
                 {
                   pragma: 'Ryunix.createElement',
                   pragmaFrag: 'Ryunix.Fragments',
+                  throwIfNamespace: false,
                 },
               ].filter(Boolean),
             ],

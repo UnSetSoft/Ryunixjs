@@ -1,11 +1,11 @@
 const vars = {
-  containerRoot: null,
-  nextUnitOfWork: null,
-  currentRoot: null,
-  wipRoot: null,
-  deletions: null,
-  wipFiber: null,
-  hookIndex: null,
+  containerRoot: undefined,
+  nextUnitOfWork: undefined,
+  currentRoot: undefined,
+  wipRoot: undefined,
+  deletions: undefined,
+  wipFiber: undefined,
+  hookIndex: undefined,
 }
 
 const reg = /[A-Z]/g
@@ -13,6 +13,9 @@ const reg = /[A-Z]/g
 const RYUNIX_TYPES = Object.freeze({
   TEXT_ELEMENT: Symbol('text.element'),
   RYUNIX_EFFECT: Symbol('ryunix.effect'),
+  RYUNIX_MEMO: Symbol('ryunix.memo'),
+  RYUNIX_URL_QUERY: Symbol('ryunix.urlQuery'),
+  RYUNIX_REF: Symbol('ryunix.ref'),
 })
 
 const STRINGS = Object.freeze({
@@ -21,6 +24,7 @@ const STRINGS = Object.freeze({
   style: 'ryunix-style',
   className: 'ryunix-class',
   children: 'children',
+  boolean: 'boolean',
 })
 
 const OLD_STRINGS = Object.freeze({
