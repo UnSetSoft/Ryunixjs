@@ -1,4 +1,5 @@
 # Changelog
+### [0.4.15-nightly.42](https://github.com/UnSetSoft/Ryunixjs/compare/v0.4.15-nightly.41...v0.4.15-nightly.42) (2024-06-14)
 
 ### [0.4.15-nightly.41](https://github.com/UnSetSoft/Ryunixjs/compare/v0.4.15-nightly.40...v0.4.15-nightly.41) (2024-06-14)
 
