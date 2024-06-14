@@ -148,10 +148,10 @@ const useMemo = (comp, deps) => {
     if (isEqual(oldHook.deps, hook.deps)) {
       hook.value = oldHook.value
     } else {
-      hook.value = compute()
+      hook.value = comp()
     }
   } else {
-    hook.value = compute()
+    hook.value = comp()
   }
 
   if (vars.wipFiber.hooks) {
