@@ -1,13 +1,15 @@
-import { useStore, useEffect } from './hooks'
+import { useStore, useEffect, useCallback } from './hooks'
 import { createElement } from './createElement'
 const Router = ({ path, component, children }) => {
   const [currentPath, setCurrentPath] = useStore(window.location.pathname)
 
-  useEffect(() => {
-    const onLocationChange = () => {
-      setCurrentPath(() => window.location.pathname)
+  const onLocationChange = useCallback(() => {
+    if (window.location.pathname === path) {
+      setCurrentPath(window.location.pathname)
     }
+  }, [path])
 
+  useEffect(() => {
     window.addEventListener('navigate', onLocationChange)
     window.addEventListener('pushsatate', onLocationChange)
     window.addEventListener('popstate', onLocationChange)
