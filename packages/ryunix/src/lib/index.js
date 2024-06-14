@@ -8,7 +8,6 @@ import {
   useMemo,
   useCallback,
 } from './hooks'
-import { Router, Navigate, Link } from './navigation'
 import * as Dom from './dom'
 import * as Workers from './workers'
 import * as Reconciler from './reconciler'
@@ -23,9 +22,6 @@ export {
   useMemo,
   useCallback,
   Fragments,
-  Router,
-  Navigate,
-  Link,
 }
 
 export default {

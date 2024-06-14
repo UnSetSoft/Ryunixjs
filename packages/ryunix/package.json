@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "0.4.15-nightly.42",
+  "version": "0.5.2",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "types": "./dist/Ryunix.d.ts",

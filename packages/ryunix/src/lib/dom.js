@@ -29,33 +29,51 @@ const createDom = (fiber) => {
  * @param prevProps - An object representing the previous props (properties) of a DOM element.
  * @param nextProps - An object containing the new props that need to be updated in the DOM.
  */
-function updateDom(dom, prevProps, nextProps) {
-  //Remove old or changed event listeners
+const updateDom = (dom, prevProps, nextProps) => {
   Object.keys(prevProps)
     .filter(isEvent)
-    .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
+    .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2)
       dom.removeEventListener(eventType, prevProps[name])
     })
 
-  // Remove old properties
   Object.keys(prevProps)
     .filter(isProperty)
-    .filter(isGone(prevProps, nextProps))
+    .filter(isGone(nextProps))
     .forEach((name) => {
       dom[name] = ''
     })
 
-  // Set new or changed properties
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = nextProps[name]
+      if (name === STRINGS.style) {
+        DomStyle(dom, nextProps['ryunix-style'])
+      } else if (name === OLD_STRINGS.style) {
+        DomStyle(dom, nextProps.style)
+      } else if (name === STRINGS.className) {
+        if (nextProps['ryunix-class'] === '') {
+          throw new Error('data-class cannot be empty.')
+        }
+
+        prevProps['ryunix-class'] &&
+          dom.classList.remove(...prevProps['ryunix-class'].split(/\s+/))
+        dom.classList.add(...nextProps['ryunix-class'].split(/\s+/))
+      } else if (name === OLD_STRINGS.className) {
+        if (nextProps.className === '') {
+          throw new Error('className cannot be empty.')
+        }
+
+        prevProps.className &&
+          dom.classList.remove(...prevProps.className.split(/\s+/))
+        dom.classList.add(...nextProps.className.split(/\s+/))
+      } else {
+        dom[name] = nextProps[name]
+      }
     })
 
-  // Add event listeners
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
