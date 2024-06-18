@@ -1,8 +1,8 @@
-.vscode
-.vscode-test
-.gitignore
-node_modules
+# .vscodeignore
+
+.vscode/
+.git/
+node_modules/
 out/
-tsconfig.json
-vsc-extension-quickstart.md
-test
+*.log
+*.tmp

@@ -1,0 +1,72 @@
+{
+    "Return Fragment": {
+        "prefix": "r:rfra",
+        "body": [
+            "  return (",
+            "    <>",
+            "      $1",
+            "    </>",
+            "  );"
+        ],
+        "description": "Create a Fragment with return"
+    },
+    "Fragment": {
+        "prefix": "r:fra",
+        "body": [
+            "<>$1</>"
+        ],
+        "description": "Create a Fragment"
+    },
+    "Component": {
+        "prefix": "r:afc",
+        "body": [
+            "const ${1:ComponentName} = () => {",
+            "  return (",
+            "    <>",
+            "      $2",
+            "    </>",
+            "  );",
+            "};",
+            "",
+            "export default ${1:ComponentName};"
+        ],
+        "description": "Create a arrow function component"
+    },
+    "useStore": {
+        "prefix": "r:us",
+        "body": [
+            "const [${1:storeName}, ${2:setName}] = useStore()"
+        ],
+        "description": "Create a useStore state"
+    },
+    "useEffect": {
+        "prefix": "r:ue",
+        "body": [
+            "useEffect(() => {",
+            "  $1",
+            "}, []);"
+        ],
+        "description": "Create a useEffect"
+    },
+    "Import Ryunix": {
+        "prefix": "r:imp",
+        "body": [
+            "import Ryunix from '@unsetsoft/ryunix'"
+        ],
+        "description": "Import Ryunix lib"
+    },
+    "Import useStore": {
+        "prefix": "r:store",
+        "body": [
+            "import { useStore } from '@unsetsoft/ryunix'"
+        ],
+        "description": "Import useStore"
+    },
+    "Import useEffect": {
+        "prefix": "r:effect",
+        "body": [
+            "import { useEffect } from '@unsetsoft/ryunix'"
+        ],
+        "description": "Import useEffect from Ryunix lib"
+    }
+}

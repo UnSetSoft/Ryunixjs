@@ -10,22 +10,27 @@
       },
       "extends": [
         "eslint:recommended"
-       ],
+        // Otras configuraciones extendidas
+      ],
+      "rules": {
+        // Reglas específicas de tu proyecto
+      },
       "overrides": [
         {
           "files": ["*.ryx"],
           "parserOptions": {
             "ecmaFeatures": {
-              "jsx": true 
+              "jsx": true // Activa JSX solo si realmente estás usando JSX en tu lenguaje .ryx
             }
           },
           "globals": {
-      
+            // Define los globals específicos de tu proyecto si es necesario
           },
           "rules": {
-           
+            // Reglas específicas para tus archivos .ryx
           }
         }
       ]
     }
   }
+  
