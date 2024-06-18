@@ -5,7 +5,9 @@
   "homepage": "./",
   "scripts": {
     "dev": "ryunix server",
-    "build": "ryunix build"
+    "build": "ryunix build",
+    "lint": "ryunix lint",
+    "lint:fix": "ryunix lint-fix"
   },
   "engines": {
     "node": ">=18.16.0"

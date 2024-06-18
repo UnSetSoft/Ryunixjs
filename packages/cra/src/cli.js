@@ -20,6 +20,12 @@ create('create-cra', {
       choices: ['Latest', 'Nightly'],
       prompt: 'if-no-arg',
     },
+    eslint: {
+      type: 'confirm',
+      default: false,
+      describe: 'Do you whant to add ESLint addon?',
+      prompt: 'if-no-arg'
+    },
     vscode: {
       type: 'confirm',
       default: false,
@@ -33,6 +39,7 @@ create('create-cra', {
     }
 
     if (template === 'Rspack') {
+     
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
       } else if (answers.channel === 'Nightly') {
@@ -42,7 +49,14 @@ create('create-cra', {
         ['@rspack/cli', '@rspack/core', 'cross-env'],
         true,
       )
+
+      if (answers.eslint){
+        console.log("Eslint is not aviable for Rspack projects")
+      }
     } else if (template === 'Webpack') {
+      
+      // Ryunix
+      
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
         await installNpmPackage('@unsetsoft/ryunix-webpack@latest', true)
@@ -50,6 +64,16 @@ create('create-cra', {
         await installNpmPackage('@unsetsoft/ryunixjs@nightly')
         await installNpmPackage('@unsetsoft/ryunix-webpack@nightly', true)
       }
+
+
+      if (answers.eslint){
+        await installNpmPackage(
+          ['@eslint/eslintrc', '@eslint/js', 'eslint', 'globals'],
+          true,
+        )
+      }
+
+
     } else {
       throw new Error('Missing template')
     }
