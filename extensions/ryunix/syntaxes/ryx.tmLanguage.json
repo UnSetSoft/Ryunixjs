@@ -54,7 +54,7 @@
         },
         {
           "include": "#comment"
-        } 
+        }
       ]
     },
     "shebang": {
@@ -190,7 +190,7 @@
     "tag_end": {
       "match": ">",
       "name": "punctuation.definition.tag.ryx"
-    }, 
+    },
     "text.html.basic": {
       "patterns": [
         {

@@ -3,7 +3,22 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { StartServer } from './serve.mjs'
 import { compiler } from './compiler.mjs'
-import { execSync }  from 'child_process'
+import { execSync } from 'child_process'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const dir = path.dirname(path.join(__dirname, '..', '..', '..'))
+
+const lintFile = path.join(
+  dir,
+  'node_modules',
+  '@unsetsoft',
+  'ryunix-webpack',
+  'eslint.config.mjs',
+)
+console.log(lintFile)
 const serv = {
   command: 'server',
   describe: 'Run server',
@@ -39,34 +54,4 @@ const build = {
   },
 }
 
-const lint = {
-  command: 'lint',
-  describe: 'Run lint',
-  handler: async (arg) => {
-    compiler.run((err, stats) => {
-      try {
-        const output = execSync('eslint');
-        console.log(output);
-      } catch (error) {
-        console.error(error);
-      }
-    })
-  },
-}
-
-const lintFix = {
-  command: 'lint-fix',
-  describe: 'Run fix',
-  handler: async (arg) => {
-    compiler.run((err, stats) => {
-      try {
-        const output = execSync('eslint --fix');
-        console.log(output);
-      } catch (error) {
-        console.error(error);
-      }
-    })
-  },
-}
-
-yargs(hideBin(process.argv)).command(serv).command(build).command(lint).command(lintFix).parse()
+yargs(hideBin(process.argv)).command(serv).command(build).parse()

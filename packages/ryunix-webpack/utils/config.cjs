@@ -39,14 +39,16 @@ const defaultSettings = {
   },
 
   eslint: {
-    files:  config?.eslint?.files ? config.eslint.files : [],
+    files: config?.eslint?.files ? config.eslint.files : ['**/*.ryx'],
     plugins: config?.eslint?.plugins ? config.eslint.plugins : {},
-    rules: config?.eslint?.rules ? config.eslint.rules : {
-      'no-unused-vars': 'off',
-      "indent": ["error", 2],
-      "linebreak-style": 1,
-      "quotes": ["error", "double"]
-    },
+    rules: config?.eslint?.rules
+      ? config.eslint.rules
+      : {
+          'no-unused-vars': 'off',
+          indent: ['error', 2],
+          'linebreak-style': 1,
+          quotes: ['error', 'double'],
+        },
   },
 
   webpack: {
