@@ -1,4 +1,4 @@
-import { createElement, cloneElement, Fragments } from './createElement'
+import { createElement, cloneElement, Fragment } from './createElement'
 import { render, init } from './render'
 import {
   useStore,
@@ -7,6 +7,8 @@ import {
   useRef,
   useMemo,
   useCallback,
+  useContext,
+  createContext,
 } from './hooks'
 import * as Dom from './dom'
 import * as Workers from './workers'
@@ -21,14 +23,16 @@ export {
   useRef,
   useMemo,
   useCallback,
-  Fragments,
+  useContext,
+  createContext,
+  Fragment
 }
 
 export default {
   createElement,
   render,
   init,
-  Fragments,
+  Fragment,
   Dom,
   Workers,
   Reconciler,

@@ -1,5 +1,6 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
+import { Fragment, createElement, cloneElement } from './createElement'
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
@@ -165,4 +166,63 @@ const useCallback = (callback, deps) => {
   return useMemo(() => callback, deps)
 }
 
-export { useStore, useEffect, useQuery, useRef, useMemo, useCallback }
+const createContext = (defaultValue) => {
+  const context = {
+    value: defaultValue,
+    subscribers: [],
+  };
+
+  const Provider = ({ value, children }) => {
+    const oldContext = vars.wipFiber.alternate?.hooks?.[vars.hookIndex]?.context;
+    context.value = value;
+
+    // Notificar a los suscriptores
+    context.subscribers.forEach(callback => callback(value));
+
+    // Crear un nuevo Provider para los contextos anidados
+    return createElement(
+      Fragment,
+      null,
+      children.map(children, child =>
+        cloneElement(child, { context: context })
+      )
+    );
+  };
+
+  return {context, Provider}
+}
+
+const useContext = (context) => {
+  if (!context || !context.subscribers) {
+    throw new Error('useContext must be used with a valid Context');
+  }
+
+  const [value, setValue] = useStore(context.value);
+
+  // Suscribirse a los cambios del contexto
+  useEffect(() => {
+    const subscriber = (newValue) => {
+      setValue(newValue);
+    };
+
+    context.subscribers.push(subscriber);
+
+    // Desuscribirse al desmontar el componente
+    return () => {
+      context.subscribers = context.subscribers.filter(cb => cb !== subscriber);
+    };
+  }, [context]);
+
+  return value;
+};
+
+export {
+  useStore,
+  useEffect,
+  useQuery,
+  useRef,
+  useMemo,
+  useCallback,
+  useContext,
+  createContext
+}

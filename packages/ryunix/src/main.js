@@ -6,7 +6,9 @@ export {
   useRef,
   useMemo,
   useCallback,
-  Fragments,
+  Fragment,
+  useContext,
+  createContext,
 } from './lib/index.js'
 
 window.Ryunix = Ryunix
