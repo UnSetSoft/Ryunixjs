@@ -117,7 +117,7 @@ export default {
                 '@babel/plugin-transform-react-jsx',
                 {
                   pragma: 'Ryunix.createElement',
-                  pragmaFrag: 'Ryunix.Fragments',
+                  pragmaFrag: 'Ryunix.Fragment',
                   throwIfNamespace: false,
                 },
               ].filter(Boolean),
