@@ -1,19 +1,19 @@
-# RyunixJS
+<img src="./extensions/ryunix/logo-dark.svg"  width="200" height="200" style="
+    display: block;
+    margin: 0 auto;" />
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FUnSetSoft%2FRyunixjs%2Ftree%2Fmaster%2Fvercel%2Fryunix-jsx&project-name=ryunix-jsx-project&repository-name=ryunix-jsx-project)
+## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/nightly.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/nightly)
 
-## What is RyunixJS?
+### What is RyunixJS?
 
-Is a ReactJS Clone! Even lighter, however, at a very early stage for production use.
+Like React, NextJS, Preact, Vite. Ryunix allows you to build static websites from JavaScript in a similar way to the aforementioned frameworks. However, Ryunix is planned to be completely standalone, i.e. without including React internally. This way allowing it to be more manageable and moldable for each developer. The reactivity of Ryunix is similar to Preact, however, it does not pretend to follow any standard of React or any similar Framework, but to allow to generate an SPA in its own way.
 
-## Usage
+### Usage
 
 `npx @unsetsoft/cra@latest`
 
-## Bugs?
-
-You can create an issue on GitHub.
-
-## Do you want to contribute?
+### Do you want to contribute?
 
 Fork a send a pull request!
+
+[![Invitame un café en cafecito.app](https://cdn.cafecito.app/imgs/buttons/button_3.svg)](https://cafecito.app/neyunse) [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A1314KEV)
