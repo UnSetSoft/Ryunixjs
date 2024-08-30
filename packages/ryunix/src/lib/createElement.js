@@ -1,6 +1,6 @@
 import { RYUNIX_TYPES, STRINGS } from '../utils/index'
 
-const Fragments = (props) => {
+const Fragment = (props) => {
   return props.children
 }
 
@@ -75,4 +75,4 @@ const createTextElement = (text) => {
   }
 }
 
-export { createElement, createTextElement, Fragments, cloneElement }
+export { createElement, createTextElement, Fragment, cloneElement }

@@ -38,6 +38,19 @@ const defaultSettings = {
     },
   },
 
+  eslint: {
+    files: config?.eslint?.files ? config.eslint.files : ['**/*.ryx'],
+    plugins: config?.eslint?.plugins ? config.eslint.plugins : {},
+    rules: config?.eslint?.rules
+      ? config.eslint.rules
+      : {
+          'no-unused-vars': 'off',
+          indent: ['error', 2],
+          'linebreak-style': 1,
+          quotes: ['error', 'double'],
+        },
+  },
+
   webpack: {
     production: config?.webpack?.production ? config.webpack.production : false,
     root: config?.webpack?.root ? config.webpack.root : 'src',

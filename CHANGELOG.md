@@ -1,5 +1,33 @@
 # Changelog
 
+### [0.5.4](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.14...v0.5.4) (2024-08-31)
+
+### [0.5.3-nightly.14](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.13...v0.5.3-nightly.14) (2024-08-30)
+
+### [0.5.3-nightly.13](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.11...v0.5.3-nightly.13) (2024-08-30)
+
+### [0.5.3-nightly.11](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.10...v0.5.3-nightly.11) (2024-06-19)
+
+### [0.5.3-nightly.10](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.9...v0.5.3-nightly.10) (2024-06-19)
+
+### [0.5.3-nightly.9](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.8...v0.5.3-nightly.9) (2024-06-19)
+
+### [0.5.3-nightly.8](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.7...v0.5.3-nightly.8) (2024-06-19)
+
+### [0.5.3-nightly.7](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.6...v0.5.3-nightly.7) (2024-06-19)
+
+### [0.5.3-nightly.6](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.5...v0.5.3-nightly.6) (2024-06-19)
+
+### [0.5.3-nightly.5](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.4...v0.5.3-nightly.5) (2024-06-19)
+
+### [0.5.3-nightly.4](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.3...v0.5.3-nightly.4) (2024-06-19)
+
+### [0.5.3-nightly.3](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.2...v0.5.3-nightly.3) (2024-06-19)
+
+### [0.5.3-nightly.2](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.1...v0.5.3-nightly.2) (2024-06-19)
+
+### [0.5.3-nightly.1](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.2...v0.5.3-nightly.1) (2024-06-19)
+
 ### [0.5.2](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.1...v0.5.2) (2024-06-14)
 
 ### [0.5.1](https://github.com/UnSetSoft/Ryunixjs/compare/v0.4.15-nightly.46...v0.5.1) (2024-06-14)

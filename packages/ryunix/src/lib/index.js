@@ -1,4 +1,4 @@
-import { createElement, cloneElement, Fragments } from './createElement'
+import { createElement, cloneElement, Fragment } from './createElement'
 import { render, init } from './render'
 import {
   useStore,
@@ -14,21 +14,13 @@ import * as Reconciler from './reconciler'
 import * as Components from './components'
 import * as Commits from './commits'
 
-export {
-  useStore,
-  useEffect,
-  useQuery,
-  useRef,
-  useMemo,
-  useCallback,
-  Fragments,
-}
+export { useStore, useEffect, useQuery, useRef, useMemo, useCallback, Fragment }
 
 export default {
   createElement,
   render,
   init,
-  Fragments,
+  Fragment,
   Dom,
   Workers,
   Reconciler,

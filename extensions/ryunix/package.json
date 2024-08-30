@@ -3,7 +3,7 @@
   "displayName": "RyunixJS",
   "description": "Ryunix language support",
   "publisher": "unsetsoft",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "MIT",
   "homepage": "https://github.com/UnSetSoft/Ryunixjs",
   "bugs": {
@@ -15,25 +15,30 @@
   },
   "icon": "icon.png",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.60.0"
   },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
   "scripts": {
     "build": "vsce package",
     "pb": "vsce publish"
   },
-  "categories": [
-    "Snippets"
-  ],
   "contributes": {
     "configurationDefaults": {
-      "[ryunix]": {
+      "[ryx]": {
         "editor.maxTokenizationLineLength": 2500,
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        }
       }
     },
     "languages": [
       {
-        "id": "ryunix",
+        "id": "ryx",
         "aliases": [
           "JavaScript RYX",
           "JavaScript Ryunix",
@@ -58,14 +63,14 @@
     ],
     "grammars": [
       {
-        "language": "ryunix",
+        "language": "ryx",
         "scopeName": "source.js.ryx",
-        "path": "./syntaxes/JavaScriptRyunix.tmLanguage.json",
+        "path": "./syntaxes/ryx.tmLanguage.json",
         "embeddedLanguages": {
           "meta.tag.js": "ryx-tags",
           "meta.tag.without-attributes.js": "ryx-tags",
-          "meta.tag.attributes.js.ryx": "ryunix",
-          "meta.embedded.expression.js": "ryunix"
+          "meta.tag.attributes.js.ryx": "ryx",
+          "meta.embedded.expression.js": "ryx"
         },
         "tokenTypes": {
           "meta.template.expression": "other",
@@ -83,7 +88,7 @@
     ],
     "semanticTokenScopes": [
       {
-        "language": "ryunix",
+        "language": "ryx",
         "scopes": {
           "property": [
             "variable.other.property.ryx"
@@ -114,12 +119,31 @@
     ],
     "snippets": [
       {
-        "language": "ryunix",
-        "path": "./snippets/javascript.code-snippets"
+        "language": "ryx",
+        "path": "./snippets/ryx-snippets.json"
       }
-    ]
+    ],
+    "configuration": {
+      "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "ryx"
+      ],
+      "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+      "emmet.includeLanguages": {
+        "ryx": "html,javascript,javascriptreact"
+      }
+    }
   },
-  "dependencies": {
-    "@vscode/vsce": "^2.21.0"
+  "devDependencies": {
+    "typescript": "^4.0.0",
+    "vscode": "^1.1.33",
+    "eslint": "^7.32.0",
+    "prettier": "^2.3.2",
+    "@vscode/vsce": "^2.27.0"
   }
 }

@@ -43,6 +43,8 @@ create('create-cra', {
         true,
       )
     } else if (template === 'Webpack') {
+      // Ryunix
+
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
         await installNpmPackage('@unsetsoft/ryunix-webpack@latest', true)

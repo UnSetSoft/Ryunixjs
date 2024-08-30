@@ -1,0 +1,222 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "RYX",
+  "scopeName": "source.js.ryx",
+  "fileTypes": ["ryx"],
+  "patterns": [
+    {
+      "include": "#directives"
+    },
+    {
+      "include": "#statements"
+    },
+    {
+      "include": "#shebang"
+    },
+    {
+      "include": "text.html.basic"
+    },
+    {
+      "include": "source.js"
+    }
+  ],
+  "repository": {
+    "directives": {
+      "patterns": [
+        {
+          "match": "^\\s*#\\w+",
+          "name": "keyword.control.directive.ryx"
+        }
+      ]
+    },
+    "statements": {
+      "patterns": [
+        {
+          "include": "#jsx"
+        },
+        {
+          "include": "#function_call"
+        },
+        {
+          "include": "#variable_declaration"
+        },
+        {
+          "include": "#object_literal"
+        },
+        {
+          "include": "#array_literal"
+        },
+        {
+          "include": "#string_literal"
+        },
+        {
+          "include": "#number_literal"
+        },
+        {
+          "include": "#comment"
+        }
+      ]
+    },
+    "shebang": {
+      "patterns": [
+        {
+          "match": "^#!.*$",
+          "name": "comment.line.shebang.ryx"
+        }
+      ]
+    },
+    "jsx": {
+      "begin": "<",
+      "end": ">",
+      "captures": {
+        "0": {
+          "name": "punctuation.definition.tag.ryx"
+        },
+        "1": {
+          "patterns": [
+            {
+              "include": "#tag_name"
+            },
+            {
+              "include": "#attribute"
+            },
+            {
+              "include": "#tag_end"
+            }
+          ]
+        }
+      }
+    },
+    "function_call": {
+      "match": "\\b\\w+\\(",
+      "name": "entity.name.function.call.ryx",
+      "captures": {
+        "0": {
+          "name": "entity.name.function.ryx"
+        }
+      }
+    },
+    "variable_declaration": {
+      "match": "\\b(let|const|var)\\s+\\w+\\b",
+      "name": "variable.declaration.ryx",
+      "captures": {
+        "1": {
+          "name": "storage.type.ryx"
+        },
+        "2": {
+          "name": "variable.other.readwrite.ryx"
+        }
+      }
+    },
+    "object_literal": {
+      "begin": "{",
+      "end": "}",
+      "captures": {
+        "0": {
+          "name": "punctuation.section.object.ryx"
+        },
+        "1": {
+          "patterns": [
+            {
+              "include": "#object_key_value_pair"
+            }
+          ]
+        },
+        "2": {
+          "name": "punctuation.section.object.ryx"
+        }
+      }
+    },
+    "object_key_value_pair": {
+      "patterns": [
+        {
+          "match": "\\b\\w+\\b\\s*:",
+          "name": "entity.name.tag.ryx",
+          "captures": {
+            "0": {
+              "name": "entity.name.tag.ryx"
+            }
+          }
+        }
+      ]
+    },
+    "array_literal": {
+      "begin": "\\[",
+      "end": "\\]",
+      "captures": {
+        "0": {
+          "name": "punctuation.section.array.ryx"
+        },
+        "1": {
+          "patterns": [
+            {
+              "include": "#array_value"
+            }
+          ]
+        },
+        "2": {
+          "name": "punctuation.section.array.ryx"
+        }
+      }
+    },
+    "array_value": {
+      "patterns": [
+        {
+          "match": "\\b\\w+\\b",
+          "name": "variable.other.readwrite.ryx"
+        }
+      ]
+    },
+    "string_literal": {
+      "match": "\"(\\\\\\\\|\\\\\"|[^\"])*\"",
+      "name": "string.quoted.double.ryx"
+    },
+    "number_literal": {
+      "match": "\\b\\d+\\b",
+      "name": "constant.numeric.ryx"
+    },
+    "comment": {
+      "match": "//.*$",
+      "name": "comment.line.double-slash.ryx"
+    },
+    "tag_name": {
+      "match": "\\b\\w+",
+      "name": "entity.name.tag.ryx"
+    },
+    "attribute": {
+      "match": "\\b\\w+\\b(?=\\s*=\\s*)",
+      "name": "entity.other.attribute-name.ryx"
+    },
+    "tag_end": {
+      "match": ">",
+      "name": "punctuation.definition.tag.ryx"
+    },
+    "text.html.basic": {
+      "patterns": [
+        {
+          "include": "#tag"
+        }
+      ]
+    },
+    "tag": {
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#tag_name"
+        },
+        {
+          "include": "#attribute"
+        },
+        {
+          "include": "#string"
+        }
+      ]
+    },
+    "string": {
+      "match": "\"(\\\\\\\\|\\\\\"|[^\"])*\"",
+      "name": "string.quoted.double.html"
+    }
+  }
+}
