@@ -1,4 +1,4 @@
-<img src="./extensions/ryunix/logo-dark.svg"  width="200" height="200" style="
+<img src="[.](https://github.com/UnSetSoft/Ryunixjs/blob/dev/extensions/ryunix/logo-dark.svg"  width="200" height="200" style="
     display: block;
     margin: 0 auto;" />
 
