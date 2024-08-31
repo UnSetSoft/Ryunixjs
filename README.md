@@ -16,5 +16,4 @@ Like React, NextJS, Preact, Vite. Ryunix allows you to build static websites fro
 
 Fork a send a pull request!
 
-
 [![Invitame un café en cafecito.app](https://cdn.cafecito.app/imgs/buttons/button_3.svg)](https://cafecito.app/neyunse) [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A1314KEV)

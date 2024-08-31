@@ -7,8 +7,6 @@ import {
   useRef,
   useMemo,
   useCallback,
-  useContext,
-  createContext,
 } from './hooks'
 import * as Dom from './dom'
 import * as Workers from './workers'
@@ -16,17 +14,7 @@ import * as Reconciler from './reconciler'
 import * as Components from './components'
 import * as Commits from './commits'
 
-export {
-  useStore,
-  useEffect,
-  useQuery,
-  useRef,
-  useMemo,
-  useCallback,
-  useContext,
-  createContext,
-  Fragment
-}
+export { useStore, useEffect, useQuery, useRef, useMemo, useCallback, Fragment }
 
 export default {
   createElement,
