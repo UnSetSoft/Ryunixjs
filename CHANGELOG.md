@@ -1,4 +1,37 @@
 # Changelog
+### [1.0.1](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.13...v1.0.1) (2024-10-12)
+
+### [0.5.9-nightly.13](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.12...v0.5.9-nightly.13) (2024-10-12)
+
+### [0.5.9-nightly.12](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.11...v0.5.9-nightly.12) (2024-10-12)
+
+### [0.5.9-nightly.11](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.10...v0.5.9-nightly.11) (2024-10-12)
+
+### [0.5.9-nightly.10](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.9...v0.5.9-nightly.10) (2024-10-12)
+
+### [0.5.9-nightly.9](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.8...v0.5.9-nightly.9) (2024-10-12)
+
+### [0.5.9-nightly.8](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.7...v0.5.9-nightly.8) (2024-10-12)
+
+### [0.5.9-nightly.7](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.6...v0.5.9-nightly.7) (2024-10-12)
+
+### [0.5.9-nightly.6](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.5...v0.5.9-nightly.6) (2024-10-12)
+
+### [0.5.9-nightly.5](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.4...v0.5.9-nightly.5) (2024-10-12)
+
+### [0.5.9-nightly.4](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.3...v0.5.9-nightly.4) (2024-10-12)
+
+### [0.5.9-nightly.3](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.2...v0.5.9-nightly.3) (2024-10-12)
+
+### [0.5.9-nightly.2](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.1...v0.5.9-nightly.2) (2024-10-12)
+
+### [0.5.9-nightly.1](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.8...v0.5.9-nightly.1) (2024-10-11)
+
+### [0.5.8](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.5...v0.5.8) (2024-08-31)
+
+### [0.5.7](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.6...v0.5.7) (2024-08-31)
+
+### [0.5.6](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.3-nightly.11...v0.5.6) (2024-08-31)
 
 ### [0.5.7](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.6...v0.5.7) (2024-08-31)
 

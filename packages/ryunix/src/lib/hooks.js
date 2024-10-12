@@ -166,4 +166,37 @@ const useCallback = (callback, deps) => {
   return useMemo(() => callback, deps)
 }
 
-export { useStore, useEffect, useQuery, useRef, useMemo, useCallback }
+const useRouter = (routes) => {
+  const [location, setLocation] = useStore(window.location.pathname)
+
+  const navigate = (path) => {
+    window.history.pushState({}, '', path)
+    setLocation(path)
+  }
+
+  useEffect(() => {
+    const onPopState = () => {
+      setLocation(window.location.pathname)
+    }
+
+    window.addEventListener('popstate', onPopState)
+    return () => {
+      window.removeEventListener('popstate', onPopState)
+    }
+  }, [])
+
+  const currentRoute = routes.find((route) => route.path === location)
+  const Children = () => (currentRoute ? currentRoute.component : null)
+
+  return { Children, navigate }
+}
+
+export {
+  useStore,
+  useEffect,
+  useQuery,
+  useRef,
+  useMemo,
+  useCallback,
+  useRouter,
+}

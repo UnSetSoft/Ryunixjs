@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto'
 import { resolve } from 'path'
 
+import { promises as fs } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
 const resolveApp = (appDirectory, relativePath) =>
   resolve(appDirectory, relativePath)
 
@@ -52,4 +56,19 @@ const getEnviroment = () =>
       },
     )
 
-export { getPackageManager, ENV_HASH, getEnviroment, resolveApp, RYUNIX_APP }
+const getPackageVersion = async () => {
+  const __dirname = dirname(fileURLToPath(import.meta.url)) // Para obtener el directorio actual
+  const packageJsonPath = join(__dirname, '../package.json')
+  const data = await fs.readFile(packageJsonPath, 'utf-8')
+  const packageJson = JSON.parse(data)
+  return packageJson
+}
+
+export {
+  getPackageManager,
+  ENV_HASH,
+  getEnviroment,
+  resolveApp,
+  RYUNIX_APP,
+  getPackageVersion,
+}
