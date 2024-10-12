@@ -34,5 +34,5 @@ const configFileExist = () => {
 
 module.exports = {
   config,
-  configFileExist
+  configFileExist,
 }

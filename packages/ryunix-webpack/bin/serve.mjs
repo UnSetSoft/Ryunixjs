@@ -1,7 +1,7 @@
 import Webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import webpackConfig from '../webpack.config.mjs'
-import {configFileExist} from '../utils/settingfile.cjs'
+import { configFileExist } from '../utils/settingfile.cjs'
 import envPath from '../utils/envExist.cjs'
 import { getPackageVersion } from '../utils/index.mjs'
 import logger from 'terminal-log'

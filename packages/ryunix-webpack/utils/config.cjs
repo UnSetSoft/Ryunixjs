@@ -1,5 +1,5 @@
 'use strict'
-const {config} = require('./settingfile.cjs')
+const { config } = require('./settingfile.cjs')
 
 const defaultSettings = {
   static: {
