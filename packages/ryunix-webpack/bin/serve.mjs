@@ -1,7 +1,7 @@
 import Webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import webpackConfig from '../webpack.config.mjs'
-import configFile from '../utils/settingfile.cjs'
+import {configFileExist} from '../utils/settingfile.cjs'
 import envPath from '../utils/envExist.cjs'
 import { getPackageVersion } from '../utils/index.mjs'
 import logger from 'terminal-log'
@@ -61,7 +61,7 @@ const StartServer = async (cliSettings) => {
         ${chalk.bold(chalk.cyanBright(`<Ryunix/> ${version}`))}
 
           - Running at: http://localhost:${port}
-          - Config file: ${configFile ? `loaded` : '404'}
+          - Config file: ${configFileExist() ? `loaded` : '404'}
           - Environment file: ${envPath() ? `loaded` : '404'}
           - Launched in: ${
             Date.now() - startTime > 1 && Date.now() - startTime < 89
