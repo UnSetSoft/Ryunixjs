@@ -1,4 +1,9 @@
 # Changelog
+
+### [1.0.3](https://github.com/UnSetSoft/Ryunixjs/compare/v1.0.2...v1.0.3) (2024-10-12)
+
+### [1.0.2](https://github.com/UnSetSoft/Ryunixjs/compare/v1.0.1...v1.0.2) (2024-10-12)
+
 ### [1.0.1](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.13...v1.0.1) (2024-10-12)
 
 ### [0.5.9-nightly.13](https://github.com/UnSetSoft/Ryunixjs/compare/v0.5.9-nightly.12...v0.5.9-nightly.13) (2024-10-12)

@@ -22,4 +22,17 @@ if (fs.existsSync(defaultConfigFile)) {
   config = require('../../../../ryunix.config.cjs')
 }
 
-module.exports = config
+const configFileExist = () => {
+  if (fs.existsSync(defaultConfigFile)) {
+    return true
+  } else if (fs.existsSync(CommonConfigFile)) {
+    return true
+  }
+
+  return false
+}
+
+module.exports = {
+  config,
+  configFileExist,
+}
