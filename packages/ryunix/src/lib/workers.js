@@ -3,51 +3,54 @@ import { updateFunctionComponent, updateHostComponent } from './components'
 import { vars } from '../utils/index'
 
 /**
- * This function uses requestIdleCallback to perform work on a fiber tree until it is complete or the
- * browser needs to yield to other tasks.
- * @param deadline - The `deadline` parameter is an object that represents the amount of time the
- * browser has to perform work before it needs to handle other tasks. It has a `timeRemaining()` method
- * that returns the amount of time remaining before the deadline is reached. The `shouldYield` variable
- * is used to determine
+ * Main work loop that processes the fiber tree using requestIdleCallback.
+ * It continues processing until all units of work are completed or the browser needs to yield.
+ * @param {IdleDeadline} deadline - Represents the time remaining for the browser to execute tasks before yielding.
  */
 const workLoop = (deadline) => {
   let shouldYield = false
+
+  // Process each unit of work until we should yield back control to the browser
   while (vars.nextUnitOfWork && !shouldYield) {
     vars.nextUnitOfWork = performUnitOfWork(vars.nextUnitOfWork)
     shouldYield = deadline.timeRemaining() < 1
   }
 
+  // If there are no more units of work, commit the changes to the DOM
   if (!vars.nextUnitOfWork && vars.wipRoot) {
     commitRoot()
   }
 
+  // Continue the work loop using requestIdleCallback for efficient task scheduling
   requestIdleCallback(workLoop)
 }
 
+// Start the work loop for the first time
 requestIdleCallback(workLoop)
 
 /**
- * The function performs a unit of work by updating either a function component or a host component and
- * returns the next fiber to be processed.
- * @param fiber - A fiber is a unit of work in Ryunix that represents a component and its state. It
- * contains information about the component's type, props, and children, as well as pointers to its
- * parent, child, and sibling fibers. The `performUnitOfWork` function takes a fiber as a parameter and
- * performs work
- * @returns The function `performUnitOfWork` returns the next fiber to be processed. If the current
- * fiber has a child, it returns the child. Otherwise, it looks for the next sibling of the current
- * fiber. If there are no more siblings, it goes up the tree to the parent and looks for the next
- * sibling of the parent. The function returns `undefined` if there are no more fibers to process.
+ * Processes a unit of work in the fiber tree.
+ * Decides whether to update a function component or a host component (DOM element).
+ * @param {Object} fiber - The current fiber representing a component and its state in the virtual DOM tree.
+ * @returns {Object|undefined} The next fiber to process, or undefined if there are no more.
  */
 const performUnitOfWork = (fiber) => {
+  // Determine if the current fiber is a function component
   const isFunctionComponent = fiber.type instanceof Function
+
+  // Update based on the type of component
   if (isFunctionComponent) {
     updateFunctionComponent(fiber)
   } else {
     updateHostComponent(fiber)
   }
+
+  // Return the child fiber if it exists (depth-first processing)
   if (fiber.child) {
     return fiber.child
   }
+
+  // Traverse up the tree looking for the next sibling to process
   let nextFiber = fiber
   while (nextFiber) {
     if (nextFiber.sibling) {
@@ -55,6 +58,8 @@ const performUnitOfWork = (fiber) => {
     }
     nextFiber = nextFiber.parent
   }
+
+  // If no more fibers, return undefined
   return undefined
 }
 

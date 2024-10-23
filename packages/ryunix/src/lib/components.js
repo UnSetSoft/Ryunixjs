@@ -3,38 +3,42 @@ import { reconcileChildren } from './reconciler'
 import { vars } from '../utils/index'
 
 /**
- * This function updates a function component by setting up a work-in-progress fiber, resetting the
- * hook index, creating an empty hooks array, rendering the component, and reconciling its children.
- * @param fiber - The fiber parameter is an object that represents a node in the fiber tree. It
- * contains information about the component, its props, state, and children. In this function, it is
- * used to update the state of the component and its children.
+ * Updates a function component by setting up a work-in-progress fiber,
+ * resetting the hook index, initializing an empty hooks array, rendering the component,
+ * and reconciling its children.
+ * 
+ * @param fiber - The fiber node representing the function component being updated. It contains
+ *                properties such as the component type, props, and hooks.
  */
 const updateFunctionComponent = (fiber) => {
+  // Set up work-in-progress fiber
   vars.wipFiber = fiber
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
+
+  // Render the function component by calling its type (the component function) with the props
   const children = fiber.type(fiber.props)
-  let childArr = []
-  if (Array.isArray(children)) {
-    // Fragment results returns array
-    childArr = [...children]
-  } else {
-    // Normal function component returns single root node
-    childArr = [children]
-  }
+  
+  // Convert the result to an array for easier handling, supporting single child and fragment-like arrays
+  const childArr = Array.isArray(children) ? [...children] : [children]
+
+  // Reconcile the children of the fiber
   reconcileChildren(fiber, childArr)
 }
 
 /**
- * This function updates a host component's DOM element and reconciles its children.
- * @param fiber - A fiber is a unit of work in Ryunix that represents a component and its state. It
- * contains information about the component's type, props, and children, as well as pointers to other
- * fibers in the tree.
+ * Updates a host component's DOM element and reconciles its children.
+ * This function handles standard DOM elements like div, span, etc.
+ * 
+ * @param fiber - A fiber node representing the host component (e.g., a DOM node like div, span, etc.).
  */
 const updateHostComponent = (fiber) => {
+  // Create a DOM node for the fiber if it doesn't already exist
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
   }
+
+  // Reconcile the children of the host component (DOM node)
   reconcileChildren(fiber, fiber.props.children)
 }
 

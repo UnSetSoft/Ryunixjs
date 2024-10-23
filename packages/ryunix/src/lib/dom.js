@@ -2,34 +2,34 @@ import { isEvent, isGone, isNew, isProperty } from './effects'
 import { RYUNIX_TYPES, STRINGS, reg, OLD_STRINGS } from '../utils/index'
 
 /**
- * The function creates a new DOM element based on the given fiber object and updates its properties.
- * @param fiber - The fiber parameter is an object that represents a node in the fiber tree. It
- * contains information about the element type, props, and children of the node.
- * @returns The `createDom` function returns a newly created DOM element based on the `fiber` object
- * passed as an argument. If the `fiber` object represents a text element, a text node is created using
- * `document.createTextNode("")`. Otherwise, a new element is created using
- * `document.createElement(fiber.type)`. The function then calls the `updateDom` function to update the
- * properties of the newly created
+ * Creates a new DOM element based on the given fiber object and updates its properties.
+ * 
+ * @param fiber - The fiber object represents a node in the fiber tree and contains 
+ *                information about the element type, props, and children.
+ * @returns A newly created DOM element based on the fiber object.
  */
 const createDom = (fiber) => {
-  const dom =
-    fiber.type == RYUNIX_TYPES.TEXT_ELEMENT
+  const dom = 
+    fiber.type === RYUNIX_TYPES.TEXT_ELEMENT
       ? document.createTextNode('')
       : document.createElement(fiber.type)
 
+  // Update the newly created DOM element with initial props
   updateDom(dom, {}, fiber.props)
 
   return dom
 }
 
 /**
- * The function updates the DOM by removing old event listeners and properties, and adding new ones
- * based on the previous and next props.
- * @param dom - The DOM element that needs to be updated with new props.
- * @param prevProps - An object representing the previous props (properties) of a DOM element.
- * @param nextProps - An object containing the new props that need to be updated in the DOM.
+ * Updates a DOM element by removing old properties and event listeners, 
+ * and applying new properties and event listeners from the nextProps.
+ * 
+ * @param dom - The DOM element that needs to be updated.
+ * @param prevProps - The previous properties of the DOM element.
+ * @param nextProps - The new properties that should be applied to the DOM element.
  */
 const updateDom = (dom, prevProps, nextProps) => {
+  // Remove old or changed event listeners
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
@@ -38,6 +38,7 @@ const updateDom = (dom, prevProps, nextProps) => {
       dom.removeEventListener(eventType, prevProps[name])
     })
 
+  // Remove old properties
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(nextProps))
@@ -45,35 +46,21 @@ const updateDom = (dom, prevProps, nextProps) => {
       dom[name] = ''
     })
 
+  // Set new or changed properties
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      if (name === STRINGS.style) {
-        DomStyle(dom, nextProps['ryunix-style'])
-      } else if (name === OLD_STRINGS.style) {
-        DomStyle(dom, nextProps.style)
-      } else if (name === STRINGS.className) {
-        if (nextProps['ryunix-class'] === '') {
-          throw new Error('data-class cannot be empty.')
-        }
-
-        prevProps['ryunix-class'] &&
-          dom.classList.remove(...prevProps['ryunix-class'].split(/\s+/))
-        dom.classList.add(...nextProps['ryunix-class'].split(/\s+/))
-      } else if (name === OLD_STRINGS.className) {
-        if (nextProps.className === '') {
-          throw new Error('className cannot be empty.')
-        }
-
-        prevProps.className &&
-          dom.classList.remove(...prevProps.className.split(/\s+/))
-        dom.classList.add(...nextProps.className.split(/\s+/))
+      if (name === STRINGS.style || name === OLD_STRINGS.style) {
+        DomStyle(dom, nextProps[STRINGS.style] || nextProps[OLD_STRINGS.style])
+      } else if (name === STRINGS.className || name === OLD_STRINGS.className) {
+        handleClassName(dom, prevProps, nextProps, name)
       } else {
         dom[name] = nextProps[name]
       }
     })
 
+  // Add new event listeners
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
@@ -83,14 +70,42 @@ const updateDom = (dom, prevProps, nextProps) => {
     })
 }
 
+/**
+ * Updates the DOM element's style by applying the provided styles.
+ * 
+ * @param dom - The DOM element that needs to be styled.
+ * @param style - An object containing the styles to be applied.
+ */
 const DomStyle = (dom, style) => {
   dom.style = Object.keys(style).reduce((acc, styleName) => {
-    const key = styleName.replace(reg, function (v) {
-      return '-' + v.toLowerCase()
-    })
+    const key = styleName.replace(reg, (v) => `-${v.toLowerCase()}`)
     acc += `${key}: ${style[styleName]};`
     return acc
   }, '')
+}
+
+/**
+ * Handles updating the className or ryunix-class properties, ensuring
+ * that the old class names are removed and the new ones are applied.
+ * 
+ * @param dom - The DOM element to be updated.
+ * @param prevProps - The previous properties, including className.
+ * @param nextProps - The new properties, including className.
+ * @param name - The name of the class property (className or ryunix-class).
+ */
+const handleClassName = (dom, prevProps, nextProps, name) => {
+  const classProp = name === STRINGS.className ? 'ryunix-class' : 'className'
+  
+  if (nextProps[classProp] === '') {
+    throw new Error(`${classProp} cannot be empty.`)
+  }
+
+  // Remove old class names if they exist
+  prevProps[classProp] &&
+    dom.classList.remove(...prevProps[classProp].split(/\s+/))
+
+  // Add new class names
+  dom.classList.add(...nextProps[classProp].split(/\s+/))
 }
 
 export { DomStyle, createDom, updateDom }

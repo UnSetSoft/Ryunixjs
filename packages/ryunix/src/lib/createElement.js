@@ -1,23 +1,32 @@
-import { RYUNIX_TYPES, STRINGS } from '../utils/index'
+import { RYUNIX_TYPES, STRINGS } from '../utils/index';
 
 const Fragment = (props) => {
-  return props.children
-}
+  return props.children;
+};
 
-const childArray = (children, out) => {
-  out = out || []
-  if (children == undefined || typeof children == STRINGS.boolean) {
-    // pass
+/**
+ * The function takes a set of child elements and flattens them into an array to ensure all children are handled properly.
+ * @param children - The child elements, which can be of different types (array, object, primitive).
+ * @param out - The array where the final children will be stored.
+ * @returns An array with all the child elements.
+ */
+const childArray = (children, out = []) => {
+  if (children == undefined || typeof children === STRINGS.boolean) {
+    // Do nothing with undefined or boolean children
   } else if (Array.isArray(children)) {
-    children.some((child) => {
-      childArray(child, out)
-    })
+    children.forEach((child) => childArray(child, out)); // Use forEach instead of some
   } else {
-    out.push(children)
+    out.push(children);
   }
-  return out
-}
+  return out;
+};
 
+/**
+ * The function clones a given element, allowing you to add or override its properties (props).
+ * @param element - The element to be cloned.
+ * @param props - The new or updated properties for the cloned element.
+ * @returns A new element object with the updated properties.
+ */
 const cloneElement = (element, props) => {
   return {
     ...element,
@@ -25,54 +34,42 @@ const cloneElement = (element, props) => {
       ...element.props,
       ...props,
     },
-  }
-}
+  };
+};
 
 /**
- * The function creates a new element with the given type, props, and children.
- * @param type - The type of the element to be created, such as "div", "span", "h1", etc.
- * @param props - The `props` parameter is an object that contains the properties or attributes of the
- * element being created. These properties can include things like `className`, `id`, `style`, and any
- * other custom attributes that the user wants to add to the element. The `props` object is spread
- * using the spread
- * @param children - The `children` parameter is a rest parameter that allows the function to accept
- * any number of arguments after the `props` parameter. These arguments will be treated as children
- * elements of the created element. The `map` function is used to iterate over each child and create a
- * new element if it is not
- * @returns A JavaScript object with a `type` property and a `props` property. The `type` property is
- * set to the `type` argument passed into the function, and the `props` property is an object that
- * includes any additional properties passed in the `props` argument, as well as a `children` property
- * that is an array of any child elements passed in the `...children` argument
+ * The function creates a new element with a given type, properties, and children.
+ * @param type - The type of element to create (div, span, etc.).
+ * @param props - The properties of the element.
+ * @param children - The child elements of the new element.
+ * @returns An object representing the created element.
  */
-
 const createElement = (type, props, ...children) => {
-  children = childArray(children, [])
+  children = childArray(children, []);
   return {
     type,
     props: {
       ...props,
       children: children.map((child) =>
-        typeof child === STRINGS.object ? child : createTextElement(child),
+        typeof child === STRINGS.object ? child : createTextElement(child)
       ),
     },
-  }
-}
+  };
+};
 
 /**
- * The function creates a text element with a given text value.
- * @param text - The text content that will be used to create a new text element.
- * @returns A JavaScript object with a `type` property set to `"TEXT_ELEMENT"` and a `props` property
- * that contains a `nodeValue` property set to the `text` parameter and an empty `children` array.
+ * The function creates a text element from a given text value.
+ * @param text - The text content to create the element.
+ * @returns An object representing a text element.
  */
-
 const createTextElement = (text) => {
   return {
     type: RYUNIX_TYPES.TEXT_ELEMENT,
     props: {
       nodeValue: text,
-      children: [],
+      children: [], // Text elements don't have children.
     },
-  }
-}
+  };
+};
 
-export { createElement, createTextElement, Fragment, cloneElement }
+export { createElement, createTextElement, Fragment, cloneElement };

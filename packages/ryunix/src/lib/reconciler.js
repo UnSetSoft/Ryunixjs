@@ -22,9 +22,9 @@ const reconcileChildren = (wipFiber, elements) => {
 
     if (sameType) {
       newFiber = {
-        type: oldFiber ? oldFiber.type : undefined,
+        type: oldFiber.type,
         props: element.props,
-        dom: oldFiber ? oldFiber.dom : undefined,
+        dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
@@ -40,7 +40,7 @@ const reconcileChildren = (wipFiber, elements) => {
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
     }
-    if (oldFiber && !sameType) {
+    if (!element && oldFiber) {
       oldFiber.effectTag = EFFECT_TAGS.DELETION
       vars.deletions.push(oldFiber)
     }

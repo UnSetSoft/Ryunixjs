@@ -1,9 +1,40 @@
 import { RYUNIX_TYPES, STRINGS } from '../utils/index'
 
+/**
+ * Checks if a key is an event handler (i.e., starts with 'on').
+ * @param key - The key to check.
+ * @returns A boolean indicating if the key is an event.
+ */
 const isEvent = (key) => key.startsWith('on')
+
+/**
+ * Checks if a key is a property (not 'children' and not an event).
+ * @param key - The key to check.
+ * @returns A boolean indicating if the key is a property.
+ */
 const isProperty = (key) => key !== STRINGS.children && !isEvent(key)
+
+/**
+ * Checks if a property has changed between the previous and next props.
+ * @param prev - The previous props object.
+ * @param next - The next props object.
+ * @returns A function that takes a key and returns true if the property has changed.
+ */
 const isNew = (prev, next) => (key) => prev[key] !== next[key]
+
+/**
+ * Checks if a property is no longer present in the next props.
+ * @param next - The next props object.
+ * @returns A function that takes a key and returns true if the property is not present in the next props.
+ */
 const isGone = (next) => (key) => !(key in next)
+
+/**
+ * Checks if the dependencies for a hook have changed.
+ * @param prevDeps - The previous dependencies array.
+ * @param nextDeps - The next dependencies array.
+ * @returns A boolean indicating if the dependencies have changed.
+ */
 const hasDepsChanged = (prevDeps, nextDeps) =>
   !prevDeps ||
   !nextDeps ||
@@ -11,11 +42,8 @@ const hasDepsChanged = (prevDeps, nextDeps) =>
   prevDeps.some((dep, index) => dep !== nextDeps[index])
 
 /**
- * The function cancels all effect hooks in a given fiber.
- * @param fiber - The "fiber" parameter is likely referring to a data structure used in React.js to
- * represent a component and its state. It contains information about the component's props, state, and
- * children, as well as metadata used by React to manage updates and rendering. The function
- * "cancelEffects" is likely intended
+ * Cancels all effect hooks in a given fiber.
+ * @param fiber - The fiber object containing hooks.
  */
 const cancelEffects = (fiber) => {
   if (fiber.hooks) {
@@ -28,11 +56,8 @@ const cancelEffects = (fiber) => {
 }
 
 /**
- * The function runs all effect hooks in a given fiber.
- * @param fiber - The "fiber" parameter is likely referring to a data structure used in the
- * implementation of a fiber-based reconciliation algorithm, such as the one used in React. A fiber
- * represents a unit of work that needs to be performed by the reconciliation algorithm, and it
- * contains information about a component and its children, as
+ * Runs all effect hooks in a given fiber.
+ * @param fiber - The fiber object containing hooks.
  */
 const runEffects = (fiber) => {
   if (fiber.hooks) {
