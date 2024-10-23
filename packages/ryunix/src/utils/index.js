@@ -3,12 +3,13 @@ const vars = {
   nextUnitOfWork: undefined,
   currentRoot: undefined,
   wipRoot: undefined,
-  deletions: undefined,
-  wipFiber: undefined,
-  hookIndex: undefined,
+  deletions: [],
+  workInProgressFiber: undefined,
+  hookIndex: 0,
+  errorBoundary: null, // New property to hold error boundary references
 }
 
-const reg = /[A-Z]/g
+const capitalLetterRegex = /[A-Z]/g
 
 const RYUNIX_TYPES = Object.freeze({
   TEXT_ELEMENT: Symbol('text.element'),
@@ -16,6 +17,7 @@ const RYUNIX_TYPES = Object.freeze({
   RYUNIX_MEMO: Symbol('ryunix.memo'),
   RYUNIX_URL_QUERY: Symbol('ryunix.urlQuery'),
   RYUNIX_REF: Symbol('ryunix.ref'),
+  RYUNIX_ERROR_BOUNDARY: Symbol('ryunix.errorBoundary'), // New Error Boundary Type
 })
 
 const STRINGS = Object.freeze({
@@ -33,9 +35,9 @@ const OLD_STRINGS = Object.freeze({
 })
 
 const EFFECT_TAGS = Object.freeze({
-  PLACEMENT: Symbol(),
-  UPDATE: Symbol(),
-  DELETION: Symbol(),
+  PLACEMENT: Symbol('placement'),
+  UPDATE: Symbol('update'),
+  DELETION: Symbol('deletion'),
 })
 
-export { vars, reg, RYUNIX_TYPES, EFFECT_TAGS, STRINGS, OLD_STRINGS }
+export { vars, capitalLetterRegex, RYUNIX_TYPES, EFFECT_TAGS, STRINGS, OLD_STRINGS }

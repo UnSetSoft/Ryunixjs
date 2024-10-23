@@ -1,33 +1,39 @@
 import { vars } from '../utils/index'
+import { commitRoot } from './commits'
+import { performUnitOfWork, workLoop } from './workers'
 
 /**
- * The function renders an element into a container using a work-in-progress root.
- * @param element - The element parameter is the component or element that needs to be rendered in the
- * container. It could be a Ryunix component or a DOM element.
- * @param container - The container parameter is the DOM element where the rendered element will be
- * appended to. this parameter is optional if you use createRoot().
+ * Renders an element into the specified container or the default root element.
  */
 const render = (element, container) => {
+  if (!element || !container) {
+    console.error('Invalid element or container provided.')
+    return
+  }
+
   vars.wipRoot = {
-    dom: vars.containerRoot || container,
-    props: {
-      children: [element],
-    },
+    dom: container,
+    props: { children: [element] },
     alternate: vars.currentRoot,
   }
+
   vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
+  requestIdleCallback(workLoop)
 }
 
 /**
- * @description The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
- * @example Ryunix.init("root") -> <div id="root" />
- * @param root - The parameter "root" is the id of the HTML element that will serve as the container
- * for the root element.
+ * Initializes the app with a root container.
  */
-const init = (root) => {
-  const rootElement = root || '__ryunix'
-  vars.containerRoot = document.getElementById(rootElement)
+const init = (rootId = '__ryunix') => {
+  const rootElement = document.getElementById(rootId)
+  if (!rootElement) {
+    console.error(`Root element with ID '${rootId}' not found.`)
+    return null
+  }
+
+  vars.containerRoot = rootElement
+  console.log(`Ryunix initialized with root ID: ${rootId}`)
   return this
 }
 

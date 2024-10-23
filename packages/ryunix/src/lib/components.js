@@ -11,21 +11,14 @@ import { vars } from '../utils/index'
  *                properties such as the component type, props, and hooks.
  */
 const updateFunctionComponent = (fiber) => {
-  // Set up work-in-progress fiber
-  vars.wipFiber = fiber
+  // Set the current work-in-progress fiber
+  vars.workInProgressFiber = fiber
   vars.hookIndex = 0
-  vars.wipFiber.hooks = []
+  vars.workInProgressFiber.hooks = []
 
-  // Render the function component by calling its type (the component function) with the props
   const children = fiber.type(fiber.props)
-  
-  // Convert the result to an array for easier handling, supporting single child and fragment-like arrays
-  const childArr = Array.isArray(children) ? [...children] : [children]
-
-  // Reconcile the children of the fiber
-  reconcileChildren(fiber, childArr)
+  reconcileChildren(fiber, children)
 }
-
 /**
  * Updates a host component's DOM element and reconciles its children.
  * This function handles standard DOM elements like div, span, etc.
@@ -33,12 +26,10 @@ const updateFunctionComponent = (fiber) => {
  * @param fiber - A fiber node representing the host component (e.g., a DOM node like div, span, etc.).
  */
 const updateHostComponent = (fiber) => {
-  // Create a DOM node for the fiber if it doesn't already exist
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
   }
 
-  // Reconcile the children of the host component (DOM node)
   reconcileChildren(fiber, fiber.props.children)
 }
 
