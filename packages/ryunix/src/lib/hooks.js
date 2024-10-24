@@ -206,9 +206,6 @@ const useRouter = (routes) => {
   return { Children, navigate, NavLink }
 }
 
-function NotFound() {
-  return <h1>404 - Page Not Found</h1>
-}
 
 export {
   useStore,
