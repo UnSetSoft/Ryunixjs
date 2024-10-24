@@ -12,26 +12,35 @@ import { EFFECT_TAGS, vars } from '../utils/index'
 const reconcileChildren = (wipFiber, elements) => {
   let index = 0
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
-  let prevSibling
+  let prevSibling = null
 
-  while (index < elements.length || oldFiber != undefined) {
+   const oldFibersMap = new Map()
+  while (oldFiber) {
+    const oldKey = oldFiber.props.key || oldFiber.type
+    oldFibersMap.set(oldKey, oldFiber)
+    oldFiber = oldFiber.sibling
+  }
+
+   while (index < elements.length) {
     const element = elements[index]
-    let newFiber
+    const key = element.props.key || element.type
+    const oldFiber = oldFibersMap.get(key)  
 
-    const sameType = oldFiber && element && element.type == oldFiber.type
+    let newFiber
+    const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
-      newFiber = {
-        type: oldFiber ? oldFiber.type : undefined,
+       newFiber = {
+        type: oldFiber.type,
         props: element.props,
-        dom: oldFiber ? oldFiber.dom : undefined,
+        dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
       }
-    }
-    if (element && !sameType) {
-      newFiber = {
+      oldFibersMap.delete(key)  
+    } else if (element) {
+       newFiber = {
         type: element.type,
         props: element.props,
         dom: undefined,
@@ -40,18 +49,15 @@ const reconcileChildren = (wipFiber, elements) => {
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
     }
-    if (oldFiber && !sameType) {
+
+     oldFibersMap.forEach((oldFiber) => {
       oldFiber.effectTag = EFFECT_TAGS.DELETION
       vars.deletions.push(oldFiber)
-    }
-
-    if (oldFiber) {
-      oldFiber = oldFiber.sibling
-    }
+    })
 
     if (index === 0) {
       wipFiber.child = newFiber
-    } else if (element && prevSibling) {
+    } else if (prevSibling) {
       prevSibling.sibling = newFiber
     }
 
@@ -59,4 +65,5 @@ const reconcileChildren = (wipFiber, elements) => {
     index++
   }
 }
+
 export { reconcileChildren }

@@ -1,6 +1,6 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
-import { Fragment, createElement, cloneElement } from './createElement'
+import { createElement } from './createElement'
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
@@ -14,24 +14,19 @@ const useStore = (initial) => {
     vars.wipFiber.alternate.hooks[vars.hookIndex]
   const hook = {
     state: oldHook ? oldHook.state : initial,
-    queue: [],
+    queue: oldHook ? [...oldHook.queue] : [],
   }
 
-  const actions = oldHook ? oldHook.queue : []
-  actions.forEach((action) => {
+  hook.queue.forEach((action) => {
     hook.state =
       typeof action === STRINGS.function ? action(hook.state) : action
   })
 
-  /**
-   * The function `setState` updates the state of a component in Ryunix by adding an action to a queue
-   * and setting up a new work-in-progress root.
-   * @param action - The `action` parameter is an object that represents a state update to be performed
-   * on a component. It contains information about the type of update to be performed and any new data
-   * that needs to be applied to the component's state.
-   */
+  hook.queue = []
+
   const setState = (action) => {
     hook.queue.push(action)
+
     vars.wipRoot = {
       dom: vars.currentRoot.dom,
       props: vars.currentRoot.props,
@@ -45,6 +40,7 @@ const useStore = (initial) => {
     vars.wipFiber.hooks.push(hook)
     vars.hookIndex++
   }
+
   return [hook.state, setState]
 }
 
@@ -185,10 +181,31 @@ const useRouter = (routes) => {
     }
   }, [])
 
-  const currentRoute = routes.find((route) => route.path === location)
-  const Children = () => (currentRoute ? currentRoute.component : null)
+  let currentRoute = routes.find((route) => route.path === location)
+  if (!currentRoute) {
+    currentRoute = {
+      component: routes.find((route) => route.NotFound)?.NotFound || null,
+    }
+  }
 
-  return { Children, navigate }
+  const Children = () =>
+    currentRoute.component ? currentRoute.component : null
+
+  const NavLink = ({ to, ...props }) => {
+    const { children, ...restProps } = props
+
+    const NewProps = {
+      href: to,
+      onClick: (e) => {
+        e.preventDefault()
+        navigate(to)
+      },
+      ...restProps,
+    }
+    return createElement('a', NewProps, children)
+  }
+
+  return { Children, navigate, NavLink }
 }
 
 export {

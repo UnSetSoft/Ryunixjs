@@ -1,11 +1,18 @@
 import { vars } from '../utils/index'
 
+const clearContainer = (container) => {
+  while (container.firstChild) {
+    container.removeChild(container.firstChild)
+  }
+}
+
 /**
- * The function renders an element into a container using a work-in-progress root.
- * @param element - The element parameter is the component or element that needs to be rendered in the
- * container. It could be a Ryunix component or a DOM element.
- * @param container - The container parameter is the DOM element where the rendered element will be
- * appended to. this parameter is optional if you use createRoot().
+ * Renders an element into a container using a work-in-progress (WIP) root.
+ * @function render
+ * @param {Object|HTMLElement} element - The element to be rendered in the container. It can be a Ryunix component (custom element) or a standard DOM element.
+ * @param {HTMLElement} container - The container where the element will be rendered. This parameter is optional if `createRoot()` is used beforehand to set up the container.
+ * @description The function assigns the `container` to a work-in-progress root and sets up properties for reconciliation, including children and the reference to the current root.
+ * It also clears any scheduled deletions and establishes the next unit of work for incremental rendering.
  */
 const render = (element, container) => {
   vars.wipRoot = {
@@ -15,20 +22,24 @@ const render = (element, container) => {
     },
     alternate: vars.currentRoot,
   }
+
   vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
 }
 
 /**
- * @description The function creates a reference to a DOM element with the specified ID. This will be used to initialize the app.
- * @example Ryunix.init("root") -> <div id="root" />
- * @param root - The parameter "root" is the id of the HTML element that will serve as the container
- * for the root element.
+ * Initializes the application by creating a reference to a DOM element with the specified ID and rendering the main component.
+ * @function init
+ * @param {Object} MainElement - The main component to render, typically the root component of the application.
+ * @param {string} [root='__ryunix'] - The ID of the HTML element that serves as the container for the root element. Defaults to `'__ryunix'` if not provided.
+ * @example
+ * Ryunix.init(App, "__ryunix"); // Initializes and renders the App component into the <div id="__ryunix"></div> element.
+ * @description This function retrieves the container element by its ID and invokes the `render` function to render the main component into it.
  */
-const init = (root) => {
-  const rootElement = root || '__ryunix'
-  vars.containerRoot = document.getElementById(rootElement)
-  return this
+const init = (MainElement, root = '__ryunix') => {
+  vars.containerRoot = document.getElementById(root)
+
+  render(MainElement, vars.containerRoot)
 }
 
 export { render, init }
