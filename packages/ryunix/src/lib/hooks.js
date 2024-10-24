@@ -1,5 +1,6 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
+import { createElement } from "./createElement"
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
@@ -199,7 +200,7 @@ const useRouter = (routes) => {
       },
       ...restProps
     }
-    return Ryunix.createElement("a", NewProps, children)
+    return createElement("a", NewProps, children)
   }
 
   return { Children, navigate, NavLink };
