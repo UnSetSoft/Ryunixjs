@@ -14,26 +14,23 @@ const reconcileChildren = (wipFiber, elements) => {
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
   let prevSibling = null
 
-  // Creamos un mapa para los elementos antiguos utilizando las claves
-  const oldFibersMap = new Map()
+   const oldFibersMap = new Map()
   while (oldFiber) {
     const oldKey = oldFiber.props.key || oldFiber.type
     oldFibersMap.set(oldKey, oldFiber)
     oldFiber = oldFiber.sibling
   }
 
-  // Recorremos los elementos nuevos
-  while (index < elements.length) {
+   while (index < elements.length) {
     const element = elements[index]
     const key = element.props.key || element.type
-    const oldFiber = oldFibersMap.get(key) // Obtenemos el viejo fiber por la clave
+    const oldFiber = oldFibersMap.get(key)  
 
     let newFiber
     const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
-      // Actualizamos un nodo existente
-      newFiber = {
+       newFiber = {
         type: oldFiber.type,
         props: element.props,
         dom: oldFiber.dom,
@@ -41,10 +38,9 @@ const reconcileChildren = (wipFiber, elements) => {
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
       }
-      oldFibersMap.delete(key) // Eliminamos este elemento reconciliado del mapa
+      oldFibersMap.delete(key)  
     } else if (element) {
-      // Creamos un nuevo nodo
-      newFiber = {
+       newFiber = {
         type: element.type,
         props: element.props,
         dom: undefined,
@@ -54,8 +50,7 @@ const reconcileChildren = (wipFiber, elements) => {
       }
     }
 
-    // Marcamos para eliminación aquellos nodos antiguos no reconciliados
-    oldFibersMap.forEach((oldFiber) => {
+     oldFibersMap.forEach((oldFiber) => {
       oldFiber.effectTag = EFFECT_TAGS.DELETION
       vars.deletions.push(oldFiber)
     })

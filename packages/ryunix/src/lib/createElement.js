@@ -56,7 +56,7 @@ const createElement = (type, props, ...children) => {
     type,
     props: {
       ...props,
-      key, // Asignamos la clave generada
+      key,
       children: children.map((child) =>
         typeof child === STRINGS.object ? child : createTextElement(child),
       ),
