@@ -3,6 +3,8 @@ import { dirname, join } from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
 import webpack from 'webpack'
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import {
   getPackageManager,
   ENV_HASH,
@@ -42,7 +44,8 @@ export default {
   // context: src
   context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
-  devtool: 'source-map',
+  devtool:
+    process.env.NODE_ENV === 'development' ? 'cheap-module-source-map' : false,
   output: {
     // path: .ryunix
     path: resolveApp(dir, config.webpack.output.buildDirectory),
@@ -70,23 +73,25 @@ export default {
     proxy: config.webpack.devServer.proxy,
   },
   optimization: {
-    moduleIds: 'named',
-    minimize: true,
-    concatenateModules: true,
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      minSize: 20000,
+      maxSize: 70000,
+    },
+    minimize: process.env.NODE_ENV === 'production',
     minimizer: [
       new TerserPlugin({
-        minify: TerserPlugin.swcMinify,
+        parallel: true,
         terserOptions: {
           compress: {
             dead_code: true,
-            // Zero means no limit.
-            passes: 0,
-          },
-          format: {
-            preamble: '',
+            passes: 2,
           },
         },
       }),
+      new CssMinimizerPlugin(),
     ],
   },
   cache: {
@@ -106,68 +111,44 @@ export default {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ryx|)$/,
+        test: /\.(js|jsx|ryx)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
+            cacheDirectory: true,
             plugins: [
               [
                 '@babel/plugin-transform-react-jsx',
                 {
                   pragma: 'Ryunix.createElement',
                   pragmaFrag: 'Ryunix.Fragment',
-                  throwIfNamespace: false,
                 },
-              ].filter(Boolean),
+              ],
             ],
           },
         },
       },
       {
-        test: /\.sass|css$/,
-        exclude: /(node_modules)/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        test: /\.s[ac]ss|css$/,
+        exclude: /node_modules/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(jpg|jpeg|png|gif|svg|ico)$/,
-        exclude: /(node_modules)/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'assets/image/',
-            },
-          },
-        ],
+        exclude: /node_modules/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/images/[name].[hash][ext]',
+        },
       },
       {
         test: /\.(mp3|mp4|pdf)$/,
-        exclude: /(node_modules)/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'assets/files/',
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(png|woff|woff2|eot|ttf|svg|pdf|ico)$/, // to import images and fonts
-        exclude: /(node_modules)/,
-        loader: 'url-loader',
-        options: { limit: false },
-      },
-      {
-        test: /\.ico$/i,
+        exclude: /node_modules/,
         type: 'asset/resource',
-        exclude: /(node_modules)/,
         generator: {
-          filename: '[name][ext][query]',
+          filename: 'assets/files/[name].[hash][ext]',
         },
       },
       ...config.webpack.module.rules,
@@ -188,21 +169,22 @@ export default {
 
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    !!fs.existsSync(resolveApp(dir, '.env')) &&
+    fs.existsSync(resolveApp(dir, '.env')) &&
       new Dotenv({
         path: resolveApp(dir, '.env'),
         prefix: 'ryunix.env.RYUNIX_APP_',
-        safe: false,
-        allowEmptyValues: true,
       }),
-
     new HtmlWebpackPlugin({
       title: config.static.seo.title,
       favicon: config.static.favicon && join(dir, 'public', 'favicon.png'),
       meta: config.static.seo.meta,
-      template: join(__dirname, 'template', 'index.html'),
+      template: config.static.customTemplate
+        ? join(dir, 'public', 'index.html')
+        : join(__dirname, 'template', 'index.html'),
     }),
-
+    new MiniCssExtractPlugin({
+      filename: 'assets/css/[name].[contenthash].css',
+    }),
     ...config.webpack.plugins,
   ].filter(Boolean),
   externals: [

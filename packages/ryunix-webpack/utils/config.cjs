@@ -4,6 +4,9 @@ const { config } = require('./settingfile.cjs')
 const defaultSettings = {
   static: {
     favicon: config?.static?.favicon ? config.static.favicon : true,
+    customTemplate: config?.static?.customTemplate
+      ? config.static.customTemplate
+      : false,
     seo: {
       title: config?.static?.seo?.title
         ? config.static.seo.title
