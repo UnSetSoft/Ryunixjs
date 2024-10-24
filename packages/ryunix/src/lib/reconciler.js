@@ -14,23 +14,23 @@ const reconcileChildren = (wipFiber, elements) => {
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
   let prevSibling = null
 
-   const oldFibersMap = new Map()
+  const oldFibersMap = new Map()
   while (oldFiber) {
     const oldKey = oldFiber.props.key || oldFiber.type
     oldFibersMap.set(oldKey, oldFiber)
     oldFiber = oldFiber.sibling
   }
 
-   while (index < elements.length) {
+  while (index < elements.length) {
     const element = elements[index]
     const key = element.props.key || element.type
-    const oldFiber = oldFibersMap.get(key)  
+    const oldFiber = oldFibersMap.get(key)
 
     let newFiber
     const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
-       newFiber = {
+      newFiber = {
         type: oldFiber.type,
         props: element.props,
         dom: oldFiber.dom,
@@ -38,9 +38,9 @@ const reconcileChildren = (wipFiber, elements) => {
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
       }
-      oldFibersMap.delete(key)  
+      oldFibersMap.delete(key)
     } else if (element) {
-       newFiber = {
+      newFiber = {
         type: element.type,
         props: element.props,
         dom: undefined,
@@ -50,7 +50,7 @@ const reconcileChildren = (wipFiber, elements) => {
       }
     }
 
-     oldFibersMap.forEach((oldFiber) => {
+    oldFibersMap.forEach((oldFiber) => {
       oldFiber.effectTag = EFFECT_TAGS.DELETION
       vars.deletions.push(oldFiber)
     })
