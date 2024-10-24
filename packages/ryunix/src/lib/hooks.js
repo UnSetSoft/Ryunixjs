@@ -1,6 +1,6 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
-import { createElement } from "./createElement"
+import { createElement } from './createElement'
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
@@ -163,53 +163,51 @@ const useCallback = (callback, deps) => {
 }
 
 const useRouter = (routes) => {
-  const [location, setLocation] = useStore(window.location.pathname);
+  const [location, setLocation] = useStore(window.location.pathname)
 
   const navigate = (path) => {
-    window.history.pushState({}, '', path);
-    setLocation(path);
-  };
+    window.history.pushState({}, '', path)
+    setLocation(path)
+  }
 
   useEffect(() => {
     const onPopState = () => {
-      setLocation(window.location.pathname);
-    };
+      setLocation(window.location.pathname)
+    }
 
-    window.addEventListener('popstate', onPopState);
+    window.addEventListener('popstate', onPopState)
     return () => {
-      window.removeEventListener('popstate', onPopState);
-    };
-  }, []);
+      window.removeEventListener('popstate', onPopState)
+    }
+  }, [])
 
-  let currentRoute = routes.find((route) => route.path === location);
+  let currentRoute = routes.find((route) => route.path === location)
   if (!currentRoute) {
-    currentRoute = routes.find((route) => route.path === "/*") || {};
+    currentRoute = routes.find((route) => route.path === '/*') || {}
   }
 
-  const Children = () => (currentRoute.component ? currentRoute.component : null);
+  const Children = () =>
+    currentRoute.component ? currentRoute.component : null
 
-  const NavLink = ({to, ...props}) => {
-
-    const { children, ...restProps } = props;
+  const NavLink = ({ to, ...props }) => {
+    const { children, ...restProps } = props
 
     const NewProps = {
       href: to, // just for ref and SEO
-      onClick: (e) =>{
+      onClick: (e) => {
         e.preventDefault()
         navigate(to)
       },
-      ...restProps
+      ...restProps,
     }
-    return createElement("a", NewProps, children)
+    return createElement('a', NewProps, children)
   }
 
-  return { Children, navigate, NavLink };
-};
+  return { Children, navigate, NavLink }
+}
 
 function NotFound() {
-  return (
-    <h1>404 - Page Not Found</h1>
-  );
+  return <h1>404 - Page Not Found</h1>
 }
 
 export {
