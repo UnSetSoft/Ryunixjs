@@ -163,48 +163,48 @@ const useCallback = (callback, deps) => {
 }
 
 const useRouter = (routes) => {
-  const [location, setLocation] = useStore(window.location.pathname)
+  const [location, setLocation] = useStore(window.location.pathname);
 
-  const navigate = (path) => {
-    window.history.pushState({}, '', path)
-    setLocation(path)
-  }
+
+ const navigate = (path) => {
+   window.history.pushState({}, '', path);
+   setLocation(path);
+ };
 
   useEffect(() => {
-    const onPopState = () => {
-      setLocation(window.location.pathname)
-    }
+   const onPopState = () => {
+     setLocation(window.location.pathname);
+   };
 
-    window.addEventListener('popstate', onPopState)
-    return () => {
-      window.removeEventListener('popstate', onPopState)
-    }
-  }, [])
+   window.addEventListener('popstate', onPopState);
+   return () => {
+     window.removeEventListener('popstate', onPopState);
+   };
+ }, []);
 
-  let currentRoute = routes.find((route) => route.path === location)
-  if (!currentRoute) {
-    currentRoute = routes.find((route) => route.path === '/*') || {}
-  }
+  let currentRoute = routes.find((route) => route.path === location);
+ if (!currentRoute) {
+    currentRoute = { component: routes.find((route) => route.NotFound)?.NotFound || null };
+ }
 
-  const Children = () =>
-    currentRoute.component ? currentRoute.component : null
+  const Children = () => (currentRoute.component ? currentRoute.component : null);
 
   const NavLink = ({ to, ...props }) => {
-    const { children, ...restProps } = props
+   const { children, ...restProps } = props;
 
-    const NewProps = {
-      href: to, // just for ref and SEO
-      onClick: (e) => {
-        e.preventDefault()
-        navigate(to)
-      },
-      ...restProps,
-    }
-    return createElement('a', NewProps, children)
-  }
+   const NewProps = {
+     href: to,  
+     onClick: (e) => {
+       e.preventDefault();
+       navigate(to);
+     },
+     ...restProps,
+   };
+   return createElement('a', NewProps, children);
+ };
 
-  return { Children, navigate, NavLink }
-}
+ return { Children, navigate, NavLink };
+};
 
 export {
   useStore,
