@@ -12,25 +12,38 @@ import { EFFECT_TAGS, vars } from '../utils/index'
 const reconcileChildren = (wipFiber, elements) => {
   let index = 0
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
-  let prevSibling
+  let prevSibling = null
 
-  while (index < elements.length || oldFiber != undefined) {
+  // Creamos un mapa para los elementos antiguos utilizando las claves
+  const oldFibersMap = new Map()
+  while (oldFiber) {
+    const oldKey = oldFiber.props.key || oldFiber.type
+    oldFibersMap.set(oldKey, oldFiber)
+    oldFiber = oldFiber.sibling
+  }
+
+  // Recorremos los elementos nuevos
+  while (index < elements.length) {
     const element = elements[index]
-    let newFiber
+    const key = element.props.key || element.type
+    const oldFiber = oldFibersMap.get(key) // Obtenemos el viejo fiber por la clave
 
-    const sameType = oldFiber && element && element.type == oldFiber.type
+    let newFiber
+    const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
+      // Actualizamos un nodo existente
       newFiber = {
-        type: oldFiber ? oldFiber.type : undefined,
+        type: oldFiber.type,
         props: element.props,
-        dom: oldFiber ? oldFiber.dom : undefined,
+        dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
       }
-    }
-    if (element && !sameType) {
+      oldFibersMap.delete(key) // Eliminamos este elemento reconciliado del mapa
+    } else if (element) {
+      // Creamos un nuevo nodo
       newFiber = {
         type: element.type,
         props: element.props,
@@ -40,18 +53,16 @@ const reconcileChildren = (wipFiber, elements) => {
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
     }
-    if (oldFiber && !sameType) {
+
+    // Marcamos para eliminación aquellos nodos antiguos no reconciliados
+    oldFibersMap.forEach((oldFiber) => {
       oldFiber.effectTag = EFFECT_TAGS.DELETION
       vars.deletions.push(oldFiber)
-    }
-
-    if (oldFiber) {
-      oldFiber = oldFiber.sibling
-    }
+    })
 
     if (index === 0) {
       wipFiber.child = newFiber
-    } else if (element && prevSibling) {
+    } else if (prevSibling) {
       prevSibling.sibling = newFiber
     }
 
@@ -59,4 +70,5 @@ const reconcileChildren = (wipFiber, elements) => {
     index++
   }
 }
+
 export { reconcileChildren }

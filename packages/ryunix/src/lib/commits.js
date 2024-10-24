@@ -22,9 +22,7 @@ const commitRoot = () => {
  * @returns The function does not return anything, it performs side effects by manipulating the DOM.
  */
 const commitWork = (fiber) => {
-  if (!fiber) {
-    return
-  }
+  if (!fiber) return
 
   let domParentFiber = fiber.parent
   while (!domParentFiber.dom) {
@@ -37,15 +35,19 @@ const commitWork = (fiber) => {
       domParent.appendChild(fiber.dom)
     }
     runEffects(fiber)
-  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
+  }
+
+  if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber)
     if (fiber.dom != undefined) {
       updateDom(fiber.dom, fiber.alternate.props, fiber.props)
     }
     runEffects(fiber)
-  } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
-    cancelEffects(fiber)
+  }
+
+  if (fiber.effectTag === EFFECT_TAGS.DELETION) {
     commitDeletion(fiber, domParent)
+    cancelEffects(fiber)
     return
   }
 
@@ -61,11 +63,10 @@ const commitWork = (fiber) => {
  * @param domParent - The parent DOM element from which the fiber's DOM element needs to be removed.
  */
 const commitDeletion = (fiber, domParent) => {
-  if (fiber && fiber.dom) {
+  if (fiber.dom) {
     domParent.removeChild(fiber.dom)
-  } else if (fiber && fiber.child) {
+  } else {
     commitDeletion(fiber.child, domParent)
   }
 }
-
 export { commitDeletion, commitWork, commitRoot }

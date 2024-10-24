@@ -1,6 +1,5 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
-import { Fragment, createElement, cloneElement } from './createElement'
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
@@ -14,24 +13,19 @@ const useStore = (initial) => {
     vars.wipFiber.alternate.hooks[vars.hookIndex]
   const hook = {
     state: oldHook ? oldHook.state : initial,
-    queue: [],
+    queue: oldHook ? [...oldHook.queue] : [],
   }
 
-  const actions = oldHook ? oldHook.queue : []
-  actions.forEach((action) => {
+  hook.queue.forEach((action) => {
     hook.state =
       typeof action === STRINGS.function ? action(hook.state) : action
   })
 
-  /**
-   * The function `setState` updates the state of a component in Ryunix by adding an action to a queue
-   * and setting up a new work-in-progress root.
-   * @param action - The `action` parameter is an object that represents a state update to be performed
-   * on a component. It contains information about the type of update to be performed and any new data
-   * that needs to be applied to the component's state.
-   */
+  hook.queue = []
+
   const setState = (action) => {
     hook.queue.push(action)
+
     vars.wipRoot = {
       dom: vars.currentRoot.dom,
       props: vars.currentRoot.props,
@@ -45,6 +39,7 @@ const useStore = (initial) => {
     vars.wipFiber.hooks.push(hook)
     vars.hookIndex++
   }
+
   return [hook.state, setState]
 }
 
@@ -167,28 +162,53 @@ const useCallback = (callback, deps) => {
 }
 
 const useRouter = (routes) => {
-  const [location, setLocation] = useStore(window.location.pathname)
+  const [location, setLocation] = useStore(window.location.pathname);
 
   const navigate = (path) => {
-    window.history.pushState({}, '', path)
-    setLocation(path)
-  }
+    window.history.pushState({}, '', path);
+    setLocation(path);
+  };
 
   useEffect(() => {
     const onPopState = () => {
-      setLocation(window.location.pathname)
-    }
+      setLocation(window.location.pathname);
+    };
 
-    window.addEventListener('popstate', onPopState)
+    window.addEventListener('popstate', onPopState);
     return () => {
-      window.removeEventListener('popstate', onPopState)
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
+
+  let currentRoute = routes.find((route) => route.path === location);
+  if (!currentRoute) {
+    currentRoute = routes.find((route) => route.path === "/*") || {};
+  }
+
+  const Children = () => (currentRoute.component ? currentRoute.component : null);
+
+  const NavLink = ({to, ...props}) => {
+
+    const { children, ...restProps } = props;
+
+    const NewProps = {
+      href: to, // just for ref and SEO
+      onClick: (e) =>{
+        e.preventDefault()
+        navigate(to)
+      },
+      ...restProps
     }
-  }, [])
+    return Ryunix.createElement("a", NewProps, children)
+  }
 
-  const currentRoute = routes.find((route) => route.path === location)
-  const Children = () => (currentRoute ? currentRoute.component : null)
+  return { Children, navigate, NavLink };
+};
 
-  return { Children, navigate }
+function NotFound() {
+  return (
+    <h1>404 - Page Not Found</h1>
+  );
 }
 
 export {

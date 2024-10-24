@@ -47,10 +47,16 @@ const cloneElement = (element, props) => {
 
 const createElement = (type, props, ...children) => {
   children = childArray(children, [])
+  const key =
+    props && props.key
+      ? props.key
+      : `${type}-${Math.random().toString(36).substring(2, 9)}`
+
   return {
     type,
     props: {
       ...props,
+      key, // Asignamos la clave generada
       children: children.map((child) =>
         typeof child === STRINGS.object ? child : createTextElement(child),
       ),
