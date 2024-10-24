@@ -8,6 +8,6 @@
     "build": "cross-env NODE_ENV=production rspack build"
   },
   "engines": {
-    "node": ">=18.16.0"
+    "node": "^18 || ^22"
   }
 }

@@ -4,7 +4,4 @@ import Ryunix from "@unsetsoft/ryunixjs";
 import App from "./App";
 import "./styles/global.css"
 
-
-Ryunix.init();
-
-Ryunix.render(<App />);
+Ryunix.init(<App />);
