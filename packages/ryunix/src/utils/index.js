@@ -12,6 +12,7 @@ const reg = /[A-Z]/g
 
 const RYUNIX_TYPES = Object.freeze({
   TEXT_ELEMENT: Symbol('text.element'),
+  Ryunix_ELEMENT: Symbol('ryunix.element'),
   RYUNIX_EFFECT: Symbol('ryunix.effect'),
   RYUNIX_MEMO: Symbol('ryunix.memo'),
   RYUNIX_URL_QUERY: Symbol('ryunix.urlQuery'),

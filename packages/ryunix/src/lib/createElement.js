@@ -50,7 +50,7 @@ const createElement = (type, props, ...children) => {
   const key =
     props && props.key
       ? props.key
-      : `${type}-${Math.random().toString(36).substring(2, 9)}`
+      : `${RYUNIX_TYPES.Ryunix_ELEMENT.toString()}-${Math.random().toString(36).substring(2, 9)}`
 
   return {
     type,

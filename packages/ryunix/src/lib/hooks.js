@@ -80,36 +80,6 @@ const useEffect = (callback, deps) => {
   }
 }
 
-/**
- * The `useQuery` function is a custom hook in JavaScript that retrieves query parameters from the URL
- * and stores them in a hook for easy access.
- * @returns The `useQuery` function returns the `query` property of the `hook` object.
- */
-const useQuery = () => {
-  const oldHook =
-    vars.wipFiber.alternate &&
-    vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex]
-
-  const hasOld = oldHook ? oldHook : undefined
-
-  const urlSearchParams = new URLSearchParams(window.location.search)
-  const params = Object.fromEntries(urlSearchParams.entries())
-  const Query = hasOld ? hasOld : params
-
-  const hook = {
-    type: RYUNIX_TYPES.RYUNIX_URL_QUERY,
-    query: Query,
-  }
-
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
-
-  return hook.query
-}
-
 const useRef = (initial) => {
   const oldHook =
     vars.wipFiber.alternate &&
@@ -158,54 +128,153 @@ const useMemo = (comp, deps) => {
 
   return hook.value
 }
+
 const useCallback = (callback, deps) => {
   return useMemo(() => callback, deps)
 }
+
+/**
+ * The `useQuery` function parses the query parameters from the URL and returns them as an object.
+ * @returns An object containing key-value pairs of the query parameters from the URLSearchParams in
+ * the current window's URL is being returned.
+ */
+const useQuery = () => {
+  const searchParams = new URLSearchParams(window.location.search)
+  const query = {}
+  for (let [key, value] of searchParams.entries()) {
+    query[key] = value
+  }
+  return query
+}
+
+/**
+ * useRouter is a routing function to manage navigation and route matching.
+ *
+ * This function handles client-side routing, URL updates, and component rendering based on defined routes.
+ * It supports dynamic routes (e.g., "/user/:id") and allows navigation using links.
+ *
+ * @param {Array} routes - An array of route objects, each containing:
+ *    - `path` (string): The URL path to match (supports dynamic segments like "/user/:id").
+ *    - `component` (function): The component to render when the route matches.
+ *    - `NotFound` (optional function): Component to render for unmatched routes (default 404 behavior).
+ *
+ * @returns {Object} - An object with:
+ *    - `Children` (function): Returns the component that matches the current route, passing route parameters and query parameters as props.
+ *    - `NavLink` (component): A link component to navigate within the application without refreshing the page.
+ *
+ * @example
+ * // Define routes
+ * const routes = [
+ *   {
+ *     path: "/",
+ *     component: HomePage,
+ *   },
+ *   {
+ *     path: "/user/:id",
+ *     component: UserProfile,
+ *   },
+ *   {
+ *     path: "*",
+ *     NotFound: NotFoundPage,
+ *   },
+ * ];
+ *
+ * // Use the routing function
+ * const { Children, NavLink } = useRouter(routes);
+ *
+ * // Render the matched component
+ * const App = () => (
+ *   <div>
+ *     <NavLink to="/">Home</NavLink>
+ *     <NavLink to="/user/123">User Profile</NavLink>
+ *     <Children />
+ *   </div>
+ * );
+ *
+ * // Example: UserProfile Component that receives route parameters
+ * const UserProfile = ({ params, query }) => {
+ *   return (
+ *     <div>
+ *       <h1>User ID: {params.id}</h1>
+ *       <p>Query Parameters: {JSON.stringify(query)}</p>
+ *     </div>
+ *   );
+ * };
+ */
 
 const useRouter = (routes) => {
   const [location, setLocation] = useStore(window.location.pathname)
 
   const navigate = (path) => {
     window.history.pushState({}, '', path)
-    setLocation(path)
+    updateRoute(path)
+  }
+
+  const updateRoute = (path) => {
+    setLocation(path.split('?')[0])
   }
 
   useEffect(() => {
-    const onPopState = () => {
-      setLocation(window.location.pathname)
-    }
-
+    const onPopState = () => updateRoute(window.location.pathname)
     window.addEventListener('popstate', onPopState)
-    return () => {
-      window.removeEventListener('popstate', onPopState)
-    }
+    return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
-  let currentRoute = routes.find((route) => route.path === location)
-  if (!currentRoute) {
-    currentRoute = {
-      component: routes.find((route) => route.NotFound)?.NotFound || null,
+  const findCurrentRoute = (routes, path) => {
+    const pathname = path.split('?')[0]
+
+    for (const { path: routePath, component } of routes) {
+      if (!routePath) continue
+
+      const keys = []
+      const pattern = new RegExp(
+        `^${routePath.replace(/:\w+/g, (match) => {
+          keys.push(match.substring(1)) // Extract only the name without ":" and add to keys
+          return '([^/]+)'
+        })}$`,
+      )
+
+      const match = pathname.match(pattern)
+      if (match) {
+        const params = keys.reduce((acc, key, index) => {
+          acc[key] = match[index + 1] // Match and assign the correct parameter value
+          return acc
+        }, {})
+        return { route: { component }, params }
+      }
     }
+
+    // Return NotFound component if no match is found
+    const notFoundRoute = routes.find((route) => route.NotFound)
+    return notFoundRoute
+      ? { route: { component: notFoundRoute.NotFound }, params: {} }
+      : { route: { component: null }, params: {} }
   }
 
-  const Children = () =>
-    currentRoute.component ? currentRoute.component : null
+  const currentRouteData = findCurrentRoute(routes, location)
+  const Children = () => {
+    const query = useQuery()
+    return currentRouteData.route.component
+      ? currentRouteData.route.component({
+          params: currentRouteData.params,
+          query,
+        })
+      : null
+  }
 
   const NavLink = ({ to, ...props }) => {
-    const { children, ...restProps } = props
-
-    const NewProps = {
-      href: to,
-      onClick: (e) => {
-        e.preventDefault()
-        navigate(to)
-      },
-      ...restProps,
+    const handleClick = (e) => {
+      e.preventDefault()
+      navigate(to)
     }
-    return createElement('a', NewProps, children)
+    return createElement(
+      'a',
+      { href: to, onClick: handleClick, ...props },
+      props.children,
+    )
   }
 
-  return { Children, navigate, NavLink }
+  return { Children, NavLink, navigate }
 }
 
 export {

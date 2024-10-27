@@ -49,6 +49,7 @@ export default {
   output: {
     // path: .ryunix
     path: resolveApp(dir, config.webpack.output.buildDirectory),
+    publicPath: '/',
     chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
     assetModuleFilename: './assets/media/[name].[hash][ext]',
     filename: './assets/js/[name].[fullhash:8].bundle.js',
