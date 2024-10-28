@@ -14,7 +14,11 @@ module.exports = {
   experiments: {
     rspackFuture: {
       disableTransformByDefault: true,
+      css: true,
     },
+  },
+  output:{
+    publicPath: '/',
   },
   devServer: {
     hot: isDev,
@@ -31,7 +35,8 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        type: 'css',
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
+        type: 'javascript/auto',
       },
       {
         test: /\.module\.css$/i,
@@ -70,7 +75,16 @@ module.exports = {
       },
     ],
   },
+  resolve: {
+    extensions: [
+      '.*',
+      '.js',
+      '.jsx',
+      '.ryx'
+    ],
+  },
   plugins: [
+    new rspack.CssExtractRspackPlugin({}),
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }),

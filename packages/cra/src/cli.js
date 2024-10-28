@@ -39,7 +39,7 @@ create('create-cra', {
         await installNpmPackage('@unsetsoft/ryunixjs@nightly')
       }
       await installNpmPackage(
-        ['@rspack/cli', '@rspack/core', 'cross-env'],
+        ['@rspack/cli', '@rspack/core', 'cross-env', 'css-loader'],
         true,
       )
     } else if (template === 'Webpack') {
