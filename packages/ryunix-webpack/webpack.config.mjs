@@ -15,6 +15,7 @@ import {
 import fs from 'fs'
 import config from './utils/config.cjs'
 import Dotenv from 'dotenv-webpack'
+import { getPackageVersion } from './utils/index.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -40,6 +41,9 @@ function getAlias(object) {
     }, {})
   return output
 }
+
+const { version } = await getPackageVersion()
+
 export default {
   // context: src
   context: resolveApp(dir, config.webpack.root),
@@ -176,12 +180,17 @@ export default {
         prefix: 'ryunix.env.RYUNIX_APP_',
       }),
     new HtmlWebpackPlugin({
+      pageLang: config.static.seo.pageLang,
       title: config.static.seo.title,
       favicon: config.static.favicon && join(dir, 'public', 'favicon.png'),
       meta: config.static.seo.meta,
       template: config.static.customTemplate
         ? join(dir, 'public', 'index.html')
         : join(__dirname, 'template', 'index.html'),
+      info: {
+        framework: 'Ryunix',
+        version,
+      },
     }),
     new MiniCssExtractPlugin({
       filename: 'assets/css/[name].[contenthash].css',

@@ -8,6 +8,9 @@ const defaultSettings = {
       ? config.static.customTemplate
       : false,
     seo: {
+      pageLang: config?.static?.seo?.pageLang
+        ? config.static.seo.pageLang
+        : 'en',
       title: config?.static?.seo?.title
         ? config.static.seo.title
         : 'Ryunix App',
