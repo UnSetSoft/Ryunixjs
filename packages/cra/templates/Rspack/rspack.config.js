@@ -17,7 +17,7 @@ module.exports = {
       css: true,
     },
   },
-  output:{
+  output: {
     publicPath: '/',
   },
   devServer: {
@@ -76,12 +76,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [
-      '.*',
-      '.js',
-      '.jsx',
-      '.ryx'
-    ],
+    extensions: ['.*', '.js', '.jsx', '.ryx'],
   },
   plugins: [
     new rspack.CssExtractRspackPlugin({}),
