@@ -1,4 +1,6 @@
 '#
+### [1.1.5-nightly.47](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.46...v1.1.5-nightly.47) (2024-10-29)
+
 ### [1.1.5-nightly.46](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.45...v1.1.5-nightly.46) (2024-10-29)
 
 ### [1.1.5-nightly.45](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.44...v1.1.5-nightly.45) (2024-10-29)
