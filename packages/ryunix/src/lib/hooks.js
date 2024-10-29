@@ -369,6 +369,69 @@ const useRouter = (routes) => {
   return { Children, NavLink, navigate }
 }
 
+/**
+ * `createContext` creates a context object to share global data among deeply nested components.
+ *
+ * This function creates a context with a Provider and a consumer hook. The Provider component
+ * allows passing down data, while the consumer hook (`useContext`) enables access to the context value.
+ * The implementation mirrors the behavior of a typical context API for flexible state management.
+ *
+ * @param {*} defaultValue - The default value for the context.
+ *
+ * @returns {Object} - An object containing:
+ *    - `Provider` (component): A component that provides the context value to its descendants.
+ *    - `useContext` (hook): A hook that allows consuming the context value within components.
+ *
+ * @example
+ * // Create a context for theme management
+ * const ThemeContext = createContext("light");
+ *
+ * // Use the ThemeContext in a component tree
+ * const App = () => {
+ *   return (
+ *     <ThemeContext.Provider value="dark">
+ *       <DeeplyNestedComponent />
+ *     </ThemeContext.Provider>
+ *   );
+ * };
+ *
+ * // Consume the context in a deeply nested component
+ * const DeeplyNestedComponent = () => {
+ *   const theme = ThemeContext.useContext();
+ *   return <div>Current Theme: {theme}</div>;
+ * };
+ */
+const createContext = (defaultValue) => {
+  let context = {
+    value: defaultValue,
+    listeners: new Set(),
+  };
+
+  const Provider = ({ value, children }) => {
+    context.value = value;
+    context.listeners.forEach((listener) => listener(value));
+    return children;
+  };
+
+  const useContext = () => {
+    const [state, setState] = useStore(context.value);
+    
+    // Subscribe to context changes
+    useEffect(() => {
+      const listener = (newValue) => setState(newValue);
+      context.listeners.add(listener);
+
+      // Unsubscribe on cleanup
+      return () => context.listeners.delete(listener);
+    }, []);
+
+    return state;
+  };
+
+  return { Provider, useContext };
+};
+
+
 export {
   useStore,
   useEffect,
