@@ -6,6 +6,7 @@ const vars = {
   deletions: undefined,
   wipFiber: undefined,
   hookIndex: undefined,
+  pendingUpdates: undefined
 }
 
 const reg = /[A-Z]/g
@@ -39,4 +40,9 @@ const EFFECT_TAGS = Object.freeze({
   DELETION: Symbol(),
 })
 
-export { vars, reg, RYUNIX_TYPES, EFFECT_TAGS, STRINGS, OLD_STRINGS }
+const generateHash = (deps) => {
+  return deps.map(dep => JSON.stringify(dep)).join('-');
+};
+
+
+export { vars, reg, RYUNIX_TYPES, EFFECT_TAGS, STRINGS, OLD_STRINGS, generateHash }
