@@ -35,7 +35,7 @@
     "glob": "10.3.7",
     "globals": "^15.6.0",
     "html-loader": "4.2.0",
-    "html-webpack-plugin": "5.5.3",
+    "html-webpack-plugin": "5.6.3",
     "image-webpack-loader": "8.1.0",
     "mini-css-extract-plugin": "^2.9.1",
     "node-sass": "9.0.0",
