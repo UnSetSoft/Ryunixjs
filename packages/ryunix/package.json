@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.1.5",
+  "version": "1.1.5-nightly.3",
   "license": "MIT",
   "main": "./dist/Ryunix.js",
   "types": "./dist/Ryunix.d.ts",
@@ -12,7 +12,6 @@
   "scripts": {
     "build:js": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix --plugin @rollup/plugin-terser",
     "prepublishOnly": "npm run build:js",
-    "postinstall": "npm run build:js",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish",
     "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc"
@@ -33,7 +32,6 @@
     "registry": "https://registry.npmjs.org"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ]
 }
