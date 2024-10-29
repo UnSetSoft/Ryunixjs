@@ -17,9 +17,9 @@
     "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc"
   },
   "dependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-terser": "0.4.4",
     "eslint": "8.56.0",
-    "lodash": "^4.17.20",
+    "lodash": "4.17.20",
     "rollup": "4.9.2"
   },
   "engines": {
