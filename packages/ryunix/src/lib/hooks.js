@@ -223,26 +223,36 @@ const useQuery = () => {
 }
 
 /**
- * useRouter is a routing function to manage navigation and route matching.
+ * `useRouter` is a routing function to manage navigation, nested routes, and route pre-loading.
  *
- * This function handles client-side routing, URL updates, and component rendering based on defined routes.
- * It supports dynamic routes (e.g., "/user/:id") and allows navigation using links.
+ * This function handles client-side routing, URL updates, and component rendering based on defined routes. It supports:
+ * - Dynamic routes (e.g., "/user/:id").
+ * - Optional nested routes with an `subRoutes` property in route objects.
+ * - Default pre-loading of all routes except the current active route.
  *
  * @param {Array} routes - An array of route objects, each containing:
  *    - `path` (string): The URL path to match (supports dynamic segments like "/user/:id").
  *    - `component` (function): The component to render when the route matches.
+ *    - `subRoutes` (optional array): An optional array of nested route objects, defining sub-routes for this route.
  *    - `NotFound` (optional function): Component to render for unmatched routes (default 404 behavior).
  *
  * @returns {Object} - An object with:
  *    - `Children` (function): Returns the component that matches the current route, passing route parameters and query parameters as props.
  *    - `NavLink` (component): A link component to navigate within the application without refreshing the page.
+ *    - `navigate` (function): Allows programmatically navigating to a specific path.
  *
  * @example
- * // Define routes
+ * // Define nested routes
  * const routes = [
  *   {
  *     path: "/",
  *     component: HomePage,
+ *     subRoutes: [
+ *       {
+ *         path: "/settings",
+ *         component: SettingsPage,
+ *       },
+ *     ],
  *   },
  *   {
  *     path: "/user/:id",
@@ -259,83 +269,90 @@ const useQuery = () => {
  *
  * // Render the matched component
  * const App = () => (
- *   <div>
+ *   <>
  *     <NavLink to="/">Home</NavLink>
+ *     <NavLink to="/settings">Settings</NavLink>
  *     <NavLink to="/user/123">User Profile</NavLink>
  *     <Children />
- *   </div>
+ *   </>
  * );
- *
- * // Example: UserProfile Component that receives route parameters
- * const UserProfile = ({ params, query }) => {
- *   return (
- *     <div>
- *       <h1>User ID: {params.id}</h1>
- *       <p>Query Parameters: {JSON.stringify(query)}</p>
- *     </div>
- *   );
- * };
  */
-
 const useRouter = (routes) => {
-  const [location, setLocation] = useStore(window.location.pathname)
+  const [location, setLocation] = useStore(window.location.pathname);
 
-  const navigate = (path) => {
-    window.history.pushState({}, '', path)
-    updateRoute(path)
-  }
+  const findRoute = (routes, path) => {
+    for (const route of routes) {
+      if (route.subRoutes) {
+        const childRoute = findRoute(route.subRoutes, path);
+        if (childRoute) return childRoute;
+      }
 
-  const updateRoute = (path) => {
-    setLocation(path.split('?')[0])
-  }
-
-  useEffect(() => {
-    const onPopState = () => updateRoute(window.location.pathname)
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [])
-
-  const findCurrentRoute = (routes, path) => {
-    const pathname = path.split('?')[0]
-
-    for (const { path: routePath, component } of routes) {
-      if (!routePath) continue
-
-      const keys = []
+      const keys = [];
       const pattern = new RegExp(
-        `^${routePath.replace(/:\w+/g, (match) => {
-          keys.push(match.substring(1)) // Extract only the name without ":" and add to keys
-          return '([^/]+)'
-        })}$`,
-      )
+        `^${route.path.replace(/:\w+/g, (match) => {
+          keys.push(match.substring(1));
+          return '([^/]+)';
+        })}$`
+      );
 
-      const match = pathname.match(pattern)
+      const match = path.match(pattern);
       if (match) {
         const params = keys.reduce((acc, key, index) => {
-          acc[key] = match[index + 1] // Match and assign the correct parameter value
-          return acc
-        }, {})
-        return { route: { component }, params }
+          acc[key] = match[index + 1];
+          return acc;
+        }, {});
+        return { route, params };
       }
     }
+    return null;
+  };
 
-    // Return NotFound component if no match is found
-    const notFoundRoute = routes.find((route) => route.NotFound)
-    return notFoundRoute
-      ? { route: { component: notFoundRoute.NotFound }, params: {} }
-      : { route: { component: null }, params: {} }
-  }
+  const preloadComponent = async (component) => {
+    if (component && typeof component.preload === STRINGS.function) {
+      await component.preload();
+    }
+  };
 
-  const currentRouteData = findCurrentRoute(routes, location)
+  const preloadRoutes = (routes, currentPath) => {
+    routes.forEach((route) => {
+      if (route.path !== currentPath) {
+        preloadComponent(route.component);
+        if (route.subRoutes) {
+          preloadRoutes(route.subRoutes, currentPath);
+        }
+      }
+    });
+  };
+
+  const navigate = (path) => {
+    window.history.pushState({}, '', path);
+    updateRoute(path);
+  };
+
+  const updateRoute = (path) => {
+    setLocation(path.split('?')[0]);
+  };
+
+  useEffect(() => {
+    const onPopState = () => updateRoute(window.location.pathname);
+    window.addEventListener('popstate', onPopState);
+
+    // Preload all routes except the current active route
+    preloadRoutes(routes, location);
+
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [location]);
+
+  const currentRouteData = findRoute(routes, location);
   const Children = () => {
-    const query = useQuery()
-    return currentRouteData.route.component
+    const query = useQuery();
+    return currentRouteData?.route?.component
       ? currentRouteData.route.component({
           params: currentRouteData.params,
           query,
         })
-      : null
-  }
+      : null;
+  };
 
   const NavLink = ({ to, ...props }) => {
     const handleClick = (e) => {
