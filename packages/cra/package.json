@@ -23,8 +23,8 @@
     "release": "npm publish"
   },
   "dependencies": {
-    "command-exists-promise": "^2.0.2",
-    "create-create-app": "^7.3.0"
+    "command-exists-promise": "2.0.2",
+    "create-create-app": "7.3.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
