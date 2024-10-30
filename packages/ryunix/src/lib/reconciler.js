@@ -50,11 +50,6 @@ const reconcileChildren = (wipFiber, elements) => {
       }
     }
 
-    oldFibersMap.forEach((oldFiber) => {
-      oldFiber.effectTag = EFFECT_TAGS.DELETION
-      vars.deletions.push(oldFiber)
-    })
-
     if (index === 0) {
       wipFiber.child = newFiber
     } else if (prevSibling) {
@@ -64,6 +59,11 @@ const reconcileChildren = (wipFiber, elements) => {
     prevSibling = newFiber
     index++
   }
+
+  oldFibersMap.forEach((oldFiber) => {
+    oldFiber.effectTag = EFFECT_TAGS.DELETION
+    vars.deletions.push(oldFiber)
+  })
 }
 
 export { reconcileChildren }

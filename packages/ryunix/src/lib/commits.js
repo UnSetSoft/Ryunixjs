@@ -30,27 +30,20 @@ const commitWork = (fiber) => {
   }
   const domParent = domParentFiber.dom
 
-  if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
-    if (fiber.dom != undefined) {
-      domParent.appendChild(fiber.dom)
-    }
+  if (fiber.effectTag === EFFECT_TAGS.PLACEMENT && fiber.dom != null) {
+    domParent.appendChild(fiber.dom)
     runEffects(fiber)
-  }
-
-  if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
+  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE && fiber.dom != null) {
     cancelEffects(fiber)
-    if (fiber.dom != undefined) {
-      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
-    }
+    updateDom(fiber.dom, fiber.alternate.props, fiber.props)
     runEffects(fiber)
-  }
-
-  if (fiber.effectTag === EFFECT_TAGS.DELETION) {
+  } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
     commitDeletion(fiber, domParent)
     cancelEffects(fiber)
     return
   }
 
+  // Recorre los "fibers" hijos y hermanos
   commitWork(fiber.child)
   commitWork(fiber.sibling)
 }

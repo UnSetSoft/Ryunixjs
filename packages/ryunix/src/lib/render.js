@@ -16,7 +16,7 @@ const clearContainer = (container) => {
  */
 const render = (element, container) => {
   vars.wipRoot = {
-    dom: vars.containerRoot || container,
+    dom: container,
     props: {
       children: [element],
     },
