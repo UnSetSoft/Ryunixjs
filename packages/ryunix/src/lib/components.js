@@ -13,10 +13,16 @@ const updateFunctionComponent = (fiber) => {
   vars.wipFiber = fiber
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
-
   const children = fiber.type(fiber.props)
-
-  reconcileChildren(fiber, Array.isArray(children) ? children : [children])
+  let childArr = []
+  if (Array.isArray(children)) {
+    // Fragment results returns array
+    childArr = [...children]
+  } else {
+    // Normal function component returns single root node
+    childArr = [children]
+  }
+  reconcileChildren(fiber, childArr)
 }
 
 /**
