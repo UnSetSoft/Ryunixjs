@@ -1,5 +1,10 @@
 import { vars } from '../utils/index'
-import { workLoop } from './workers'
+
+const clearContainer = (container) => {
+  while (container.firstChild) {
+    container.removeChild(container.firstChild)
+  }
+}
 
 /**
  * Renders an element into a container using a work-in-progress (WIP) root.
@@ -11,7 +16,7 @@ import { workLoop } from './workers'
  */
 const render = (element, container) => {
   vars.wipRoot = {
-    dom: container,
+    dom: vars.containerRoot || container,
     props: {
       children: [element],
     },
@@ -20,8 +25,6 @@ const render = (element, container) => {
 
   vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
-
-  requestIdleCallback(workLoop)
 }
 
 /**
