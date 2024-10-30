@@ -21,10 +21,10 @@ const workLoop = (deadline) => {
     commitRoot()
   }
 
-  requestIdleCallback(workLoop)
+  if (vars.wipRoot) {
+    requestIdleCallback(workLoop)
+  }
 }
-
-requestIdleCallback(workLoop)
 
 /**
  * The function performs a unit of work by updating either a function component or a host component and
@@ -38,7 +38,7 @@ requestIdleCallback(workLoop)
  * fiber. If there are no more siblings, it goes up the tree to the parent and looks for the next
  * sibling of the parent. The function returns `undefined` if there are no more fibers to process.
  */
-const performUnitOfWork = (fiber) => {
+function performUnitOfWork(fiber) {
   const isFunctionComponent = fiber.type instanceof Function
   if (isFunctionComponent) {
     updateFunctionComponent(fiber)
@@ -55,7 +55,6 @@ const performUnitOfWork = (fiber) => {
     }
     nextFiber = nextFiber.parent
   }
-  return undefined
 }
 
 export { performUnitOfWork, workLoop }

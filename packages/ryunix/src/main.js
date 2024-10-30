@@ -8,6 +8,7 @@ export {
   useCallback,
   useRouter,
   Fragment,
+  useReducer,
 } from './lib/index.js'
 
 window.Ryunix = Ryunix

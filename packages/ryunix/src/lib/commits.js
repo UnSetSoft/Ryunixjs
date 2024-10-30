@@ -6,11 +6,18 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  * The function commits changes made to the virtual DOM to the actual DOM.
  */
 const commitRoot = () => {
-  vars.deletions.forEach(commitWork)
+  // Eliminar nodos marcados para eliminación
+  vars.deletions.forEach((fiber) => {
+    commitWork(fiber)
+  })
+
+  // Si existe un hijo en la raíz de trabajo, aplicar el commit en el árbol de hijos
   if (vars.wipRoot && vars.wipRoot.child) {
     commitWork(vars.wipRoot.child)
     vars.currentRoot = vars.wipRoot
   }
+
+  // Limpiar la raíz de trabajo
   vars.wipRoot = undefined
 }
 
@@ -31,28 +38,28 @@ const commitWork = (fiber) => {
   const domParent = domParentFiber.dom
 
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
-    if (fiber.dom != undefined) {
+    if (fiber.dom != null) {
       domParent.appendChild(fiber.dom)
     }
     runEffects(fiber)
-  }
-
-  if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
-    cancelEffects(fiber)
-    if (fiber.dom != undefined) {
-      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
+    if (fiber.alternate && fiber.alternate.props !== fiber.props) {
+      cancelEffects(fiber)
+      if (fiber.dom != null) {
+        updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+      }
+      runEffects(fiber)
     }
-    runEffects(fiber)
-  }
-
-  if (fiber.effectTag === EFFECT_TAGS.DELETION) {
+  } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
     commitDeletion(fiber, domParent)
     cancelEffects(fiber)
     return
   }
 
-  commitWork(fiber.child)
-  commitWork(fiber.sibling)
+  if (fiber.child) {
+    commitWork(fiber.child)
+  }
+  if (fiber.sibling) commitWork(fiber.sibling)
 }
 
 /**

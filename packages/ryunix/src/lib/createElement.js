@@ -58,7 +58,9 @@ const createElement = (type, props, ...children) => {
       ...props,
       key,
       children: children.map((child) =>
-        typeof child === STRINGS.object ? child : createTextElement(child),
+        typeof child === STRINGS.object && child !== null
+          ? child
+          : createTextElement(String(child)),
       ),
     },
   }
@@ -72,9 +74,11 @@ const createElement = (type, props, ...children) => {
  */
 
 const createTextElement = (text) => {
+  const key = `${RYUNIX_TYPES.TEXT_ELEMENT.toString()}-${Math.random().toString(36).substring(2, 9)}`
   return {
     type: RYUNIX_TYPES.TEXT_ELEMENT,
     props: {
+      key,
       nodeValue: text,
       children: [],
     },

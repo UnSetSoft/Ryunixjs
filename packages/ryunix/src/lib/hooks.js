@@ -1,15 +1,113 @@
-import { RYUNIX_TYPES, STRINGS, vars, generateHash } from '../utils/index'
+import {
+  RYUNIX_TYPES,
+  STRINGS,
+  vars,
+  generateHash,
+  generateHookHash,
+} from '../utils/index'
 import { isEqual } from 'lodash'
 import { createElement } from './createElement'
+import { workLoop } from './workers'
 
 /**
- * `useStore` is a custom state management hook to handle component state updates efficiently.
+ * `useReducer` hook for managing complex state with reducer logic.
  *
- * This hook manages component state and utilizes batching to avoid reconciling the entire component structure on every `setState` call.
- * Updates are queued and processed in a batch during the next available frame, improving performance.
+ * @param {function} reducer - A reducer function that takes the current state and an action, and returns the new state.
+ * @param {*} initialState - The initial state value or an initial function that returns the initial state.
+ * @param {function} [init] - An optional initializer function to transform initial state.
+ * @returns {Array} - An array containing:
+ *    - `state` (any): The current state value.
+ *    - `dispatch` (function): A function to dispatch actions to update the state.
+ *
+ * @example
+ * // Using useReducer in a component to manage a counter
+ * const reducer = (state, action) => {
+ *   switch (action.type) {
+ *     case "INCREMENT":
+ *       return state + 1;
+ *     case "DECREMENT":
+ *       return state - 1;
+ *     default:
+ *       return state;
+ *   }
+ * };
+ *
+ * const App = () => {
+ *   const [state, dispatch] = useReducer(reducer, 0);
+ *   return (
+ *     <>
+ *       <button onClick={() => dispatch({ type: "INCREMENT" })}>Increment</button>
+ *       <div>Count: {state}</div>
+ *     </>
+ *   );
+ * };
+ */
+
+const useReducer = (reducer, initialState, init) => {
+  const hookHash = generateHookHash(vars.wipFiber, RYUNIX_TYPES.RYUNIX_REDUCE)
+  const oldHook = vars.wipFiber.alternate?.hooks?.[hookHash]
+
+  // Utilizamos useMemo para memorizar el estado inicial de forma eficiente
+  const initial = useMemo(() => (init ? init(initialState) : initialState), [])
+
+  // Creamos el hook con el estado y una cola de acciones inicial
+  const hook = {
+    state: oldHook ? oldHook.state : initial,
+    queue: oldHook ? oldHook.queue : [],
+    reducer,
+  }
+
+  // Agregamos logs de depuración
+  console.log(`--------------[${hookHash}]------------------`)
+  console.log('[useReducer] initial state ', initialState)
+  console.log('[useReducer] hook.state: ', hook.state)
+  console.log('[useReducer] hook.reducer: ', hook.reducer)
+  console.log('[useReducer] hook.queue: ', hook.queue)
+  console.log('[useReducer] hook: ', hook)
+  console.log('---------------------------------------------')
+
+  // Función de despachador que usa useCallback para evitar recrearla innecesariamente
+  const dispatch = useCallback((action) => {
+    // Añadimos la acción a la cola
+    hook.queue.push(action)
+    // Creamos una nueva raíz de trabajo para procesar la actualización
+    vars.wipRoot = {
+      dom: vars.currentRoot.dom,
+      props: vars.currentRoot.props,
+      alternate: vars.currentRoot,
+    }
+    vars.nextUnitOfWork = vars.wipRoot
+    vars.deletions = []
+
+    requestIdleCallback(workLoop)
+  }, [])
+
+  // Aplicamos las acciones acumuladas en la cola al estado actual
+  hook.queue.forEach((action) => {
+    hook.state = hook.reducer(hook.state, action)
+  })
+
+  // Limpiamos la cola para evitar que las acciones se procesen repetidamente
+  hook.queue = []
+
+  // Guardamos el hook en la fibra en progreso
+  vars.wipFiber.hooks = vars.wipFiber.hooks || []
+  vars.wipFiber.hooks[hookHash] = hook
+
+  // Integración de useEffect para reaccionar a los cambios en el estado
+  useEffect(() => {
+    // Aquí puedes ejecutar cualquier lógica que necesite reaccionar al cambio en el estado
+    console.log('El estado se ha actualizado: ', hook.state)
+  }, [hook.state]) // Dependencia en hook.state para ejecutar el efecto cuando cambie
+
+  return [hook.state, dispatch]
+}
+
+/**
+ * `useStore` is a state management hook to handle component state updates efficiently.
  *
  * @param {*} initial - The initial state value for the component.
- * 
+ *
  * @returns {Array} - An array containing:
  *    - `state` (any): The current state value.
  *    - `setState` (function): A function to update the state.
@@ -26,58 +124,22 @@ import { createElement } from './createElement'
  * };
  */
 
+/**
+ * @description The function creates a state.
+ * @param initial - The initial value of the state for the hook.
+ * @returns The `useStore` function returns an array with two elements: the current state value and a
+ * `setState` function that can be used to update the state.
+ */
 const useStore = (initial) => {
-  const oldHook =
-    vars.wipFiber.alternate &&
-    vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex];
-  const hook = {
-    state: oldHook ? oldHook.state : initial,
-    queue: oldHook ? [...oldHook.queue] : [],
-  };
-
-  hook.queue.forEach((action) => {
-    hook.state =
-      typeof action === STRINGS.function ? action(hook.state) : action;
-  });
-
-  hook.queue = [];
-  vars.pendingUpdates = []
-
-  const setState = (action) => {
-    hook.queue.push(action);
-    vars.pendingUpdates.push(() => {
-      vars.wipRoot = {
-        dom: vars.currentRoot.dom,
-        props: vars.currentRoot.props,
-        alternate: vars.currentRoot,
-      };
-      vars.nextUnitOfWork = vars.wipRoot;
-      vars.deletions = [];
-    });
-
-    if (vars.pendingUpdates.length === 1) {
-      requestIdleCallback(() => {
-        vars.pendingUpdates.forEach(update => update());
-        vars.pendingUpdates.length = 0;
-      });
-    }
-  };
-
-  if (vars.wipFiber && vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook);
-    vars.hookIndex++;
-  }
-
-  return [hook.state, setState];
-};
+  // Wrap `useReducer` with a simple reducer for updating state directly
+  return useReducer((state, action) => {
+    return typeof action === STRINGS.function ? action(state) : action
+  }, initial)
+}
 
 /**
- * `useEffect` is a custom hook to handle side effects in components with optimized dependency tracking.
- *
- * This hook runs a callback function after the component renders, based on the provided dependencies.
- * It also supports an optional cleanup function that runs automatically when the component unmounts or when dependencies change.
- * Dependency changes are detected using an efficient hash comparison, which reduces unnecessary re-renders.
+ * `useEffect` is a hook to handle side effects in components with optimized dependency tracking.
+
  *
  * @param {function} callback - A function to execute after the component has rendered or when dependencies have changed.
  *    - If the callback returns a function, it will be used as a cleanup function to execute when the effect needs to be cleaned up.
@@ -101,53 +163,45 @@ const useStore = (initial) => {
  */
 
 const useEffect = (callback, deps) => {
+  const hookHash = generateHookHash(vars.wipFiber, RYUNIX_TYPES.RYUNIX_EFFECT)
+
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex];
+    vars.wipFiber.alternate.hooks[hookHash]
 
   const hook = {
     type: RYUNIX_TYPES.RYUNIX_EFFECT,
     deps,
-    hash: generateHash(deps),
-    cleanup: oldHook ? oldHook.cleanup : undefined,
-  };
+    cleanup: null,
+  }
 
-  const hasChangedDeps =
-    !oldHook || oldHook.hash !== hook.hash;
-
-  if (hasChangedDeps) {
-    if (hook.cleanup) hook.cleanup();
-    const result = callback();
-    if (typeof result === STRINGS.function) {
-      hook.cleanup = result;
+  if (!oldHook || !isEqual(oldHook.deps, hook.deps)) {
+    if (typeof oldHook?.cleanup === STRINGS.function) {
+      oldHook.cleanup()
     }
-  }
 
-  // @ts-ignore
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook);
-    vars.hookIndex++;
+    hook.cleanup = callback()
   }
-};
-
+  vars.wipFiber.hooks = vars.wipFiber.hooks || []
+  vars.wipFiber.hooks[hookHash] = hook
+}
 
 const useRef = (initial) => {
+  const hookHash = generateHookHash(vars.wipFiber, RYUNIX_TYPES.RYUNIX_REF)
+
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex]
+    vars.wipFiber.alternate.hooks[hookHash]
 
   const hook = {
     type: RYUNIX_TYPES.RYUNIX_REF,
     value: oldHook ? oldHook.value : { current: initial },
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
-
+  vars.wipFiber.hooks = vars.wipFiber.hooks || []
+  vars.wipFiber.hooks[hookHash] = hook
   return hook.value
 }
 
@@ -168,7 +222,7 @@ const useRef = (initial) => {
  *   const memoizedValue = useMemo(() => {
  *     return computeHeavyOperation();
  *   }, [dependency1, dependency2]);
- * 
+ *
  *   return (
  *     <>
  *       <div>Memoized Value: {memoizedValue}</div>
@@ -177,32 +231,31 @@ const useRef = (initial) => {
  * };
  */
 const useMemo = (compute, deps) => {
+  const hookHash = generateHookHash(vars.wipFiber, RYUNIX_TYPES.RYUNIX_MEMO)
+
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex];
+    vars.wipFiber.alternate.hooks[hookHash]
 
   const hook = {
     type: RYUNIX_TYPES.RYUNIX_MEMO,
     value: null,
     deps,
     hash: generateHash(deps),
-  };
+  }
 
   if (!oldHook || oldHook.hash !== hook.hash) {
-    hook.value = compute();
+    hook.value = compute()
   } else {
-    hook.value = oldHook.value;
+    hook.value = oldHook.value
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook);
-    vars.hookIndex++;
-  }
+  vars.wipFiber.hooks = vars.wipFiber.hooks || []
+  vars.wipFiber.hooks[hookHash] = hook
 
-  return hook.value;
-};
-
+  return hook.value
+}
 
 const useCallback = (callback, deps) => {
   return useMemo(() => callback, deps)
@@ -278,81 +331,96 @@ const useQuery = () => {
  * );
  */
 const useRouter = (routes) => {
-  const [location, setLocation] = useStore(window.location.pathname);
+  const [location, setLocation] = useStore(window.location.pathname)
 
   const findRoute = (routes, path) => {
+    const pathname = path.split('?')[0]
+
+    const notFoundRoute = routes.find((route) => route.NotFound)
+    const notFound = notFoundRoute
+      ? { route: { component: notFoundRoute.NotFound }, params: {} }
+      : { route: { component: null }, params: {} }
+
     for (const route of routes) {
       if (route.subRoutes) {
-        const childRoute = findRoute(route.subRoutes, path);
-        if (childRoute) return childRoute;
+        const childRoute = findRoute(route.subRoutes, path)
+        if (childRoute) return childRoute
       }
 
-      const keys = [];
+      if (route.path === '*') {
+        return notFound
+      }
+
+      if (!route.path || typeof route.path !== 'string') {
+        console.warn('Invalid route detected:', route)
+        console.info(
+          "if you are using { NotFound: NotFound } please add { path: '*', NotFound: NotFound }",
+        )
+        continue
+      }
+
+      const keys = []
       const pattern = new RegExp(
         `^${route.path.replace(/:\w+/g, (match) => {
-          keys.push(match.substring(1));
-          return '([^/]+)';
-        })}$`
-      );
+          keys.push(match.substring(1))
+          return '([^/]+)'
+        })}$`,
+      )
 
-      const match = path.match(pattern);
+      const match = pathname.match(pattern)
       if (match) {
         const params = keys.reduce((acc, key, index) => {
-          acc[key] = match[index + 1];
-          return acc;
-        }, {});
-        return { route, params };
+          acc[key] = match[index + 1]
+          return acc
+        }, {})
+
+        return { route, params }
       }
     }
-    return null;
-  };
 
-  const preloadComponent = async (component) => {
-    if (component && typeof component.preload === STRINGS.function) {
-      await component.preload();
-    }
-  };
-
-  const preloadRoutes = (routes, currentPath) => {
-    routes.forEach((route) => {
-      if (route.path !== currentPath) {
-        preloadComponent(route.component);
-        if (route.subRoutes) {
-          preloadRoutes(route.subRoutes, currentPath);
-        }
-      }
-    });
-  };
+    return notFound
+  }
 
   const navigate = (path) => {
-    window.history.pushState({}, '', path);
-    updateRoute(path);
-  };
+    window.history.pushState({}, '', path)
+    updateRoute(path)
+  }
 
   const updateRoute = (path) => {
-    setLocation(path.split('?')[0]);
-  };
+    const cleanedPath = path.split('?')[0]
+    setLocation(cleanedPath)
+  }
 
   useEffect(() => {
-    const onPopState = () => updateRoute(window.location.pathname);
-    window.addEventListener('popstate', onPopState);
+    const onPopState = () => updateRoute(window.location.pathname)
+    window.addEventListener('popstate', onPopState)
 
-    // Preload all routes except the current active route
-    preloadRoutes(routes, location);
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
 
-    return () => window.removeEventListener('popstate', onPopState);
-  }, [location]);
+  const currentRouteData = findRoute(routes, location) || {}
 
-  const currentRouteData = findRoute(routes, location);
   const Children = () => {
-    const query = useQuery();
-    return currentRouteData?.route?.component
-      ? currentRouteData.route.component({
-          params: currentRouteData.params,
-          query,
-        })
-      : null;
-  };
+    const query = useQuery()
+    const { route } = currentRouteData
+
+    if (
+      !route ||
+      !route.component ||
+      typeof route.component !== STRINGS.function
+    ) {
+      console.error(
+        'Component not found for current path or the component is not a valid function:',
+        currentRouteData,
+      )
+      return null
+    }
+
+    return route.component({
+      params: currentRouteData.params || {},
+      query,
+    })
+  }
 
   const NavLink = ({ to, ...props }) => {
     const handleClick = (e) => {
@@ -405,32 +473,31 @@ const createContext = (defaultValue) => {
   let context = {
     value: defaultValue,
     listeners: new Set(),
-  };
+  }
 
   const Provider = ({ value, children }) => {
-    context.value = value;
-    context.listeners.forEach((listener) => listener(value));
-    return children;
-  };
+    context.value = value
+    context.listeners.forEach((listener) => listener(value))
+    return children
+  }
 
   const useContext = () => {
-    const [state, setState] = useStore(context.value);
-    
+    const [state, setState] = useStore(context.value)
+
     // Subscribe to context changes
     useEffect(() => {
-      const listener = (newValue) => setState(newValue);
-      context.listeners.add(listener);
+      const listener = (newValue) => setState(newValue)
+      context.listeners.add(listener)
 
       // Unsubscribe on cleanup
-      return () => context.listeners.delete(listener);
-    }, []);
+      return () => context.listeners.delete(listener)
+    }, [])
 
-    return state;
-  };
+    return state
+  }
 
-  return { Provider, useContext };
-};
-
+  return { Provider, useContext }
+}
 
 export {
   useStore,
@@ -440,4 +507,5 @@ export {
   useMemo,
   useCallback,
   useRouter,
+  useReducer,
 }

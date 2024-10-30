@@ -1,4 +1,4 @@
-import { EFFECT_TAGS, vars } from '../utils/index'
+import { EFFECT_TAGS, vars, Fiber } from '../utils/index'
 
 /**
  * This function reconciles the children of a fiber node with a new set of elements, creating new
@@ -24,36 +24,40 @@ const reconcileChildren = (wipFiber, elements) => {
   while (index < elements.length) {
     const element = elements[index]
     const key = element.props.key || element.type
-    const oldFiber = oldFibersMap.get(key)
+    oldFiber = oldFibersMap.get(key)
 
     let newFiber
     const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
-      newFiber = {
+      newFiber = Fiber({
+        _id: oldFiber.id,
         type: oldFiber.type,
         props: element.props,
         dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
-      }
+        child: oldFiber.child,
+        sibling: oldFiber.sibling,
+        hooks: oldFiber.hooks,
+        key,
+      })
       oldFibersMap.delete(key)
     } else if (element) {
-      newFiber = {
+      newFiber = Fiber({
         type: element.type,
         props: element.props,
         dom: undefined,
         parent: wipFiber,
-        alternate: undefined,
+        alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
-      }
+        child: null,
+        sibling: null,
+        hooks: [],
+        key,
+      })
     }
-
-    oldFibersMap.forEach((oldFiber) => {
-      oldFiber.effectTag = EFFECT_TAGS.DELETION
-      vars.deletions.push(oldFiber)
-    })
 
     if (index === 0) {
       wipFiber.child = newFiber
@@ -64,6 +68,11 @@ const reconcileChildren = (wipFiber, elements) => {
     prevSibling = newFiber
     index++
   }
+
+  oldFibersMap.forEach((oldFiber) => {
+    oldFiber.effectTag = EFFECT_TAGS.DELETION
+    vars.deletions.push(oldFiber)
+  })
 }
 
 export { reconcileChildren }
