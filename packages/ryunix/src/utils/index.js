@@ -75,7 +75,9 @@ const generateHash = (deps) => {
 }
 
 const generateHookHash = (fiber, descriptor) => {
-  return `${fiber.key}-${descriptor.toString()}-${Math.random().toString(36).substring(2, 9)}` // Or any other unique combination
+  return `${fiber.key}-${descriptor.toString()}-${Math.random()
+    .toString(36)
+    .substring(2, 9)}` // Or any other unique combination
 }
 
 const generateUnicHash = (prefix) => {

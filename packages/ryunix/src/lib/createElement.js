@@ -74,7 +74,9 @@ const createElement = (type, props, ...children) => {
  */
 
 const createTextElement = (text) => {
-  const key = `${RYUNIX_TYPES.TEXT_ELEMENT.toString()}-${Math.random().toString(36).substring(2, 9)}`
+  const key = `${RYUNIX_TYPES.TEXT_ELEMENT.toString()}-${Math.random()
+    .toString(36)
+    .substring(2, 9)}`
   return {
     type: RYUNIX_TYPES.TEXT_ELEMENT,
     props: {

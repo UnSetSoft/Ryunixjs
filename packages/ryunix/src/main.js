@@ -1,4 +1,5 @@
 import Ryunix from './lib/index.js'
+
 export {
   useStore,
   useEffect,
@@ -7,9 +8,7 @@ export {
   useMemo,
   useCallback,
   useRouter,
-  Fragment,
-  useReducer,
-} from './lib/index.js'
+} from './lib/hooks.js'
 
 window.Ryunix = Ryunix
 
