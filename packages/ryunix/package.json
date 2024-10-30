@@ -2,7 +2,7 @@
   "name": "@unsetsoft/ryunixjs",
   "version": "1.1.5-nightly.77",
   "license": "MIT",
-  "main": "./dist/Ryunix.js",
+  "main": "./dist/Ryunix.min.js",
   "types": "./dist/Ryunix.d.ts",
   "private": false,
   "bugs": {
@@ -10,9 +10,9 @@
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
-    "build:js": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix --plugin @rollup/plugin-terser",
-    "build": "rollup ./src/main.js --file ./dist/Ryunix.um.js --format umd --name Ryunix",
-    "prepublishOnly": "npm run build:js",
+    "build:js": "rollup ./src/main.js --file ./dist/Ryunix.min.js --format umd --name Ryunix --plugin @rollup/plugin-terser",
+    "build": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
+    "prepublishOnly": "npm run build:js | npm run build",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish",
     "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc"
