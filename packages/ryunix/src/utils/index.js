@@ -69,16 +69,8 @@ const Fiber = ({
     key,
   }
 }
-
-const generateHash = (deps) => {
-  return deps.map((dep) => JSON.stringify(dep)).join('-')
-}
-
-const generateHookHash = (fiber, descriptor) => {
-  return `${fiber.key}-${descriptor.toString()}-${Math.random().toString(36).substring(2, 9)}` // Or any other unique combination
-}
-
-const generateUnicHash = (prefix) => {
+ 
+const generateHash = (prefix) => {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`
 }
 
@@ -90,6 +82,5 @@ export {
   STRINGS,
   OLD_STRINGS,
   generateHash,
-  generateHookHash,
   Fiber,
 }

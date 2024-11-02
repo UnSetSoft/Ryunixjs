@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, STRINGS } from '../utils/index'
+import { generateHash, RYUNIX_TYPES, STRINGS } from '../utils/index'
 
 const Fragment = (props) => {
   return props.children
@@ -49,8 +49,8 @@ const createElement = (type, props, ...children) => {
   children = childArray(children, [])
   const key =
     props && props.key
-      ? props.key
-      : `${RYUNIX_TYPES.Ryunix_ELEMENT.toString()}-${Math.random().toString(36).substring(2, 9)}`
+      ? generateHash(props.key)
+      : generateHash(RYUNIX_TYPES.Ryunix_ELEMENT.toString()) 
 
   return {
     type,
