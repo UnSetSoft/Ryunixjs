@@ -1,4 +1,12 @@
 '#
+### [1.1.6-canary.4](///compare/v1.1.6-canary.3...v1.1.6-canary.4) (2024-11-02)
+
+### [1.1.6-canary.3](///compare/v1.1.6-canary.2...v1.1.6-canary.3) (2024-11-02)
+
+### [1.1.6-canary.2](///compare/v1.1.6-canary.1...v1.1.6-canary.2) (2024-11-02)
+
+### [1.1.6-canary.1](///compare/v1.1.6...v1.1.6-canary.1) (2024-11-02)
+
 ### [1.1.6](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.90...v1.1.6) (2024-10-30)
 
 ### [1.1.5-nightly.90](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.89...v1.1.5-nightly.90) (2024-10-30)

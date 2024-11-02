@@ -10,6 +10,8 @@
   "scripts": {
     "cli": "node ./bin/index.mjs",
     "nightly:release": "npm publish --tag nightly",
+    "nightly:canary": "npm publish --tag canary",
+
     "release": "npm publish"
   },
   "bin": {
