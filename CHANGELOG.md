@@ -1,4 +1,6 @@
 '#
+### [1.1.6-canary.36](///compare/v1.1.6-canary.35...v1.1.6-canary.36) (2024-11-02)
+
 ### [1.1.6-canary.35](///compare/v1.1.6-canary.34...v1.1.6-canary.35) (2024-11-02)
 
 ### [1.1.6-canary.34](///compare/v1.1.6-canary.33...v1.1.6-canary.34) (2024-11-02)
