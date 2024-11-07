@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "1.1.6-canary.58",
+  "version": "1.1.6-canary.59",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -8,8 +8,8 @@
   ],
   "license": "MIT",
   "scripts": {
-    "lint-eslint": "eslint . --ext js,jsx,ts,tsx --max-warnings=0 --config eslint.config.mjs --no-eslintrc",
-    "lint-fix": "yarn prettier-fix && eslint . --ext js,jsx,ts,tsx --fix --max-warnings=0 --config eslint.config.mjs --no-eslintrc",
+    "lint-eslint": "eslint . --max-warnings=0 --config eslint.config.mjs --no-eslintrc",
+    "lint-fix": "yarn prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs --no-eslintrc",
     "prettier-check": "prettier --check .",
     "prettier-fix": "prettier --write .",
     "kg:init": "gmvu init",
