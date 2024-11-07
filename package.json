@@ -7,7 +7,6 @@
     "packages/*"
   ],
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "lint-eslint": "eslint . --max-warnings=0 --config eslint.config.mjs  ",
     "lint-fix": "yarn prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs  ",
