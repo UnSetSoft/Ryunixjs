@@ -1,12 +1,13 @@
 {
   "name": "RyunixJS",
-  "version": "1.1.6-canary.61",
+  "version": "1.1.6-canary.62",
   "private": true,
   "homepage": "./",
   "workspaces": [
     "packages/*"
   ],
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "lint-eslint": "eslint . --max-warnings=0 --config eslint.config.mjs  ",
     "lint-fix": "yarn prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs  ",
