@@ -30,7 +30,7 @@
     "css-loader": "6.8.1",
     "css-minimizer-webpack-plugin": "7.0.0",
     "dotenv-webpack": "8.0.1",
-    "eslint": "9.5.0",
+    "eslint": "9.16.0",
     "file-loader": "6.2.0",
     "glob": "10.3.7",
     "globals": "15.6.0",
