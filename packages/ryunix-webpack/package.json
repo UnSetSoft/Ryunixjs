@@ -39,7 +39,7 @@
     "image-webpack-loader": "8.1.0",
     "mini-css-extract-plugin": "^2.9.1",
     "node-sass": "9.0.0",
-    "sass": "1.66.1",
+    "sass": "1.81.1",
     "sass-loader": "13.3.2",
     "style-loader": "3.3.3",
     "terminal-log": "1.0.1",
