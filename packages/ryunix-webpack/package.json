@@ -33,7 +33,7 @@
     "eslint": "9.5.0",
     "file-loader": "6.2.0",
     "glob": "10.3.7",
-    "globals": "15.6.0",
+    "globals": "15.14.0",
     "html-loader": "4.2.0",
     "html-webpack-plugin": "5.5.3",
     "image-webpack-loader": "8.1.0",
