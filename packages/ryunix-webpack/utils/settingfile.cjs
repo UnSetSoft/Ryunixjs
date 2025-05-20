@@ -1,35 +1,21 @@
 'use strict'
+
 const fs = require('fs')
 const path = require('path')
 
-const defaultConfigFile = path.join(
-  __dirname,
-  '../../../../',
-  'ryunix.config.js',
-)
-
-const CommonConfigFile = path.join(
-  __dirname,
-  '../../../../',
-  'ryunix.config.cjs',
-)
+const defaultConfigFile = path.join(process.cwd(), 'ryunix.config.js')
+const commonConfigFile = path.join(process.cwd(), 'ryunix.config.cjs')
 
 let config = {}
 
 if (fs.existsSync(defaultConfigFile)) {
-  config = require('../../../../ryunix.config.js')
-} else if (fs.existsSync(CommonConfigFile)) {
-  config = require('../../../../ryunix.config.cjs')
+  config = require(defaultConfigFile)
+} else if (fs.existsSync(commonConfigFile)) {
+  config = require(commonConfigFile)
 }
 
 const configFileExist = () => {
-  if (fs.existsSync(defaultConfigFile)) {
-    return true
-  } else if (fs.existsSync(CommonConfigFile)) {
-    return true
-  }
-
-  return false
+  return fs.existsSync(defaultConfigFile) || fs.existsSync(commonConfigFile)
 }
 
 module.exports = {
