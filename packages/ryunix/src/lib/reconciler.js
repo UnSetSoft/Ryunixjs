@@ -64,11 +64,13 @@ const reconcileChildren = (wipFiber, elements) => {
       if (wipFiber.hooks) {
         newFiber.hooks = wipFiber.hooks.map((hook) => ({ ...hook }))
         newFiber.hooks.forEach((hook) => {
-          if (hook.queue.length > 0) {
+          if (hook.queue && hook.queue.length > 0) {
             hook.state = hook.queue.reduce((state, action) => {
               return typeof action === 'function' ? action(state) : action
             }, hook.state)
             hook.queue = []
+          } else {
+            console.warn('[reconcileChildren] Hook queue is undefined or empty:', hook)
           }
         })
       }
