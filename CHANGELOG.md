@@ -1,4 +1,141 @@
 '#
+
+### [1.1.6-canary.68](///compare/v1.1.6-canary.67...v1.1.6-canary.68) (2024-11-07)
+
+### [1.1.6-canary.67](///compare/v1.1.6-canary.66...v1.1.6-canary.67) (2024-11-07)
+
+### [1.1.6-canary.66](///compare/v1.1.6-canary.65...v1.1.6-canary.66) (2024-11-07)
+
+### [1.1.6-canary.65](///compare/v1.1.6-canary.64...v1.1.6-canary.65) (2024-11-07)
+
+### [1.1.6-canary.64](///compare/v1.1.6-canary.63...v1.1.6-canary.64) (2024-11-07)
+
+### [1.1.6-canary.63](///compare/v1.1.6-canary.62...v1.1.6-canary.63) (2024-11-07)
+
+### [1.1.6-canary.62](///compare/v1.1.6-canary.61...v1.1.6-canary.62) (2024-11-07)
+
+### [1.1.6-canary.61](///compare/v1.1.6-canary.60...v1.1.6-canary.61) (2024-11-07)
+
+### [1.1.6-canary.60](///compare/v1.1.6-canary.59...v1.1.6-canary.60) (2024-11-07)
+
+### [1.1.6-canary.59](///compare/v1.1.6-canary.58...v1.1.6-canary.59) (2024-11-07)
+
+### [1.1.6-canary.58](///compare/v1.1.6-canary.57...v1.1.6-canary.58) (2024-11-07)
+
+### [1.1.6-canary.57](///compare/v1.1.6-canary.56...v1.1.6-canary.57) (2024-11-07)
+
+### [1.1.6-canary.56](///compare/v1.1.6-canary.55...v1.1.6-canary.56) (2024-11-07)
+
+### [1.1.6-canary.55](///compare/v1.1.6-canary.54...v1.1.6-canary.55) (2024-11-02)
+
+### [1.1.6-canary.54](///compare/v1.1.6-canary.53...v1.1.6-canary.54) (2024-11-02)
+
+### [1.1.6-canary.53](///compare/v1.1.6-canary.52...v1.1.6-canary.53) (2024-11-02)
+
+### [1.1.6-canary.52](///compare/v1.1.6-canary.51...v1.1.6-canary.52) (2024-11-02)
+
+### [1.1.6-canary.51](///compare/v1.1.6-canary.50...v1.1.6-canary.51) (2024-11-02)
+
+### [1.1.6-canary.50](///compare/v1.1.6-canary.49...v1.1.6-canary.50) (2024-11-02)
+
+### [1.1.6-canary.49](///compare/v1.1.6-canary.48...v1.1.6-canary.49) (2024-11-02)
+
+### [1.1.6-canary.48](///compare/v1.1.6-canary.47...v1.1.6-canary.48) (2024-11-02)
+
+### [1.1.6-canary.47](///compare/v1.1.6-canary.46...v1.1.6-canary.47) (2024-11-02)
+
+### [1.1.6-canary.46](///compare/v1.1.6-canary.45...v1.1.6-canary.46) (2024-11-02)
+
+### [1.1.6-canary.45](///compare/v1.1.6-canary.44...v1.1.6-canary.45) (2024-11-02)
+
+### [1.1.6-canary.44](///compare/v1.1.6-canary.43...v1.1.6-canary.44) (2024-11-02)
+
+### [1.1.6-canary.43](///compare/v1.1.6-canary.42...v1.1.6-canary.43) (2024-11-02)
+
+### [1.1.6-canary.42](///compare/v1.1.6-canary.41...v1.1.6-canary.42) (2024-11-02)
+
+### [1.1.6-canary.41](///compare/v1.1.6-canary.40...v1.1.6-canary.41) (2024-11-02)
+
+### [1.1.6-canary.40](///compare/v1.1.6-canary.39...v1.1.6-canary.40) (2024-11-02)
+
+### [1.1.6-canary.39](///compare/v1.1.6-canary.38...v1.1.6-canary.39) (2024-11-02)
+
+### [1.1.6-canary.38](///compare/v1.1.6-canary.37...v1.1.6-canary.38) (2024-11-02)
+
+### [1.1.6-canary.37](///compare/v1.1.6-canary.36...v1.1.6-canary.37) (2024-11-02)
+
+### [1.1.6-canary.36](///compare/v1.1.6-canary.35...v1.1.6-canary.36) (2024-11-02)
+
+### [1.1.6-canary.35](///compare/v1.1.6-canary.34...v1.1.6-canary.35) (2024-11-02)
+
+### [1.1.6-canary.34](///compare/v1.1.6-canary.33...v1.1.6-canary.34) (2024-11-02)
+
+### [1.1.6-canary.33](///compare/v1.1.6-canary.32...v1.1.6-canary.33) (2024-11-02)
+
+### [1.1.6-canary.32](///compare/v1.1.6-canary.31...v1.1.6-canary.32) (2024-11-02)
+
+### [1.1.6-canary.31](///compare/v1.1.6-canary.30...v1.1.6-canary.31) (2024-11-02)
+
+### [1.1.6-canary.30](///compare/v1.1.6-canary.29...v1.1.6-canary.30) (2024-11-02)
+
+### [1.1.6-canary.29](///compare/v1.1.6-canary.28...v1.1.6-canary.29) (2024-11-02)
+
+### [1.1.6-canary.28](///compare/v1.1.6-canary.27...v1.1.6-canary.28) (2024-11-02)
+
+### [1.1.6-canary.27](///compare/v1.1.6-canary.26...v1.1.6-canary.27) (2024-11-02)
+
+### [1.1.6-canary.26](///compare/v1.1.6-canary.25...v1.1.6-canary.26) (2024-11-02)
+
+### [1.1.6-canary.25](///compare/v1.1.6-canary.24...v1.1.6-canary.25) (2024-11-02)
+
+### [1.1.6-canary.24](///compare/v1.1.6-canary.23...v1.1.6-canary.24) (2024-11-02)
+
+### [1.1.6-canary.23](///compare/v1.1.6-canary.22...v1.1.6-canary.23) (2024-11-02)
+
+### [1.1.6-canary.22](///compare/v1.1.6-canary.21...v1.1.6-canary.22) (2024-11-02)
+
+### [1.1.6-canary.21](///compare/v1.1.6-canary.20...v1.1.6-canary.21) (2024-11-02)
+
+### [1.1.6-canary.20](///compare/v1.1.6-canary.19...v1.1.6-canary.20) (2024-11-02)
+
+### [1.1.6-canary.19](///compare/v1.1.6-canary.18...v1.1.6-canary.19) (2024-11-02)
+
+### [1.1.6-canary.18](///compare/v1.1.6-canary.17...v1.1.6-canary.18) (2024-11-02)
+
+### [1.1.6-canary.17](///compare/v1.1.6-canary.16...v1.1.6-canary.17) (2024-11-02)
+
+### [1.1.6-canary.16](///compare/v1.1.6-canary.15...v1.1.6-canary.16) (2024-11-02)
+
+### [1.1.6-canary.15](///compare/v1.1.6-canary.14...v1.1.6-canary.15) (2024-11-02)
+
+### [1.1.6-canary.14](///compare/v1.1.6-canary.13...v1.1.6-canary.14) (2024-11-02)
+
+### [1.1.6-canary.13](///compare/v1.1.6-canary.12...v1.1.6-canary.13) (2024-11-02)
+
+### [1.1.6-canary.12](///compare/v1.1.6-canary.11...v1.1.6-canary.12) (2024-11-02)
+
+### [1.1.6-canary.11](///compare/v1.1.6-canary.10...v1.1.6-canary.11) (2024-11-02)
+
+### [1.1.6-canary.10](///compare/v1.1.6-canary.9...v1.1.6-canary.10) (2024-11-02)
+
+### [1.1.6-canary.9](///compare/v1.1.6-canary.8...v1.1.6-canary.9) (2024-11-02)
+
+### [1.1.6-canary.8](///compare/v1.1.6-canary.7...v1.1.6-canary.8) (2024-11-02)
+
+### [1.1.6-canary.7](///compare/v1.1.6-canary.6...v1.1.6-canary.7) (2024-11-02)
+
+### [1.1.6-canary.6](///compare/v1.1.6-canary.5...v1.1.6-canary.6) (2024-11-02)
+
+### [1.1.6-canary.5](///compare/v1.1.6...v1.1.6-canary.5) (2024-11-02)
+
+### [1.1.6-canary.4](///compare/v1.1.6-canary.3...v1.1.6-canary.4) (2024-11-02)
+
+### [1.1.6-canary.3](///compare/v1.1.6-canary.2...v1.1.6-canary.3) (2024-11-02)
+
+### [1.1.6-canary.2](///compare/v1.1.6-canary.1...v1.1.6-canary.2) (2024-11-02)
+
+### [1.1.6-canary.1](///compare/v1.1.6...v1.1.6-canary.1) (2024-11-02)
+
 ### [1.1.6](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.90...v1.1.6) (2024-10-30)
 
 ### [1.1.5-nightly.90](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.5-nightly.89...v1.1.5-nightly.90) (2024-10-30)
