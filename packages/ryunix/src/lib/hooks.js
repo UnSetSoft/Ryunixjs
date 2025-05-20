@@ -25,8 +25,8 @@ const useStore = (initial) => {
   })
 
   console.log('[useStore] Hook after processing queue:', hook)
-  hook.queue = hook.queue || [];
-  console.log('[useStore] Hook queue initialized:', hook.queue);
+  hook.queue = hook.queue || []
+  console.log('[useStore] Hook queue initialized:', hook.queue)
 
   const setState = (action) => {
     console.log('[useStore] setState called with action:', action)

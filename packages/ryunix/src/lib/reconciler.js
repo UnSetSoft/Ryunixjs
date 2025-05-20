@@ -70,7 +70,10 @@ const reconcileChildren = (wipFiber, elements) => {
             }, hook.state)
             hook.queue = []
           } else {
-            console.warn('[reconcileChildren] Hook queue is undefined or empty:', hook)
+            console.warn(
+              '[reconcileChildren] Hook queue is undefined or empty:',
+              hook,
+            )
           }
         })
       }
