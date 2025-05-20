@@ -50,6 +50,15 @@ const reconcileChildren = (wipFiber, elements) => {
       }
     }
 
+    if (newFiber) {
+      // Ensure hooks and state are properly initialized for new fibers
+      if (!newFiber.alternate) {
+        newFiber.hooks = []
+      } else {
+        newFiber.hooks = newFiber.alternate.hooks || []
+      }
+    }
+
     if (index === 0) {
       wipFiber.child = newFiber
     } else if (prevSibling) {

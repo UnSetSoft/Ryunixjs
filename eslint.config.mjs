@@ -21,7 +21,7 @@ export default [
       },
 
       parser: babelParser,
-      ecmaVersion: 5,
+      ecmaVersion: 'latest',
       sourceType: 'module',
 
       parserOptions: {
@@ -30,19 +30,16 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        parserOptions: {
-          ecmaVersion: 'latest',
-          sourceType: 'module',
-        },
+
         babelOptions: {
           presets: ['@babel/preset-react'],
-
           caller: {
             supportsTopLevelAwait: true,
           },
         },
       },
     },
+
     rules: {
       'import/no-unresolved': 'off',
       'import/extensions': 'off',

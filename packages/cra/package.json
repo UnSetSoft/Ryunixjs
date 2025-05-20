@@ -5,14 +5,11 @@
   "author": "Neyunse",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
   "license": "MIT",
-  "private": false,
   "keywords": [
     "ryunixjs"
   ],
   "main": "src/cli.js",
-  "bin": {
-    "cra": "src/cli.js"
-  },
+  "bin": "src/cli.js",
   "files": [
     "src",
     "templates"

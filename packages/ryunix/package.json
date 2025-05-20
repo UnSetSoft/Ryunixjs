@@ -4,7 +4,6 @@
   "license": "MIT",
   "main": "./dist/Ryunix.min.js",
   "types": "./dist/Ryunix.d.ts",
-  "private": false,
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
   },
@@ -16,13 +15,16 @@
     "nightly:release": "npm publish --tag nightly",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish",
-    "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc"
+    "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc",
+    "build:test": "npm run build:js | npm run build",
+    "prettier-check": "prettier -c .",
+    "prettier-fix": "prettier -w ."
   },
   "dependencies": {
     "@rollup/plugin-terser": "0.4.4",
     "eslint": "8.56.0",
-    "lodash": "4.17.20",
-    "rollup": "4.9.2"
+    "lodash": "^4.17.21",
+    "rollup": "^4.41.0"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"
