@@ -89,7 +89,10 @@ const reconcileChildren = (wipFiber, elements) => {
     vars.deletions.push(oldFiber)
   })
 
-  console.log('[reconcileChildren] Reconciliation complete for fiber:', wipFiber)
+  console.log(
+    '[reconcileChildren] Reconciliation complete for fiber:',
+    wipFiber,
+  )
 }
 
 export { reconcileChildren }
