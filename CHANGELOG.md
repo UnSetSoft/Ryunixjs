@@ -1,4 +1,5 @@
-'#
+# Changelog
+### [1.1.6-canary.69](///compare/v1.1.6-canary.68...v1.1.6-canary.69) (2025-05-20)
 
 ### [1.1.6-canary.68](///compare/v1.1.6-canary.67...v1.1.6-canary.68) (2024-11-07)
 
