@@ -8,6 +8,7 @@ import { createElement } from './createElement'
  * `setState` function that can be used to update the state.
  */
 const useStore = (initial) => {
+  console.log('[useStore] Initial state:', initial)
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
@@ -17,14 +18,17 @@ const useStore = (initial) => {
     queue: oldHook ? [...oldHook.queue] : [],
   }
 
+  console.log('[useStore] Hook before processing queue:', hook)
   hook.queue.forEach((action) => {
     hook.state =
       typeof action === STRINGS.function ? action(hook.state) : action
   })
 
+  console.log('[useStore] Hook after processing queue:', hook)
   hook.queue = []
 
   const setState = (action) => {
+    console.log('[useStore] setState called with action:', action)
     hook.queue.push(action)
 
     vars.wipRoot = {
@@ -43,6 +47,7 @@ const useStore = (initial) => {
     vars.hookIndex++
   }
 
+  console.log('[useStore] Returning state and setState:', [hook.state, setState])
   return [hook.state, setState]
 }
 
