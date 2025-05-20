@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-webpack",
-  "version": "1.1.5-nightly.90",
+  "version": "1.1.6-canary.68",
   "license": "MIT",
   "private": false,
   "bugs": {
@@ -10,8 +10,7 @@
   "scripts": {
     "cli": "node ./bin/index.mjs",
     "nightly:release": "npm publish --tag nightly",
-    "nightly:canary": "npm publish --tag canary",
-
+    "canary:release": "npm publish --tag canary",
     "release": "npm publish"
   },
   "bin": {

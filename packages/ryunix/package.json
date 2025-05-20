@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.1.5-nightly.90",
+  "version": "1.1.6-canary.68",
   "license": "MIT",
   "main": "./dist/Ryunix.min.js",
   "types": "./dist/Ryunix.d.ts",
@@ -14,8 +14,7 @@
     "build": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
     "prepublishOnly": "npm run build:js | npm run build",
     "nightly:release": "npm publish --tag nightly",
-    "nightly:canary": "npm publish --tag canary",
-
+    "canary:release": "npm publish --tag canary",
     "release": "npm publish",
     "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc"
   },

@@ -50,7 +50,7 @@ const createElement = (type, props, ...children) => {
   const key =
     props && props.key
       ? generateHash(props.key)
-      : generateHash(RYUNIX_TYPES.Ryunix_ELEMENT.toString()) 
+      : generateHash(RYUNIX_TYPES.Ryunix_ELEMENT.toString())
 
   return {
     type,
