@@ -57,6 +57,11 @@ const reconcileChildren = (wipFiber, elements) => {
       } else {
         newFiber.hooks = newFiber.alternate.hooks || []
       }
+
+      // Propagate parent state to child fibers
+      if (wipFiber.hooks) {
+        newFiber.parentState = wipFiber.hooks.map((hook) => hook.state)
+      }
     }
 
     if (index === 0) {
