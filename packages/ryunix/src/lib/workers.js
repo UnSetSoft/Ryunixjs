@@ -21,7 +21,13 @@ const workLoop = (deadline) => {
     commitRoot()
   }
 
-  requestIdleCallback(workLoop)
+  const fallbackDeadline = { timeRemaining: () => Infinity }
+
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(workLoop)
+  } else {
+    workLoop(fallbackDeadline)
+  }
 }
 
 requestIdleCallback(workLoop)

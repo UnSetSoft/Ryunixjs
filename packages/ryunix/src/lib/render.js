@@ -1,4 +1,5 @@
 import { vars } from '../utils/index'
+import { workLoop } from './workers'
 
 const clearContainer = (container) => {
   while (container.firstChild) {
@@ -25,6 +26,16 @@ const render = (element, container) => {
 
   vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
+
+  const fallbackDeadline = { timeRemaining: () => Infinity }
+
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(workLoop)
+  } else {
+    workLoop(fallbackDeadline)
+  }
+
+  return vars.wipRoot
 }
 
 /**
