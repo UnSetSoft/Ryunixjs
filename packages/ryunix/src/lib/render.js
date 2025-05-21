@@ -27,13 +27,7 @@ const render = (element, container) => {
   vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
 
-  const fallbackDeadline = { timeRemaining: () => Infinity }
-
-  if (typeof requestIdleCallback === 'function') {
-    requestIdleCallback(workLoop)
-  } else {
-    workLoop(fallbackDeadline)
-  }
+  workLoop({ timeRemaining: () => 999 })
 
   return vars.wipRoot
 }
