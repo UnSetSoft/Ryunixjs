@@ -10,7 +10,6 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  * fiber's subtree
  */
 const reconcileChildren = (wipFiber, elements) => {
-  console.log('[reconcileChildren] Start reconciliation for fiber:', wipFiber)
   let index = 0
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
   let prevSibling = null
@@ -51,34 +50,6 @@ const reconcileChildren = (wipFiber, elements) => {
       }
     }
 
-    if (newFiber) {
-      console.log('[reconcileChildren] New fiber created:', newFiber)
-      // Ensure hooks and state are properly initialized for new fibers
-      if (!newFiber.alternate) {
-        newFiber.hooks = []
-      } else {
-        newFiber.hooks = newFiber.alternate.hooks || []
-      }
-
-      // Synchronize state between parent and child fibers
-      if (wipFiber.hooks) {
-        newFiber.hooks = wipFiber.hooks.map((hook) => ({ ...hook }))
-        newFiber.hooks.forEach((hook) => {
-          if (hook.queue && hook.queue.length > 0) {
-            hook.state = hook.queue.reduce((state, action) => {
-              return typeof action === 'function' ? action(state) : action
-            }, hook.state)
-            hook.queue = []
-          } else {
-            console.warn(
-              '[reconcileChildren] Hook queue is undefined or empty:',
-              hook,
-            )
-          }
-        })
-      }
-    }
-
     if (index === 0) {
       wipFiber.child = newFiber
     } else if (prevSibling) {
@@ -93,11 +64,6 @@ const reconcileChildren = (wipFiber, elements) => {
     oldFiber.effectTag = EFFECT_TAGS.DELETION
     vars.deletions.push(oldFiber)
   })
-
-  console.log(
-    '[reconcileChildren] Reconciliation complete for fiber:',
-    wipFiber,
-  )
 }
 
 export { reconcileChildren }
