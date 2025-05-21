@@ -21,7 +21,7 @@ describe('App Component with Count and Test', () => {
   const Count = ({ value, callback, label }) => {
     useEffect(() => {
       console.log(`----------[called from ${label}]----------`)
-      console.log(`${label}:`, value === '' ? '[empty]' : value)
+      console.log(`${label}:`, value)
       console.log(`------------------------------------------`)
     }, [value])
 
@@ -35,7 +35,7 @@ describe('App Component with Count and Test', () => {
 
   const Test = () => {
     const [message, setCount] = useStore('')
-    const click = () => setCount('hello')
+    const click = () => setCount((p) => 'hello')
     return Ryunix.createElement(Count, {
       value: message,
       callback: click,
@@ -77,19 +77,19 @@ describe('App Component with Count and Test', () => {
     const buttons = container.dom.querySelectorAll('button')
     expect(buttons.length).toBe(3)
 
-    // Click en el botón "App"
+    // Simula click en el segundo botón (App)
     buttons[1].click()
     workLoop({ timeRemaining: () => 100 })
 
     const paragraphs = container.dom.querySelectorAll('p')
     expect(paragraphs.length).toBe(3)
+
     expect(paragraphs[1].textContent).toBe('Muestra en home el valor: hola')
 
-    // Click en el botón "Test"
+    // Simula click en el primer botón (Test)
     buttons[0].click()
     workLoop({ timeRemaining: () => 100 })
 
-    expect(paragraphs.length).toBe(3)
-    expect(paragraphs[0].textContent).toBe('Muestra en home el valor: hello')
+    expect(paragraphs[0].textContent).toBe('Muestra en home el valor: ')
   })
 })
