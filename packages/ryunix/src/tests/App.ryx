@@ -1,4 +1,4 @@
-import { useStore, useEffect } from '@unsetsoft/ryunixjs'
+import { useStore, useEffect } from '../lib/index.js'
 
 console.log('[App.ryx] File loaded')
 
