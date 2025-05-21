@@ -17,7 +17,7 @@ create('create-cra', {
     channel: {
       type: 'list',
       describe: 'Which Ryunix channel do you want to use?',
-      choices: ['Latest', 'Nightly'],
+      choices: ['Latest', 'Canary'],
       prompt: 'if-no-arg',
     },
     vscode: {
@@ -35,8 +35,8 @@ create('create-cra', {
     if (template === 'Rspack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
-      } else if (answers.channel === 'Nightly') {
-        await installNpmPackage('@unsetsoft/ryunixjs@nightly')
+      } else if (answers.channel === 'Canary') {
+        await installNpmPackage('@unsetsoft/ryunixjs@canary')
       }
       await installNpmPackage(
         ['@rspack/cli', '@rspack/core', 'cross-env', 'css-loader'],
@@ -48,9 +48,9 @@ create('create-cra', {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
         await installNpmPackage('@unsetsoft/ryunix-webpack@latest', true)
-      } else if (answers.channel === 'Nightly') {
-        await installNpmPackage('@unsetsoft/ryunixjs@nightly')
-        await installNpmPackage('@unsetsoft/ryunix-webpack@nightly', true)
+      } else if (answers.channel === 'Canary') {
+        await installNpmPackage('@unsetsoft/ryunixjs@canary')
+        await installNpmPackage('@unsetsoft/ryunix-webpack@canary', true)
       }
     } else {
       throw new Error('Missing template')
