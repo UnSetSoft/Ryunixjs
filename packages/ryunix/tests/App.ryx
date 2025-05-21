@@ -1,0 +1,42 @@
+import { useStore, useEffect } from '@unsetsoft/ryunixjs'
+
+console.log('[App.ryx] File loaded')
+
+const Count = ({ value, callback, label }) => {
+  useEffect(() => {
+    console.log(`----------[called from ${label}]----------`)
+    console.log(`${label}:`, value)
+    console.log(`------------------------------------------`)
+  }, [value])
+
+  return (
+    <>
+      <button onClick={callback}>Boton {label}</button>
+      <p>Muestra en home el valor: {value}</p>
+    </>
+  )
+}
+
+const Test = () => {
+  const [message, setCount] = useStore('')
+  const click = () => setCount((p) => 'hello')
+  return <Count value={message} callback={click} label="Test" />
+}
+
+const App = () => {
+  const [count, setCount] = useStore('')
+  const click = () => setCount('hola')
+  return (
+    <div>
+      <main>
+        <div ryunix-class="container">
+          <Test />
+          <Count value={count} callback={click} label="App" />
+          <Test />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default App
