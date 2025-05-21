@@ -47,7 +47,10 @@ const useStore = (initial) => {
     vars.hookIndex++
   }
 
-  console.log('[useStore] Returning state and setState:', [hook.state, setState])
+  console.log('[useStore] Returning state and setState:', [
+    hook.state,
+    setState,
+  ])
   return [hook.state, setState]
 }
 
