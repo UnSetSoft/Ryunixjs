@@ -1,5 +1,0 @@
-import Ryunix from '../lib/index.js'
-
-const App = () => Ryunix.createElement('div', null, 'Hello Ryunix!')
-
-export default App
