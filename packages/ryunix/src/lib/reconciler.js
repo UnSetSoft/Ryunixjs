@@ -9,25 +9,37 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  * @param elements - an array of elements representing the new children to be rendered in the current
  * fiber's subtree
  */
+const shouldComponentUpdate = (oldProps, newProps) => {
+  // Comparar las propiedades antiguas y nuevas
+  return (
+    !oldProps ||
+    !newProps ||
+    Object.keys(oldProps).length !== Object.keys(newProps).length ||
+    Object.keys(newProps).some((key) => oldProps[key] !== newProps[key])
+  )
+}
+
+const recycleFiber = (oldFiber, newProps) => {
+  return {
+    ...oldFiber,
+    props: newProps,
+    alternate: oldFiber,
+    effectTag: EFFECT_TAGS.UPDATE,
+  }
+}
+
 const reconcileChildren = (wipFiber, elements) => {
   let index = 0
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
   let prevSibling = null
 
-  // Crear un mapa de fibras antiguas por clave o tipo
   const oldFibersMap = new Map()
   while (oldFiber) {
     const oldKey = oldFiber.props.key || oldFiber.type
-    if (oldFibersMap.has(oldKey)) {
-      console.warn(
-        `Clave duplicada detectada: ${oldKey}. Esto puede causar problemas en la reconciliación.`,
-      )
-    }
     oldFibersMap.set(oldKey, oldFiber)
     oldFiber = oldFiber.sibling
   }
 
-  // Reconciliar elementos nuevos con fibras antiguas
   while (index < elements.length) {
     const element = elements[index]
     const key = element.props.key || element.type
@@ -36,7 +48,11 @@ const reconcileChildren = (wipFiber, elements) => {
     let newFiber
     const sameType = oldFiber && element && element.type === oldFiber.type
 
-    if (sameType) {
+    if (sameType && !shouldComponentUpdate(oldFiber.props, element.props)) {
+      // Reutilizar fibra existente si no hay cambios
+      newFiber = recycleFiber(oldFiber, element.props)
+      oldFibersMap.delete(key)
+    } else if (sameType) {
       // Actualizar fibra existente
       newFiber = {
         type: oldFiber.type,
@@ -69,11 +85,41 @@ const reconcileChildren = (wipFiber, elements) => {
     index++
   }
 
-  // Marcar fibras antiguas restantes para eliminación
   oldFibersMap.forEach((oldFiber) => {
     oldFiber.effectTag = EFFECT_TAGS.DELETION
     vars.deletions.push(oldFiber)
   })
 }
 
-export { reconcileChildren }
+let updateQueue = []
+
+const scheduleUpdate = (fiber, priority) => {
+  updateQueue.push({ fiber, priority })
+  updateQueue.sort((a, b) => a.priority - b.priority) // Ordenar por prioridad
+}
+
+const performConcurrentWork = () => {
+  while (updateQueue.length > 0) {
+    const { fiber } = updateQueue.shift()
+    performUnitOfWork(fiber)
+  }
+}
+
+const performUnitOfWork = (fiber) => {
+  // Procesar la unidad de trabajo
+  reconcileChildren(fiber, fiber.props.children)
+
+  if (fiber.child) {
+    return fiber.child
+  }
+
+  let nextFiber = fiber
+  while (nextFiber) {
+    if (nextFiber.sibling) {
+      return nextFiber.sibling
+    }
+    nextFiber = nextFiber.parent
+  }
+}
+
+export { reconcileChildren, scheduleUpdate, performConcurrentWork }

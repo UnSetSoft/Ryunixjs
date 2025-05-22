@@ -1,4 +1,5 @@
 import { RYUNIX_TYPES, STRINGS } from '../utils/index'
+import { commitDeletion } from './commits'
 
 const isEvent = (key) => key.startsWith('on')
 const isProperty = (key) => key !== STRINGS.children && !isEvent(key)
@@ -44,6 +45,42 @@ const runEffects = (fiber) => {
   }
 }
 
+let effectList = []
+
+const addEffect = (fiber) => {
+  effectList.push(fiber)
+}
+
+const commitEffects = () => {
+  effectList.forEach((fiber) => {
+    if (fiber.effectTag === RYUNIX_TYPES.UPDATE) {
+      // Actualizar propiedades del DOM
+      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+    } else if (fiber.effectTag === RYUNIX_TYPES.PLACEMENT) {
+      // Agregar nuevo nodo al DOM
+      const parentFiber = findParentFiber(fiber)
+      if (parentFiber) {
+        parentFiber.dom.appendChild(fiber.dom)
+      }
+    } else if (fiber.effectTag === RYUNIX_TYPES.DELETION) {
+      // Eliminar nodo del DOM
+      commitDeletion(fiber, fiber.parent.dom)
+      return
+    }
+  })
+
+  // Limpiar la lista de efectos después de procesarlos
+  effectList = []
+}
+
+const findParentFiber = (fiber) => {
+  let parent = fiber.parent
+  while (parent && !parent.dom) {
+    parent = parent.parent
+  }
+  return parent
+}
+
 export {
   runEffects,
   cancelEffects,
@@ -52,4 +89,6 @@ export {
   isNew,
   isGone,
   hasDepsChanged,
+  addEffect,
+  commitEffects,
 }
