@@ -14,13 +14,20 @@ const reconcileChildren = (wipFiber, elements) => {
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
   let prevSibling = null
 
+  // Crear un mapa de fibras antiguas por clave o tipo
   const oldFibersMap = new Map()
   while (oldFiber) {
     const oldKey = oldFiber.props.key || oldFiber.type
+    if (oldFibersMap.has(oldKey)) {
+      console.warn(
+        `Clave duplicada detectada: ${oldKey}. Esto puede causar problemas en la reconciliación.`,
+      )
+    }
     oldFibersMap.set(oldKey, oldFiber)
     oldFiber = oldFiber.sibling
   }
 
+  // Reconciliar elementos nuevos con fibras antiguas
   while (index < elements.length) {
     const element = elements[index]
     const key = element.props.key || element.type
@@ -30,6 +37,7 @@ const reconcileChildren = (wipFiber, elements) => {
     const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
+      // Actualizar fibra existente
       newFiber = {
         type: oldFiber.type,
         props: element.props,
@@ -40,6 +48,7 @@ const reconcileChildren = (wipFiber, elements) => {
       }
       oldFibersMap.delete(key)
     } else if (element) {
+      // Crear nueva fibra
       newFiber = {
         type: element.type,
         props: element.props,
@@ -60,6 +69,7 @@ const reconcileChildren = (wipFiber, elements) => {
     index++
   }
 
+  // Marcar fibras antiguas restantes para eliminación
   oldFibersMap.forEach((oldFiber) => {
     oldFiber.effectTag = EFFECT_TAGS.DELETION
     vars.deletions.push(oldFiber)
