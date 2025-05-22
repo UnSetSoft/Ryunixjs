@@ -18,7 +18,7 @@ const workLoop = (deadline) => {
   }
 
   if (!vars.nextUnitOfWork && vars.wipRoot) {
-    commitRoot()
+    commitRoot() // Confirmar que los cambios se reflejan en el DOM
   }
 
   const fallbackDeadline = { timeRemaining: () => Infinity }
@@ -64,4 +64,21 @@ const performUnitOfWork = (fiber) => {
   return undefined
 }
 
-export { performUnitOfWork, workLoop }
+const scheduleUpdate = (fiber) => {
+  vars.wipRoot = {
+    dom: fiber.dom,
+    props: fiber.props,
+    alternate: fiber.alternate,
+  }
+  vars.nextUnitOfWork = vars.wipRoot
+  vars.deletions = []
+
+  // Trigger the work loop immediately
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(workLoop)
+  } else {
+    workLoop({ timeRemaining: () => Infinity })
+  }
+}
+
+export { performUnitOfWork, workLoop, scheduleUpdate }

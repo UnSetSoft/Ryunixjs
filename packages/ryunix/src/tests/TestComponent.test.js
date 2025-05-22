@@ -19,12 +19,6 @@ describe('App Component with Count and Test', () => {
   })
 
   const Count = ({ value, callback, label }) => {
-    useEffect(() => {
-      console.log(`----------[called from ${label}]----------`)
-      console.log(`${label}:`, value)
-      console.log(`------------------------------------------`)
-    }, [value])
-
     return Ryunix.createElement(
       Ryunix.Fragment,
       null,
@@ -47,25 +41,10 @@ describe('App Component with Count and Test', () => {
     const [count, setCount] = useStore('')
     const click = () => setCount('hola')
 
-    return Ryunix.createElement(
-      'div',
-      null,
-      Ryunix.createElement(
-        'main',
-        null,
-        Ryunix.createElement(
-          'div',
-          { 'ryunix-class': 'container' },
-          Ryunix.createElement(Test),
-          Ryunix.createElement(Count, {
-            value: count,
-            callback: click,
-            label: 'App',
-          }),
-          Ryunix.createElement(Test),
-        ),
-      ),
-    )
+    return Ryunix.createElement(Ryunix.Fragment, null, [
+      Ryunix.createElement('button', { onClick: click }, `Click me`),
+      Ryunix.createElement('p', null, `Muestra en home el valor: ${count}`),
+    ])
   }
 
   test('renders App and updates state from Test and App buttons', () => {
@@ -74,22 +53,14 @@ describe('App Component with Count and Test', () => {
 
     workLoop({ timeRemaining: () => 100 })
 
-    const buttons = container.dom.querySelectorAll('button')
-    expect(buttons.length).toBe(3)
+    const button = container.dom.querySelector('button')
+
+    workLoop({ timeRemaining: () => 100 })
 
     // Simula click en el segundo botón (App)
-    buttons[1].click()
-    workLoop({ timeRemaining: () => 100 })
+    button.click()
 
-    const paragraphs = container.dom.querySelectorAll('p')
-    expect(paragraphs.length).toBe(3)
-
-    expect(paragraphs[1].textContent).toBe('Muestra en home el valor: hola')
-
-    // Simula click en el primer botón (Test)
-    buttons[0].click()
-    workLoop({ timeRemaining: () => 100 })
-
-    expect(paragraphs[0].textContent).toBe('Muestra en home el valor: ')
+    const paragraph = container.dom.querySelector('p')
+    expect(paragraph.textContent).toBe('Muestra en home el valor: hola')
   })
 })

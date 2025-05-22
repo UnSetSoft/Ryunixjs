@@ -1,47 +1,52 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
 import { createElement } from './createElement'
+import { scheduleUpdate } from './workers'
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
  * @returns The `useStore` function returns an array with two elements: the current state value and a
  * `setState` function that can be used to update the state.
  */
+const fiberHooks = new WeakMap()
+
 const useStore = (initial) => {
-  const oldHook =
-    vars.wipFiber.alternate &&
-    vars.wipFiber.alternate.hooks &&
-    vars.wipFiber.alternate.hooks[vars.hookIndex]
-  const hook = {
-    state: oldHook ? oldHook.state : initial,
-    queue: oldHook ? [...oldHook.queue] : [],
+  const fiber = vars.wipFiber
+  if (!fiberHooks.has(fiber)) {
+    fiberHooks.set(fiber, [])
   }
 
-  hook.queue.forEach((action) => {
-    hook.state =
-      typeof action === STRINGS.function ? action(hook.state) : action
+  const hooks = fiberHooks.get(fiber)
+  const hookIndex = vars.hookIndex++
+  const hook = hooks[hookIndex] || { state: initial, queue: [] }
+
+  // Procesar actualizaciones en la cola
+  hook.queue.forEach((update) => {
+    hook.state = typeof update === 'function' ? update(hook.state) : update
   })
 
-  hook.queue = []
+  hook.queue = [] // Limpiar la cola después de procesar
 
-  const setState = (action) => {
-    hook.queue.push(action)
+  const setState = (update) => {
+    hook.queue.push(update)
+    console.log('[hook] setState', {
+      state: hook.state,
+      queue: hook.queue,
+      hooks: hooks[hookIndex],
+      fiber,
+    })
 
-    vars.wipRoot = {
-      dom: vars.currentRoot.dom,
-      props: {
-        ...vars.currentRoot.props,
-      },
-      alternate: vars.currentRoot,
-    }
-    vars.nextUnitOfWork = vars.wipRoot
-    vars.deletions = []
+    scheduleUpdate(fiber) // Asegurar que se programe la actualización
   }
 
-  if (vars.wipFiber && vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  hooks[hookIndex] = hook
+
+  console.log('[hook] useStore', {
+    state: hook.state,
+    queue: hook.queue,
+    hooks: hooks[hookIndex],
+    fiber,
+  })
 
   return [hook.state, setState]
 }
@@ -216,95 +221,62 @@ const useRouter = (routes) => {
       : { route: { component: null }, params: {} }
 
     for (const route of routes) {
-      if (route.subRoutes) {
-        const childRoute = findRoute(route.subRoutes, path)
-        if (childRoute) return childRoute
-      }
+      const { path, params } = route
 
-      if (route.path === '*') {
-        return notFound
-      }
+      // Handle dynamic routes
+      const pathToRegex = (path) =>
+        new RegExp('^' + path.replace(/:[^/]+/g, '([^/]+)') + '(\\/|$)')
+      const match = pathname.match(pathToRegex(path))
 
-      if (!route.path || typeof route.path !== 'string') {
-        console.warn('Invalid route detected:', route)
-        console.info(
-          "if you are using { NotFound: NotFound } please add { path: '*', NotFound: NotFound }",
-        )
-        continue
-      }
-
-      const keys = []
-      const pattern = new RegExp(
-        `^${route.path.replace(/:\w+/g, (match) => {
-          keys.push(match.substring(1))
-          return '([^/]+)'
-        })}$`,
-      )
-
-      const match = pathname.match(pattern)
       if (match) {
-        const params = keys.reduce((acc, key, index) => {
-          acc[key] = match[index + 1]
-          return acc
-        }, {})
+        const paramNames = (path.match(/:[^/]+/g) || []).map((p) => p.slice(1))
+        const paramValues = match.slice(1).map(decodeURIComponent)
 
-        return { route, params }
+        return {
+          route,
+          params: Object.fromEntries(
+            paramNames.map((name, i) => [name, paramValues[i]]),
+          ),
+        }
       }
     }
 
     return notFound
   }
 
-  const navigate = (path) => {
-    window.history.pushState({}, '', path)
-    updateRoute(path)
+  const { route, params } = findRoute(routes, location)
+
+  // Actualizar la ubicación en caso de navegación interna
+  const navigate = (to) => {
+    window.history.pushState(null, '', to)
+    setLocation(to)
   }
-
-  const updateRoute = (path) => {
-    const cleanedPath = path.split('?')[0]
-    setLocation(cleanedPath)
-  }
-
-  useEffect(() => {
-    const onPopState = () => updateRoute(window.location.pathname)
-    window.addEventListener('popstate', onPopState)
-
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [])
-
-  const currentRouteData = findRoute(routes, location) || {}
 
   const Children = () => {
-    const query = useQuery()
-    const { route } = currentRouteData
+    const { component: RouteComponent } = route
 
-    if (
-      !route ||
-      !route.component ||
-      typeof route.component !== STRINGS.function
-    ) {
-      console.error(
-        'Component not found for current path or the component is not a valid function:',
-        currentRouteData,
-      )
-      return null
-    }
-
-    return route.component({
-      params: currentRouteData.params || {},
-      query,
-    })
+    return RouteComponent
+      ? createElement(RouteComponent, { params, query: useQuery() })
+      : null
   }
 
-  const NavLink = ({ to, ...props }) => {
+  const NavLink = ({ to, children, ...props }) => {
+    const isActive = location === to
+
     const handleClick = (e) => {
       e.preventDefault()
       navigate(to)
     }
-    return createElement(
-      'a',
-      { href: to, onClick: handleClick, ...props },
-      props.children,
+
+    return (
+      <a
+        href={to}
+        onClick={handleClick}
+        {...props}
+        style={{ fontWeight: isActive ? 'bold' : 'normal' }}
+      >
+        {children}
+      </a>
     )
   }
 
@@ -314,9 +286,9 @@ const useRouter = (routes) => {
 export {
   useStore,
   useEffect,
-  useQuery,
   useRef,
   useMemo,
   useCallback,
+  useQuery,
   useRouter,
 }
