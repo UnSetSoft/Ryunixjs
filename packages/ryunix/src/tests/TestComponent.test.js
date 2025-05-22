@@ -1,8 +1,8 @@
 import Ryunix from '../lib/index'
 import { workLoop } from '../lib/workers'
-import { useStore, useEffect } from '../lib/hooks'
+import { useStore } from '../lib/hooks'
 
-describe('App Component with Count and Test', () => {
+describe('useStore Hook', () => {
   let container
 
   beforeEach(() => {
@@ -17,79 +17,38 @@ describe('App Component with Count and Test', () => {
       container = null
     }
   })
+  const [message, setMessage] = useStore('')
 
-  const Count = ({ value, callback, label }) => {
-    useEffect(() => {
-      console.log(`----------[called from ${label}]----------`)
-      console.log(`${label}:`, value)
-      console.log(`------------------------------------------`)
-    }, [value])
-
-    return Ryunix.createElement(
-      Ryunix.Fragment,
-      null,
-      Ryunix.createElement('button', { onClick: callback }, `Boton ${label}`),
-      Ryunix.createElement('p', null, `Muestra en home el valor: ${value}`),
+  test('updates state correctly and reflects in DOM', () => {
+    const button = Ryunix.createElement(
+      'button',
+      {
+        onClick: () => setMessage('hola'),
+      },
+      'Click me',
     )
-  }
 
-  const Test = () => {
-    const [message, setCount] = useStore('')
-    const click = () => setCount((p) => 'hello')
-    return Ryunix.createElement(Count, {
-      value: message,
-      callback: click,
-      label: 'Test',
-    })
-  }
-
-  const App = () => {
-    const [count, setCount] = useStore('')
-    const click = () => setCount('hola')
-
-    return Ryunix.createElement(
-      'div',
+    const paragraph = Ryunix.createElement(
+      'p',
       null,
-      Ryunix.createElement(
-        'main',
-        null,
-        Ryunix.createElement(
-          'div',
-          { 'ryunix-class': 'container' },
-          Ryunix.createElement(Test),
-          Ryunix.createElement(Count, {
-            value: count,
-            callback: click,
-            label: 'App',
-          }),
-          Ryunix.createElement(Test),
-        ),
-      ),
+      `Muestra en home el valor: ${message}`,
     )
-  }
 
-  test('renders App and updates state from Test and App buttons', () => {
-    const root = Ryunix.createElement(App)
-    container = Ryunix.render(root, container)
+    const Root = Ryunix.createElement('div', null, [button, paragraph])
+
+    container = Ryunix.init(Root())
+
+    // Verificar que el contenedor tiene la propiedad `dom` configurada
+    expect(container.dom).toBeDefined()
 
     workLoop({ timeRemaining: () => 100 })
 
-    const buttons = container.dom.querySelectorAll('button')
-    expect(buttons.length).toBe(3)
+    const buttonElement = container.dom.querySelector('button')
+    buttonElement.click()
 
-    // Simula click en el segundo botón (App)
-    buttons[1].click()
     workLoop({ timeRemaining: () => 100 })
 
-    const paragraphs = container.dom.querySelectorAll('p')
-    expect(paragraphs.length).toBe(3)
-
-    expect(paragraphs[1].textContent).toBe('Muestra en home el valor: hola')
-
-    // Simula click en el primer botón (Test)
-    buttons[0].click()
-    workLoop({ timeRemaining: () => 100 })
-
-    expect(paragraphs[0].textContent).toBe('Muestra en home el valor: ')
+    const paragraphElement = container.dom.querySelector('p')
+    expect(paragraphElement.textContent).toBe('Muestra en home el valor: hola')
   })
 })

@@ -1,5 +1,4 @@
 import { vars } from '../utils/index'
-import { workLoop } from './workers'
 
 const clearContainer = (container) => {
   while (container.firstChild) {
@@ -27,14 +26,6 @@ const render = (element, container) => {
   vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
 
-  const fallbackDeadline = { timeRemaining: () => Infinity }
-
-  if (typeof requestIdleCallback === 'function') {
-    requestIdleCallback(workLoop)
-  } else {
-    workLoop(fallbackDeadline)
-  }
-
   return vars.wipRoot
 }
 
@@ -50,7 +41,9 @@ const render = (element, container) => {
 const init = (MainElement, root = '__ryunix') => {
   vars.containerRoot = document.getElementById(root)
 
-  render(MainElement, vars.containerRoot)
+  const renderProcess = render(MainElement, vars.containerRoot)
+
+  return renderProcess
 }
 
 export { render, init }

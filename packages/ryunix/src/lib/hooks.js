@@ -42,7 +42,9 @@ const useStore = (initial) => {
     vars.wipFiber.hooks.push(hook)
     vars.hookIndex++
   }
-  
+
+  console.log(hook.state)
+
   return [hook.state, setState]
 }
 
