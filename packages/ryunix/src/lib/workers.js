@@ -24,7 +24,7 @@ const workLoop = (deadline) => {
   requestIdleCallback(workLoop)
 }
 
-requestIdleCallback(workLoop)
+//requestIdleCallback(workLoop)
 
 /**
  * The function performs a unit of work by updating either a function component or a host component and
