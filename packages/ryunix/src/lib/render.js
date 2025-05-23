@@ -1,4 +1,5 @@
 import { vars } from '../utils/index'
+import { scheduleWork } from './workers'
 
 const clearContainer = (container) => {
   while (container.firstChild) {
@@ -23,9 +24,9 @@ const render = (element, container) => {
     alternate: vars.currentRoot,
   }
 
-  vars.deletions = []
   vars.nextUnitOfWork = vars.wipRoot
-
+  vars.deletions = []
+  scheduleWork(vars.wipRoot)
   return vars.wipRoot
 }
 

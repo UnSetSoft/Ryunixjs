@@ -91,35 +91,4 @@ const reconcileChildren = (wipFiber, elements) => {
   })
 }
 
-let updateQueue = []
-
-const scheduleUpdate = (fiber, priority) => {
-  updateQueue.push({ fiber, priority })
-  updateQueue.sort((a, b) => a.priority - b.priority) // Ordenar por prioridad
-}
-
-const performConcurrentWork = () => {
-  while (updateQueue.length > 0) {
-    const { fiber } = updateQueue.shift()
-    performUnitOfWork(fiber)
-  }
-}
-
-const performUnitOfWork = (fiber) => {
-  // Procesar la unidad de trabajo
-  reconcileChildren(fiber, fiber.props.children)
-
-  if (fiber.child) {
-    return fiber.child
-  }
-
-  let nextFiber = fiber
-  while (nextFiber) {
-    if (nextFiber.sibling) {
-      return nextFiber.sibling
-    }
-    nextFiber = nextFiber.parent
-  }
-}
-
-export { reconcileChildren, scheduleUpdate, performConcurrentWork }
+export { reconcileChildren }

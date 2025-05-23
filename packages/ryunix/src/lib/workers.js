@@ -58,4 +58,9 @@ const performUnitOfWork = (fiber) => {
   return undefined
 }
 
-export { performUnitOfWork, workLoop }
+const scheduleWork = (root) => {
+  vars.nextUnitOfWork = root
+  requestIdleCallback(workLoop)
+}
+
+export { performUnitOfWork, workLoop, scheduleWork }
