@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-webpack",
-  "version": "1.1.6-canary.137",
+  "version": "1.1.6-canary.149",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
@@ -15,6 +15,7 @@
   "bin": {
     "ryunix": "./bin/index.mjs"
   },
+  "types": "./config.d.ts",
   "dependencies": {
     "@babel/cli": "7.23.0",
     "@babel/core": "7.23.2",

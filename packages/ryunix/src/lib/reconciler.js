@@ -64,8 +64,6 @@ const reconcileChildren = (wipFiber, elements) => {
         alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
-
-      console.log('ELEMENT: ', element)
     }
 
     if (oldFiber && !sameType) {

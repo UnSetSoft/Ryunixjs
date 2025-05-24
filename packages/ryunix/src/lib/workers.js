@@ -60,6 +60,11 @@ const performUnitOfWork = (fiber) => {
 
 const scheduleWork = (root) => {
   vars.nextUnitOfWork = root
+  vars.wipRoot = root
+  vars.deletions = []
+
+  vars.hookIndex = 0
+  vars.effects = []
   requestIdleCallback(workLoop)
 }
 

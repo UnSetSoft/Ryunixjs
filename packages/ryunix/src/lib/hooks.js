@@ -1,49 +1,71 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
 import { createElement } from './createElement'
+import { scheduleWork } from './workers'
+
+const getHookIndex = (index) => {
+  vars.hookIndex = 0
+
+  const hooks = vars.currentRoot.hooks || (vars.currentRoot.hooks = [])
+
+  if (index >= hooks.length) {
+    hooks.push([])
+  }
+
+  return hooks[index]
+}
+
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
  * @returns The `useStore` function returns an array with two elements: the current state value and a
  * `setState` function that can be used to update the state.
  */
-const useStore = (initial) => {
+const useStore = (initialState, init) => {
+  const reducer = (state, action) =>
+    typeof action === 'function' ? action(state) : action
+
+  return useReducer(reducer, initialState, init)
+}
+
+const useReducer = (reducer, initialState, init) => {
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
     vars.wipFiber.alternate.hooks[vars.hookIndex]
+
   const hook = {
-    state: oldHook ? oldHook.state : initial,
-    queue: oldHook ? [...oldHook.queue] : [],
+    state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
+    queue: oldHook && Array.isArray(oldHook.queue) ? oldHook.queue.slice() : [],
   }
 
-  hook.queue.forEach((action) => {
-    hook.state =
-      typeof action === STRINGS.function ? action(hook.state) : action
-  })
+  if (oldHook && Array.isArray(oldHook.queue)) {
+    oldHook.queue.forEach((action) => {
+      hook.state = reducer(hook.state, action)
+    })
+  }
 
-  hook.queue = []
-
-  const setState = (action) => {
+  const dispatch = (action) => {
     hook.queue.push(action)
 
     vars.wipRoot = {
       dom: vars.currentRoot.dom,
-      props: {
-        ...vars.currentRoot.props,
-      },
+      props: vars.currentRoot.props,
       alternate: vars.currentRoot,
     }
-    vars.nextUnitOfWork = vars.wipRoot
     vars.deletions = []
+    vars.hookIndex = 0
+    scheduleWork(vars.wipRoot)
   }
+
+  hook.queue.forEach((action) => {
+    hook.state = reducer(hook.state, action)
+  })
 
   vars.wipFiber.hooks[vars.hookIndex] = hook
   vars.hookIndex++
 
-  console.log('wipFiber', vars.wipFiber)
-
-  return [hook.state, setState]
+  return [hook.state, dispatch]
 }
 
 /**
