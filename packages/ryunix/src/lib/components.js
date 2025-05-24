@@ -13,6 +13,7 @@ const updateFunctionComponent = (fiber) => {
   vars.wipFiber = fiber
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
+  vars.effects = []
 
   const children = fiber.type(fiber.props)
   let childArr = Array.isArray(children) ? children : [children]

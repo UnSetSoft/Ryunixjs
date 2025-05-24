@@ -1,5 +1,3 @@
-import { GlobalContext } from './context'
-
 let vars = {
   containerRoot: null,
   nextUnitOfWork: null,
@@ -8,6 +6,7 @@ let vars = {
   deletions: null,
   wipFiber: null,
   hookIndex: null,
+  effects: null,
 }
 
 const reg = /[A-Z]/g
@@ -44,40 +43,11 @@ const EFFECT_TAGS = Object.freeze({
   DELETION: Symbol('ryunix.reconciler.status.deletion').toString(),
 })
 
-const Fiber = ({
-  _id = generateUnicHash('fiber'),
-  type,
-  props,
-  parent,
-  alternate,
-  effectTag,
-  dom,
-  child,
-  sibling,
-  hooks = [],
-  key,
-}) => {
-  return {
-    _id,
-    type,
-    props,
-    parent,
-    dom,
-    alternate,
-    child,
-    sibling,
-    effectTag,
-    hooks,
-    key,
-  }
-}
-
 const generateHash = (prefix) => {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`
 }
 
 export {
-  GlobalContext,
   vars,
   reg,
   RYUNIX_TYPES,
@@ -85,5 +55,4 @@ export {
   STRINGS,
   OLD_STRINGS,
   generateHash,
-  Fiber,
 }

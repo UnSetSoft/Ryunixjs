@@ -38,12 +38,10 @@ const useStore = (initial) => {
     vars.deletions = []
   }
 
-  if (vars.wipFiber && vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 
-  console.log(hook.state)
+  console.log('wipFiber', vars.wipFiber)
 
   return [hook.state, setState]
 }
@@ -67,21 +65,28 @@ const useEffect = (callback, deps) => {
   const hook = {
     type: RYUNIX_TYPES.RYUNIX_EFFECT,
     deps,
+    cleanup: oldHook?.cleanup,
   }
 
-  if (!oldHook) {
-    // invoke callback if this is the first time
-    callback()
-  } else {
-    if (!isEqual(oldHook.deps, hook.deps)) {
-      callback()
-    }
+  const hasChanged = !oldHook || !isEqual(oldHook.deps, deps)
+
+  if (hasChanged) {
+    vars.effects.push(() => {
+      // Llama al cleanup anterior si existe
+      if (typeof hook.cleanup === 'function') {
+        hook.cleanup()
+      }
+
+      // Ejecuta el nuevo efecto y guarda el nuevo cleanup
+      const result = callback()
+      if (typeof result === 'function') {
+        hook.cleanup = result
+      }
+    })
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 }
 
 const useRef = (initial) => {
@@ -95,10 +100,8 @@ const useRef = (initial) => {
     value: oldHook ? oldHook.value : { current: initial },
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 
   return hook.value
 }
@@ -125,10 +128,8 @@ const useMemo = (comp, deps) => {
     hook.value = comp()
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 
   return hook.value
 }

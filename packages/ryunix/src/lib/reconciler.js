@@ -59,11 +59,13 @@ const reconcileChildren = (wipFiber, elements) => {
       newFiber = {
         type: element.type,
         props: element.props,
-        dom: undefined,
+        dom: null,
         parent: wipFiber,
-        alternate: undefined,
+        alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
+
+      console.log('ELEMENT: ', element)
     }
 
     if (oldFiber && !sameType) {
