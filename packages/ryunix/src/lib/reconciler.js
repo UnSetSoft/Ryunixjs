@@ -52,18 +52,9 @@ const reconcileChildren = (wipFiber, elements) => {
       // Reutilizar fibra existente si no hay cambios
       newFiber = recycleFiber(oldFiber, element.props)
       oldFibersMap.delete(key)
-    } else if (sameType) {
-      // Actualizar fibra existente
-      newFiber = {
-        type: oldFiber.type,
-        props: element.props,
-        dom: oldFiber.dom,
-        parent: wipFiber,
-        alternate: oldFiber,
-        effectTag: EFFECT_TAGS.UPDATE,
-      }
-      oldFibersMap.delete(key)
-    } else if (element) {
+    }
+
+    if (element && !sameType) {
       // Crear nueva fibra
       newFiber = {
         type: element.type,
@@ -75,6 +66,12 @@ const reconcileChildren = (wipFiber, elements) => {
       }
     }
 
+    if (oldFiber && !sameType) {
+      oldFiber.effectTag = EFFECT_TAGS.DELETION
+      wipFiber.effects = wipFiber.effects || []
+      wipFiber.effects.push(oldFiber)
+    }
+
     if (index === 0) {
       wipFiber.child = newFiber
     } else if (prevSibling) {
@@ -82,6 +79,7 @@ const reconcileChildren = (wipFiber, elements) => {
     }
 
     prevSibling = newFiber
+
     index++
   }
 

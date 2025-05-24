@@ -1,11 +1,13 @@
+import { GlobalContext } from './context'
+
 let vars = {
-  containerRoot: {},
-  nextUnitOfWork: {},
-  currentRoot: {},
-  wipRoot: {},
-  deletions: [],
-  wipFiber: {},
-  hookIndex: 0,
+  containerRoot: null,
+  nextUnitOfWork: null,
+  currentRoot: null,
+  wipRoot: null,
+  deletions: null,
+  wipFiber: null,
+  hookIndex: null,
 }
 
 const reg = /[A-Z]/g
@@ -75,6 +77,7 @@ const generateHash = (prefix) => {
 }
 
 export {
+  GlobalContext,
   vars,
   reg,
   RYUNIX_TYPES,
