@@ -1,6 +1,7 @@
 import { createDom } from './dom'
 import { reconcileChildren } from './reconciler'
 import { vars } from '../utils/index'
+import { createElement } from './createElement'
 
 /**
  * This function updates a function component by setting up a work-in-progress fiber, resetting the
@@ -33,4 +34,68 @@ const updateHostComponent = (fiber) => {
   reconcileChildren(fiber, fiber.props.children)
 }
 
-export { updateFunctionComponent, updateHostComponent }
+/* Internal components*/
+
+/**
+ * The function `optimizationImageApi` optimizes image URLs by adding query parameters for width,
+ * height, quality, and extension, and handles local and remote image sources.
+ * @returns The function `optimizationImageApi` returns either the original `src` if it is a local
+ * image and the page is being run on localhost, or it returns a modified image URL with optimization
+ * parameters added if the `src` is not local.
+ */
+const optimizationImageApi = ({ src, props }) => {
+  const query = new URLSearchParams()
+  const apiEndpoint = 'https://image.unsetsoft.com'
+
+  const isLocal = !src.startsWith('http') || !src.startsWith('https')
+
+  if (props.width) query.set('width', props.width)
+  if (props.height) query.set('width', props.height)
+  if (props.quality) query.set('quality', props.quality)
+
+  const extension = props.extension ? `@${props.extension}` : ''
+
+  const localhost =
+    window.location.origin === 'http://localhost:3000' ||
+    window.location.origin === 'http://localhost:5173' ||
+    window.location.origin === 'http://localhost:4173'
+
+  if (isLocal) {
+    if (localhost) {
+      console.warn(
+        'Image optimizations only work with full links and must not contain localhost.',
+      )
+      return src
+    }
+
+    return `${window.location.origin}/${src}`
+  }
+
+  return `${apiEndpoint}/image/${src}${extension}?${query.toString()}`
+}
+
+/**
+ * The `Image` function in JavaScript optimizes image loading based on a specified optimization flag.
+ * @returns An `<img>` element is being returned with the specified `src` and other props passed to the
+ * `Image` component. The `src` is either the original `src` value or the result of calling
+ * `optimizationImageApi` function with `src` and `props` if `optimization` is set to 'true'.
+ */
+const Image = ({ src, ...props }) => {
+  const optimization = props.optimization === 'true' ? true : false
+
+  const url = optimization
+    ? optimizationImageApi({
+        src,
+        props,
+      })
+    : src
+
+  const ImageProps = {
+    src: url,
+    props,
+  }
+
+  return createElement('img', ImageProps, null)
+}
+
+export { updateFunctionComponent, updateHostComponent, Image }
