@@ -9,6 +9,25 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  * @param elements - an array of elements representing the new children to be rendered in the current
  * fiber's subtree
  */
+const shouldComponentUpdate = (oldProps, newProps) => {
+  // Comparar las propiedades antiguas y nuevas
+  return (
+    !oldProps ||
+    !newProps ||
+    Object.keys(oldProps).length !== Object.keys(newProps).length ||
+    Object.keys(newProps).some((key) => oldProps[key] !== newProps[key])
+  )
+}
+
+const recycleFiber = (oldFiber, newProps) => {
+  return {
+    ...oldFiber,
+    props: newProps,
+    alternate: oldFiber,
+    effectTag: EFFECT_TAGS.UPDATE,
+  }
+}
+
 const reconcileChildren = (wipFiber, elements) => {
   let index = 0
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
@@ -29,25 +48,28 @@ const reconcileChildren = (wipFiber, elements) => {
     let newFiber
     const sameType = oldFiber && element && element.type === oldFiber.type
 
-    if (sameType) {
-      newFiber = {
-        type: oldFiber.type,
-        props: element.props,
-        dom: oldFiber.dom,
-        parent: wipFiber,
-        alternate: oldFiber,
-        effectTag: EFFECT_TAGS.UPDATE,
-      }
+    if (sameType && !shouldComponentUpdate(oldFiber.props, element.props)) {
+      // Reutilizar fibra existente si no hay cambios
+      newFiber = recycleFiber(oldFiber, element.props)
       oldFibersMap.delete(key)
-    } else if (element) {
+    }
+
+    if (element && !sameType) {
+      // Crear nueva fibra
       newFiber = {
         type: element.type,
         props: element.props,
-        dom: undefined,
+        dom: null,
         parent: wipFiber,
-        alternate: undefined,
+        alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
+    }
+
+    if (oldFiber && !sameType) {
+      oldFiber.effectTag = EFFECT_TAGS.DELETION
+      wipFiber.effects = wipFiber.effects || []
+      wipFiber.effects.push(oldFiber)
     }
 
     if (index === 0) {
@@ -57,6 +79,7 @@ const reconcileChildren = (wipFiber, elements) => {
     }
 
     prevSibling = newFiber
+
     index++
   }
 

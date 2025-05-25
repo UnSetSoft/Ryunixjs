@@ -1,4 +1,172 @@
-'#
+# Changelog
+
+### [1.1.6-canary.169](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.168...v1.1.6-canary.169) (2025-05-25)
+
+### [1.1.6-canary.168](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.167...v1.1.6-canary.168) (2025-05-25)
+
+### [1.1.6-canary.167](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.166...v1.1.6-canary.167) (2025-05-25)
+
+### [1.1.6-canary.166](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.165...v1.1.6-canary.166) (2025-05-25)
+
+### [1.1.6-canary.165](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.164...v1.1.6-canary.165) (2025-05-25)
+
+### [1.1.6-canary.164](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.163...v1.1.6-canary.164) (2025-05-24)
+
+### [1.1.6-canary.163](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.162...v1.1.6-canary.163) (2025-05-24)
+
+### [1.1.6-canary.162](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.161...v1.1.6-canary.162) (2025-05-24)
+
+### [1.1.6-canary.161](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.160...v1.1.6-canary.161) (2025-05-24)
+
+### [1.1.6-canary.160](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.159...v1.1.6-canary.160) (2025-05-24)
+
+### [1.1.6-canary.159](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.158...v1.1.6-canary.159) (2025-05-24)
+
+### [1.1.6-canary.158](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.157...v1.1.6-canary.158) (2025-05-24)
+
+### [1.1.6-canary.157](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.156...v1.1.6-canary.157) (2025-05-24)
+
+### [1.1.6-canary.156](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.155...v1.1.6-canary.156) (2025-05-24)
+
+### [1.1.6-canary.155](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.154...v1.1.6-canary.155) (2025-05-24)
+
+### [1.1.6-canary.154](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.153...v1.1.6-canary.154) (2025-05-24)
+
+### [1.1.6-canary.153](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.152...v1.1.6-canary.153) (2025-05-24)
+
+### [1.1.6-canary.152](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.151...v1.1.6-canary.152) (2025-05-24)
+
+### [1.1.6-canary.151](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.150...v1.1.6-canary.151) (2025-05-24)
+
+### [1.1.6-canary.150](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.149...v1.1.6-canary.150) (2025-05-24)
+
+### [1.1.6-canary.149](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.148...v1.1.6-canary.149) (2025-05-24)
+
+### [1.1.6-canary.148](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.147...v1.1.6-canary.148) (2025-05-24)
+
+### [1.1.6-canary.147](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.146...v1.1.6-canary.147) (2025-05-24)
+
+### [1.1.6-canary.146](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.145...v1.1.6-canary.146) (2025-05-24)
+
+### [1.1.6-canary.145](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.144...v1.1.6-canary.145) (2025-05-24)
+
+### [1.1.6-canary.144](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.143...v1.1.6-canary.144) (2025-05-24)
+
+### [1.1.6-canary.143](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.142...v1.1.6-canary.143) (2025-05-24)
+
+### [1.1.6-canary.142](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.141...v1.1.6-canary.142) (2025-05-24)
+
+### [1.1.6-canary.141](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.140...v1.1.6-canary.141) (2025-05-24)
+
+### [1.1.6-canary.140](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.139...v1.1.6-canary.140) (2025-05-24)
+
+### [1.1.6-canary.139](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.138...v1.1.6-canary.139) (2025-05-24)
+
+### [1.1.6-canary.138](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.137...v1.1.6-canary.138) (2025-05-24)
+
+### [1.1.6-canary.137](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.136...v1.1.6-canary.137) (2025-05-24)
+
+### [1.1.6-canary.136](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.135...v1.1.6-canary.136) (2025-05-24)
+
+### [1.1.6-canary.135](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.134...v1.1.6-canary.135) (2025-05-24)
+
+### [1.1.6-canary.134](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.133...v1.1.6-canary.134) (2025-05-24)
+
+### [1.1.6-canary.133](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.132...v1.1.6-canary.133) (2025-05-24)
+
+### [1.1.6-canary.132](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.131...v1.1.6-canary.132) (2025-05-24)
+
+### [1.1.6-canary.131](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.130...v1.1.6-canary.131) (2025-05-24)
+
+### [1.1.6-canary.130](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.129...v1.1.6-canary.130) (2025-05-24)
+
+### [1.1.6-canary.129](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.128...v1.1.6-canary.129) (2025-05-24)
+
+### [1.1.6-canary.128](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.127...v1.1.6-canary.128) (2025-05-24)
+
+### [1.1.6-canary.127](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.126...v1.1.6-canary.127) (2025-05-24)
+
+### [1.1.6-canary.126](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.125...v1.1.6-canary.126) (2025-05-24)
+
+### [1.1.6-canary.125](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.124...v1.1.6-canary.125) (2025-05-24)
+
+### [1.1.6-canary.124](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.123...v1.1.6-canary.124) (2025-05-24)
+
+### [1.1.6-canary.123](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.122...v1.1.6-canary.123) (2025-05-24)
+
+### [1.1.6-canary.122](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.121...v1.1.6-canary.122) (2025-05-24)
+
+### [1.1.6-canary.121](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.120...v1.1.6-canary.121) (2025-05-24)
+
+### [1.1.6-canary.120](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.119...v1.1.6-canary.120) (2025-05-23)
+
+### [1.1.6-canary.119](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.118...v1.1.6-canary.119) (2025-05-23)
+
+### [1.1.6-canary.118](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.117...v1.1.6-canary.118) (2025-05-23)
+
+### [1.1.6-canary.117](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.116...v1.1.6-canary.117) (2025-05-23)
+
+### [1.1.6-canary.116](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.115...v1.1.6-canary.116) (2025-05-23)
+
+### [1.1.6-canary.115](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.114...v1.1.6-canary.115) (2025-05-23)
+
+### [1.1.6-canary.114](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.113...v1.1.6-canary.114) (2025-05-22)
+
+### [1.1.6-canary.113](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.112...v1.1.6-canary.113) (2025-05-22)
+
+### [1.1.6-canary.112](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.111...v1.1.6-canary.112) (2025-05-22)
+
+### [1.1.6-canary.111](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.110...v1.1.6-canary.111) (2025-05-22)
+
+### [1.1.6-canary.110](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.109...v1.1.6-canary.110) (2025-05-22)
+
+### [1.1.6-canary.109](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.108...v1.1.6-canary.109) (2025-05-22)
+
+### [1.1.6-canary.108](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.90...v1.1.6-canary.108) (2025-05-22)
+
+### [1.1.6-canary.90](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.89...v1.1.6-canary.90) (2025-05-21)
+
+### [1.1.6-canary.86](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.85...v1.1.6-canary.86) (2025-05-21)
+
+### [1.1.6-canary.85](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.84...v1.1.6-canary.85) (2025-05-21)
+
+### [1.1.6-canary.84](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.83...v1.1.6-canary.84) (2025-05-21)
+
+### [1.1.6-canary.83](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.82...v1.1.6-canary.83) (2025-05-21)
+
+### [1.1.6-canary.82](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.81...v1.1.6-canary.82) (2025-05-21)
+
+### [1.1.6-canary.81](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.80...v1.1.6-canary.81) (2025-05-21)
+
+### [1.1.6-canary.80](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.79...v1.1.6-canary.80) (2025-05-20)
+
+### [1.1.6-canary.89](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.88...v1.1.6-canary.89) (2025-05-21)
+
+### [1.1.6-canary.88](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.87...v1.1.6-canary.88) (2025-05-21)
+
+### [1.1.6-canary.87](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.79...v1.1.6-canary.87) (2025-05-21)
+
+### [1.1.6-canary.79](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.78...v1.1.6-canary.79) (2025-05-20)
+
+### [1.1.6-canary.78](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.77...v1.1.6-canary.78) (2025-05-20)
+
+### [1.1.6-canary.77](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.6-canary.76...v1.1.6-canary.77) (2025-05-20)
+
+### [1.1.6-canary.76](///compare/v1.1.6-canary.75...v1.1.6-canary.76) (2025-05-20)
+
+### [1.1.6-canary.75](///compare/v1.1.6-canary.74...v1.1.6-canary.75) (2025-05-20)
+
+### [1.1.6-canary.74](///compare/v1.1.6-canary.73...v1.1.6-canary.74) (2025-05-20)
+
+### [1.1.6-canary.73](///compare/v1.1.6-canary.72...v1.1.6-canary.73) (2025-05-20)
+
+### [1.1.6-canary.72](///compare/v1.1.6-canary.71...v1.1.6-canary.72) (2025-05-20)
+
+### [1.1.6-canary.71](///compare/v1.1.6-canary.70...v1.1.6-canary.71) (2025-05-20)
+
+### [1.1.6-canary.70](///compare/v1.1.6-canary.69...v1.1.6-canary.70) (2025-05-20)
+
+### [1.1.6-canary.69](///compare/v1.1.6-canary.68...v1.1.6-canary.69) (2025-05-20)
 
 ### [1.1.6-canary.68](///compare/v1.1.6-canary.67...v1.1.6-canary.68) (2024-11-07)
 

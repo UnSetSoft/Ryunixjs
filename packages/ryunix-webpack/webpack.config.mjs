@@ -5,6 +5,7 @@ import TerserPlugin from 'terser-webpack-plugin'
 import webpack from 'webpack'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 import {
   getPackageManager,
   ENV_HASH,
@@ -25,7 +26,7 @@ let dir
 
 const manager = getPackageManager()
 if (manager === 'yarn' || manager === 'npm' || manager === 'bun') {
-  dir = dirname(join(__dirname, '..', '..'))
+  dir = process.cwd()
 } else if (manager === 'pnpm') {
   throw new Error(`The manager ${manager} is not supported.`)
 }
@@ -194,6 +195,18 @@ export default {
     }),
     new MiniCssExtractPlugin({
       filename: 'assets/css/[name].[contenthash].css',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolveApp(dir, 'public'),
+          to: resolveApp(dir, config.webpack.output.buildDirectory),
+          globOptions: {
+            ignore: ['**/index.html', '**/favicon.png'],
+          },
+          noErrorOnMissing: true,
+        },
+      ],
     }),
     ...config.webpack.plugins,
   ].filter(Boolean),

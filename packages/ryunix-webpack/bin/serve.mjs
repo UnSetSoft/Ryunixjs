@@ -72,8 +72,14 @@ const StartServer = async (cliSettings) => {
         ${chalk.bold(chalk.cyanBright(`<Ryunix/> ${version}`))}
 
           - Running at: http://localhost:${port}
-          - Config file: ${configFileExist() ? `loaded` : '404'}
-          - Environment file: ${envPath() ? `loaded` : '404'}
+          - Config file: ${
+            configFileExist()
+              ? chalk.green(`loaded`)
+              : chalk.red(`404 Not Found`)
+          }
+          - Environment file: ${
+            envPath() ? chalk.green(`loaded`) : chalk.red(`404 Not Found`)
+          }
           - Launched in: ${speedIndicator}
       `)
     } catch (err) {

@@ -3,3 +3,8 @@ yarn.lock
 .npmrc
 old_lib
 src
+src/tests
+babel.config.js
+jest.config.js
+jest.setup.js
+.babelrc

@@ -1,49 +1,71 @@
 import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
 import { createElement } from './createElement'
+import { scheduleWork } from './workers'
+
+const getHookIndex = (index) => {
+  vars.hookIndex = 0
+
+  const hooks = vars.currentRoot.hooks || (vars.currentRoot.hooks = [])
+
+  if (index >= hooks.length) {
+    hooks.push([])
+  }
+
+  return hooks[index]
+}
+
 /**
  * @description The function creates a state.
  * @param initial - The initial value of the state for the hook.
  * @returns The `useStore` function returns an array with two elements: the current state value and a
  * `setState` function that can be used to update the state.
  */
-const useStore = (initial) => {
+const useStore = (initialState, init) => {
+  const reducer = (state, action) =>
+    typeof action === 'function' ? action(state) : action
+
+  return useReducer(reducer, initialState, init)
+}
+
+const useReducer = (reducer, initialState, init) => {
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
     vars.wipFiber.alternate.hooks[vars.hookIndex]
+
   const hook = {
-    state: oldHook ? oldHook.state : initial,
-    queue: oldHook ? [...oldHook.queue] : [],
+    state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
+    queue: oldHook && Array.isArray(oldHook.queue) ? oldHook.queue.slice() : [],
   }
 
-  hook.queue.forEach((action) => {
-    hook.state =
-      typeof action === STRINGS.function ? action(hook.state) : action
-  })
+  if (oldHook && Array.isArray(oldHook.queue)) {
+    oldHook.queue.forEach((action) => {
+      hook.state = reducer(hook.state, action)
+    })
+  }
 
-  hook.queue = []
-
-  const setState = (action) => {
+  const dispatch = (action) => {
     hook.queue.push(action)
 
     vars.wipRoot = {
       dom: vars.currentRoot.dom,
-      props: {
-        ...vars.currentRoot.props,
-      },
+      props: vars.currentRoot.props,
       alternate: vars.currentRoot,
     }
-    vars.nextUnitOfWork = vars.wipRoot
     vars.deletions = []
+    vars.hookIndex = 0
+    scheduleWork(vars.wipRoot)
   }
 
-  if (vars.wipFiber && vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  hook.queue.forEach((action) => {
+    hook.state = reducer(hook.state, action)
+  })
 
-  return [hook.state, setState]
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
+
+  return [hook.state, dispatch]
 }
 
 /**
@@ -65,21 +87,28 @@ const useEffect = (callback, deps) => {
   const hook = {
     type: RYUNIX_TYPES.RYUNIX_EFFECT,
     deps,
+    cleanup: oldHook?.cleanup,
   }
 
-  if (!oldHook) {
-    // invoke callback if this is the first time
-    callback()
-  } else {
-    if (!isEqual(oldHook.deps, hook.deps)) {
-      callback()
-    }
+  const hasChanged = !oldHook || !isEqual(oldHook.deps, deps)
+
+  if (hasChanged) {
+    vars.effects.push(() => {
+      // Llama al cleanup anterior si existe
+      if (typeof hook.cleanup === 'function') {
+        hook.cleanup()
+      }
+
+      // Ejecuta el nuevo efecto y guarda el nuevo cleanup
+      const result = callback()
+      if (typeof result === 'function') {
+        hook.cleanup = result
+      }
+    })
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 }
 
 const useRef = (initial) => {
@@ -93,10 +122,8 @@ const useRef = (initial) => {
     value: oldHook ? oldHook.value : { current: initial },
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 
   return hook.value
 }
@@ -123,10 +150,8 @@ const useMemo = (comp, deps) => {
     hook.value = comp()
   }
 
-  if (vars.wipFiber.hooks) {
-    vars.wipFiber.hooks.push(hook)
-    vars.hookIndex++
-  }
+  vars.wipFiber.hooks[vars.hookIndex] = hook
+  vars.hookIndex++
 
   return hook.value
 }

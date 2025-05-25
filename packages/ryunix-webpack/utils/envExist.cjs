@@ -2,7 +2,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const envPath = path.join(__dirname, '../../../../', '.env')
+const envPath = path.join(process.cwd(), '.env')
 
 const envExist = () => {
   if (fs.existsSync(envPath)) {

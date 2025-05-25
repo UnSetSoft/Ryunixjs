@@ -11,7 +11,15 @@ const commitRoot = () => {
     commitWork(vars.wipRoot.child)
     vars.currentRoot = vars.wipRoot
   }
-  vars.wipRoot = undefined
+  vars.effects.forEach((effect) => {
+    try {
+      effect()
+    } catch (err) {
+      console.error('Error in effect:', err)
+    }
+  })
+  vars.effects = []
+  vars.wipRoot = null
 }
 
 /**

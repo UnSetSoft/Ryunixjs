@@ -1,11 +1,12 @@
 let vars = {
-  containerRoot: {},
-  nextUnitOfWork: {},
-  currentRoot: {},
-  wipRoot: {},
-  deletions: [],
-  wipFiber: {},
-  hookIndex: 0,
+  containerRoot: null,
+  nextUnitOfWork: null,
+  currentRoot: null,
+  wipRoot: null,
+  deletions: null,
+  wipFiber: null,
+  hookIndex: null,
+  effects: null,
 }
 
 const reg = /[A-Z]/g
@@ -42,34 +43,6 @@ const EFFECT_TAGS = Object.freeze({
   DELETION: Symbol('ryunix.reconciler.status.deletion').toString(),
 })
 
-const Fiber = ({
-  _id = generateUnicHash('fiber'),
-  type,
-  props,
-  parent,
-  alternate,
-  effectTag,
-  dom,
-  child,
-  sibling,
-  hooks = [],
-  key,
-}) => {
-  return {
-    _id,
-    type,
-    props,
-    parent,
-    dom,
-    alternate,
-    child,
-    sibling,
-    effectTag,
-    hooks,
-    key,
-  }
-}
-
 const generateHash = (prefix) => {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`
 }
@@ -82,5 +55,4 @@ export {
   STRINGS,
   OLD_STRINGS,
   generateHash,
-  Fiber,
 }

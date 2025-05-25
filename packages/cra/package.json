@@ -1,18 +1,15 @@
 {
   "name": "@unsetsoft/cra",
   "description": "Create Ryunix app",
-  "version": "1.1.8",
+  "version": "1.1.10",
   "author": "Neyunse",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
   "license": "MIT",
-  "private": false,
   "keywords": [
     "ryunixjs"
   ],
   "main": "src/cli.js",
-  "bin": {
-    "cra": "src/cli.js"
-  },
+  "bin": "src/cli.js",
   "files": [
     "src",
     "templates"
