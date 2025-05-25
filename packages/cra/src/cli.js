@@ -52,6 +52,16 @@ create('create-cra', {
         await installNpmPackage('@unsetsoft/ryunixjs@canary')
         await installNpmPackage('@unsetsoft/ryunix-webpack@canary', true)
       }
+    } else if (template === 'Vite') {
+      // Ryunix
+
+      if (answers.channel === 'Latest') {
+        await installNpmPackage('@unsetsoft/ryunixjs@latest')
+        await installNpmPackage('vite@latest', true)
+      } else if (answers.channel === 'Canary') {
+        await installNpmPackage('@unsetsoft/ryunixjs@canary')
+        await installNpmPackage('vite@latest', true)
+      }
     } else {
       throw new Error('Missing template')
     }
