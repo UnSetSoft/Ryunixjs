@@ -2,9 +2,7 @@
     display: block;
     margin: 0 auto;" />
 
-## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/nightly.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/nightly)
-
-[![Invitame un café en cafecito.app](https://cdn.cafecito.app/imgs/buttons/button_3.svg)](https://cafecito.app/neyunse) [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A1314KEV)
+## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/canary)
 
 ### What is RyunixJS?
 
@@ -12,7 +10,7 @@ Like React, NextJS, Preact, Vite. Ryunix allows you to build static websites fro
 
 ### Usage
 
-`npx @unsetsoft/cra@latest`
+`npx @unsetsoft/cra@latest <my-app>`
 
 ## Do you want to contribute?
 
