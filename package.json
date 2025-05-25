@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "1.1.6-canary.169",
+  "version": "1.1.7",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -14,7 +14,6 @@
     "prettier-fix": "prettier -w .",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
-    "r:n": "yarn log --prerelease nightly && yarn kg:bump && yarn prettier-fix && npm run nightly:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git nightly",
     "r:c": "yarn log --prerelease canary && yarn kg:bump && yarn prettier-fix && npm run canary:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git canary",
     "r:r": "yarn log && yarn kg:bump && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git latest",
     "cra:r": "npm run release --workspace=@unsetsoft/cra",
