@@ -43,7 +43,7 @@
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.9.1",
     "rollup": "4.41.0",
-    "sass": "1.66.1",
+    "sass": "1.89.0",
     "sass-loader": "13.3.2",
     "style-loader": "3.3.3",
     "terminal-log": "1.0.1",
