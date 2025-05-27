@@ -15,6 +15,13 @@ const updateFunctionComponent = (fiber) => {
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
   const children = [fiber.type(fiber.props)]
+
+  // Aquí detectamos si es Provider para guardar contexto y valor en fiber
+  if (fiber.type._contextId && fiber.props.value !== undefined) {
+    fiber._contextId = fiber.type._contextId
+    fiber._contextValue = fiber.props.value
+  }
+
   reconcileChildren(fiber, children)
 }
 

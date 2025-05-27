@@ -21,6 +21,7 @@ const RYUNIX_TYPES = Object.freeze({
   RYUNIX_STORE: Symbol('ryunix.store').toString(),
   RYUNIX_REDUCE: Symbol('ryunix.reduce').toString(),
   RYUNIX_FRAGMENT: Symbol('ryunix.fragment').toString(),
+  RYUNIX_CONTEXT: Symbol('ryunix.context').toString(),
 })
 
 const STRINGS = Object.freeze({
