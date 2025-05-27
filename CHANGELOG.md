@@ -1,4 +1,6 @@
 # Changelog
+### [1.1.7-canary.90](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.7-canary.89...v1.1.7-canary.90) (2025-05-27)
+
 ### [1.1.7-canary.89](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.7-canary.88...v1.1.7-canary.89) (2025-05-27)
 
 ### [1.1.7-canary.88](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.7-canary.87...v1.1.7-canary.88) (2025-05-27)
