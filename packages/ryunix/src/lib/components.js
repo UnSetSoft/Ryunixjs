@@ -2,6 +2,7 @@ import { createDom } from './dom'
 import { reconcileChildren } from './reconciler'
 import { vars } from '../utils/index'
 import { createElement } from './createElement'
+import { EFFECT_TAGS } from '../utils/index'
 
 /**
  * This function updates a function component by setting up a work-in-progress fiber, resetting the
@@ -15,10 +16,14 @@ const updateFunctionComponent = (fiber) => {
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
 
+  // Renderizar el componente y reconciliar sus hijos
   const children = fiber.type(fiber.props)
-  let childArr = Array.isArray(children) ? children : [children]
+  const childArr = Array.isArray(children) ? children : [children]
 
   reconcileChildren(fiber, childArr)
+
+  // Marcar el fiber para actualización
+  fiber.effectTag = EFFECT_TAGS.UPDATE
 }
 
 /**
