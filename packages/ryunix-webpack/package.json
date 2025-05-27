@@ -47,7 +47,7 @@
     "sass-loader": "13.3.2",
     "style-loader": "3.3.3",
     "terminal-log": "1.0.1",
-    "terser-webpack-plugin": "5.3.9",
+    "terser-webpack-plugin": "5.3.14",
     "thread-loader": "4.0.4",
     "url-loader": "4.1.1",
     "webpack": "5.99.9",
