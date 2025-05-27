@@ -282,6 +282,13 @@ const useRouter = (routes) => {
 
   const navigate = (path) => {
     window.history.pushState({}, '', path)
+    vars.wipRoot = {
+      dom: vars.currentRoot.dom,
+      props: vars.currentRoot.props,
+      alternate: vars.currentRoot,
+    }
+    vars.nextUnitOfWork = vars.wipRoot
+    vars.deletions = []
     updateRoute(path)
   }
 
@@ -316,6 +323,7 @@ const useRouter = (routes) => {
     }
 
     return route.component({
+      key: location,
       params: currentRouteData.params || {},
       query,
     })

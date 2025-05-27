@@ -7,18 +7,8 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  */
 const commitRoot = () => {
   vars.deletions.forEach(commitWork)
-  if (vars.wipRoot && vars.wipRoot.child) {
-    commitWork(vars.wipRoot.child)
-    vars.currentRoot = vars.wipRoot
-  }
-  vars.effects.forEach((effect) => {
-    try {
-      effect()
-    } catch (err) {
-      console.error('Error in effect:', err)
-    }
-  })
-  vars.effects = []
+  commitWork(vars.wipRoot.child)
+  vars.currentRoot = vars.wipRoot
   vars.wipRoot = null
 }
 
@@ -30,7 +20,9 @@ const commitRoot = () => {
  * @returns The function does not return anything, it performs side effects by manipulating the DOM.
  */
 const commitWork = (fiber) => {
-  if (!fiber) return
+  if (!fiber) {
+    return
+  }
 
   let domParentFiber = fiber.parent
   while (!domParentFiber.dom) {
@@ -38,20 +30,23 @@ const commitWork = (fiber) => {
   }
   const domParent = domParentFiber.dom
 
-  if (fiber.effectTag === EFFECT_TAGS.PLACEMENT && fiber.dom != null) {
-    domParent.appendChild(fiber.dom)
+  if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
+    if (fiber.dom != null) {
+      domParent.appendChild(fiber.dom)
+    }
     runEffects(fiber)
-  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE && fiber.dom != null) {
+  } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber)
-    updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+    if (fiber.dom != null) {
+      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+    }
     runEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
-    commitDeletion(fiber, domParent)
     cancelEffects(fiber)
+    commitDeletion(fiber, domParent)
     return
   }
 
-  // Recorre los "fibers" hijos y hermanos
   commitWork(fiber.child)
   commitWork(fiber.sibling)
 }
@@ -70,4 +65,5 @@ const commitDeletion = (fiber, domParent) => {
     commitDeletion(fiber.child, domParent)
   }
 }
+
 export { commitDeletion, commitWork, commitRoot }

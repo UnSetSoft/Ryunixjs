@@ -1,6 +1,6 @@
 import { createDom } from './dom'
 import { reconcileChildren } from './reconciler'
-import { vars } from '../utils/index'
+import { RYUNIX_TYPES, vars } from '../utils/index'
 import { createElement } from './createElement'
 
 /**
@@ -14,11 +14,8 @@ const updateFunctionComponent = (fiber) => {
   vars.wipFiber = fiber
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
-
-  const children = fiber.type(fiber.props)
-  let childArr = Array.isArray(children) ? children : [children]
-
-  reconcileChildren(fiber, childArr)
+  const children = [fiber.type(fiber.props)]
+  reconcileChildren(fiber, children)
 }
 
 /**
@@ -28,10 +25,14 @@ const updateFunctionComponent = (fiber) => {
  * fibers in the tree.
  */
 const updateHostComponent = (fiber) => {
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber)
+  if (fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    reconcileChildren(fiber, fiber.props.children.flat())
+  } else {
+    if (!fiber.dom) {
+      fiber.dom = createDom(fiber)
+    }
+    reconcileChildren(fiber, fiber.props.children.flat())
   }
-  reconcileChildren(fiber, fiber.props.children)
 }
 
 /* Internal components*/

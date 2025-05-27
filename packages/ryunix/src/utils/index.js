@@ -49,6 +49,35 @@ const generateHash = (prefix) => {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`
 }
 
+const matchPath = (pattern, path) => {
+  const patternSegments = pattern.split('/').filter(Boolean)
+  const pathSegments = path.split('/').filter(Boolean)
+
+  if (pattern === '*') return {}
+
+  if (patternSegments.length !== pathSegments.length) return null
+
+  const params = {}
+
+  for (let i = 0; i < patternSegments.length; i++) {
+    const pSeg = patternSegments[i]
+    const pathSeg = pathSegments[i]
+
+    if (pSeg.startsWith(':')) {
+      params[pSeg.slice(1)] = decodeURIComponent(pathSeg)
+    } else if (pSeg !== pathSeg) {
+      return null
+    }
+  }
+
+  return params
+}
+
+const parseQuery = (search) => {
+  if (!search) return {}
+  return Object.fromEntries(new URLSearchParams(search))
+}
+
 export {
   vars,
   reg,
@@ -57,4 +86,6 @@ export {
   STRINGS,
   OLD_STRINGS,
   generateHash,
+  matchPath,
+  parseQuery,
 }
