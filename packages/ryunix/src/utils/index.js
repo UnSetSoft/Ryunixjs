@@ -12,14 +12,15 @@ let vars = {
 const reg = /[A-Z]/g
 
 const RYUNIX_TYPES = Object.freeze({
-  TEXT_ELEMENT: Symbol('text.element'),
-  Ryunix_ELEMENT: Symbol('ryunix.element'),
-  RYUNIX_EFFECT: Symbol('ryunix.effect'),
-  RYUNIX_MEMO: Symbol('ryunix.memo'),
-  RYUNIX_URL_QUERY: Symbol('ryunix.urlQuery'),
-  RYUNIX_REF: Symbol('ryunix.ref'),
-  RYUNIX_STORE: Symbol('ryunix.store'),
-  RYUNIX_REDUCE: Symbol('ryunix.reduce'),
+  TEXT_ELEMENT: Symbol('text.element').toString(),
+  Ryunix_ELEMENT: Symbol('ryunix.element').toString(),
+  RYUNIX_EFFECT: Symbol('ryunix.effect').toString(),
+  RYUNIX_MEMO: Symbol('ryunix.memo').toString(),
+  RYUNIX_URL_QUERY: Symbol('ryunix.urlQuery').toString(),
+  RYUNIX_REF: Symbol('ryunix.ref').toString(),
+  RYUNIX_STORE: Symbol('ryunix.store').toString(),
+  RYUNIX_REDUCE: Symbol('ryunix.reduce').toString(),
+  RYUNIX_FRAGMENT: Symbol('ryunix.fragment').toString(),
 })
 
 const STRINGS = Object.freeze({
@@ -41,6 +42,7 @@ const EFFECT_TAGS = Object.freeze({
   PLACEMENT: Symbol('ryunix.reconciler.status.placement').toString(),
   UPDATE: Symbol('ryunix.reconciler.status.update').toString(),
   DELETION: Symbol('ryunix.reconciler.status.deletion').toString(),
+  NO_EFFECT: Symbol('ryunix.reconciler.status.no_efect').toString(),
 })
 
 const generateHash = (prefix) => {
