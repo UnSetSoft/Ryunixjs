@@ -12,6 +12,9 @@ import { RYUNIX_TYPES, STRINGS, reg, OLD_STRINGS } from '../utils/index'
  * properties of the newly created
  */
 const createDom = (fiber) => {
+  if (fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    return null // Los fragmentos no crean nodos DOM reales
+  }
   const dom =
     fiber.type == RYUNIX_TYPES.TEXT_ELEMENT
       ? document.createTextNode('')

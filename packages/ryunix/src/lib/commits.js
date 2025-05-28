@@ -62,8 +62,11 @@ const commitDeletion = (fiber, domParent) => {
   if (fiber.dom) {
     domParent.removeChild(fiber.dom)
   } else {
-    commitDeletion(fiber.child, domParent)
+    let child = fiber.child
+    while (child) {
+      commitDeletion(child, domParent)
+      child = child.sibling
+    }
   }
 }
-
 export { commitDeletion, commitWork, commitRoot }

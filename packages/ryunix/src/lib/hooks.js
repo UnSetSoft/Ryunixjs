@@ -492,11 +492,7 @@ const Children = () => {
 
   if (!route || !route.component) return null
 
-  return createElement(
-    RYUNIX_TYPES.RYUNIX_FRAGMENT,
-    {},
-    createElement(route.component, { key: location, params, query }),
-  )
+  return createElement(route.component, { key: location, params, query })
 }
 
 // Componente NavLink para navegación interna

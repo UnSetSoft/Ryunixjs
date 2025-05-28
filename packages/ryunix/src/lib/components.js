@@ -32,13 +32,17 @@ const updateFunctionComponent = (fiber) => {
  * fibers in the tree.
  */
 const updateHostComponent = (fiber) => {
+  const children = Array.isArray(fiber.props.children)
+    ? fiber.props.children.flat()
+    : [fiber.props.children]
+
   if (fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
-    reconcileChildren(fiber, fiber.props.children.flat())
+    reconcileChildren(fiber, children)
   } else {
     if (!fiber.dom) {
       fiber.dom = createDom(fiber)
     }
-    reconcileChildren(fiber, fiber.props.children.flat())
+    reconcileChildren(fiber, children)
   }
 }
 

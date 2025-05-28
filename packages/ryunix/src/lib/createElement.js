@@ -48,7 +48,11 @@ const createTextElement = (text) => {
   }
 }
 
-const Fragment = (props) =>
-  createElement(RYUNIX_TYPES.RYUNIX_FRAGMENT, {}, ...props.children)
+const Fragment = (props) => {
+  const children = Array.isArray(props.children)
+    ? props.children
+    : [props.children]
+  return createElement(RYUNIX_TYPES.RYUNIX_FRAGMENT, {}, ...children)
+}
 
 export { createElement, createTextElement, Fragment }
