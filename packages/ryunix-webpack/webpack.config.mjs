@@ -47,6 +47,9 @@ const { version } = await getPackageVersion()
 
 export default {
   // context: src
+  experiments: {
+    lazyCompilation: config.webpack.experiments.lazyCompilation,
+  },
   context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
   devtool:

@@ -67,7 +67,7 @@ const getPackageVersion = async () => {
 function cleanCacheDir(dirPath) {
   if (fs.existsSync(dirPath)) {
     fs.rmSync(dirPath, { recursive: true, force: true })
-    console.log(`[cache] Limpieza completada: ${dirPath}`)
+    console.log(`[cache] Cleaning completed: ${dirPath}`)
   }
 }
 

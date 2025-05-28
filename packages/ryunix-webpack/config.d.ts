@@ -78,5 +78,8 @@ export interface Settings {
     module: {
       rules: object[]
     }
+    experiments: {
+      lazyCompilation: boolean
+    }
   }
 }
