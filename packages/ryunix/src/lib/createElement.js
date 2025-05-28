@@ -1,32 +1,4 @@
-import { generateHash, RYUNIX_TYPES, STRINGS } from '../utils/index'
-
-const Fragment = (props) => {
-  return props.children
-}
-
-const childArray = (children, out) => {
-  out = out || []
-  if (children == undefined || typeof children == STRINGS.boolean) {
-    // pass
-  } else if (Array.isArray(children)) {
-    children.some((child) => {
-      childArray(child, out)
-    })
-  } else {
-    out.push(children)
-  }
-  return out
-}
-
-const cloneElement = (element, props) => {
-  return {
-    ...element,
-    props: {
-      ...element.props,
-      ...props,
-    },
-  }
-}
+import { RYUNIX_TYPES, STRINGS } from '../utils/index'
 
 /**
  * The function creates a new element with the given type, props, and children.
@@ -46,20 +18,15 @@ const cloneElement = (element, props) => {
  */
 
 const createElement = (type, props, ...children) => {
-  children = childArray(children, [])
-  const key =
-    props && props.key
-      ? generateHash(props.key)
-      : generateHash(RYUNIX_TYPES.Ryunix_ELEMENT.toString())
-
   return {
     type,
     props: {
       ...props,
-      key,
-      children: children.map((child) =>
-        typeof child === STRINGS.object ? child : createTextElement(child),
-      ),
+      children: children
+        .flat()
+        .map((child) =>
+          typeof child === STRINGS.object ? child : createTextElement(child),
+        ),
     },
   }
 }
@@ -81,4 +48,11 @@ const createTextElement = (text) => {
   }
 }
 
-export { createElement, createTextElement, Fragment, cloneElement }
+const Fragment = (props) => {
+  const children = Array.isArray(props.children)
+    ? props.children
+    : [props.children]
+  return createElement(RYUNIX_TYPES.RYUNIX_FRAGMENT, {}, ...children)
+}
+
+export { createElement, createTextElement, Fragment }

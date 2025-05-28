@@ -3,10 +3,15 @@ import WebpackDevServer from 'webpack-dev-server'
 import webpackConfig from '../webpack.config.mjs'
 import { configFileExist } from '../utils/settingfile.cjs'
 import envPath from '../utils/envExist.cjs'
-import { getPackageVersion } from '../utils/index.mjs'
+import {
+  getPackageVersion,
+  resolveApp,
+  cleanCacheDir,
+} from '../utils/index.mjs'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import net from 'net' // Para verificar si el puerto está disponible
+import defaultSettings from '../utils/config.cjs'
 
 const checkPortInUse = (port) => {
   return new Promise((resolve, reject) => {
@@ -39,6 +44,15 @@ const findAvailablePort = async (port) => {
 }
 
 const StartServer = async (cliSettings) => {
+  const cacheDir = resolveApp(
+    process.cwd(),
+    `${defaultSettings.webpack.output.buildDirectory}/cache`,
+  )
+
+  if (process.env.NODE_ENV === 'development') {
+    cleanCacheDir(cacheDir)
+  }
+
   webpackConfig.mode = 'development'
   const compiler = Webpack(webpackConfig)
   let port = webpackConfig.devServer.port || 3000
