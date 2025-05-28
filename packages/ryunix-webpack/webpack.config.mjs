@@ -56,7 +56,7 @@ export default {
   output: {
     // path: .ryunix
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
-    publicPath: '/static/',
+    publicPath: '/',
     chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
     assetModuleFilename: './assets/media/[name].[hash][ext]',
     filename: './assets/js/[name].[fullhash:8].bundle.js',
@@ -155,9 +155,9 @@ export default {
         test: /\.s[ac]ss|css$/,
         exclude: /node_modules/,
         use: [
-          process.env.NODE_ENV === 'development'
-            ? 'style-loader'
-            : MiniCssExtractPlugin.loader,
+          config.webpack.production
+            ? MiniCssExtractPlugin.loader
+            : 'style-loader',
           'css-loader',
           'sass-loader',
         ],
