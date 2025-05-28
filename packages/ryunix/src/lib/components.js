@@ -1,6 +1,6 @@
 import { createDom } from './dom'
 import { reconcileChildren } from './reconciler'
-import { vars } from '../utils/index'
+import { RYUNIX_TYPES, vars } from '../utils/index'
 import { createElement } from './createElement'
 
 /**
@@ -14,11 +14,15 @@ const updateFunctionComponent = (fiber) => {
   vars.wipFiber = fiber
   vars.hookIndex = 0
   vars.wipFiber.hooks = []
+  const children = [fiber.type(fiber.props)]
 
-  const children = fiber.type(fiber.props)
-  let childArr = Array.isArray(children) ? children : [children]
+  // Aquí detectamos si es Provider para guardar contexto y valor en fiber
+  if (fiber.type._contextId && fiber.props.value !== undefined) {
+    fiber._contextId = fiber.type._contextId
+    fiber._contextValue = fiber.props.value
+  }
 
-  reconcileChildren(fiber, childArr)
+  reconcileChildren(fiber, children)
 }
 
 /**
@@ -28,10 +32,18 @@ const updateFunctionComponent = (fiber) => {
  * fibers in the tree.
  */
 const updateHostComponent = (fiber) => {
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber)
+  const children = Array.isArray(fiber.props.children)
+    ? fiber.props.children.flat()
+    : [fiber.props.children]
+
+  if (fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    reconcileChildren(fiber, children)
+  } else {
+    if (!fiber.dom) {
+      fiber.dom = createDom(fiber)
+    }
+    reconcileChildren(fiber, children)
   }
-  reconcileChildren(fiber, fiber.props.children)
 }
 
 /* Internal components*/

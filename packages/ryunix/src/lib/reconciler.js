@@ -9,53 +9,28 @@ import { EFFECT_TAGS, vars } from '../utils/index'
  * @param elements - an array of elements representing the new children to be rendered in the current
  * fiber's subtree
  */
-const shouldComponentUpdate = (oldProps, newProps) => {
-  // Comparar las propiedades antiguas y nuevas
-  return (
-    !oldProps ||
-    !newProps ||
-    Object.keys(oldProps).length !== Object.keys(newProps).length ||
-    Object.keys(newProps).some((key) => oldProps[key] !== newProps[key])
-  )
-}
-
-const recycleFiber = (oldFiber, newProps) => {
-  return {
-    ...oldFiber,
-    props: newProps,
-    alternate: oldFiber,
-    effectTag: EFFECT_TAGS.UPDATE,
-  }
-}
-
 const reconcileChildren = (wipFiber, elements) => {
   let index = 0
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child
-  let prevSibling = null
+  let prevSibling
 
-  const oldFibersMap = new Map()
-  while (oldFiber) {
-    const oldKey = oldFiber.props.key || oldFiber.type
-    oldFibersMap.set(oldKey, oldFiber)
-    oldFiber = oldFiber.sibling
-  }
-
-  while (index < elements.length) {
+  while (index < elements.length || oldFiber != null) {
     const element = elements[index]
-    const key = element.props.key || element.type
-    const oldFiber = oldFibersMap.get(key)
-
     let newFiber
-    const sameType = oldFiber && element && element.type === oldFiber.type
 
-    if (sameType && !shouldComponentUpdate(oldFiber.props, element.props)) {
-      // Reutilizar fibra existente si no hay cambios
-      newFiber = recycleFiber(oldFiber, element.props)
-      oldFibersMap.delete(key)
+    const sameType = oldFiber && element && element.type == oldFiber.type
+
+    if (sameType) {
+      newFiber = {
+        type: oldFiber.type,
+        props: element.props,
+        dom: oldFiber.dom,
+        parent: wipFiber,
+        alternate: oldFiber,
+        effectTag: EFFECT_TAGS.UPDATE,
+      }
     }
-
     if (element && !sameType) {
-      // Crear nueva fibra
       newFiber = {
         type: element.type,
         props: element.props,
@@ -65,28 +40,23 @@ const reconcileChildren = (wipFiber, elements) => {
         effectTag: EFFECT_TAGS.PLACEMENT,
       }
     }
-
     if (oldFiber && !sameType) {
       oldFiber.effectTag = EFFECT_TAGS.DELETION
-      wipFiber.effects = wipFiber.effects || []
-      wipFiber.effects.push(oldFiber)
+      vars.deletions.push(oldFiber)
+    }
+
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling
     }
 
     if (index === 0) {
       wipFiber.child = newFiber
-    } else if (prevSibling) {
+    } else if (element) {
       prevSibling.sibling = newFiber
     }
 
     prevSibling = newFiber
-
     index++
   }
-
-  oldFibersMap.forEach((oldFiber) => {
-    oldFiber.effectTag = EFFECT_TAGS.DELETION
-    vars.deletions.push(oldFiber)
-  })
 }
-
 export { reconcileChildren }

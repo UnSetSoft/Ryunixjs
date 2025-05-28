@@ -67,6 +67,11 @@ const defaultSettings = {
     module: {
       rules: config?.webpack?.module?.rules ? config.webpack.module.rules : [],
     },
+    experiments: {
+      lazyCompilation: config?.webpack?.experiments?.lazyCompilation
+        ? config.webpack.experiments.lazyCompilation
+        : false,
+    },
   },
 }
 

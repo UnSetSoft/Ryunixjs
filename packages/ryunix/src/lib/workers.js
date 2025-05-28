@@ -24,7 +24,7 @@ const workLoop = (deadline) => {
   requestIdleCallback(workLoop)
 }
 
-//requestIdleCallback(workLoop)
+requestIdleCallback(workLoop)
 
 /**
  * The function performs a unit of work by updating either a function component or a host component and
@@ -36,7 +36,7 @@ const workLoop = (deadline) => {
  * @returns The function `performUnitOfWork` returns the next fiber to be processed. If the current
  * fiber has a child, it returns the child. Otherwise, it looks for the next sibling of the current
  * fiber. If there are no more siblings, it goes up the tree to the parent and looks for the next
- * sibling of the parent. The function returns `undefined` if there are no more fibers to process.
+ * sibling of the parent. The function returns `null` if there are no more fibers to process.
  */
 const performUnitOfWork = (fiber) => {
   const isFunctionComponent = fiber.type instanceof Function
@@ -55,7 +55,6 @@ const performUnitOfWork = (fiber) => {
     }
     nextFiber = nextFiber.parent
   }
-  return undefined
 }
 
 const scheduleWork = (root) => {
