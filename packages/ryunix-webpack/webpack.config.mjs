@@ -66,6 +66,7 @@ export default {
   },
   target: config.webpack.target,
   devServer: {
+    watchFiles: [resolveApp(dir, 'src/**/*')],
     hot: true,
     historyApiFallback: {
       index: '/',
@@ -117,6 +118,7 @@ export default {
     buildDependencies: {
       defaultWebpack: ['webpack/lib/'],
       config: [__filename],
+      src: [resolveApp(dir, 'src')],
     },
   },
   infrastructureLogging: {
