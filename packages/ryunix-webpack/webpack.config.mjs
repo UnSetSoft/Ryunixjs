@@ -52,12 +52,11 @@ export default {
   },
   context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
-  devtool:
-    process.env.NODE_ENV === 'development' ? 'cheap-module-source-map' : false,
+  devtool: config.webpack.production ? 'cheap-module-source-map' : false,
   output: {
     // path: .ryunix
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
-    publicPath: '/',
+    publicPath: '/static/',
     chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
     assetModuleFilename: './assets/media/[name].[hash][ext]',
     filename: './assets/js/[name].[fullhash:8].bundle.js',
@@ -90,22 +89,21 @@ export default {
       minSize: 20000,
       maxSize: 70000,
     },
-    minimize: process.env.NODE_ENV === 'production',
-    minimizer:
-      process.env.NODE_ENV === 'production'
-        ? [
-            new TerserPlugin({
-              parallel: true,
-              terserOptions: {
-                compress: {
-                  dead_code: true,
-                  passes: 2,
-                },
+    minimize: config.webpack.production === true,
+    minimizer: config.webpack.production
+      ? [
+          new TerserPlugin({
+            parallel: true,
+            terserOptions: {
+              compress: {
+                dead_code: true,
+                passes: 2,
               },
-            }),
-            new CssMinimizerPlugin(),
-          ]
-        : [],
+            },
+          }),
+          new CssMinimizerPlugin(),
+        ]
+      : [],
   },
   cache: {
     type: 'filesystem',
@@ -216,9 +214,10 @@ export default {
         version,
       },
     }),
-    new MiniCssExtractPlugin({
-      filename: 'assets/css/[name].[contenthash].css',
-    }),
+    config.webpack.production &&
+      new MiniCssExtractPlugin({
+        filename: 'assets/css/[name].[contenthash].css',
+      }),
     new CopyWebpackPlugin({
       patterns: [
         {
