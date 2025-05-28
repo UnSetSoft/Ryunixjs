@@ -64,6 +64,13 @@ const getPackageVersion = async () => {
   return packageJson
 }
 
+function cleanCacheDir(dirPath) {
+  if (fs.existsSync(dirPath)) {
+    fs.rmSync(dirPath, { recursive: true, force: true })
+    console.log(`[cache] Limpieza completada: ${dirPath}`)
+  }
+}
+
 export {
   getPackageManager,
   ENV_HASH,
@@ -71,4 +78,5 @@ export {
   resolveApp,
   RYUNIX_APP,
   getPackageVersion,
+  cleanCacheDir,
 }

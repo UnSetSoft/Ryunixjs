@@ -53,7 +53,7 @@ export default {
     process.env.NODE_ENV === 'development' ? 'cheap-module-source-map' : false,
   output: {
     // path: .ryunix
-    path: resolveApp(dir, config.webpack.output.buildDirectory),
+    path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
     publicPath: '/',
     chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
     assetModuleFilename: './assets/media/[name].[hash][ext]',
@@ -87,23 +87,29 @@ export default {
       maxSize: 70000,
     },
     minimize: process.env.NODE_ENV === 'production',
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-        terserOptions: {
-          compress: {
-            dead_code: true,
-            passes: 2,
-          },
-        },
-      }),
-      new CssMinimizerPlugin(),
-    ],
+    minimizer:
+      process.env.NODE_ENV === 'production'
+        ? [
+            new TerserPlugin({
+              parallel: true,
+              terserOptions: {
+                compress: {
+                  dead_code: true,
+                  passes: 2,
+                },
+              },
+            }),
+            new CssMinimizerPlugin(),
+          ]
+        : [],
   },
   cache: {
     type: 'filesystem',
     version: ENV_HASH(getEnviroment()),
-    cacheDirectory: resolveApp(dir, 'node_modules/.cache'),
+    cacheDirectory: resolveApp(
+      dir,
+      `${config.webpack.output.buildDirectory}/cache/webpack`,
+    ),
     store: 'pack',
     buildDependencies: {
       defaultWebpack: ['webpack/lib/'],
@@ -119,27 +125,39 @@ export default {
       {
         test: /\.(js|jsx|ryx)$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env', '@babel/preset-react'],
-            cacheDirectory: true,
-            plugins: [
-              [
-                '@babel/plugin-transform-react-jsx',
-                {
-                  pragma: 'Ryunix.createElement',
-                  pragmaFrag: 'Ryunix.Fragment',
-                },
+        use: [
+          'thread-loader',
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env', '@babel/preset-react'],
+              cacheDirectory: resolveApp(
+                dir,
+                `${config.webpack.output.buildDirectory}/cache/babel`,
+              ),
+              plugins: [
+                [
+                  '@babel/plugin-transform-react-jsx',
+                  {
+                    pragma: 'Ryunix.createElement',
+                    pragmaFrag: 'Ryunix.Fragment',
+                  },
+                ],
               ],
-            ],
+            },
           },
-        },
+        ],
       },
       {
         test: /\.s[ac]ss|css$/,
         exclude: /node_modules/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        use: [
+          process.env.NODE_ENV === 'development'
+            ? 'style-loader'
+            : MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+        ],
       },
       {
         test: /\.(jpg|jpeg|png|gif|svg|ico)$/,
@@ -200,7 +218,7 @@ export default {
       patterns: [
         {
           from: resolveApp(dir, 'public'),
-          to: resolveApp(dir, config.webpack.output.buildDirectory),
+          to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
           globOptions: {
             ignore: ['**/index.html', '**/favicon.png'],
           },
