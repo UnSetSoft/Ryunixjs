@@ -95,6 +95,17 @@ const StartServer = async (cliSettings) => {
             envPath() ? chalk.green(`loaded`) : chalk.red(`404 Not Found`)
           }
           - Launched in: ${speedIndicator}
+          - Mode: ${
+            defaultSettings.webpack.production
+              ? chalk.green(`production`)
+              : chalk.yellow(`development`)
+          }
+        ${
+          defaultSettings.webpack.production !== true &&
+          chalk.yellow(
+            `⚠️ You are in development mode, remember update ryunix.config.js for production!`,
+          )
+        }
       `)
     } catch (err) {
       logger.error(`[error] ${err.message}`)

@@ -52,8 +52,7 @@ export default {
   },
   context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
-  devtool:
-    process.env.NODE_ENV === 'development' ? 'cheap-module-source-map' : false,
+  devtool: config.webpack.production ? 'cheap-module-source-map' : false,
   output: {
     // path: .ryunix
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
@@ -90,22 +89,21 @@ export default {
       minSize: 20000,
       maxSize: 70000,
     },
-    minimize: process.env.NODE_ENV === 'production',
-    minimizer:
-      process.env.NODE_ENV === 'production'
-        ? [
-            new TerserPlugin({
-              parallel: true,
-              terserOptions: {
-                compress: {
-                  dead_code: true,
-                  passes: 2,
-                },
+    minimize: config.webpack.production === true,
+    minimizer: config.webpack.production
+      ? [
+          new TerserPlugin({
+            parallel: true,
+            terserOptions: {
+              compress: {
+                dead_code: true,
+                passes: 2,
               },
-            }),
-            new CssMinimizerPlugin(),
-          ]
-        : [],
+            },
+          }),
+          new CssMinimizerPlugin(),
+        ]
+      : [],
   },
   cache: {
     type: 'filesystem',
@@ -157,9 +155,9 @@ export default {
         test: /\.s[ac]ss|css$/,
         exclude: /node_modules/,
         use: [
-          process.env.NODE_ENV === 'development'
-            ? 'style-loader'
-            : MiniCssExtractPlugin.loader,
+          config.webpack.production
+            ? MiniCssExtractPlugin.loader
+            : 'style-loader',
           'css-loader',
           'sass-loader',
         ],
@@ -216,9 +214,10 @@ export default {
         version,
       },
     }),
-    new MiniCssExtractPlugin({
-      filename: 'assets/css/[name].[contenthash].css',
-    }),
+    config.webpack.production &&
+      new MiniCssExtractPlugin({
+        filename: 'assets/css/[name].[contenthash].css',
+      }),
     new CopyWebpackPlugin({
       patterns: [
         {

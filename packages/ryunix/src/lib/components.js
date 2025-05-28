@@ -55,6 +55,12 @@ const updateHostComponent = (fiber) => {
  * image and the page is being run on localhost, or it returns a modified image URL with optimization
  * parameters added if the `src` is not local.
  */
+
+const isLocalhost = () => {
+  const { hostname } = window.location
+  return hostname === 'localhost' || hostname === '127.0.0.1'
+}
+
 const optimizationImageApi = ({ src, props }) => {
   const query = new URLSearchParams()
   const apiEndpoint = 'https://image.unsetsoft.com'
@@ -62,18 +68,13 @@ const optimizationImageApi = ({ src, props }) => {
   const isLocal = !src.startsWith('http') || !src.startsWith('https')
 
   if (props.width) query.set('width', props.width)
-  if (props.height) query.set('width', props.height)
+  if (props.height) query.set('height', props.height)
   if (props.quality) query.set('quality', props.quality)
 
   const extension = props.extension ? `@${props.extension}` : ''
 
-  const localhost =
-    window.location.origin === 'http://localhost:3000' ||
-    window.location.origin === 'http://localhost:5173' ||
-    window.location.origin === 'http://localhost:4173'
-
   if (isLocal) {
-    if (localhost) {
+    if (isLocalhost()) {
       console.warn(
         'Image optimizations only work with full links and must not contain localhost.',
       )
@@ -104,7 +105,7 @@ const Image = ({ src, ...props }) => {
 
   const ImageProps = {
     src: url,
-    props,
+    ...props,
   }
 
   return createElement('img', ImageProps, null)

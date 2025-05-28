@@ -1,5 +1,19 @@
 # Changelog
 
+### [1.1.17](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.16...v1.1.17) (2025-05-28)
+
+### [1.1.16](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.15...v1.1.16) (2025-05-28)
+
+### [1.1.15](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.14...v1.1.15) (2025-05-28)
+
+### [1.1.14](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.13...v1.1.14) (2025-05-28)
+
+### [1.1.13](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.12...v1.1.13) (2025-05-28)
+
+### [1.1.12](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.11...v1.1.12) (2025-05-28)
+
+### [1.1.11](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.10...v1.1.11) (2025-05-28)
+
 ### [1.1.10](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.9...v1.1.10) (2025-05-28)
 
 ### [1.1.9](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.7-canary.100...v1.1.9) (2025-05-28)
