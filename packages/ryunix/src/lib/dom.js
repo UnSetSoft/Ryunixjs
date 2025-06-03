@@ -62,16 +62,22 @@ const updateDom = (dom, prevProps, nextProps) => {
         }
 
         prevProps['ryunix-class'] &&
-          dom.classList.remove(...prevProps['ryunix-class'].split(/\s+/))
-        dom.classList.add(...nextProps['ryunix-class'].split(/\s+/))
+          dom.classList.remove(
+            ...(prevProps['ryunix-class'].split(/\s+/).filter(Boolean) || []),
+          )
+        dom.classList.add(
+          ...nextProps['ryunix-class'].split(/\s+/).filter(Boolean),
+        )
       } else if (name === OLD_STRINGS.className) {
         if (nextProps.className === '') {
           throw new Error('className cannot be empty.')
         }
 
         prevProps.className &&
-          dom.classList.remove(...prevProps.className.split(/\s+/))
-        dom.classList.add(...nextProps.className.split(/\s+/))
+          dom.classList.remove(
+            ...(prevProps.className.split(/\s+/).filter(Boolean) || []),
+          )
+        dom.classList.add(...nextProps.className.split(/\s+/).filter(Boolean))
       } else {
         dom[name] = nextProps[name]
       }

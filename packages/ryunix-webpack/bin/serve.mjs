@@ -71,17 +71,6 @@ const StartServer = async (cliSettings) => {
     try {
       await server.start() // Iniciar el servidor con el nuevo puerto
 
-      const launchTime = Date.now() - startTime
-      let speedIndicator = ''
-
-      if (launchTime < 500) {
-        speedIndicator = chalk.green(`🚀 ${launchTime}ms`)
-      } else if (launchTime >= 500 && launchTime < 900) {
-        speedIndicator = chalk.yellow(`🐢 ${launchTime}ms`)
-      } else {
-        speedIndicator = chalk.red(`🚨 ${launchTime}ms`)
-      }
-
       logger.info(`\n
         ${chalk.bold(chalk.cyanBright(`<Ryunix/> ${version}`))}
 
@@ -94,7 +83,6 @@ const StartServer = async (cliSettings) => {
           - Environment file: ${
             envPath() ? chalk.green(`loaded`) : chalk.red(`404 Not Found`)
           }
-          - Launched in: ${speedIndicator}
           - Mode: ${
             defaultSettings.webpack.production
               ? chalk.green(`production`)

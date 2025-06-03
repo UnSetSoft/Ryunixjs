@@ -34,7 +34,9 @@ const useReducer = (reducer, initialState, init) => {
   }
 
   const dispatch = (action) => {
-    hook.queue.push(action)
+    hook.queue.push(
+      typeof action === STRINGS.function ? action : (prev) => action,
+    )
 
     vars.wipRoot = {
       dom: vars.currentRoot.dom,
@@ -180,24 +182,11 @@ const useCallback = (callback, deps) => {
   return useMemo(() => callback, deps)
 }
 
-/**
- * The `useQuery` function parses the query parameters from the URL and returns them as an object.
- * @returns An object containing key-value pairs of the query parameters from the URLSearchParams in
- * the current window's URL is being returned.
- */
-const useQuery = () => {
-  const searchParams = new URLSearchParams(window.location.search)
-  const query = {}
-  for (let [key, value] of searchParams.entries()) {
-    query[key] = value
-  }
-  return query
-}
-
-const createContext = (defaultValue) => {
-  const contextId = RYUNIX_TYPES.RYUNIX_CONTEXT
-
-  const Provider = ({ value, children }) => {
+const createContext = (
+  contextId = RYUNIX_TYPES.RYUNIX_CONTEXT,
+  defaultValue = {},
+) => {
+  const Provider = ({ children }) => {
     return Fragment({
       children: children,
     })
@@ -205,10 +194,10 @@ const createContext = (defaultValue) => {
 
   Provider._contextId = contextId
 
-  const useContext = () => {
+  const useContext = (ctxID = RYUNIX_TYPES.RYUNIX_CONTEXT) => {
     let fiber = vars.wipFiber
     while (fiber) {
-      if (fiber.type && fiber.type._contextId === contextId) {
+      if (fiber.type && fiber.type._contextId === ctxID) {
         if (fiber.props && 'value' in fiber.props) {
           return fiber.props.value
         }
@@ -225,175 +214,28 @@ const createContext = (defaultValue) => {
   }
 }
 
-/**
- * `useRouter` is a routing function to manage navigation, nested routes, and route pre-loading.
- *
- * This function handles client-side routing, URL updates, and component rendering based on defined routes. It supports:
- * - Dynamic routes (e.g., "/user/:id").
- * - Optional nested routes with an `subRoutes` property in route objects.
- * - Default pre-loading of all routes except the current active route.
- *
- * @param {Array} routes - An array of route objects, each containing:
- *    - `path` (string): The URL path to match (supports dynamic segments like "/user/:id").
- *    - `component` (function): The component to render when the route matches.
- *    - `subRoutes` (optional array): An optional array of nested route objects, defining sub-routes for this route.
- *    - `NotFound` (optional function): Component to render for unmatched routes (default 404 behavior).
- *
- * @returns {Object} - An object with:
- *    - `Children` (function): Returns the component that matches the current route, passing route parameters and query parameters as props.
- *    - `NavLink` (component): A link component to navigate within the application without refreshing the page.
- *    - `navigate` (function): Allows programmatically navigating to a specific path.
- *
- * @example
- * // Define nested routes
- * const routes = [
- *   {
- *     path: "/",
- *     component: HomePage,
- *     subRoutes: [
- *       {
- *         path: "/settings",
- *         component: SettingsPage,
- *       },
- *     ],
- *   },
- *   {
- *     path: "/user/:id",
- *     component: UserProfile,
- *   },
- *   {
- *     path: "*",
- *     NotFound: NotFoundPage,
- *   },
- * ];
- *
- * // Use the routing function
- * const { Children, NavLink } = useRouter(routes);
- *
- * // Render the matched component
- * const App = () => (
- *   <>
- *     <NavLink to="/">Home</NavLink>
- *     <NavLink to="/settings">Settings</NavLink>
- *     <NavLink to="/user/123">User Profile</NavLink>
- *     <Children />
- *   </>
- * );
- */
-// const useRouter = (routes) => {
-//   const [location, setLocation] = useStore(window.location.pathname)
+const useQuery = () => {
+  const searchParams = new URLSearchParams(window.location.search)
+  const query = {}
+  for (let [key, value] of searchParams.entries()) {
+    query[key] = value
+  }
+  return query
+}
 
-//   const findRoute = (routes, path) => {
-//     const pathname = path.split('?')[0]
+const useHash = () => {
+  const [hash, setHash] = useStore(window.location.hash)
+  useEffect(() => {
+    const onHashChange = () => {
+      setHash(window.location.hash)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+  return hash
+}
 
-//     const notFoundRoute = routes.find((route) => route.NotFound)
-//     const notFound = notFoundRoute
-//       ? { route: { component: notFoundRoute.NotFound }, params: {} }
-//       : { route: { component: null }, params: {} }
-
-//     for (const route of routes) {
-//       if (route.subRoutes) {
-//         const childRoute = findRoute(route.subRoutes, path)
-//         if (childRoute) return childRoute
-//       }
-
-//       if (route.path === '*') {
-//         return notFound
-//       }
-
-//       if (!route.path || typeof route.path !== 'string') {
-//         console.warn('Invalid route detected:', route)
-//         console.info(
-//           "if you are using { NotFound: NotFound } please add { path: '*', NotFound: NotFound }",
-//         )
-//         continue
-//       }
-
-//       const keys = []
-//       const pattern = new RegExp(
-//         `^${route.path.replace(/:\w+/g, (match) => {
-//           keys.push(match.substring(1))
-//           return '([^/]+)'
-//         })}$`,
-//       )
-
-//       const match = pathname.match(pattern)
-//       if (match) {
-//         const params = keys.reduce((acc, key, index) => {
-//           acc[key] = match[index + 1]
-//           return acc
-//         }, {})
-
-//         return { route, params }
-//       }
-//     }
-
-//     return notFound
-//   }
-
-//   const navigate = (path) => {
-//     window.history.pushState({}, '', path)
-
-//     updateRoute(path)
-//   }
-
-//   const updateRoute = (path) => {
-//     const cleanedPath = path.split('?')[0]
-//     setLocation(cleanedPath)
-//   }
-
-//   useEffect(() => {
-//     const onPopState = () => updateRoute(window.location.pathname)
-//     window.addEventListener('popstate', onPopState)
-
-//     return () => window.removeEventListener('popstate', onPopState)
-//   }, [])
-
-//   const currentRouteData = findRoute(routes, location) || {}
-
-//   const Children = () => {
-//     const query = useQuery()
-//     const { route } = currentRouteData
-
-//     if (
-//       !route ||
-//       !route.component ||
-//       typeof route.component !== STRINGS.function
-//     ) {
-//       console.error(
-//         'Component not found for current path or the component is not a valid function:',
-//         currentRouteData,
-//       )
-//       return null
-//     }
-
-//     const WrappedComponent = () =>
-//       createElement(route.component, {
-//         key: location,
-//         params: currentRouteData.params || {},
-//         query,
-//       })
-
-//     return createElement(WrappedComponent)
-//   }
-
-//   const NavLink = ({ to, ...props }) => {
-//     const handleClick = (e) => {
-//       e.preventDefault()
-//       navigate(to)
-//     }
-//     return createElement(
-//       'a',
-//       { href: to, onClick: handleClick, ...props },
-//       props.children,
-//     )
-//   }
-
-//   return { Children, NavLink, navigate }
-// }
-
-// Crear contexto para Router
-const RouterContext = createContext({
+const RouterContext = createContext('ryunix.navigation', {
   location: '/',
   params: {},
   query: {},
@@ -402,7 +244,7 @@ const RouterContext = createContext({
 })
 
 const findRoute = (routes, path) => {
-  const pathname = path.split('?')[0]
+  const pathname = path.split('?')[0].split('#')[0]
 
   const notFoundRoute = routes.find((route) => route.NotFound)
   const notFound = notFoundRoute
@@ -453,17 +295,22 @@ const RouterProvider = ({ routes, children }) => {
   const [location, setLocation] = useStore(window.location.pathname)
 
   useEffect(() => {
-    const onPopState = () => setLocation(window.location.pathname)
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
+    const update = () => setLocation(window.location.pathname)
+
+    window.addEventListener('popstate', update)
+    window.addEventListener('hashchange', update)
+    return () => {
+      window.removeEventListener('popstate', update)
+      window.removeEventListener('hashchange', update)
+    }
   }, [])
 
   const navigate = (path) => {
     window.history.pushState({}, '', path)
-    setLocation(path)
+    setLocation(window.location.pathname)
   }
 
-  const currentRouteData = findRoute(routes, location) || {}
+  const currentRouteData = findRoute(routes, window.location.pathname) || {}
   const query = useQuery()
 
   const contextValue = {
@@ -484,15 +331,28 @@ const RouterProvider = ({ routes, children }) => {
 }
 
 const useRouter = () => {
-  return RouterContext.useContext()
+  return RouterContext.useContext('ryunix.navigation')
 }
 
 const Children = () => {
   const { route, params, query, location } = useRouter()
-
   if (!route || !route.component) return null
+  const hash = useHash()
 
-  return createElement(route.component, { key: location, params, query })
+  useEffect(() => {
+    if (hash) {
+      const id = hash.slice(1)
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    }
+  }, [hash])
+
+  return createElement(route.component, {
+    key: location,
+    params,
+    query,
+    hash,
+  })
 }
 
 // Componente NavLink para navegación interna
@@ -524,4 +384,5 @@ export {
   useRouter,
   Children,
   NavLink,
+  useHash,
 }
