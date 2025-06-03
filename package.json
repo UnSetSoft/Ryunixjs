@@ -24,7 +24,7 @@
     "build": "yarn lint-fix && yarn build:test"
   },
   "dependencies": {
-    "@babel/cli": "7.23.0",
+    "@babel/cli": "7.27.2",
     "@babel/core": "7.23.2",
     "@babel/eslint-parser": "7.25.9",
     "@babel/plugin-proposal-class-properties": "7.18.6",
