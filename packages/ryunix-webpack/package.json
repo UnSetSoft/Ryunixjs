@@ -35,7 +35,7 @@
     "dotenv-webpack": "8.0.1",
     "eslint": "9.5.0",
     "file-loader": "6.2.0",
-    "glob": "10.3.7",
+    "glob": "11.0.2",
     "globals": "15.6.0",
     "html-loader": "4.2.0",
     "html-webpack-plugin": "5.5.3",
