@@ -3,7 +3,7 @@ const { config } = require('./settingfile.cjs')
 
 const defaultSettings = {
   static: {
-    favicon: config?.static?.favicon ? config.static.favicon : true,
+    favicon: config?.static?.favicon ? config.static.favicon : false,
     customTemplate: config?.static?.customTemplate
       ? config.static.customTemplate
       : false,

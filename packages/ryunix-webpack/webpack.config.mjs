@@ -116,7 +116,6 @@ export default {
     buildDependencies: {
       defaultWebpack: ['webpack/lib/'],
       config: [__filename],
-      src: [resolveApp(dir, 'src')],
     },
   },
   infrastructureLogging: {
@@ -204,7 +203,9 @@ export default {
     new HtmlWebpackPlugin({
       pageLang: config.static.seo.pageLang,
       title: config.static.seo.title,
-      favicon: config.static.favicon && join(dir, 'public', 'favicon.png'),
+      favicon: config.static.favicon
+        ? join(dir, 'public', 'favicon.png')
+        : false,
       meta: config.static.seo.meta,
       template: config.static.customTemplate
         ? join(dir, 'public', 'index.html')

@@ -34,7 +34,9 @@ const useReducer = (reducer, initialState, init) => {
   }
 
   const dispatch = (action) => {
-    hook.queue.push(action)
+    hook.queue.push(
+      typeof action === STRINGS.function ? action : (prev) => action,
+    )
 
     vars.wipRoot = {
       dom: vars.currentRoot.dom,
