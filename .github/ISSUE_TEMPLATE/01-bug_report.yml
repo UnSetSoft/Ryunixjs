@@ -1,0 +1,49 @@
+name: Bug Report
+description: 'File a new bug report.'
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > Remember use the last version before publish an issue, if you are using the last version and has some bug use this form.
+
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Provide steps to reproduce the bug
+      value: |
+        1.
+        2.
+        3.
+        4.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Ryunix Version
+      description:
+      placeholder: 'v1.1.19'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: SO
+    attributes:
+      label: In what os are you runing Ryunix?
+      multiple: false
+      options:
+        - Windows
+        - MacOS
+        - Linux
+    validations:
+      required: true
