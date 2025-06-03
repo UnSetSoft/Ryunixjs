@@ -7,8 +7,6 @@
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
-    "cli": "node ./bin/index.mjs",
-    "nightly:release": "npm publish --tag nightly",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish"
   },
