@@ -6,7 +6,7 @@ function App() {
   const [count, setCount] = useStore(0)
 
   const handleButtonClick = () => {
-    setCount((c) => c + 1)
+    setCount(count + 1)
   }
 
   return (

@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite'
+import { ryunixVite } from '@unsetsoft/ryunix-presets/vite'
 
 export default defineConfig({
-  esbuild: {
-    jsxFactory: 'Ryunix.createElement',
-    jsxFragment: 'Ryunix.Fragment',
-  },
+  plugins: [ryunixVite()],
 })
