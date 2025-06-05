@@ -1,0 +1,28 @@
+{
+  "name": "@unsetsoft/ryunix-presets",
+  "description": "Package with presets for different development environments.",
+  "version": "1.0.0",
+  "author": "Neyunse",
+  "type": "module",
+  "repository": "https://github.com/UnSetSoft/Ryunixjs",
+  "license": "MIT",
+  "keywords": [
+    "ryunixjs"
+  ],
+  "files": [
+    "vite/",
+    "rspack/"
+  ],
+  "scripts": {},
+  "dependencies": {},
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "exports": {
+    "./vite": "./vite/index.js",
+    "./rspack": "./rspack/index.js"
+  },
+  "engines": {
+    "node": "^18 || ^22"
+  }
+}
