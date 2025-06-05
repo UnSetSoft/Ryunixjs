@@ -1,10 +1,10 @@
 # Changelog
-### [1.1.20](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.19-canary.35...v1.1.20) (2025-06-05)
 
+### [1.1.20](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.19-canary.35...v1.1.20) (2025-06-05)
 
 ### Bug Fixes
 
-* fixed useEffect hook ([53afcb1](https://github.com/UnSetSoft/Ryunixjs/commit/53afcb14e9576ab0c2596bd93a82c3a654224e53))
+- fixed useEffect hook ([53afcb1](https://github.com/UnSetSoft/Ryunixjs/commit/53afcb14e9576ab0c2596bd93a82c3a654224e53))
 
 ### [1.1.19-canary.35](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.19-canary.34...v1.1.19-canary.35) (2025-06-05)
 
