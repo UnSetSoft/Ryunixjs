@@ -1,5 +1,5 @@
 import { updateDom } from './dom'
-import { cancelEffects, runEffects } from './effects'
+import { cancelEffects, cancelEffectsDeep, runEffects } from './effects'
 import { EFFECT_TAGS, vars } from '../utils/index'
 
 /**
@@ -42,7 +42,7 @@ const commitWork = (fiber) => {
     }
     runEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
-    cancelEffects(fiber)
+    cancelEffectsDeep(fiber)
     commitDeletion(fiber, domParent)
     return
   }
