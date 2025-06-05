@@ -19,13 +19,44 @@ const hasDepsChanged = (prevDeps, nextDeps) =>
  * "cancelEffects" is likely intended
  */
 const cancelEffects = (fiber) => {
-  if (fiber.hooks) {
+  if (fiber.hooks && fiber.hooks.length > 0) {
     fiber.hooks
-      .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.cancel)
+      .filter((hook) => hook.type === RYUNIX_TYPES.RYUNIX_EFFECT && hook.cancel)
       .forEach((effectHook) => {
         effectHook.cancel()
       })
   }
+}
+
+/**
+ * The function `cancelEffectsDeep` recursively cancels effects in a fiber tree by running cleanup
+ * functions for each effect hook.
+ * @param fiber - The `fiber` parameter in the `cancelEffectsDeep` function seems to be an object
+ * representing a fiber node in a data structure. The function recursively traverses the fiber tree to
+ * find hooks with effects and cancels them by calling their `cancel` function if it exists. It also
+ * logs a message
+ * @returns The `cancelEffectsDeep` function does not explicitly return a value. It is a recursive
+ * function that traverses a fiber tree structure and cancels effects for hooks that have a `cancel`
+ * function defined. The function performs cleanup operations by calling the `cancel` function for each
+ * applicable hook.
+ */
+const cancelEffectsDeep = (fiber) => {
+  if (!fiber) return
+
+  if (fiber.hooks && fiber.hooks.length > 0) {
+    fiber.hooks
+      .filter(
+        (hook) =>
+          hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
+          typeof hook.cancel === STRINGS.function,
+      )
+      .forEach((hook) => {
+        hook.cancel()
+      })
+  }
+
+  if (fiber.child) cancelEffectsDeep(fiber.child)
+  if (fiber.sibling) cancelEffectsDeep(fiber.sibling)
 }
 
 /**
@@ -36,18 +67,34 @@ const cancelEffects = (fiber) => {
  * contains information about a component and its children, as
  */
 const runEffects = (fiber) => {
-  if (fiber.hooks) {
-    fiber.hooks
-      .filter((hook) => hook.tag === RYUNIX_TYPES.RYUNIX_EFFECT && hook.effect)
-      .forEach((effectHook) => {
-        effectHook.cancel = effectHook.effect()
-      })
+  if (!fiber.hooks || fiber.hooks.length === 0) return
+
+  for (let i = 0; i < fiber.hooks.length; i++) {
+    const hook = fiber.hooks[i]
+    if (
+      hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
+      typeof hook.effect === STRINGS.function &&
+      hook.effect !== null
+    ) {
+      if (typeof hook.cancel === STRINGS.function) {
+        hook.cancel()
+      }
+
+      const cleanup = hook.effect()
+
+      if (typeof cleanup === 'function') {
+        hook.cancel = cleanup
+      } else {
+        hook.cancel = undefined
+      }
+    }
   }
 }
 
 export {
   runEffects,
   cancelEffects,
+  cancelEffectsDeep,
   isEvent,
   isProperty,
   isNew,

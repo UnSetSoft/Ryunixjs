@@ -2,6 +2,7 @@ import { RYUNIX_TYPES, STRINGS, vars } from '../utils/index'
 import { isEqual } from 'lodash'
 import { createElement, Fragment } from './createElement'
 import { scheduleWork } from './workers'
+import { hasDepsChanged } from './effects'
 
 /**
  * @description The function creates a state.
@@ -16,6 +17,22 @@ const useStore = (initialState, init) => {
   return useReducer(reducer, initialState, init)
 }
 
+/**
+ * The `useReducer` function in JavaScript is used to manage state updates based on actions dispatched
+ * to a reducer function.
+ * @param reducer - The `reducer` parameter in the `useReducer` function is a function that takes the
+ * current state and an action as arguments, and returns the new state based on the action. It is used
+ * to update the state in response to different actions dispatched by the `dispatch` function.
+ * @param initialState - The `initialState` parameter in the `useReducer` function represents the
+ * initial state of the reducer. It is the state that will be used when the reducer is first
+ * initialized or reset. This initial state can be any value or object that the reducer will operate on
+ * and update based on the dispatched actions
+ * @param init - The `init` parameter in the `useReducer` function is an optional function that can be
+ * used to initialize the state. If provided, it will be called with the `initialState` as its argument
+ * and the return value will be used as the initial state value. If `init` is not
+ * @returns The `useReducer` function is returning an array with two elements: the current state and a
+ * dispatch function.
+ */
 const useReducer = (reducer, initialState, init) => {
   const oldHook =
     vars.wipFiber.alternate &&
@@ -23,6 +40,8 @@ const useReducer = (reducer, initialState, init) => {
     vars.wipFiber.alternate.hooks[vars.hookIndex]
 
   const hook = {
+    hookID: vars.hookIndex,
+    type: RYUNIX_TYPES.RYUNIX_STORE,
     state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
     queue: oldHook && Array.isArray(oldHook.queue) ? oldHook.queue.slice() : [],
   }
@@ -74,27 +93,14 @@ const useEffect = (callback, deps) => {
     vars.wipFiber.alternate.hooks &&
     vars.wipFiber.alternate.hooks[vars.hookIndex]
 
+  const hasChanged = hasDepsChanged(oldHook?.deps, deps)
+
   const hook = {
+    hookID: vars.hookIndex,
     type: RYUNIX_TYPES.RYUNIX_EFFECT,
     deps,
-    cleanup: oldHook?.cleanup,
-  }
-
-  const hasChanged = !oldHook || !isEqual(oldHook.deps, deps)
-
-  if (hasChanged) {
-    vars.effects.push(() => {
-      // Llama al cleanup anterior si existe
-      if (typeof hook.cleanup === 'function') {
-        hook.cleanup()
-      }
-
-      // Ejecuta el nuevo efecto y guarda el nuevo cleanup
-      const result = callback()
-      if (typeof result === 'function') {
-        hook.cleanup = result
-      }
-    })
+    effect: hasChanged ? callback : null,
+    cancel: oldHook?.cancel,
   }
 
   vars.wipFiber.hooks[vars.hookIndex] = hook
