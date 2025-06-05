@@ -1,4 +1,0 @@
-import Ryunix from "@unsetsoft/ryunixjs";
-import App from "./src/App";
-
-Ryunix.init(<App />);
