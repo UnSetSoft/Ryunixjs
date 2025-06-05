@@ -4,6 +4,8 @@ import { resolve } from 'path'
 import { promises as fs } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import logger from 'terminal-log'
+import chalk from 'chalk'
 
 const resolveApp = (appDirectory, relativePath) =>
   resolve(appDirectory, relativePath)
@@ -64,10 +66,20 @@ const getPackageVersion = async () => {
   return packageJson
 }
 
-function cleanCacheDir(dirPath) {
-  if (fs.existsSync(dirPath)) {
-    fs.rmSync(dirPath, { recursive: true, force: true })
-    console.log(`[cache] Cleaning completed: ${dirPath}`)
+async function cleanCacheDir(dirPath) {
+  try {
+    await fs.access(dirPath)
+    await fs.rm(dirPath, { recursive: true, force: true })
+    logger.info(
+      `webpack cache cleaned ${chalk.bold(chalk.green('successfully'))}`,
+    )
+  } catch (err) {
+    // Directory does not exist or some error occurred
+    if (err.code === 'ENOENT') {
+      logger.info(`webpack cache cleaned ${chalk.red('failed')}`)
+    } else {
+      throw err // or handle error accordingly
+    }
   }
 }
 

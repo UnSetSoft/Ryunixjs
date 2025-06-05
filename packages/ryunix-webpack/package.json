@@ -1,13 +1,12 @@
 {
   "name": "@unsetsoft/ryunix-webpack",
-  "version": "1.1.19",
+  "version": "1.1.19-canary.35",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
   },
   "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
   "scripts": {
-    "cli": "node ./bin/index.mjs",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish"
   },

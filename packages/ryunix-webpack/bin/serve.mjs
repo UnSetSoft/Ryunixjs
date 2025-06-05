@@ -49,7 +49,7 @@ const StartServer = async (cliSettings) => {
     `${defaultSettings.webpack.output.buildDirectory}/cache`,
   )
 
-  if (process.env.NODE_ENV === 'development') {
+  if (!defaultSettings.webpack.production) {
     cleanCacheDir(cacheDir)
   }
 
@@ -64,6 +64,8 @@ const StartServer = async (cliSettings) => {
   webpackConfig.devServer.port = port
   const devServerOptions = { ...webpackConfig.devServer, ...cliSettings }
   const server = new WebpackDevServer(devServerOptions, compiler)
+
+  const devMode = Boolean(!defaultSettings.webpack.production)
 
   const { version } = await getPackageVersion()
 
@@ -89,10 +91,11 @@ const StartServer = async (cliSettings) => {
               : chalk.yellow(`development`)
           }
         ${
-          defaultSettings.webpack.production !== true &&
-          chalk.yellow(
-            `⚠️ You are in development mode, remember update ryunix.config.js for production!`,
-          )
+          devMode
+            ? chalk.yellow(
+                `⚠️ You are in development mode, remember update ryunix.config.js for production!`,
+              )
+            : '' // prevent false in the terminal
         }
       `)
     } catch (err) {
@@ -100,7 +103,6 @@ const StartServer = async (cliSettings) => {
     }
   }
 
-  const startTime = Date.now()
   await startServer()
 }
 

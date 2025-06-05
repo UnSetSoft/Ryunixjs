@@ -28,6 +28,7 @@ const reconcileChildren = (wipFiber, elements) => {
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
+        hooks: oldFiber.hooks,
       }
     }
     if (element && !sameType) {
