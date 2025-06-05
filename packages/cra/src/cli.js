@@ -38,6 +38,7 @@ create('create-cra', {
       } else if (answers.channel === 'Canary') {
         await installNpmPackage('@unsetsoft/ryunixjs@canary')
       }
+
       await installNpmPackage(
         [
           '@rspack/cli',
@@ -60,17 +61,16 @@ create('create-cra', {
       }
     } else if (template === 'Vite') {
       // Ryunix
-
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
-        await installNpmPackage('vite@latest', true)
       } else if (answers.channel === 'Canary') {
         await installNpmPackage('@unsetsoft/ryunixjs@canary')
-        await installNpmPackage(
-          ['vite@latest', '@unsetsoft/ryunix-presets'],
-          true,
-        )
       }
+
+      await installNpmPackage(
+        ['vite@latest', '@unsetsoft/ryunix-presets'],
+        true,
+      )
     } else {
       throw new Error('Missing template')
     }
