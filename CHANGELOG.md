@@ -1,5 +1,21 @@
 # Changelog
 
+### [1.1.20-canary.6](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.5...v1.1.20-canary.6) (2025-06-06)
+
+### [1.1.20-canary.5](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.4...v1.1.20-canary.5) (2025-06-06)
+
+### [1.1.20-canary.4](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.3...v1.1.20-canary.4) (2025-06-06)
+
+### [1.1.20-canary.3](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.2...v1.1.20-canary.3) (2025-06-06)
+
+### [1.1.20-canary.2](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.1...v1.1.20-canary.2) (2025-06-06)
+
+### [1.1.20-canary.1](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20...v1.1.20-canary.1) (2025-06-06)
+
+### Bug Fixes
+
+- fixed vite install ([099d65e](https://github.com/UnSetSoft/Ryunixjs/commit/099d65e1cddaf8b484ad80a65bfdeba052fb1fd9))
+
 ### [1.1.20](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.19-canary.35...v1.1.20) (2025-06-05)
 
 ### Bug Fixes

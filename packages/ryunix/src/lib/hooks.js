@@ -246,6 +246,7 @@ const RouterContext = createContext('ryunix.navigation', {
   params: {},
   query: {},
   navigate: (path) => {},
+  replace: (path) => {},
   route: null,
 })
 
@@ -290,6 +291,10 @@ const findRoute = (routes, path) => {
         return acc
       }, {})
 
+      if (route?.redirectTo) {
+        return { redirect: route.redirectTo }
+      }
+
       return { route, params }
     }
   }
@@ -309,14 +314,24 @@ const RouterProvider = ({ routes, children }) => {
       window.removeEventListener('popstate', update)
       window.removeEventListener('hashchange', update)
     }
-  }, [])
+  }, [location])
 
   const navigate = (path) => {
     window.history.pushState({}, '', path)
-    setLocation(window.location.pathname)
+    setLocation(path)
   }
 
-  const currentRouteData = findRoute(routes, window.location.pathname) || {}
+  const replace = (path) => {
+    window.history.replaceState({}, '', path)
+    setLocation(path)
+  }
+
+  const currentRouteData = findRoute(routes, location) || {}
+
+  if (currentRouteData?.redirect) {
+    replace(routeData.redirect)
+    return null
+  }
   const query = useQuery()
 
   const contextValue = {
@@ -324,6 +339,7 @@ const RouterProvider = ({ routes, children }) => {
     params: currentRouteData.params || {},
     query,
     navigate,
+    replace,
     route: currentRouteData.route,
   }
 
@@ -361,20 +377,46 @@ const Children = () => {
   })
 }
 
-// Componente NavLink para navegación interna
-const NavLink = ({ to, ...props }) => {
-  const { navigate } = useRouter()
+const NavLink = ({ to, exact = false, ...props }) => {
+  const { location, navigate } = useRouter()
+
+  const isActive = exact ? location === to : location.startsWith(to)
+
+  const resolveClass = (cls) =>
+    typeof cls === 'function' ? cls({ isActive }) : cls || ''
 
   const handleClick = (e) => {
     e.preventDefault()
     navigate(to)
   }
 
+  const classAttrName = props['ryunix-class'] ? 'ryunix-class' : 'className'
+
+  const classAttrValue = resolveClass(props['ryunix-class'] || className)
+
+  const {
+    ['ryunix-class']: _omitRyunix,
+    className: _omitClassName,
+    ...cleanedProps
+  } = props
+
   return createElement(
     'a',
-    { href: to, onClick: handleClick, ...props },
+    {
+      href: to,
+      onClick: handleClick,
+      [classAttrName]: classAttrValue,
+      ...cleanedProps,
+    },
     props.children,
   )
+}
+
+const useIsActive = (path, exact = false) => {
+  const { location } = useRouter()
+  return exact
+    ? location === path
+    : location.startsWith(window.location.pathname)
 }
 
 export {
@@ -391,4 +433,5 @@ export {
   Children,
   NavLink,
   useHash,
+  useIsActive,
 }
