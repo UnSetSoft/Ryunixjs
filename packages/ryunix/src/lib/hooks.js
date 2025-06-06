@@ -329,7 +329,7 @@ const RouterProvider = ({ routes, children }) => {
   const currentRouteData = findRoute(routes, location) || {}
 
   if (currentRouteData?.redirect) {
-    replace(routeData.redirect)
+    replace(currentRouteData.redirect)
     return null
   }
   const query = useQuery()
