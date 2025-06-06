@@ -399,13 +399,7 @@ const NavLink = ({ to, exact = false, ...props }) => {
   )
 }
 
-const useIsActive = (path, exact = false) => {
-  const { location } = useRouter()
-  return exact
-    ? location === path
-    : location.startsWith(window.location.pathname)
-}
-
+ 
 export {
   useStore,
   useEffect,
@@ -420,5 +414,4 @@ export {
   Children,
   NavLink,
   useHash,
-  useIsActive,
 }
