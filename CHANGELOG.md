@@ -1,5 +1,24 @@
 # Changelog
 
+### [1.1.20-canary.14](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.13...v1.1.20-canary.14) (2025-06-06)
+
+### [1.1.20-canary.13](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.12...v1.1.20-canary.13) (2025-06-06)
+
+### [1.1.20-canary.12](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.11...v1.1.20-canary.12) (2025-06-06)
+
+### [1.1.20-canary.11](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.10...v1.1.20-canary.11) (2025-06-06)
+
+### [1.1.20-canary.10](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.9...v1.1.20-canary.10) (2025-06-06)
+
+### [1.1.20-canary.9](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.8...v1.1.20-canary.9) (2025-06-06)
+
+### [1.1.20-canary.8](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.7...v1.1.20-canary.8) (2025-06-06)
+
+### Bug Fixes
+
+- fixed className is not defined ([2718a75](https://github.com/UnSetSoft/Ryunixjs/commit/2718a759fe6e016584127511e9b334f98959b15f))
+- fixed wrong var name ([9baa624](https://github.com/UnSetSoft/Ryunixjs/commit/9baa624a5492e238faa84e755b5db3143bdc6352))
+
 ### [1.1.20-canary.7](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.6...v1.1.20-canary.7) (2025-06-06)
 
 ### [1.1.20-canary.6](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.5...v1.1.20-canary.6) (2025-06-06)
