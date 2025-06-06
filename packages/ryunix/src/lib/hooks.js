@@ -392,7 +392,9 @@ const NavLink = ({ to, exact = false, ...props }) => {
 
   const classAttrName = props['ryunix-class'] ? 'ryunix-class' : 'className'
 
-  const classAttrValue = resolveClass(props['ryunix-class'] || className)
+  const classAttrValue = resolveClass(
+    props['ryunix-class'] || props['className'],
+  )
 
   const {
     ['ryunix-class']: _omitRyunix,
