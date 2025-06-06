@@ -419,9 +419,6 @@ const useIsActive = (path, exact = false) => {
     : location.startsWith(window.location.pathname)
 }
 
-const a = useIsActive('/home')
-const b = useIsActive('/test')
-
 export {
   useStore,
   useEffect,
