@@ -246,7 +246,6 @@ const RouterContext = createContext('ryunix.navigation', {
   params: {},
   query: {},
   navigate: (path) => {},
-  replace: (path) => {},
   route: null,
 })
 
@@ -291,10 +290,6 @@ const findRoute = (routes, path) => {
         return acc
       }, {})
 
-      if (route?.redirectTo) {
-        return { redirect: route.redirectTo }
-      }
-
       return { route, params }
     }
   }
@@ -321,17 +316,8 @@ const RouterProvider = ({ routes, children }) => {
     setLocation(path)
   }
 
-  const replace = (path) => {
-    window.history.replaceState({}, '', path)
-    setLocation(path)
-  }
-
   const currentRouteData = findRoute(routes, location) || {}
 
-  if (currentRouteData?.redirect) {
-    replace(currentRouteData.redirect)
-    return null
-  }
   const query = useQuery()
 
   const contextValue = {
@@ -339,7 +325,6 @@ const RouterProvider = ({ routes, children }) => {
     params: currentRouteData.params || {},
     query,
     navigate,
-    replace,
     route: currentRouteData.route,
   }
 
