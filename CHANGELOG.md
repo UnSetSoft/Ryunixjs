@@ -1,4 +1,5 @@
 # Changelog
+### [1.1.20-canary.9](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.8...v1.1.20-canary.9) (2025-06-06)
 
 ### [1.1.20-canary.8](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.7...v1.1.20-canary.8) (2025-06-06)
 
