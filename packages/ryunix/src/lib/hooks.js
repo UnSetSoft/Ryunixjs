@@ -309,14 +309,15 @@ const RouterProvider = ({ routes, children }) => {
       window.removeEventListener('popstate', update)
       window.removeEventListener('hashchange', update)
     }
-  }, [])
+  }, [location])
 
   const navigate = (path) => {
     window.history.pushState({}, '', path)
-    setLocation(window.location.pathname)
+    setLocation(path)
   }
 
-  const currentRouteData = findRoute(routes, window.location.pathname) || {}
+  const currentRouteData = findRoute(routes, location) || {}
+
   const query = useQuery()
 
   const contextValue = {
@@ -361,18 +362,39 @@ const Children = () => {
   })
 }
 
-// Componente NavLink para navegación interna
-const NavLink = ({ to, ...props }) => {
-  const { navigate } = useRouter()
+const NavLink = ({ to, exact = false, ...props }) => {
+  const { location, navigate } = useRouter()
+
+  const isActive = exact ? location === to : location.startsWith(to)
+
+  const resolveClass = (cls) =>
+    typeof cls === 'function' ? cls({ isActive }) : cls || ''
 
   const handleClick = (e) => {
     e.preventDefault()
     navigate(to)
   }
 
+  const classAttrName = props['ryunix-class'] ? 'ryunix-class' : 'className'
+
+  const classAttrValue = resolveClass(
+    props['ryunix-class'] || props['className'],
+  )
+
+  const {
+    ['ryunix-class']: _omitRyunix,
+    className: _omitClassName,
+    ...cleanedProps
+  } = props
+
   return createElement(
     'a',
-    { href: to, onClick: handleClick, ...props },
+    {
+      href: to,
+      onClick: handleClick,
+      [classAttrName]: classAttrValue,
+      ...cleanedProps,
+    },
     props.children,
   )
 }
