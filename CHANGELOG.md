@@ -1,4 +1,6 @@
 # Changelog
+### [1.1.24](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.23...v1.1.24) (2025-06-11)
+
 ### [1.1.23](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.22...v1.1.23) (2025-06-11)
 
 ### [1.1.22](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.21...v1.1.22) (2025-06-11)
