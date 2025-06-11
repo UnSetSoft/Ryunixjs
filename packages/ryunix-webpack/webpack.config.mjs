@@ -213,6 +213,7 @@ export default {
       info: {
         framework: 'Ryunix',
         version,
+        mode: config.webpack.production ? 'production' : 'dev',
       },
     }),
     config.webpack.production &&

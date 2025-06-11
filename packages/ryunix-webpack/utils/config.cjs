@@ -1,5 +1,7 @@
 'use strict'
-const { config } = require('./settingfile.cjs')
+const { getConfig } = require('./settingfile.cjs')
+
+const config = getConfig()
 
 const defaultSettings = {
   static: {
@@ -36,7 +38,7 @@ const defaultSettings = {
   },
 
   webpack: {
-    production: config?.webpack?.production ? config.webpack.production : false,
+    production: config?.webpack?.production ?? false,
     root: config?.webpack?.root ? config.webpack.root : 'src',
     output: {
       buildDirectory: config?.webpack?.output?.buildDirectory
