@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "1.1.37-canary.7",
+  "version": "1.1.37-canary.8",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -40,6 +40,7 @@
     "command-exists-promise": "2.0.2",
     "copy-webpack-plugin": "13.0.0",
     "create-create-app": "7.3.0",
+    "critters-webpack-plugin": "3.0.2",
     "css-loader": "6.8.1",
     "css-minimizer-webpack-plugin": "7.0.0",
     "dotenv-webpack": "8.0.1",
@@ -50,7 +51,7 @@
     "glob": "10.3.7",
     "globals": "15.6.0",
     "html-loader": "4.2.0",
-    "html-webpack-plugin": "5.5.3",
+    "html-webpack-plugin": "4.5.2",
     "image-webpack-loader": "8.0.1",
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.9.1",
