@@ -1,5 +1,7 @@
 'use strict'
-const { config } = require('./settingfile.cjs')
+const { getConfig } = require('./settingfile.cjs')
+
+const config = getConfig()
 
 const defaultSettings = {
   static: {
@@ -14,11 +16,7 @@ const defaultSettings = {
       title: config?.static?.seo?.title
         ? config.static.seo.title
         : 'Ryunix App',
-      meta: config?.static?.seo?.meta
-        ? config.static.seo.meta
-        : {
-            description: 'Web site created using @unsetsoft/cra',
-          },
+      meta: config?.static?.seo?.meta ? config.static.seo.meta : {},
     },
   },
 
@@ -36,7 +34,7 @@ const defaultSettings = {
   },
 
   webpack: {
-    production: config?.webpack?.production ? config.webpack.production : false,
+    production: config?.webpack?.production ?? false,
     root: config?.webpack?.root ? config.webpack.root : 'src',
     output: {
       buildDirectory: config?.webpack?.output?.buildDirectory
@@ -58,7 +56,7 @@ const defaultSettings = {
     plugins: config?.webpack?.plugins ? config.webpack.plugins : [],
     devServer: {
       port: config?.webpack?.server?.port ? config.webpack.server.port : 3000,
-      proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : {},
+      proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : [],
       allowedHosts: config?.webpack?.server?.allowedHosts
         ? config.webpack.server.allowedHosts
         : 'auto',

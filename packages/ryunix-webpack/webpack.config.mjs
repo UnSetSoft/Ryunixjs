@@ -6,6 +6,7 @@ import webpack from 'webpack'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
+
 import {
   getPackageManager,
   ENV_HASH,
@@ -52,7 +53,7 @@ export default {
   },
   context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
-  devtool: config.webpack.production ? 'cheap-module-source-map' : false,
+  devtool: config.webpack.production ? 'source-map' : false,
   output: {
     // path: .ryunix
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
@@ -132,7 +133,18 @@ export default {
           {
             loader: 'babel-loader',
             options: {
-              presets: ['@babel/preset-env', '@babel/preset-react'],
+              presets: [
+                [
+                  '@babel/preset-env',
+                  {
+                    targets: 'defaults and not IE 11',
+                    useBuiltIns: false,
+                    modules: false,
+                    bugfixes: true,
+                  },
+                ],
+                '@babel/preset-react',
+              ],
               cacheDirectory: resolveApp(
                 dir,
                 `${config.webpack.output.buildDirectory}/cache/babel`,
@@ -213,6 +225,7 @@ export default {
       info: {
         framework: 'Ryunix',
         version,
+        mode: config.webpack.production ? 'production' : 'dev',
       },
     }),
     config.webpack.production &&

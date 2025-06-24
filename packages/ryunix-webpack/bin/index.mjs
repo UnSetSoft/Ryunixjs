@@ -40,7 +40,16 @@ const build = {
         return
       }
 
+      const buildTimeMs = stats.endTime - stats.startTime
+
+      const minutes = Math.floor(buildTimeMs / 60000)
+      const seconds = ((buildTimeMs % 60000) / 1000).toFixed(1)
+
+      const formattedTime =
+        minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
+
       logger.info(chalk.green('Compilation successful! 🎉'))
+      logger.info(`Done in ${formattedTime}`)
 
       compiler.close((closeErr) => {
         if (closeErr) {
