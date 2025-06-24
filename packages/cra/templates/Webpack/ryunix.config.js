@@ -5,7 +5,7 @@ const RyunixSettings = {
   static: {
     favicon: true, // if is false the favicon is not mandatory
     seo: {
-      title: 'Ryunix App',
+      title: 'Ryunix App', // include a default title for the site
       meta: {
         description: 'Web site created using @unsetsoft/cra',
       },

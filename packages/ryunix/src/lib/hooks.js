@@ -399,6 +399,77 @@ const NavLink = ({ to, exact = false, ...props }) => {
   )
 }
 
+/**
+ * useMetadata: Hook to dynamically manage SEO metadata in the <head>.
+ * Supports title with template, description, robots, robots, canonical, OpenGraph, Twitter, and any standard meta.
+ * @param {Object} tags - Object with metatags to insert/update.
+ * @param {Object} options - Optional. Allows to define template and default for the title.
+
+ */
+
+const useMetadata = (tags = {}, options = {}) => {
+  useEffect(() => {
+    if (typeof document === 'undefined') return // SSR safe
+
+    let finalTitle = ''
+    let template = undefined
+    let defaultTitle = 'Ryunix App'
+    if (options.title && typeof options.title === 'object') {
+      template = options.title.template
+      if (typeof options.title.prefix === 'string') {
+        defaultTitle = options.title.prefix
+      }
+    }
+
+    // pageTitle tiene prioridad sobre title
+    let pageTitle = tags.pageTitle || tags.title
+
+    if (typeof pageTitle === 'string') {
+      if (pageTitle.trim() === '') {
+        finalTitle = defaultTitle
+      } else if (template && template.includes('%s')) {
+        finalTitle = template.replace('%s', pageTitle)
+      } else {
+        finalTitle = pageTitle
+      }
+    } else if (typeof pageTitle === 'object' && pageTitle !== null) {
+      finalTitle = defaultTitle
+    } else if (!pageTitle) {
+      finalTitle = defaultTitle
+    }
+    document.title = finalTitle
+    // Canonical
+    if (tags.canonical) {
+      let link = document.querySelector('link[rel="canonical"]')
+      if (!link) {
+        link = document.createElement('link')
+        link.setAttribute('rel', 'canonical')
+        document.head.appendChild(link)
+      }
+      link.setAttribute('href', tags.canonical)
+    }
+    // Meta tags
+    Object.entries(tags).forEach(([key, value]) => {
+      if (key === 'title' || key === 'pageTitle' || key === 'canonical') return
+      let selector = `meta[name='${key}']`
+      if (key.startsWith('og:') || key.startsWith('twitter:')) {
+        selector = `meta[property='${key}']`
+      }
+      let meta = document.head.querySelector(selector)
+      if (!meta) {
+        meta = document.createElement('meta')
+        if (key.startsWith('og:') || key.startsWith('twitter:')) {
+          meta.setAttribute('property', key)
+        } else {
+          meta.setAttribute('name', key)
+        }
+        document.head.appendChild(meta)
+      }
+      meta.setAttribute('content', value)
+    })
+  }, [JSON.stringify(tags), JSON.stringify(options)])
+}
+
 export {
   useStore,
   useEffect,
@@ -413,4 +484,6 @@ export {
   Children,
   NavLink,
   useHash,
+  //seo
+  useMetadata,
 }
