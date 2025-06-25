@@ -1,4 +1,14 @@
 # Changelog
+## [1.2.0-canary.0](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.37-canary.10...v1.2.0-canary.0) (2025-06-25)
+
+
+### Features
+
+* update changelog and package versions, improve configuration and add hook useMetadata for SEO ([fac9daa](https://github.com/UnSetSoft/Ryunixjs/commit/fac9daa1fda2fbd0db7f1982743a8154d9db3f10))
+
+### [1.1.21](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.20-canary.14...v1.1.21) (2025-06-11)
+
+### [1.1.20](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.19-canary.35...v1.1.20) (2025-06-05)
 
 ### [1.1.38](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.37-canary.10...v1.1.38) (2025-06-24)
 
