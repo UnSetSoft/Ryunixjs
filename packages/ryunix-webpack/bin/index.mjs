@@ -35,12 +35,14 @@ const build = {
       return
     }
 
-    await cleanBuildDirectory(
-      resolveApp(
-        process.cwd(),
-        `${defaultSettings.webpack.output.buildDirectory}/static`,
-      ),
-    )
+    if (defaultSettings.experimental.ssg.prerender.length > 0) {
+      await cleanBuildDirectory(
+        resolveApp(
+          process.cwd(),
+          `${defaultSettings.webpack.output.buildDirectory}/static`,
+        ),
+      )
+    }
 
     compiler.run(async (err, stats) => {
       if (err || stats.hasErrors()) {
