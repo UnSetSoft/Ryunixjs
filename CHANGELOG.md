@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.2.0-canary.27](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.26...v1.2.0-canary.27) (2025-06-25)
+
+## [1.2.0-canary.26](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.25...v1.2.0-canary.26) (2025-06-25)
+
+## [1.2.0-canary.25](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.24...v1.2.0-canary.25) (2025-06-25)
+
+## [1.2.0-canary.24](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.23...v1.2.0-canary.24) (2025-06-25)
+
+## [1.2.0-canary.23](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.22...v1.2.0-canary.23) (2025-06-25)
+
+## [1.2.0-canary.22](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.21...v1.2.0-canary.22) (2025-06-25)
+
+## [1.2.0-canary.21](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.20...v1.2.0-canary.21) (2025-06-25)
+
+## [1.2.0-canary.20](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.19...v1.2.0-canary.20) (2025-06-25)
+
+## [1.2.0-canary.19](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.18...v1.2.0-canary.19) (2025-06-25)
+
+## [1.2.0-canary.18](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.17...v1.2.0-canary.18) (2025-06-25)
+
+## [1.2.0-canary.17](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.16...v1.2.0-canary.17) (2025-06-25)
+
+## [1.2.0-canary.16](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.15...v1.2.0-canary.16) (2025-06-25)
+
+## [1.2.0-canary.15](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.14...v1.2.0-canary.15) (2025-06-25)
+
+## [1.2.0-canary.14](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.13...v1.2.0-canary.14) (2025-06-25)
+
+## [1.2.0-canary.13](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.12...v1.2.0-canary.13) (2025-06-25)
+
+## [1.2.0-canary.12](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.11...v1.2.0-canary.12) (2025-06-25)
+
+## [1.2.0-canary.11](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.10...v1.2.0-canary.11) (2025-06-25)
+
+## [1.2.0-canary.10](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.9...v1.2.0-canary.10) (2025-06-25)
+
+## [1.2.0-canary.9](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.8...v1.2.0-canary.9) (2025-06-25)
+
+## [1.2.0-canary.8](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.7...v1.2.0-canary.8) (2025-06-25)
+
+## [1.2.0-canary.7](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.6...v1.2.0-canary.7) (2025-06-25)
+
+## [1.2.0-canary.6](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.5...v1.2.0-canary.6) (2025-06-25)
+
+## [1.2.0-canary.5](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.4...v1.2.0-canary.5) (2025-06-25)
+
+## [1.2.0-canary.4](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.3...v1.2.0-canary.4) (2025-06-25)
+
+## [1.2.0-canary.3](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.2...v1.2.0-canary.3) (2025-06-25)
+
 ## [1.2.0-canary.2](https://github.com/UnSetSoft/Ryunixjs/compare/v1.1.37-canary.10...v1.2.0-canary.2) (2025-06-25)
 
 ### Features

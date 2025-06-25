@@ -62,7 +62,7 @@ export default {
     assetModuleFilename: './assets/media/[name].[hash][ext]',
     filename: './assets/js/[name].[fullhash:8].bundle.js',
     devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
-    clean: true,
+    clean: config.experimental.ssg.prerender.length > 0 ? false : true,
   },
   target: config.webpack.target,
   devServer: {

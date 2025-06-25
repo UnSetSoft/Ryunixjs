@@ -4,6 +4,13 @@ const { getConfig } = require('./settingfile.cjs')
 const config = getConfig()
 
 const defaultSettings = {
+  experimental: {
+    ssg: {
+      prerender: config?.experimental?.ssg?.prerender
+        ? config.experimental.ssg.prerender
+        : [],
+    },
+  },
   static: {
     favicon: config?.static?.favicon ? config.static.favicon : false,
     customTemplate: config?.static?.customTemplate
