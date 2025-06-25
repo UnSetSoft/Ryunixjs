@@ -6,6 +6,8 @@ import { compiler } from './compiler.mjs'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import defaultSettings from '../utils/config.cjs'
+import Prerender from './prerender.mjs'
+import { cleanBuildDirectory, resolveApp } from '../utils/index.mjs'
 
 const serv = {
   command: 'server',
@@ -33,7 +35,14 @@ const build = {
       return
     }
 
-    compiler.run((err, stats) => {
+    await cleanBuildDirectory(
+      resolveApp(
+        process.cwd(),
+        `${defaultSettings.webpack.output.buildDirectory}/static`,
+      ),
+    )
+
+    compiler.run(async (err, stats) => {
       if (err || stats.hasErrors()) {
         logger.error(chalk.red('Error during compilation:'))
         logger.error(err || stats.toString('errors-only'))
@@ -47,6 +56,10 @@ const build = {
 
       const formattedTime =
         minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
+
+      if (defaultSettings.experimental.ssg.prerender.length > 0) {
+        await Prerender()
+      }
 
       logger.info(chalk.green('Compilation successful! 🎉'))
       logger.info(`Done in ${formattedTime}`)

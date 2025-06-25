@@ -83,6 +83,23 @@ async function cleanCacheDir(dirPath) {
   }
 }
 
+async function cleanBuildDirectory(dirPath) {
+  try {
+    await fs.access(dirPath)
+    await fs.rm(dirPath, { recursive: true, force: true })
+    logger.info(
+      `static folder cleaned ${chalk.bold(chalk.green('successfully'))}`,
+    )
+  } catch (err) {
+    // Directory does not exist or some error occurred
+    if (err.code === 'ENOENT') {
+      logger.info(`static folder cleaned ${chalk.red('failed')}`)
+    } else {
+      throw err // or handle error accordingly
+    }
+  }
+}
+
 export {
   getPackageManager,
   ENV_HASH,
@@ -91,4 +108,5 @@ export {
   RYUNIX_APP,
   getPackageVersion,
   cleanCacheDir,
+  cleanBuildDirectory,
 }
