@@ -78,16 +78,18 @@ const useReducer = (reducer, initialState, init) => {
 }
 
 /**
- * This is a function that creates a hook for managing side effects in Ryunix components.
- * @param effect - The effect function that will be executed after the component has rendered or when
- * the dependencies have changed. It can perform side effects such as fetching data, updating the DOM,
- * or subscribing to events.
- * @param deps - An array of dependencies that the effect depends on. If any of the dependencies change
- * between renders, the effect will be re-run. If the array is empty, the effect will only run once on
- * mount and never again.
+ * useEffect seguro para SSR/SSG: no ejecuta efectos en el servidor.
+ * @param effect - Función de efecto.
+ * @param deps - Dependencias.
  */
 
 const useEffect = (callback, deps) => {
+  // No ejecutar efectos en SSR/SSG
+  if (typeof window === 'undefined') {
+    vars.hookIndex++
+    return
+  }
+
   const oldHook =
     vars.wipFiber.alternate &&
     vars.wipFiber.alternate.hooks &&
@@ -220,7 +222,9 @@ const createContext = (
   }
 }
 
+// Proteger hooks que usan window/document
 const useQuery = () => {
+  if (typeof window === 'undefined') return {}
   const searchParams = new URLSearchParams(window.location.search)
   const query = {}
   for (let [key, value] of searchParams.entries()) {
@@ -230,6 +234,7 @@ const useQuery = () => {
 }
 
 const useHash = () => {
+  if (typeof window === 'undefined') return ''
   const [hash, setHash] = useStore(window.location.hash)
   useEffect(() => {
     const onHashChange = () => {
@@ -297,31 +302,46 @@ const findRoute = (routes, path) => {
   return notFound
 }
 
-const RouterProvider = ({ routes, children }) => {
-  const [location, setLocation] = useStore(window.location.pathname)
+/**
+ * RouterProvider universal: acepta contexto externo (SSR/SSG) o usa window.location (SPA).
+ * @param {Object} props - { routes, children, ssrContext }
+ * @example
+ *   // SSR/SSG:
+ *   <RouterProvider routes={routes} ssrContext={{ location: '/about', query: { q: 'x' } }}>
+ *     ...
+ *   </RouterProvider>
+ */
+const RouterProvider = ({ routes, children, ssrContext }) => {
+  // Si hay contexto externo (SSR/SSG), úsalo
+  const isSSR = typeof window === 'undefined' || !!ssrContext
+  const location = isSSR
+    ? (ssrContext && ssrContext.location) || '/'
+    : window.location.pathname
+  const [loc, setLoc] = useStore(location)
 
+  // SPA: escucha cambios de ruta
   useEffect(() => {
-    const update = () => setLocation(window.location.pathname)
-
+    if (isSSR) return
+    const update = () => setLoc(window.location.pathname)
     window.addEventListener('popstate', update)
     window.addEventListener('hashchange', update)
     return () => {
       window.removeEventListener('popstate', update)
       window.removeEventListener('hashchange', update)
     }
-  }, [location])
+  }, [loc])
 
   const navigate = (path) => {
+    if (isSSR) return
     window.history.pushState({}, '', path)
-    setLocation(path)
+    setLoc(path)
   }
 
-  const currentRouteData = findRoute(routes, location) || {}
-
-  const query = useQuery()
+  const currentRouteData = findRoute(routes, loc) || {}
+  const query = isSSR ? (ssrContext && ssrContext.query) || {} : useQuery()
 
   const contextValue = {
-    location,
+    location: loc,
     params: currentRouteData.params || {},
     query,
     navigate,
@@ -331,12 +351,16 @@ const RouterProvider = ({ routes, children }) => {
   return createElement(
     RouterContext.Provider,
     { value: contextValue },
-    Fragment({
-      children: children,
-    }),
+    Fragment({ children }),
   )
 }
 
+/**
+ * Universal useRouter: obtiene el contexto de ruta, compatible con SSR/SSG y SPA.
+ * @returns {Object} { location, params, query, navigate, route }
+ * @example
+ *   const { location, params, query } = useRouter();
+ */
 const useRouter = () => {
   return RouterContext.useContext('ryunix.navigation')
 }
@@ -400,17 +424,31 @@ const NavLink = ({ to, exact = false, ...props }) => {
 }
 
 /**
- * useMetadata: Hook to dynamically manage SEO metadata in the <head>.
- * Supports title with template, description, robots, robots, canonical, OpenGraph, Twitter, and any standard meta.
- * @param {Object} tags - Object with metatags to insert/update.
- * @param {Object} options - Optional. Allows to define template and default for the title.
-
+ * useMetadata: Hook para gestionar dinámicamente metadatos SEO y recursos en <head>.
+ * Ahora soporta title, meta, link, script, style y bloques personalizados en SSR/SSG.
+ *
+ * @param {Object} tags - Metadatos y recursos a insertar/actualizar.
+ *   Soporta: title, canonical, meta, og:*, twitter:*, script, style, custom.
+ *   - script/style/custom pueden ser string o array de strings (contenido o etiquetas completas).
+ * @param {Object} options - Opcional. Permite definir template y default para el título.
+ *
+ * Ejemplo avanzado SSR/SSG:
+ *   useMetadata({
+ *     title: 'Mi página',
+ *     description: 'Desc',
+ *     script: [
+ *       '<script src="/analytics.js"></script>',
+ *       '<script>console.log("hi")</script>'
+ *     ],
+ *     style: '<style>body{background:#000}</style>',
+ *     custom: '<!-- Bloque personalizado -->'
+ *   })
  */
-
 const useMetadata = (tags = {}, options = {}) => {
-  useEffect(() => {
-    if (typeof document === 'undefined') return // SSR safe
-
+  // SSR/SSG: collect metadata in global context if available
+  const ssrContext =
+    typeof globalThis !== 'undefined' && globalThis.__RYUNIX_SSR_CONTEXT__
+  if (ssrContext) {
     let finalTitle = ''
     let template = undefined
     let defaultTitle = 'Ryunix App'
@@ -420,10 +458,69 @@ const useMetadata = (tags = {}, options = {}) => {
         defaultTitle = options.title.prefix
       }
     }
-
-    // pageTitle tiene prioridad sobre title
     let pageTitle = tags.pageTitle || tags.title
-
+    if (typeof pageTitle === 'string') {
+      if (pageTitle.trim() === '') {
+        finalTitle = defaultTitle
+      } else if (template && template.includes('%s')) {
+        finalTitle = template.replace('%s', pageTitle)
+      } else {
+        finalTitle = pageTitle
+      }
+    } else if (typeof pageTitle === 'object' && pageTitle !== null) {
+      finalTitle = defaultTitle
+    } else if (!pageTitle) {
+      finalTitle = defaultTitle
+    }
+    if (finalTitle) {
+      ssrContext.head.push(`<title>${finalTitle}</title>`)
+    }
+    if (tags.canonical) {
+      ssrContext.head.push(`<link rel="canonical" href="${tags.canonical}" />`)
+    }
+    Object.entries(tags).forEach(([key, value]) => {
+      if (key === 'title' || key === 'pageTitle' || key === 'canonical') return
+      if (key.startsWith('og:') || key.startsWith('twitter:')) {
+        ssrContext.head.push(`<meta property="${key}" content="${value}" />`)
+      } else {
+        ssrContext.head.push(`<meta name="${key}" content="${value}" />`)
+      }
+    })
+    // Soporte para script/style/custom
+    if (tags.script) {
+      ;(Array.isArray(tags.script) ? tags.script : [tags.script]).forEach(
+        (s) => {
+          ssrContext.head.push(s)
+        },
+      )
+    }
+    if (tags.style) {
+      ;(Array.isArray(tags.style) ? tags.style : [tags.style]).forEach((s) => {
+        ssrContext.head.push(s)
+      })
+    }
+    if (tags.custom) {
+      ;(Array.isArray(tags.custom) ? tags.custom : [tags.custom]).forEach(
+        (c) => {
+          ssrContext.head.push(c)
+        },
+      )
+    }
+    return
+  }
+  // SPA: fallback to DOM logic
+  useEffect(() => {
+    if (typeof document === 'undefined') return // SSR safe
+    let finalTitle = ''
+    let template = undefined
+    let defaultTitle = 'Ryunix App'
+    if (options.title && typeof options.title === 'object') {
+      template = options.title.template
+      if (typeof options.title.prefix === 'string') {
+        defaultTitle = options.title.prefix
+      }
+    }
+    let pageTitle = tags.pageTitle || tags.title
     if (typeof pageTitle === 'string') {
       if (pageTitle.trim() === '') {
         finalTitle = defaultTitle
@@ -438,7 +535,6 @@ const useMetadata = (tags = {}, options = {}) => {
       finalTitle = defaultTitle
     }
     document.title = finalTitle
-    // Canonical
     if (tags.canonical) {
       let link = document.querySelector('link[rel="canonical"]')
       if (!link) {
@@ -448,7 +544,6 @@ const useMetadata = (tags = {}, options = {}) => {
       }
       link.setAttribute('href', tags.canonical)
     }
-    // Meta tags
     Object.entries(tags).forEach(([key, value]) => {
       if (key === 'title' || key === 'pageTitle' || key === 'canonical') return
       let selector = `meta[name='${key}']`
@@ -469,6 +564,65 @@ const useMetadata = (tags = {}, options = {}) => {
     })
   }, [JSON.stringify(tags), JSON.stringify(options)])
 }
+
+/**
+ * =============================
+ * Ejemplos universales RyunixJS
+ * =============================
+ *
+ * // SPA
+ * import { render, init, RouterProvider, useRouter } from 'ryunix';
+ * init(
+ *   <RouterProvider routes={routes}>
+ *     <App />
+ *   </RouterProvider>
+ * );
+ *
+ * // SSR
+ * import { renderToString, RouterProvider } from 'ryunix';
+ * const { html, head, data } = await renderToString(
+ *   <RouterProvider routes={routes} ssrContext={{ location: '/about', query: { q: 'x' } }}>
+ *     <App />
+ *   </RouterProvider>
+ * );
+ * // Enviar html y head al cliente
+ *
+ * // SSG
+ * import { renderToString, RouterProvider } from 'ryunix';
+ * const { html, head, data } = await renderToString(
+ *   <RouterProvider routes={routes} ssrContext={{ location: '/blog', query: {} }}>
+ *     <App />
+ *   </RouterProvider>
+ * );
+ * // Guardar html y head como archivos estáticos
+ *
+ * // Hidratación en cliente
+ * import { hydrate, RouterProvider } from 'ryunix';
+ * hydrate(
+ *   <RouterProvider routes={routes}>
+ *     <App />
+ *   </RouterProvider>,
+ *   '__ryunix'
+ * );
+ *
+ * // Metadatos avanzados
+ * useMetadata({
+ *   title: 'Mi página',
+ *   description: 'Desc',
+ *   script: '<script src="/analytics.js"></script>',
+ *   style: '<style>body{background:#000}</style>',
+ *   custom: '<!-- Bloque personalizado -->'
+ * });
+ *
+ * // Obtención de datos universal
+ * import { withSSRData, withSSGData } from 'ryunix';
+ * export default withSSRData(App, async (ctx) => ({ user: await fetchUser(ctx.route) }))
+ * export default withSSGData(App, async (ctx) => ({ posts: await fetchPosts() }))
+ *
+ * // Enrutamiento universal en componentes
+ * import { useRouter } from 'ryunix';
+ * const { location, params, query } = useRouter();
+ */
 
 export {
   useStore,
