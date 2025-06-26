@@ -1,10 +1,11 @@
 # Changelog
-## [1.2.0-canary.28](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.27...v1.2.0-canary.28) (2025-06-26)
+## [1.2.0-canary.29](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.28...v1.2.0-canary.29) (2025-06-26)
 
+## [1.2.0-canary.28](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.27...v1.2.0-canary.28) (2025-06-26)
 
 ### Bug Fixes
 
-* Upgrades version to 1.2.0-canary.27 and improves the cleanup of the build directory based on the prerender configuration. ([fbbcc92](https://github.com/UnSetSoft/Ryunixjs/commit/fbbcc9222cb3b86a38a79b4df3fdf2fb3b6370f9))
+- Upgrades version to 1.2.0-canary.27 and improves the cleanup of the build directory based on the prerender configuration. ([fbbcc92](https://github.com/UnSetSoft/Ryunixjs/commit/fbbcc9222cb3b86a38a79b4df3fdf2fb3b6370f9))
 
 ## [1.2.0-canary.27](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.26...v1.2.0-canary.27) (2025-06-25)
 
