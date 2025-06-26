@@ -6,6 +6,12 @@ const config = getConfig()
 const defaultSettings = {
   experimental: {
     ssg: {
+      baseURL: config?.experimental?.ssg?.baseURL
+        ? config.experimental.ssg.baseURL
+        : false,
+      sitemap: config?.experimental?.ssg?.sitemap
+        ? config.experimental.ssg.sitemap
+        : false,
       prerender: config?.experimental?.ssg?.prerender
         ? config.experimental.ssg.prerender
         : [],

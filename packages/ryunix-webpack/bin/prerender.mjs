@@ -12,6 +12,33 @@ import path from 'path'
 const buildDirectory = resolveApp(process.cwd(), '.ryunix/static')
 const indexFile = path.join(buildDirectory, 'index.html')
 
+const siteMap = async (routes) => {
+  if (!defaultSettings.experimental.ssg.baseURL) {
+    console.error(
+      '❌ Base URL is not defined in the configuration file. Please set `experimental.ssg.baseURL`.',
+    )
+    process.exit(1)
+  }
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${routes
+  .map((route) => {
+    const url = `${defaultSettings.experimental.ssg.baseURL}${route.path === '/' ? '' : route.path}`
+    return `<url><loc>${url}</loc></url>`
+  })
+  .join('\n')}
+</urlset>`
+
+  await fs.writeFileSync(
+    path.resolve(buildDirectory, 'sitemap.xml'),
+    sitemap,
+    'utf-8',
+  )
+
+  console.log('✅ Sitemap created')
+}
+
 const Prerender = async () => {
   if (!configFileExist()) {
     console.error('❌ No configuration file found.')
@@ -33,11 +60,15 @@ const Prerender = async () => {
     // Helper to add or replace metatag
     function upsertMetaTag(html, name, value) {
       if (value === undefined || value === null) return html
+
+      const isProperty = name.startsWith('og:') || name.startsWith('twitter:')
+      const attr = isProperty ? 'property' : 'name'
       const regex = new RegExp(
-        `<meta name=["']${name}["'] content=".*?"\\s*\/?>`,
+        `<meta ${attr}=["']${name}["'] content=".*?"\\s*\/?>`,
         'i',
       )
-      const tag = `<meta name="${name}" content="${value}">`
+      const tag = `<meta ${attr}="${name}" content="${value}">`
+
       if (regex.test(html)) {
         return html.replace(regex, tag)
       } else {
@@ -77,6 +108,9 @@ const Prerender = async () => {
 
     await fs.writeFileSync(path.join(outputDir, 'index.html'), html)
     console.log(`✅ Prerendered ${route.path}`)
+  }
+  if (defaultSettings.experimental.ssg.sitemap) {
+    await siteMap(defaultSettings.experimental.ssg.prerender)
   }
 }
 
