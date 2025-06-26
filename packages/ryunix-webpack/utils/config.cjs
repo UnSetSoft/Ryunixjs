@@ -12,6 +12,20 @@ const defaultSettings = {
       sitemap: config?.experimental?.ssg?.sitemap
         ? config.experimental.ssg.sitemap
         : false,
+      // global settings for sitemap
+      sitemap_settings: config?.experimental?.ssg?.sitemap_settings
+        ? {
+            changefreq: config?.experimental?.ssg?.sitemap_settings?.changefreq
+              ? config.experimental.ssg.sitemap_settings.changefreq
+              : 'weekly',
+            priority: config?.experimental?.ssg?.sitemap_settings?.priority
+              ? config.experimental.ssg.sitemap_settings.priority
+              : '0.7',
+          }
+        : {
+            changefreq: 'weekly',
+            priority: '0.7',
+          },
       prerender: config?.experimental?.ssg?.prerender
         ? config.experimental.ssg.prerender
         : [],

@@ -25,7 +25,21 @@ const siteMap = async (routes) => {
 ${routes
   .map((route) => {
     const url = `${defaultSettings.experimental.ssg.baseURL}${route.path === '/' ? '' : route.path}`
-    return `<url><loc>${url}</loc></url>`
+    const meta = route.meta || {}
+    const lastmod = meta.lastmod || new Date().toISOString().split('T')[0]
+    const changefreq =
+      meta.changefreq ||
+      defaultSettings.experimental.ssg.sitemap_settings.changefreq
+    const priority =
+      meta.priority ||
+      defaultSettings.experimental.ssg.sitemap_settings.priority
+
+    return `<url>
+  <loc>${url}</loc>
+  <lastmod>${lastmod}</lastmod>
+  <changefreq>${changefreq}</changefreq>
+  <priority>${priority}</priority>
+</url>`
   })
   .join('\n')}
 </urlset>`
