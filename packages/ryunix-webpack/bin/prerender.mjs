@@ -13,9 +13,9 @@ const buildDirectory = resolveApp(process.cwd(), '.ryunix/static')
 const indexFile = path.join(buildDirectory, 'index.html')
 
 const siteMap = async (routes) => {
-  if (!defaultSettings.experimental.ssg.baseURL) {
+  if (!defaultSettings.experimental.ssg.sitemap.baseURL) {
     console.error(
-      '❌ Base URL is not defined in the configuration file. Please set `experimental.ssg.baseURL`.',
+      '❌ Base URL is not defined in the configuration file. Please set `experimental.ssg.sitemap.baseURL`.',
     )
     process.exit(1)
   }
@@ -24,15 +24,20 @@ const siteMap = async (routes) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${routes
   .map((route) => {
-    const url = `${defaultSettings.experimental.ssg.baseURL}${route.path === '/' ? '' : route.path}`
+    const url = `${defaultSettings.experimental.ssg.sitemap.baseURL}${route.path === '/' ? '' : route.path}`
     const meta = route.meta || {}
+    const sitemap_settings = route.sitemap || {}
     const lastmod = meta.lastmod || new Date().toISOString().split('T')[0]
+
+    // sitemap settings
     const changefreq =
-      meta.changefreq ||
-      defaultSettings.experimental.ssg.sitemap_settings.changefreq
+      sitemap_settings.changefreq ||
+      meta.changefreq || // TODO: Remove meta.changefreq
+      defaultSettings.experimental.ssg.sitemap.settings.changefreq
     const priority =
-      meta.priority ||
-      defaultSettings.experimental.ssg.sitemap_settings.priority
+      sitemap_settings.priority ||
+      meta.priority || // TODO: Remove meta.priority
+      defaultSettings.experimental.ssg.sitemap.settings.priority
 
     return `<url>
   <loc>${url}</loc>
@@ -123,7 +128,12 @@ const Prerender = async () => {
     await fs.writeFileSync(path.join(outputDir, 'index.html'), html)
     console.log(`✅ Prerendered ${route.path}`)
   }
-  if (defaultSettings.experimental.ssg.sitemap) {
+
+  // need base url and enable
+  if (
+    defaultSettings.experimental.ssg.sitemap.enable &&
+    defaultSettings.experimental.ssg.sitemap.baseURL
+  ) {
     await siteMap(defaultSettings.experimental.ssg.prerender)
   }
 }
