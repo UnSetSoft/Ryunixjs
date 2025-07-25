@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.2.0-canary.63",
+  "version": "1.2.0-canary.69",
   "license": "MIT",
   "main": "./dist/Ryunix.min.js",
   "types": "./dist/Ryunix.d.ts",

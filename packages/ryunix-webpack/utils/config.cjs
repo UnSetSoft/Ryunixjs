@@ -1,6 +1,6 @@
 'use strict'
 const { getConfig } = require('./settingfile.cjs')
-
+const reactPlugin = require('eslint-plugin-react')
 const config = getConfig()
 
 const defaultSettings = {
@@ -62,7 +62,14 @@ const defaultSettings = {
 
   eslint: {
     files: config?.eslint?.files ? config.eslint.files : ['**/*.ryx'],
-    plugins: config?.eslint?.plugins ? config.eslint.plugins : {},
+    plugins: config?.eslint?.plugins
+      ? {
+          react: reactPlugin,
+          ...config.eslint.plugins,
+        }
+      : {
+          react: reactPlugin,
+        },
     rules: config?.eslint?.rules
       ? config.eslint.rules
       : {
@@ -81,6 +88,9 @@ const defaultSettings = {
           'arrow-parens': 'off',
           'prefer-destructuring': 'warn',
           'no-nested-ternary': 'off',
+          'react/jsx-uses-vars': 'warn',
+          'react/jsx-uses-react': 'off',
+          'react/react-in-jsx-scope': 'off',
         },
   },
 

@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix-webpack",
-  "version": "1.2.0-canary.63",
+  "version": "1.2.0-canary.69",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
@@ -32,6 +32,8 @@
     "css-minimizer-webpack-plugin": "7.0.2",
     "dotenv-webpack": "8.1.0",
     "eslint": "9.31.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-webpack-plugin": "5.0.2",
     "file-loader": "6.2.0",
     "glob": "11.0.3",
     "globals": "16.2.0",

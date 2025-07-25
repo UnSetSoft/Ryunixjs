@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
         ecmaFeatures: {
           jsx: true,
         },
+        extraFileExtensions: ['.ryx'],
       },
     },
     settings: {

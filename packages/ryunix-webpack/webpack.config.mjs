@@ -6,7 +6,8 @@ import webpack from 'webpack'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
-
+import ESLintPlugin from 'eslint-webpack-plugin'
+import eslintConfig from './eslint.config.mjs'
 import {
   getPackageManager,
   ENV_HASH,
@@ -216,6 +217,17 @@ export default {
       }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),
+    }),
+    new ESLintPlugin({
+      cwd: dir,
+      files: ['**/*.ryx', ...config.eslint.files],
+      extensions: ['js', 'ryx', 'jsx'],
+      emitError: true,
+      emitWarning: true,
+      failOnWarning: false,
+      failOnError: false,
+      overrideConfigFile: true,
+      overrideConfig: eslintConfig[0],
     }),
     new HtmlWebpackPlugin({
       pageLang: config.static.seo.pageLang,
