@@ -71,7 +71,60 @@ const defaultSettings = {
           react: reactPlugin,
         },
     rules: config?.eslint?.rules
-      ? config.eslint.rules
+      ? {
+          'max-len': config.eslint.rules['max-len']
+            ? config.eslint.rules['max-len']
+            : ['error', { code: 400 }],
+          camelcase: config.eslint.rules.camelcase
+            ? config.eslint.rules.camelcase
+            : 'off',
+          'no-unused-vars': config.eslint.rules['no-unused-vars']
+            ? config.eslint.rules['no-unused-vars']
+            : 'warn',
+          'no-console': config.eslint.rules['no-console']
+            ? config.eslint.rules['no-console']
+            : 'off',
+          'no-underscore-dangle': config.eslint.rules['no-underscore-dangle']
+            ? config.eslint.rules['no-underscore-dangle']
+            : ['error', { allow: ['id_', '_id'] }],
+          'arrow-body-style': config.eslint.rules['arrow-body-style']
+            ? config.eslint.rules['arrow-body-style']
+            : 'off',
+          indent: config.eslint.rules.indent
+            ? config.eslint.rules.indent
+            : 'warn',
+          'consistent-return': config.eslint.rules['consistent-return']
+            ? config.eslint.rules['consistent-return']
+            : 'off',
+          'no-else-return': config.eslint.rules['no-else-return']
+            ? config.eslint.rules['no-else-return']
+            : 'off',
+          'global-require': config.eslint.rules['global-require']
+            ? config.eslint.rules['global-require']
+            : 'off',
+          'no-param-reassign': config.eslint.rules['no-param-reassign']
+            ? config.eslint.rules['no-param-reassign']
+            : ['error', { props: false }],
+          'new-cap': config.eslint.rules['new-cap']
+            ? config.eslint.rules['new-cap']
+            : 'off',
+          'arrow-parens': config.eslint.rules['arrow-parens']
+            ? config.eslint.rules['arrow-parens']
+            : 'off',
+          'prefer-destructuring': config.eslint.rules['prefer-destructuring']
+            ? config.eslint.rules['prefer-destructuring']
+            : 'warn',
+          'no-nested-ternary': config.eslint.rules['no-nested-ternary']
+            ? config.eslint.rules['no-nested-ternary']
+            : 'off',
+          'react/jsx-uses-vars': config.eslint.rules['react/jsx-uses-vars']
+            ? config.eslint.rules['react/jsx-uses-vars']
+            : 'warn',
+          // by default only this
+          'react/jsx-uses-react': 'off',
+          'react/react-in-jsx-scope': 'off',
+          ...config.eslint.rules,
+        }
       : {
           'max-len': ['error', { code: 400 }],
           camelcase: 'off',

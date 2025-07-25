@@ -1,8 +1,8 @@
 {
   "outputDirectory": ".ryunix/static",
-  "buildCommand": "yarn build",
-  "devCommand": "yarn dev",
-  "installCommand": "yarn install",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "framework": null,
   "rewrites": [
     {

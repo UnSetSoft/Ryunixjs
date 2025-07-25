@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "1.2.0-canary.69",
+  "version": "1.2.0-canary.74",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -81,5 +81,5 @@
     "standard-version": "9.5.0",
     "typescript": "5.8.3"
   },
-  "packageManager": "yarn@4.9.1"
+  "packageManager": "yarn@4.9.2"
 }

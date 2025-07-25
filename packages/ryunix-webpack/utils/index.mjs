@@ -92,6 +92,7 @@ async function cleanBuildDirectory(dirPath) {
     )
   } catch (err) {
     // Directory does not exist or some error occurred
+
     if (err.code === 'ENOENT') {
       logger.info(`static folder cleaned ${chalk.red('failed')}`)
     } else {
