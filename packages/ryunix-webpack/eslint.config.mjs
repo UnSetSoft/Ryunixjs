@@ -1,24 +1,11 @@
-import globals from 'globals'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
 import config from './utils/config.cjs'
+import { resolveApp } from './utils/index.mjs'
+import { defineConfig } from 'eslint/config'
+const dir = process.cwd()
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const dir = path.dirname(path.join(__dirname, '..', '..'))
-const compat = new FlatCompat({
-  baseDirectory: dir,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
-
-export default [
-  ...compat.extends('eslint:recommended'),
+const eslintConfig = defineConfig([
   {
     files: ['**/*.ryx', ...config?.eslint?.files],
-
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',
@@ -27,29 +14,18 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
+        extraFileExtensions: ['.ryx'],
+      },
+    },
+    settings: {
+      react: {
+        pragma: 'Ryunix.createElement', // Para JSX transpile a Ryunix.createElement
+        fragment: 'Ryunix.Fragment', // Para fragmentos JSX
       },
     },
     plugins: config?.eslint?.plugins,
     rules: config?.eslint?.rules,
   },
-  ...compat.extends('eslint:recommended').map((config) => ({
-    ...config,
-    files: ['**/*.ryx'],
-  })),
-  {
-    files: ['**/*.ryx', ...config?.eslint?.files],
+])
 
-    languageOptions: {
-      ecmaVersion: 2021,
-      sourceType: 'module',
-
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    plugins: config?.eslint?.plugins,
-    rules: config?.eslint?.rules,
-  },
-]
+export default eslintConfig

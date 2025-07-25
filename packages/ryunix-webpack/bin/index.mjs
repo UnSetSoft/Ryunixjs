@@ -6,6 +6,45 @@ import { compiler } from './compiler.mjs'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import defaultSettings from '../utils/config.cjs'
+import Prerender from './prerender.mjs'
+import {
+  cleanBuildDirectory,
+  convertFlatToClassic,
+  resolveApp,
+} from '../utils/index.mjs'
+import { ESLint } from 'eslint'
+import eslintConfig from '../eslint.config.mjs'
+const lint = {
+  command: 'lint',
+  describe: 'Lint code',
+  builder: {
+    fix: {
+      alias: 'f',
+      type: 'boolean',
+      default: false,
+      describe: 'Automatically fix problems',
+    },
+  },
+  handler: async (arg) => {
+    const classicConfig = eslintConfig[0]
+
+    const fix = arg.fix
+    const eslint = new ESLint({
+      cwd: process.cwd(),
+      overrideConfigFile: true,
+      overrideConfig: classicConfig,
+      fix,
+    })
+
+    const results = await eslint.lintFiles(defaultSettings.eslint.files)
+
+    await ESLint.outputFixes(results)
+
+    const formatter = await eslint.loadFormatter('stylish')
+    const report = formatter.format(results)
+    console.log(report)
+  },
+}
 
 const serv = {
   command: 'server',
@@ -33,7 +72,16 @@ const build = {
       return
     }
 
-    compiler.run((err, stats) => {
+    if (defaultSettings.experimental.ssg.prerender.length > 0) {
+      await cleanBuildDirectory(
+        resolveApp(
+          process.cwd(),
+          `${defaultSettings.webpack.output.buildDirectory}/static`,
+        ),
+      )
+    }
+
+    compiler.run(async (err, stats) => {
       if (err || stats.hasErrors()) {
         logger.error(chalk.red('Error during compilation:'))
         logger.error(err || stats.toString('errors-only'))
@@ -48,6 +96,10 @@ const build = {
       const formattedTime =
         minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
 
+      if (defaultSettings.experimental.ssg.prerender.length > 0) {
+        await Prerender()
+      }
+
       logger.info(chalk.green('Compilation successful! 🎉'))
       logger.info(`Done in ${formattedTime}`)
 
@@ -60,4 +112,4 @@ const build = {
   },
 }
 
-yargs(hideBin(process.argv)).command(serv).command(build).parse()
+yargs(hideBin(process.argv)).command(serv).command(build).command(lint).parse()

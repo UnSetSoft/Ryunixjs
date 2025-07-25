@@ -21,6 +21,6 @@
     "./rspack": "./rspack/index.js"
   },
   "engines": {
-    "node": "^18 || ^22"
+    "node": "^20 || ^22"
   }
 }

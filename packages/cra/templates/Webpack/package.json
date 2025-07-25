@@ -5,9 +5,11 @@
   "homepage": "./",
   "scripts": {
     "dev": "ryunix server",
-    "build": "ryunix build"
+    "build": "ryunix build",
+    "lint": "ryunix lint",
+    "lint:fix": "ryunix lint --fix"
   },
   "engines": {
-    "node": "^18 || ^22"
+    "node": "^20 || ^22"
   }
 }

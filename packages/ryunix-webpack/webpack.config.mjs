@@ -6,7 +6,8 @@ import webpack from 'webpack'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
-
+import ESLintPlugin from 'eslint-webpack-plugin'
+import eslintConfig from './eslint.config.mjs'
 import {
   getPackageManager,
   ENV_HASH,
@@ -62,7 +63,7 @@ export default {
     assetModuleFilename: './assets/media/[name].[hash][ext]',
     filename: './assets/js/[name].[fullhash:8].bundle.js',
     devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
-    clean: true,
+    clean: config.experimental.ssg.prerender.length > 0 ? false : true,
   },
   target: config.webpack.target,
   devServer: {
@@ -211,7 +212,23 @@ export default {
       new Dotenv({
         path: resolveApp(dir, '.env'),
         prefix: 'ryunix.env.RYUNIX_APP_',
+        systemvars: false,
+        ignoreStub: true,
       }),
+    new webpack.DefinePlugin({
+      'ryunix.config.env': JSON.stringify(config.experimental.env),
+    }),
+    new ESLintPlugin({
+      cwd: dir,
+      files: ['**/*.ryx', ...config.eslint.files],
+      extensions: ['js', 'ryx', 'jsx'],
+      emitError: true,
+      emitWarning: true,
+      failOnWarning: false,
+      failOnError: false,
+      overrideConfigFile: true,
+      overrideConfig: eslintConfig[0],
+    }),
     new HtmlWebpackPlugin({
       pageLang: config.static.seo.pageLang,
       title: config.static.seo.title,

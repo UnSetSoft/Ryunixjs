@@ -11,6 +11,6 @@
     "preview": "vite preview"
   },
   "engines": {
-    "node": "^18 || ^22"
+    "node": "^20 || ^22"
   }
 }
