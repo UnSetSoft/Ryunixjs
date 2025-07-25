@@ -1,10 +1,11 @@
 # Changelog
-## [1.2.0-canary.72](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.71...v1.2.0-canary.72) (2025-07-25)
+## [1.2.0-canary.73](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.72...v1.2.0-canary.73) (2025-07-25)
 
+## [1.2.0-canary.72](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.71...v1.2.0-canary.72) (2025-07-25)
 
 ### Bug Fixes
 
-* change vercel yarn to prevent babel-loader error ([0bc6716](https://github.com/UnSetSoft/Ryunixjs/commit/0bc671646b2681bf45e336577309ac0b820b0a8f))
+- change vercel yarn to prevent babel-loader error ([0bc6716](https://github.com/UnSetSoft/Ryunixjs/commit/0bc671646b2681bf45e336577309ac0b820b0a8f))
 
 ## [1.2.0-canary.71](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.70...v1.2.0-canary.71) (2025-07-25)
 
