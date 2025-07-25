@@ -1,4 +1,6 @@
 # Changelog
+## [1.2.0-canary.67](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.66...v1.2.0-canary.67) (2025-07-25)
+
 ## [1.2.0-canary.66](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.65...v1.2.0-canary.66) (2025-07-25)
 
 ## [1.2.0-canary.65](https://github.com/UnSetSoft/Ryunixjs/compare/v1.2.0-canary.64...v1.2.0-canary.65) (2025-07-25)
