@@ -8,8 +8,8 @@
   ],
   "license": "MIT",
   "scripts": {
-    "lint-eslint": "eslint . --max-warnings=0 --config eslint.config.mjs  ",
-    "lint-fix": "yarn prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs  ",
+    "lint": "eslint . --max-warnings=0 --config eslint.config.mjs  ",
+    "lint:fix": "yarn prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs  ",
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
     "kg:init": "gmvu init",
