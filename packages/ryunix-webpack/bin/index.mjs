@@ -7,7 +7,44 @@ import logger from 'terminal-log'
 import chalk from 'chalk'
 import defaultSettings from '../utils/config.cjs'
 import Prerender from './prerender.mjs'
-import { cleanBuildDirectory, resolveApp } from '../utils/index.mjs'
+import {
+  cleanBuildDirectory,
+  convertFlatToClassic,
+  resolveApp,
+} from '../utils/index.mjs'
+import { ESLint } from 'eslint'
+import eslintConfig from '../eslint.config.mjs'
+const lint = {
+  command: 'lint',
+  describe: 'Lint code',
+  builder: {
+    fix: {
+      alias: 'f',
+      type: 'boolean',
+      default: false,
+      describe: 'Automatically fix problems',
+    },
+  },
+  handler: async (arg) => {
+    const classicConfig = eslintConfig[0]
+
+    const fix = arg.fix
+    const eslint = new ESLint({
+      cwd: process.cwd(),
+      overrideConfigFile: true,
+      overrideConfig: classicConfig,
+      fix,
+    })
+
+    const results = await eslint.lintFiles(defaultSettings.eslint.files)
+
+    await ESLint.outputFixes(results)
+
+    const formatter = await eslint.loadFormatter('stylish')
+    const report = formatter.format(results)
+    console.log(report)
+  },
+}
 
 const serv = {
   command: 'server',
@@ -75,4 +112,4 @@ const build = {
   },
 }
 
-yargs(hideBin(process.argv)).command(serv).command(build).parse()
+yargs(hideBin(process.argv)).command(serv).command(build).command(lint).parse()

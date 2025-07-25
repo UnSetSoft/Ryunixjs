@@ -100,6 +100,96 @@ async function cleanBuildDirectory(dirPath) {
   }
 }
 
+// utils/convertFlatToClassic.js
+export function convertFlatToClassic(configArray) {
+  const combined = {
+    env: {},
+    globals: {},
+    parserOptions: {},
+    plugins: new Set(),
+    extends: new Set(),
+    rules: {},
+    parser: undefined,
+  }
+
+  const invalidKeys = new Set()
+
+  for (const cfg of configArray) {
+    // Detectar keys inválidas
+    for (const key of Object.keys(cfg)) {
+      if (
+        ![
+          'env',
+          'globals',
+          'parserOptions',
+          'plugins',
+          'extends',
+          'rules',
+          'parser',
+          'languageOptions',
+        ].includes(key)
+      ) {
+        invalidKeys.add(key)
+      }
+    }
+
+    // Combinar env
+    if (cfg.env) Object.assign(combined.env, cfg.env)
+
+    // Combinar globals
+    if (cfg.globals) Object.assign(combined.globals, cfg.globals)
+
+    // Combinar parserOptions
+    if (cfg.languageOptions?.parserOptions) {
+      Object.assign(combined.parserOptions, cfg.languageOptions.parserOptions)
+    } else if (cfg.parserOptions) {
+      Object.assign(combined.parserOptions, cfg.parserOptions)
+    }
+
+    // Combinar plugins
+    if (cfg.plugins) {
+      if (Array.isArray(cfg.plugins)) {
+        cfg.plugins.forEach((p) => combined.plugins.add(p))
+      } else if (typeof cfg.plugins === 'object' && cfg.plugins !== null) {
+        Object.keys(cfg.plugins).forEach((p) => combined.plugins.add(p))
+      }
+    }
+
+    // Combinar extends
+    if (cfg.extends) {
+      if (Array.isArray(cfg.extends)) {
+        cfg.extends.forEach((e) => combined.extends.add(e))
+      } else if (typeof cfg.extends === 'string') {
+        combined.extends.add(cfg.extends)
+      }
+    }
+
+    // Combinar reglas
+    if (cfg.rules) Object.assign(combined.rules, cfg.rules)
+
+    // Parser
+    if (cfg.languageOptions?.parser) {
+      combined.parser = cfg.languageOptions.parser
+    } else if (cfg.parser) {
+      combined.parser = cfg.parser
+    }
+  }
+
+  return {
+    env: Object.keys(combined.env).length ? combined.env : undefined,
+    globals: Object.keys(combined.globals).length
+      ? combined.globals
+      : undefined,
+    parserOptions: Object.keys(combined.parserOptions).length
+      ? combined.parserOptions
+      : undefined,
+    plugins: combined.plugins.size ? Array.from(combined.plugins) : undefined,
+    extends: combined.extends.size ? Array.from(combined.extends) : undefined,
+    rules: combined.rules,
+    parser: combined.parser,
+  }
+}
+
 export {
   getPackageManager,
   ENV_HASH,

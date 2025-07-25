@@ -211,7 +211,12 @@ export default {
       new Dotenv({
         path: resolveApp(dir, '.env'),
         prefix: 'ryunix.env.RYUNIX_APP_',
+        systemvars: false,
+        ignoreStub: true,
       }),
+    new webpack.DefinePlugin({
+      'ryunix.config.env': JSON.stringify(config.experimental.env),
+    }),
     new HtmlWebpackPlugin({
       pageLang: config.static.seo.pageLang,
       title: config.static.seo.title,
