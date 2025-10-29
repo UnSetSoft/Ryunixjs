@@ -96,12 +96,7 @@ const optimizationImageApi = ({ src, props }) => {
 const Image = ({ src, ...props }) => {
   const optimization = props.optimization === 'true' ? true : false
 
-  const url = optimization
-    ? optimizationImageApi({
-        src,
-        props,
-      })
-    : src
+  const url = src
 
   const ImageProps = {
     src: url,

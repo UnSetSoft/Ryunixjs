@@ -1,6 +1,6 @@
 {
   "name": "RyunixJS",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -9,19 +9,19 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint . --max-warnings=0 --config eslint.config.mjs  ",
-    "lint:fix": "yarn prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs  ",
+    "lint:fix": "pnpm run prettier-fix && eslint . --fix --max-warnings=0 --config eslint.config.mjs  ",
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
-    "r:c": "yarn log --prerelease canary && yarn kg:bump && yarn prettier-fix && npm run canary:release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git canary",
-    "r:r": "yarn log main && yarn kg:bump && yarn prettier-fix && npm run release --workspace=@unsetsoft/ryunix-webpack --workspace=@unsetsoft/ryunixjs && yarn git main",
+    "r:c": "pnpm run kg:bump && pnpm run prettier-fix && npm run canary:release --workspace=@unsetsoft/ryunixjs && pnpm run git canary",
+    "r:r": "pnpm run kg:bump && pnpm run prettier-fix && npm run release --workspace=@unsetsoft/ryunixjs && pnpm run git main",
     "cra:r": "npm run release --workspace=@unsetsoft/cra",
     "cra:n": "npm run nightly:release --workspace=@unsetsoft/cra",
     "log": "standard-version --header '# Changelog'",
     "git": "git push --follow-tags origin",
-    "ryunixjs:build": "yarn build:test --workspace=@unsetsoft/ryunixjs",
-    "build": "yarn lint-fix && yarn build:test"
+    "ryunixjs:build": "pnpm run build:test --workspace=@unsetsoft/ryunixjs",
+    "build": "pnpm run lint-fix && pnpm run build:test"
   },
   "dependencies": {
     "@babel/cli": "7.27.2",
@@ -53,7 +53,7 @@
     "globals": "16.2.0",
     "html-loader": "5.1.0",
     "html-webpack-plugin": "5.6.3",
-    "image-webpack-loader": "8.1.0",
+    "image-webpack-loader": "^8.0.1",
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.9.2",
     "prettier": "3.6.0",
@@ -81,5 +81,5 @@
     "standard-version": "9.5.0",
     "typescript": "5.8.3"
   },
-  "packageManager": "yarn@4.9.2"
+  "packageManager": "pnpm@10.20.0"
 }

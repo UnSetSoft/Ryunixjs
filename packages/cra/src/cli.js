@@ -20,18 +20,8 @@ create('create-cra', {
       choices: ['Latest', 'Canary'],
       prompt: 'if-no-arg',
     },
-    vscode: {
-      type: 'confirm',
-      default: false,
-      describe: 'Do you whant to add Ryunix VScode addon? (Experimental)',
-      prompt: hasVscode ? 'if-no-arg' : 'never',
-    },
   },
   after: async ({ answers, template, installNpmPackage }) => {
-    if (answers.vscode) {
-      await InstallVsocodeAddon()
-    }
-
     if (template === 'Rspack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
@@ -54,10 +44,10 @@ create('create-cra', {
 
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
-        await installNpmPackage('@unsetsoft/ryunix-webpack@latest', true)
+        await installNpmPackage('@unsetsoft/ryunix-presets@latest', true)
       } else if (answers.channel === 'Canary') {
         await installNpmPackage('@unsetsoft/ryunixjs@canary')
-        await installNpmPackage('@unsetsoft/ryunix-webpack@canary', true)
+        await installNpmPackage('@unsetsoft/ryunix-presets@canary', true)
       }
     } else if (template === 'Vite') {
       // Ryunix
