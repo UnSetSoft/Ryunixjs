@@ -171,7 +171,7 @@ export default {
             ? MiniCssExtractPlugin.loader
             : 'style-loader',
           'css-loader',
-          'sass-loader',
+
         ],
       },
       {
