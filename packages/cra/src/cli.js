@@ -20,10 +20,8 @@ create('create-cra', {
       choices: ['Latest', 'Canary'],
       prompt: 'if-no-arg',
     },
-
   },
   after: async ({ answers, template, installNpmPackage }) => {
-
     if (template === 'Rspack') {
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')

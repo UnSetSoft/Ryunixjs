@@ -75,9 +75,15 @@ const StartServer = async (cliSettings) => {
 
       // Mejor formato de información para el servidor
       const url = `http://localhost:${port}`
-      const cfgStatus = configFileExist() ? chalk.green('loaded') : chalk.red('not found')
-      const envStatus = envPath() ? chalk.green('loaded') : chalk.yellow('not found')
-      const modeLabel = defaultSettings.webpack.production ? chalk.green('production') : chalk.yellow('development')
+      const cfgStatus = configFileExist()
+        ? chalk.green('loaded')
+        : chalk.red('not found')
+      const envStatus = envPath()
+        ? chalk.green('loaded')
+        : chalk.yellow('not found')
+      const modeLabel = defaultSettings.webpack.production
+        ? chalk.green('production')
+        : chalk.yellow('development')
 
       const lines = []
       lines.push(chalk.bold(chalk.cyanBright(`<Ryunix/> ${version}`)))
@@ -86,7 +92,12 @@ const StartServer = async (cliSettings) => {
       lines.push(`${chalk.gray('-')} Config file: ${cfgStatus}`)
       lines.push(`${chalk.gray('-')} Environment file: ${envStatus}`)
       lines.push(`${chalk.gray('-')} Mode: ${modeLabel}`)
-      if (devMode) lines.push(chalk.yellow('⚠️  You are in development mode — update ryunix.config.js for production'))
+      if (devMode)
+        lines.push(
+          chalk.yellow(
+            '⚠️  You are in development mode — update ryunix.config.js for production',
+          ),
+        )
 
       lines.push('---------------------------')
       logger.info(lines.join('\n'))

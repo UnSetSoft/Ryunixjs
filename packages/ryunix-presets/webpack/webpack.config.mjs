@@ -94,17 +94,17 @@ export default {
     minimize: config.webpack.production === true,
     minimizer: config.webpack.production
       ? [
-        new TerserPlugin({
-          parallel: true,
-          terserOptions: {
-            compress: {
-              dead_code: true,
-              passes: 2,
+          new TerserPlugin({
+            parallel: true,
+            terserOptions: {
+              compress: {
+                dead_code: true,
+                passes: 2,
+              },
             },
-          },
-        }),
-        new CssMinimizerPlugin(),
-      ]
+          }),
+          new CssMinimizerPlugin(),
+        ]
       : [],
   },
   cache: {
@@ -167,7 +167,9 @@ export default {
         test: /\.s[ac]ss|css$/i,
         exclude: /node_modules/,
         use: [
-          config.webpack.production ? MiniCssExtractPlugin.loader : 'style-loader',
+          config.webpack.production
+            ? MiniCssExtractPlugin.loader
+            : 'style-loader',
           'css-loader',
           'sass-loader',
         ],
@@ -207,12 +209,12 @@ export default {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     fs.existsSync(resolveApp(dir, '.env')) &&
-    new Dotenv({
-      path: resolveApp(dir, '.env'),
-      prefix: 'ryunix.env.RYUNIX_APP_',
-      systemvars: false,
-      ignoreStub: true,
-    }),
+      new Dotenv({
+        path: resolveApp(dir, '.env'),
+        prefix: 'ryunix.env.RYUNIX_APP_',
+        systemvars: false,
+        ignoreStub: true,
+      }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),
     }),
@@ -244,9 +246,9 @@ export default {
       },
     }),
     config.webpack.production &&
-    new MiniCssExtractPlugin({
-      filename: 'assets/css/[name].[contenthash].css',
-    }),
+      new MiniCssExtractPlugin({
+        filename: 'assets/css/[name].[contenthash].css',
+      }),
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -255,7 +257,12 @@ export default {
           // Exclude any html files (index.html or others) to avoid duplicate emission
           // when HtmlWebpackPlugin also generates index.html from a template.
           globOptions: {
-            ignore: ['**/template.html', '**/index.html', '**/*.html', '**/favicon.png'],
+            ignore: [
+              '**/template.html',
+              '**/index.html',
+              '**/*.html',
+              '**/favicon.png',
+            ],
           },
           filter: (resourcePath) => {
             try {
