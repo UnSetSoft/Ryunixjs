@@ -46,10 +46,10 @@ create('create-cra', {
 
       if (answers.channel === 'Latest') {
         await installNpmPackage('@unsetsoft/ryunixjs@latest')
-        await installNpmPackage('@unsetsoft/ryunix-webpack@latest', true)
+        await installNpmPackage('@unsetsoft/ryunix-presets@latest', true)
       } else if (answers.channel === 'Canary') {
         await installNpmPackage('@unsetsoft/ryunixjs@canary')
-        await installNpmPackage('@unsetsoft/ryunix-webpack@canary', true)
+        await installNpmPackage('@unsetsoft/ryunix-presets@canary', true)
       }
     } else if (template === 'Vite') {
       // Ryunix

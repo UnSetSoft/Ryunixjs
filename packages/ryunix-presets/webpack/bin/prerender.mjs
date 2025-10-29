@@ -73,7 +73,7 @@ const Prerender = async () => {
 
     // title
     if (meta.title) {
-      html = html.replace(/<title>.*<\/title>/, `<title>${meta.title}</title>`)
+      html = html.replace(/<title>.*<\/title>/, `<title>${meta.title}<\/title>`)
     }
 
     // Helper to add or replace metatag
@@ -82,16 +82,13 @@ const Prerender = async () => {
 
       const isProperty = name.startsWith('og:') || name.startsWith('twitter:')
       const attr = isProperty ? 'property' : 'name'
-      const regex = new RegExp(
-        `<meta ${attr}=["']${name}["'] content=".*?"\\s*\/?>`,
-        'i',
-      )
+      const regex = new RegExp(`<meta ${attr}=["']${name}["'][^>]*>`, 'i')
       const tag = `<meta ${attr}="${name}" content="${value}">`
 
       if (regex.test(html)) {
         return html.replace(regex, tag)
       } else {
-        return html.replace(/<\/head>/i, `${tag}\n</head>`)
+        return html.replace(/<\/head>/i, `${tag}\n<\/head>`)
       }
     }
 
