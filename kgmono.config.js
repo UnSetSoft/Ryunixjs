@@ -6,7 +6,4 @@ Include a list of package.json, for example:
       "packages/test2/package.json"
 ]
 */
-module.exports = [
-  'packages/ryunix/package.json',
-  'packages/ryunix-webpack/package.json',
-]
+module.exports = ['packages/ryunix/package.json']

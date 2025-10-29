@@ -60,7 +60,14 @@ const getEnviroment = () =>
 
 const getPackageVersion = async () => {
   const __dirname = dirname(fileURLToPath(import.meta.url)) // Para obtener el directorio actual
-  const packageJsonPath = join(__dirname, '../package.json')
+  const packageJsonPath = join(
+    __dirname,
+    '..',
+    '..',
+    '..',
+    'ryunixjs',
+    'package.json',
+  )
   const data = await fs.readFile(packageJsonPath, 'utf-8')
   const packageJson = JSON.parse(data)
   return packageJson

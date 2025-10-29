@@ -164,7 +164,7 @@ export default {
         ],
       },
       {
-        test: /\.s[ac]ss|css$/,
+        test: /\.s[ac]ss|css$/i,
         exclude: /node_modules/,
         use: [
           config.webpack.production
@@ -254,8 +254,22 @@ export default {
         {
           from: resolveApp(dir, 'public'),
           to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
+          // Exclude any html files (index.html or others) to avoid duplicate emission
+          // when HtmlWebpackPlugin also generates index.html from a template.
           globOptions: {
-            ignore: ['**/index.html', '**/favicon.png'],
+            ignore: [
+              '**/template.html',
+              '**/index.html',
+              '**/*.html',
+              '**/favicon.png',
+            ],
+          },
+          filter: (resourcePath) => {
+            try {
+              return !resourcePath.toLowerCase().endsWith('.html')
+            } catch (e) {
+              return true
+            }
           },
           noErrorOnMissing: true,
         },
