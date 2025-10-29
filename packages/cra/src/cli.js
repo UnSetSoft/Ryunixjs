@@ -20,17 +20,9 @@ create('create-cra', {
       choices: ['Latest', 'Canary'],
       prompt: 'if-no-arg',
     },
-    vscode: {
-      type: 'confirm',
-      default: false,
-      describe: 'Do you whant to add Ryunix VScode addon? (Experimental)',
-      prompt: hasVscode ? 'if-no-arg' : 'never',
-    },
+
   },
   after: async ({ answers, template, installNpmPackage }) => {
-    if (answers.vscode) {
-      await InstallVsocodeAddon()
-    }
 
     if (template === 'Rspack') {
       if (answers.channel === 'Latest') {

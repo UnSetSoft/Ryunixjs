@@ -1,8 +1,0 @@
-# .vscodeignore
-
-.vscode/
-.git/
-node_modules/
-out/
-*.log
-*.tmp
