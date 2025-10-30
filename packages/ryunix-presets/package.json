@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.20",
+  "version": "1.0.23",
   "author": "Neyunse",
   "type": "module",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
@@ -15,7 +15,7 @@
     "webpack/"
   ],
   "peerDependencies": {
-    "@unsetsoft/ryunixjs": "^1.2.1"
+    "@unsetsoft/ryunixjs": "^1.2.2"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
