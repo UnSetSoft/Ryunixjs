@@ -1,26 +1,26 @@
-import { EFFECT_TAGS, vars } from '../utils/index'
+import { EFFECT_TAGS, getState } from '../utils/index'
 
 /**
- * This function reconciles the children of a fiber node with a new set of elements, creating new
- * fibers for new elements, updating existing fibers for elements with the same type, and marking old
- * fibers for deletion if they are not present in the new set of elements.
- * @param wipFiber - A work-in-progress fiber object representing a component or element in the virtual
- * DOM tree.
- * @param elements - an array of elements representing the new children to be rendered in the current
- * fiber's subtree
+ * Reconcile children elements with existing fibers
+ * Core diffing algorithm
  */
 const reconcileChildren = (wipFiber, elements) => {
+  const state = getState()
+
   let index = 0
-  let oldFiber = wipFiber.alternate && wipFiber.alternate.child
-  let prevSibling
+  let oldFiber = wipFiber.alternate?.child
+  let prevSibling = null
 
-  while (index < elements.length || oldFiber != null) {
+  // Iterate through children
+  while (index < elements.length || oldFiber) {
     const element = elements[index]
-    let newFiber
+    let newFiber = null
 
-    const sameType = oldFiber && element && element.type == oldFiber.type
+    // Compare old fiber with new element
+    const sameType = oldFiber && element && element.type === oldFiber.type
 
     if (sameType) {
+      // Update existing fiber
       newFiber = {
         type: oldFiber.type,
         props: element.props,
@@ -28,10 +28,12 @@ const reconcileChildren = (wipFiber, elements) => {
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: EFFECT_TAGS.UPDATE,
-        hooks: oldFiber.hooks,
+        hooks: oldFiber.hooks || [],
       }
     }
+
     if (element && !sameType) {
+      // Create new fiber
       newFiber = {
         type: element.type,
         props: element.props,
@@ -39,20 +41,25 @@ const reconcileChildren = (wipFiber, elements) => {
         parent: wipFiber,
         alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
+        hooks: [],
       }
     }
+
     if (oldFiber && !sameType) {
+      // Mark old fiber for deletion
       oldFiber.effectTag = EFFECT_TAGS.DELETION
-      vars.deletions.push(oldFiber)
+      state.deletions.push(oldFiber)
     }
 
+    // Move to next old fiber
     if (oldFiber) {
       oldFiber = oldFiber.sibling
     }
 
+    // Link fibers
     if (index === 0) {
       wipFiber.child = newFiber
-    } else if (element) {
+    } else if (element && prevSibling) {
       prevSibling.sibling = newFiber
     }
 
@@ -60,4 +67,5 @@ const reconcileChildren = (wipFiber, elements) => {
     index++
   }
 }
+
 export { reconcileChildren }
