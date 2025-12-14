@@ -16,7 +16,12 @@ const updateFunctionComponent = (fiber) => {
 
   try {
     // Call component function
-    const children = [fiber.type(fiber.props)]
+    const result = fiber.type(fiber.props)
+
+    // Handle null/undefined/boolean returns (conditional rendering)
+    const children = result == null || typeof result === 'boolean'
+      ? []
+      : [result]
 
     // Store context info if Provider
     if (fiber.type._contextId && fiber.props.value !== undefined) {
@@ -29,7 +34,7 @@ const updateFunctionComponent = (fiber) => {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Error updating function component:', error)
     }
-    // Render error boundary or null
+    // Render empty on error
     reconcileChildren(fiber, [])
   }
 }

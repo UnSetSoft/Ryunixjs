@@ -46,7 +46,10 @@ const processChildren = (children) => {
   if (!children || children.length === 0) return []
 
   return flattenArray(children)
-    .filter((child) => child != null) // Remove null/undefined
+    .filter((child) => {
+      // Filter out null, undefined, false, true (common in conditional rendering)
+      return child != null && child !== false && child !== true
+    })
     .map((child) => {
       // Already a valid element
       if (is.object(child) && child.type) {
@@ -56,13 +59,12 @@ const processChildren = (children) => {
       // Convert primitives to text elements
       if (
         is.string(child) ||
-        typeof child === 'number' ||
-        typeof child === 'boolean'
+        typeof child === 'number'
       ) {
         return createTextElement(child)
       }
 
-      // Warn about invalid children
+      // Warn about invalid children (skip in production)
       if (process.env.NODE_ENV !== 'production') {
         console.warn('Invalid child element:', child)
       }
@@ -79,9 +81,9 @@ const processChildren = (children) => {
  * @returns {Object} Element object
  */
 const createElement = (type, props, ...children) => {
-  // Validate in development mode
-  if (process.env.NODE_ENV !== 'production') {
-    validateElementType(type)
+  // Validate type (only in development)
+  if (process.env.NODE_ENV !== 'production' && !type) {
+    console.warn('createElement called with null/undefined type')
   }
 
   // Ensure props is an object
@@ -152,7 +154,7 @@ const isValidElement = (object) => {
 export {
   createElement,
   createTextElement,
-  Fragment,
+  Fragment, 
   cloneElement,
   isValidElement
 }
