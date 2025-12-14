@@ -19,6 +19,7 @@ import fs from 'fs'
 import config from './utils/config.cjs'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.mjs'
+import RyunixRoutesPlugin from './utils/ssgPlugin.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -215,6 +216,10 @@ export default {
         systemvars: false,
         ignoreStub: true,
       }),
+    new RyunixRoutesPlugin({
+      routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/ssg/routes.json`)
+    }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),
     }),
