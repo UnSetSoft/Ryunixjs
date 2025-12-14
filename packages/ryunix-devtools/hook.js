@@ -1,40 +1,59 @@
 /**
- * Hook Script - Version con debugging
+ * Hook - Improved with performance tracking
  */
 
 (function () {
   'use strict'
 
-  console.log('[Ryunix DevTools] Hook iniciando...')
-
-  if (window.__RYUNIX_DEVTOOLS_HOOK__) {
-    console.log('[Ryunix DevTools] Hook ya existe')
-    return
-  }
+  if (window.__RYUNIX_DEVTOOLS_HOOK__) return
 
   const hook = {
     fibers: new Map(),
+    renderTimes: new Map(),
 
     recordFiber(fiber) {
       if (!fiber) return
 
+      const startTime = performance.now()
+
+      // Handle fiber.type safely
+      let typeName = 'Unknown'
+      if (typeof fiber.type === 'function') {
+        typeName = fiber.type.name || fiber.type.displayName || 'Component'
+      } else if (typeof fiber.type === 'string') {
+        typeName = fiber.type
+      }
+
       const fiberData = {
         id: this.getFiberId(fiber),
-        type: fiber.type?.name || fiber.type || 'Unknown',
+        type: typeName,
         props: this.sanitizeProps(fiber.props),
-        hooks: fiber.hooks?.length || 0
+        hooks: fiber.hooks?.length || 0,
+        renderTime: 0
       }
 
       this.fibers.set(fiber, fiberData)
+      this.renderTimes.set(fiberData.id, startTime)
       this.emit('fiber', fiberData)
+    },
 
+    recordRenderComplete(fiber) {
+      const fiberData = this.fibers.get(fiber)
+      if (!fiberData) return
+
+      const startTime = this.renderTimes.get(fiberData.id)
+      if (startTime) {
+        const duration = performance.now() - startTime
+        fiberData.renderTime = duration
+        this.emit('render', { id: fiberData.id, duration })
+      }
     },
 
     getFiberId(fiber) {
-      if (!fiber.__id) {
-        fiber.__id = 'fiber_' + Math.random().toString(36).substr(2, 9)
+      if (!fiber.__devtoolsId) {
+        fiber.__devtoolsId = 'fiber_' + Math.random().toString(36).substr(2, 9)
       }
-      return fiber.__id
+      return fiber.__devtoolsId
     },
 
     sanitizeProps(props) {
@@ -45,12 +64,19 @@
         if (key === 'children') continue
 
         const value = props[key]
-        if (typeof value === 'function') {
+        const type = typeof value
+
+        if (type === 'function') {
           sanitized[key] = '[Function]'
-        } else if (typeof value === 'object' && value !== null) {
-          sanitized[key] = '[Object]'
-        } else {
+        } else if (type === 'string' || type === 'number' || type === 'boolean') {
           sanitized[key] = value
+        } else if (type === 'undefined') {
+          sanitized[key] = 'undefined'
+        } else if (value === null) {
+          sanitized[key] = 'null'
+        } else {
+          // Objects/arrays - convert to string safely
+          sanitized[key] = '[Object]'
         }
       }
       return sanitized
@@ -61,23 +87,52 @@
         source: 'ryunix-hook',
         payload: { event, data }
       }, '*')
+    },
+
+    // Highlight element in page
+    highlightElement(fiberId) {
+      const fiber = Array.from(this.fibers.entries())
+        .find(([_, data]) => data.id === fiberId)?.[0]
+
+      if (!fiber?.dom) return
+
+      const rect = fiber.dom.getBoundingClientRect()
+      const overlay = document.getElementById('__ryunix_devtools_highlight__')
+
+      if (overlay) {
+        overlay.style.display = 'block'
+        overlay.style.top = rect.top + 'px'
+        overlay.style.left = rect.left + 'px'
+        overlay.style.width = rect.width + 'px'
+        overlay.style.height = rect.height + 'px'
+
+        setTimeout(() => overlay.style.display = 'none', 2000)
+      }
     }
   }
 
   window.__RYUNIX_DEVTOOLS_HOOK__ = hook
-  console.log('[Ryunix DevTools] Hook instalado')
+
+  // Create highlight overlay
+  const overlay = document.createElement('div')
+  overlay.id = '__ryunix_devtools_highlight__'
+  overlay.style.cssText = `
+    position: fixed;
+    pointer-events: none;
+    border: 2px solid #1976d2;
+    background: rgba(25, 118, 210, 0.1);
+    z-index: 999999;
+    display: none;
+  `
+  document.body.appendChild(overlay)
 
   // Patch Ryunix
   const patchRyunix = () => {
     if (!window.Ryunix) {
-      console.log('[Ryunix DevTools] Esperando Ryunix...')
       setTimeout(patchRyunix, 100)
       return
     }
 
-    console.log('[Ryunix DevTools] Ryunix detectado, aplicando patches')
-
-    // Patch createElement
     const originalCreateElement = window.Ryunix.createElement
     window.Ryunix.createElement = function (...args) {
       const element = originalCreateElement.apply(this, args)
@@ -85,18 +140,15 @@
       return element
     }
 
-    // Patch init
     if (window.Ryunix.init) {
       const originalInit = window.Ryunix.init
       window.Ryunix.init = function (...args) {
-        console.log('[Ryunix DevTools] App inicializada')
         hook.emit('init', { time: Date.now() })
         return originalInit.apply(this, args)
       }
     }
 
     hook.emit('ready', { version: '1.3.0' })
-    console.log('[Ryunix DevTools] Patches aplicados correctamente')
   }
 
   patchRyunix()

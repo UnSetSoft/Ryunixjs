@@ -24,14 +24,14 @@ function injectHook() {
     script.src = chrome.runtime.getURL('hook.js')
     script.onload = () => {
       script.remove()
-      console.log('[Ryunix DevTools] Hook inyectado')
+      console.log('[Ryunix DevTools] Hook injected')
     }
     script.onerror = (err) => {
-      console.error('[Ryunix DevTools] Error cargando hook:', err)
+      console.error('[Ryunix DevTools] Error loading hook:', err)
     }
       ; (document.head || document.documentElement).appendChild(script)
   } catch (error) {
-    console.error('[Ryunix DevTools] Error inyectando hook:', error)
+    console.error('[Ryunix DevTools] Error injecting hook:', error)
   }
 }
 
