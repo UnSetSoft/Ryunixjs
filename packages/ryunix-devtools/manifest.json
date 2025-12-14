@@ -5,31 +5,19 @@
   "description": "DevTools para depuración de aplicaciones Ryunix",
   "devtools_page": "devtools.html",
   "icons": {},
-  "permissions": [
-    "tabs"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "permissions": ["tabs"],
+  "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "content-script.js"
-      ],
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "hook.js"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["hook.js"],
+      "matches": ["<all_urls>"]
     }
   ],
   "background": {

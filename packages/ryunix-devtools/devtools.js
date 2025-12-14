@@ -8,5 +8,5 @@ chrome.devtools.panels.create(
   'panel.html',
   (panel) => {
     console.log('Ryunix DevTools panel created')
-  }
+  },
 )

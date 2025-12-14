@@ -44,8 +44,8 @@ class Profiler {
 
     const total = this.renderTimes.reduce((sum, r) => sum + r.duration, 0)
     const avg = total / this.renderTimes.length
-    const max = Math.max(...this.renderTimes.map(r => r.duration))
-    const min = Math.min(...this.renderTimes.map(r => r.duration))
+    const max = Math.max(...this.renderTimes.map((r) => r.duration))
+    const min = Math.min(...this.renderTimes.map((r) => r.duration))
 
     return { total, avg, max, min, count: this.renderTimes.length }
   }
@@ -85,13 +85,17 @@ class Profiler {
     console.group('🔍 Ryunix Performance Stats')
     console.log(`Total renders: ${stats.count}`)
     console.log(`Avg render time: ${stats.avg.toFixed(2)}ms`)
-    console.log(`Min: ${stats.min.toFixed(2)}ms | Max: ${stats.max.toFixed(2)}ms`)
+    console.log(
+      `Min: ${stats.min.toFixed(2)}ms | Max: ${stats.max.toFixed(2)}ms`,
+    )
 
     const slowest = this.getSlowestComponents(5)
     if (slowest.length > 0) {
       console.log('\n⚠️  Slowest components:')
       slowest.forEach((comp, i) => {
-        console.log(`${i + 1}. ${comp.name}: ${comp.avg.toFixed(2)}ms avg (${comp.count} renders)`)
+        console.log(
+          `${i + 1}. ${comp.name}: ${comp.avg.toFixed(2)}ms avg (${comp.count} renders)`,
+        )
       })
     }
     console.groupEnd()

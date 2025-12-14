@@ -8,12 +8,14 @@ window.addEventListener('message', (event) => {
   if (!event.data.source) return
 
   if (event.data.source === 'ryunix-hook') {
-    chrome.runtime.sendMessage({
-      source: 'ryunix-devtools',
-      payload: event.data.payload
-    }).catch(err => {
-      console.error('[Ryunix DevTools] Error sending message:', err)
-    })
+    chrome.runtime
+      .sendMessage({
+        source: 'ryunix-devtools',
+        payload: event.data.payload,
+      })
+      .catch((err) => {
+        console.error('[Ryunix DevTools] Error sending message:', err)
+      })
   }
 })
 
@@ -29,7 +31,7 @@ function injectHook() {
     script.onerror = (err) => {
       console.error('[Ryunix DevTools] Error loading hook:', err)
     }
-      ; (document.head || document.documentElement).appendChild(script)
+    ;(document.head || document.documentElement).appendChild(script)
   } catch (error) {
     console.error('[Ryunix DevTools] Error injecting hook:', error)
   }

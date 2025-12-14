@@ -43,7 +43,4 @@ const flushUpdates = () => {
   updates.forEach((update) => update())
 }
 
-
-export {
-  batchUpdates, queueUpdate, flushUpdates
-}
+export { batchUpdates, queueUpdate, flushUpdates }

@@ -44,7 +44,7 @@ const reconcileChildren = (wipFiber, elements) => {
         alternate: matchedFiber,
         effectTag: EFFECT_TAGS.UPDATE,
         hooks: matchedFiber.hooks,
-        key: element.key
+        key: element.key,
       }
       oldFiberMap.delete(key)
     } else {
@@ -56,7 +56,7 @@ const reconcileChildren = (wipFiber, elements) => {
         parent: wipFiber,
         alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
-        key: element.key
+        key: element.key,
       }
 
       // Mark matched fiber for deletion if exists
@@ -79,12 +79,10 @@ const reconcileChildren = (wipFiber, elements) => {
   }
 
   // Delete remaining old fibers
-  oldFiberMap.forEach(fiber => {
+  oldFiberMap.forEach((fiber) => {
     fiber.effectTag = EFFECT_TAGS.DELETION
     state.deletions.push(fiber)
   })
 }
 
 export { reconcileChildren }
-
-

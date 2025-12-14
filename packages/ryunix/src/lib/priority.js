@@ -2,11 +2,11 @@
  * Priority levels for updates
  */
 const Priority = {
-  IMMEDIATE: 1,    // User input (clicks, typing)
+  IMMEDIATE: 1, // User input (clicks, typing)
   USER_BLOCKING: 2, // Hover, scroll
-  NORMAL: 3,       // Data fetching
-  LOW: 4,          // Analytics
-  IDLE: 5,         // Background tasks
+  NORMAL: 3, // Data fetching
+  LOW: 4, // Analytics
+  IDLE: 5, // Background tasks
 }
 
 let currentPriority = Priority.NORMAL

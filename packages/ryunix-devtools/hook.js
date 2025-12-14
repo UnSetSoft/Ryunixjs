@@ -2,7 +2,7 @@
  * Hook - Improved with performance tracking
  */
 
-(function () {
+;(function () {
   'use strict'
 
   if (window.__RYUNIX_DEVTOOLS_HOOK__) return
@@ -29,7 +29,7 @@
         type: typeName,
         props: this.sanitizeProps(fiber.props),
         hooks: fiber.hooks?.length || 0,
-        renderTime: 0
+        renderTime: 0,
       }
 
       this.fibers.set(fiber, fiberData)
@@ -68,7 +68,11 @@
 
         if (type === 'function') {
           sanitized[key] = '[Function]'
-        } else if (type === 'string' || type === 'number' || type === 'boolean') {
+        } else if (
+          type === 'string' ||
+          type === 'number' ||
+          type === 'boolean'
+        ) {
           sanitized[key] = value
         } else if (type === 'undefined') {
           sanitized[key] = 'undefined'
@@ -83,16 +87,20 @@
     },
 
     emit(event, data) {
-      window.postMessage({
-        source: 'ryunix-hook',
-        payload: { event, data }
-      }, '*')
+      window.postMessage(
+        {
+          source: 'ryunix-hook',
+          payload: { event, data },
+        },
+        '*',
+      )
     },
 
     // Highlight element in page
     highlightElement(fiberId) {
-      const fiber = Array.from(this.fibers.entries())
-        .find(([_, data]) => data.id === fiberId)?.[0]
+      const fiber = Array.from(this.fibers.entries()).find(
+        ([_, data]) => data.id === fiberId,
+      )?.[0]
 
       if (!fiber?.dom) return
 
@@ -106,9 +114,9 @@
         overlay.style.width = rect.width + 'px'
         overlay.style.height = rect.height + 'px'
 
-        setTimeout(() => overlay.style.display = 'none', 2000)
+        setTimeout(() => (overlay.style.display = 'none'), 2000)
       }
-    }
+    },
   }
 
   window.__RYUNIX_DEVTOOLS_HOOK__ = hook

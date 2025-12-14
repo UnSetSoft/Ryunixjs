@@ -418,7 +418,6 @@ const NavLink = ({ to, exact = false, ...props }) => {
   )
 }
 
-
 /**
  * useStore with priority support
  */
@@ -474,7 +473,6 @@ const useDeferredValue = (value) => {
 
   return deferredValue
 }
-
 
 export {
   useStore,
