@@ -172,7 +172,6 @@ export default {
             ? MiniCssExtractPlugin.loader
             : 'style-loader',
           'css-loader',
-
         ],
       },
       {
@@ -218,7 +217,10 @@ export default {
       }),
     new RyunixRoutesPlugin({
       routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/ssg/routes.json`)
+      outputPath: resolveApp(
+        dir,
+        `${config.webpack.output.buildDirectory}/ssg/routes.json`,
+      ),
     }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),

@@ -1,5 +1,11 @@
 import { isEvent, isGone, isNew, isProperty } from './effects'
-import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, CAMEL_TO_KEBAB_REGEX, is } from '../utils/index'
+import {
+  RYUNIX_TYPES,
+  STRINGS,
+  OLD_STRINGS,
+  CAMEL_TO_KEBAB_REGEX,
+  is,
+} from '../utils/index'
 
 /**
  * Convert camelCase to kebab-case for CSS properties
@@ -7,7 +13,10 @@ import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, CAMEL_TO_KEBAB_REGEX, is } from '..
  * @returns {string} Kebab-case string
  */
 const camelToKebab = (camelCase) => {
-  return camelCase.replace(CAMEL_TO_KEBAB_REGEX, (match) => `-${match.toLowerCase()}`)
+  return camelCase.replace(
+    CAMEL_TO_KEBAB_REGEX,
+    (match) => `-${match.toLowerCase()}`,
+  )
 }
 
 /**
@@ -85,7 +94,10 @@ const createDom = (fiber) => {
       dom = document.createElement(fiber.type)
     } else {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn('Attempted to create DOM for non-host component:', fiber.type)
+        console.warn(
+          'Attempted to create DOM for non-host component:',
+          fiber.type,
+        )
       }
       return null
     }
@@ -107,7 +119,7 @@ const createDom = (fiber) => {
  * @param {Object} nextProps - Next props
  */
 const updateDom = (dom, prevProps = {}, nextProps = {}) => {
-// Remove old event listeners
+  // Remove old event listeners
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
@@ -128,7 +140,14 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
     .filter(isGone(nextProps))
     .forEach((name) => {
       // Skip special properties
-      if ([STRINGS.STYLE, OLD_STRINGS.STYLE, STRINGS.CLASS_NAME, OLD_STRINGS.CLASS_NAME].includes(name)) {
+      if (
+        [
+          STRINGS.STYLE,
+          OLD_STRINGS.STYLE,
+          STRINGS.CLASS_NAME,
+          OLD_STRINGS.CLASS_NAME,
+        ].includes(name)
+      ) {
         return
       }
       dom[name] = ''
@@ -147,10 +166,17 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
         }
         // Handle className properties
         else if (name === STRINGS.CLASS_NAME) {
-          applyClasses(dom, prevProps[STRINGS.CLASS_NAME], nextProps[STRINGS.CLASS_NAME])
-        }
-        else if (name === OLD_STRINGS.CLASS_NAME) {
-          applyClasses(dom, prevProps[OLD_STRINGS.CLASS_NAME], nextProps[OLD_STRINGS.CLASS_NAME])
+          applyClasses(
+            dom,
+            prevProps[STRINGS.CLASS_NAME],
+            nextProps[STRINGS.CLASS_NAME],
+          )
+        } else if (name === OLD_STRINGS.CLASS_NAME) {
+          applyClasses(
+            dom,
+            prevProps[OLD_STRINGS.CLASS_NAME],
+            nextProps[OLD_STRINGS.CLASS_NAME],
+          )
         }
         // Handle other properties
         else {
@@ -208,5 +234,5 @@ export {
   applyStyles,
   applyClasses,
   removeDom,
-  camelToKebab
+  camelToKebab,
 }

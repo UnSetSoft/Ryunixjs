@@ -70,10 +70,4 @@ const runWithPriority = (priority, callback) => {
   }
 }
 
-export {
-  batchUpdates,
-  queueUpdate,
-  flushUpdates,
-  Priority,
-  runWithPriority
-}
+export { batchUpdates, queueUpdate, flushUpdates, Priority, runWithPriority }

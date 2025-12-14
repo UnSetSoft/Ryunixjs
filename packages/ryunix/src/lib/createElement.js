@@ -55,7 +55,7 @@ const cloneElement = (element, props = {}, ...children) => {
   return createElement(
     element.type,
     { ...element.props, ...props },
-    ...(Array.isArray(newChildren) ? newChildren : [newChildren])
+    ...(Array.isArray(newChildren) ? newChildren : [newChildren]),
   )
 }
 
@@ -64,16 +64,14 @@ const cloneElement = (element, props = {}, ...children) => {
  */
 const isValidElement = (object) => {
   return (
-    is.object(object) &&
-    object.type !== undefined &&
-    object.props !== undefined
+    is.object(object) && object.type !== undefined && object.props !== undefined
   )
 }
 
 export {
-  createElement, 
-  createTextElement, 
-  Fragment, 
+  createElement,
+  createTextElement,
+  Fragment,
   cloneElement,
-  isValidElement
+  isValidElement,
 }

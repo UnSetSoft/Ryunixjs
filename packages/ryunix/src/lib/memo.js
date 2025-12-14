@@ -25,9 +25,7 @@ const shallowEqual = (prevProps, nextProps) => {
 
   if (prevKeys.length !== nextKeys.length) return false
 
-  return prevKeys.every((key) =>
-    Object.is(prevProps[key], nextProps[key])
-  )
+  return prevKeys.every((key) => Object.is(prevProps[key], nextProps[key]))
 }
 
 /**

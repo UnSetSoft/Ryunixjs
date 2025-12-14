@@ -52,9 +52,9 @@ const cancelEffects = (fiber) => {
   if (!fiber?.hooks?.length) return
 
   fiber.hooks
-    .filter((hook) =>
-      hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
-      is.function(hook.cancel)
+    .filter(
+      (hook) =>
+        hook.type === RYUNIX_TYPES.RYUNIX_EFFECT && is.function(hook.cancel),
     )
     .forEach((hook) => {
       try {
@@ -80,8 +80,7 @@ const cancelEffectsDeep = (fiber) => {
     fiber.hooks
       .filter(
         (hook) =>
-          hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
-          is.function(hook.cancel)
+          hook.type === RYUNIX_TYPES.RYUNIX_EFFECT && is.function(hook.cancel),
       )
       .forEach((hook) => {
         try {
@@ -110,10 +109,7 @@ const runEffects = (fiber) => {
   for (let i = 0; i < fiber.hooks.length; i++) {
     const hook = fiber.hooks[i]
 
-    if (
-      hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
-      is.function(hook.effect)
-    ) {
+    if (hook.type === RYUNIX_TYPES.RYUNIX_EFFECT && is.function(hook.effect)) {
       // Cancel previous cleanup if exists
       if (is.function(hook.cancel)) {
         try {

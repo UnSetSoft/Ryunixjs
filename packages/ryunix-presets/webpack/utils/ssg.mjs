@@ -26,13 +26,13 @@ const extractSSGRoutes = (routes) => {
 
     // Process nested routes
     if (route.subRoutes) {
-      route.subRoutes.forEach(subRoute => {
+      route.subRoutes.forEach((subRoute) => {
         processRoute(subRoute, fullPath)
       })
     }
   }
 
-  routes.forEach(route => processRoute(route))
+  routes.forEach((route) => processRoute(route))
   return ssgRoutes
 }
 
@@ -40,18 +40,14 @@ const extractSSGRoutes = (routes) => {
  * Generate robots.txt
  */
 const generateRobotsTxt = (baseURL, options = {}) => {
-  const {
-    disallow = [],
-    allow = [],
-    userAgents = ['*'],
-  } = options
+  const { disallow = [], allow = [], userAgents = ['*'] } = options
 
   let content = ''
 
-  userAgents.forEach(agent => {
+  userAgents.forEach((agent) => {
     content += `User-agent: ${agent}\n`
-    allow.forEach(path => content += `Allow: ${path}\n`)
-    disallow.forEach(path => content += `Disallow: ${path}\n`)
+    allow.forEach((path) => (content += `Allow: ${path}\n`))
+    disallow.forEach((path) => (content += `Disallow: ${path}\n`))
   })
 
   content += `\nSitemap: ${baseURL}/sitemap.xml\n`
@@ -63,27 +59,29 @@ const generateRobotsTxt = (baseURL, options = {}) => {
  * Generate enhanced sitemap with all routes
  */
 const generateSitemap = (routes, baseURL, defaultSettings = {}) => {
-  const {
-    changefreq = 'weekly',
-    priority = '0.7',
-  } = defaultSettings
+  const { changefreq = 'weekly', priority = '0.7' } = defaultSettings
 
-  const urls = routes.map(route => {
-    const url = `${baseURL}${route.path === '/' ? '' : route.path}`
-    const meta = route.meta || {}
-    const sitemap = route.sitemap || {}
+  const urls = routes
+    .map((route) => {
+      const url = `${baseURL}${route.path === '/' ? '' : route.path}`
+      const meta = route.meta || {}
+      const sitemap = route.sitemap || {}
 
-    const lastmod = meta.lastmod || sitemap.lastmod || new Date().toISOString().split('T')[0]
-    const freq = sitemap.changefreq || meta.changefreq || changefreq
-    const prio = sitemap.priority || meta.priority || priority
+      const lastmod =
+        meta.lastmod ||
+        sitemap.lastmod ||
+        new Date().toISOString().split('T')[0]
+      const freq = sitemap.changefreq || meta.changefreq || changefreq
+      const prio = sitemap.priority || meta.priority || priority
 
-    return `  <url>
+      return `  <url>
     <loc>${url}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${freq}</changefreq>
     <priority>${prio}</priority>
   </url>`
-  }).join('\n')
+    })
+    .join('\n')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -159,9 +157,10 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   for (const route of routes) {
     const html = await prerenderRoute(route, template, config)
 
-    const outputDir = route.path === '/'
-      ? path.join(buildDir, 'static')
-      : path.join(buildDir, 'static', route.path)
+    const outputDir =
+      route.path === '/'
+        ? path.join(buildDir, 'static')
+        : path.join(buildDir, 'static', route.path)
 
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true })
@@ -177,7 +176,7 @@ const buildSSG = async (routesConfig, config, buildDir) => {
     const sitemap = generateSitemap(
       routes,
       baseURL,
-      config.experimental.ssg.sitemap.settings
+      config.experimental.ssg.sitemap.settings,
     )
     fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), sitemap)
     console.log('✅ Sitemap created')

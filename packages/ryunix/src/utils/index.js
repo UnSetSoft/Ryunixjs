@@ -100,7 +100,7 @@ const matchPath = (pattern, path) => {
       const paramName = patternSeg.slice(1)
       params[paramName] = decodeURIComponent(pathSeg)
     } else if (patternSeg !== pathSeg) {
-    // Static segment doesn't match
+      // Static segment doesn't match
       return null
     }
   }

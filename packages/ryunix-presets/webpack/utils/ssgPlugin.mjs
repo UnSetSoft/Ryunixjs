@@ -11,41 +11,44 @@ class RyunixRoutesPlugin {
   }
 
   apply(compiler) {
-    compiler.hooks.emit.tapAsync('RyunixRoutesPlugin', (compilation, callback) => {
-      // Skip in development mode
-      if (compiler.options.mode !== 'production') {
+    compiler.hooks.emit.tapAsync(
+      'RyunixRoutesPlugin',
+      (compilation, callback) => {
+        // Skip in development mode
+        if (compiler.options.mode !== 'production') {
+          callback()
+          return
+        }
+
+        const routesFile = path.resolve(process.cwd(), this.routesPath)
+
+        if (!fs.existsSync(routesFile)) {
+          console.log(
+            '[SSG] No routes file found, skipping manifest generation.',
+          )
+          callback()
+          return
+        }
+
+        try {
+          const content = fs.readFileSync(routesFile, 'utf-8')
+          console.log('📄 Routes file size:', content.length, 'bytes')
+
+          const routes = this.parseRoutes(content)
+          console.log('✅ Extracted routes:', JSON.stringify(routes, null, 2))
+
+          const manifest = JSON.stringify(routes, null, 2)
+          const outputPath = path.resolve(process.cwd(), this.outputPath)
+
+          fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+          fs.writeFileSync(outputPath, manifest)
+        } catch (error) {
+          console.error('❌ Error generating routes manifest:', error)
+        }
+
         callback()
-        return
-      }
-
-      const routesFile = path.resolve(process.cwd(), this.routesPath)
-
-      if (!fs.existsSync(routesFile)) {
-        console.log('[SSG] No routes file found, skipping manifest generation.')
-        callback()
-        return
-      }
-
-      try {
-        const content = fs.readFileSync(routesFile, 'utf-8')
-        console.log('📄 Routes file size:', content.length, 'bytes')
-
-        const routes = this.parseRoutes(content)
-        console.log('✅ Extracted routes:', JSON.stringify(routes, null, 2))
-
-        const manifest = JSON.stringify(routes, null, 2)
-        const outputPath = path.resolve(process.cwd(), this.outputPath)
-
-        fs.mkdirSync(path.dirname(outputPath), { recursive: true })
-        fs.writeFileSync(outputPath, manifest)
-
-
-      } catch (error) {
-        console.error('❌ Error generating routes manifest:', error)
-      }
-
-      callback()
-    })
+      },
+    )
   }
 
   parseRoutes(content) {
@@ -101,8 +104,10 @@ class RyunixRoutesPlugin {
     const obj = {}
     const pairs = str.match(/["']?[\w:]+["']?\s*:\s*["'][^"']*["']/g) || []
 
-    pairs.forEach(pair => {
-      const [key, value] = pair.split(':').map(s => s.trim().replace(/["']/g, ''))
+    pairs.forEach((pair) => {
+      const [key, value] = pair
+        .split(':')
+        .map((s) => s.trim().replace(/["']/g, ''))
       obj[key] = value
     })
 

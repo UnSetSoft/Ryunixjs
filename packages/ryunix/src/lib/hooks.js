@@ -6,7 +6,7 @@ const validateHookCall = () => {
   const state = getState()
   if (!state.wipFiber) {
     throw new Error(
-      'Hooks can only be called inside the body of a function component.'
+      'Hooks can only be called inside the body of a function component.',
     )
   }
   if (!Array.isArray(state.wipFiber.hooks)) {
@@ -173,7 +173,7 @@ const useCallback = (callback, deps) => {
 
 const createContext = (
   contextId = RYUNIX_TYPES.RYUNIX_CONTEXT,
-  defaultValue = {}
+  defaultValue = {},
 ) => {
   const Provider = ({ children, value }) => {
     const element = Fragment({ children })
@@ -194,7 +194,10 @@ const createContext = (
       if (fiber._contextId === ctxID && fiber._contextValue !== undefined) {
         return fiber._contextValue
       }
-      if (fiber.type?._contextId === ctxID && fiber.props?.value !== undefined) {
+      if (
+        fiber.type?._contextId === ctxID &&
+        fiber.props?.value !== undefined
+      ) {
         return fiber.props.value
       }
       fiber = fiber.parent
@@ -279,7 +282,7 @@ const RouterContext = createContext('ryunix.navigation', {
   location: '/',
   params: {},
   query: {},
-  navigate: (path) => { },
+  navigate: (path) => {},
   route: null,
 })
 

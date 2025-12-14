@@ -101,7 +101,6 @@ const build = {
         await Prerender(defaultSettings.webpack.output.buildDirectory)
       }
 
-
       logger.info(chalk.green('Compilation successful! 🎉'))
       logger.info(`Done in ${formattedTime}`)
 

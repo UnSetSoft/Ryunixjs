@@ -9,7 +9,6 @@ import chalk from 'chalk'
 import { createRequire } from 'node:module'
 import { readFile } from 'node:fs/promises'
 
-
 const resolveApp = (appDirectory, relativePath) =>
   resolve(appDirectory, relativePath)
 
@@ -64,9 +63,7 @@ const getEnviroment = () =>
 const require = createRequire(import.meta.url)
 
 const getPackageVersion = async () => {
-  const packageJsonPath = require.resolve(
-    '@unsetsoft/ryunixjs/package.json'
-  )
+  const packageJsonPath = require.resolve('@unsetsoft/ryunixjs/package.json')
   const data = await readFile(packageJsonPath, 'utf-8')
   return JSON.parse(data)
 }
@@ -204,5 +201,5 @@ export {
   RYUNIX_APP,
   getPackageVersion,
   cleanCacheDir,
-  cleanBuildDirectory
+  cleanBuildDirectory,
 }

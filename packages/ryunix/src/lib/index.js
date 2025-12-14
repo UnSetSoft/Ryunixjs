@@ -5,7 +5,6 @@ import { memo } from './memo.js'
 import { lazy, Suspense } from './lazy.js'
 import { batchUpdates } from './batching.js'
 
-
 // Ryunix.*
 export default {
   createElement,

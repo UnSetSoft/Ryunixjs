@@ -32,7 +32,7 @@ const validateHookContext = (hookName) => {
   if (!state.wipFiber) {
     throw new Error(
       `${hookName} can only be called inside function components. ` +
-      'Make sure you are calling hooks at the top level of your component.'
+        'Make sure you are calling hooks at the top level of your component.',
     )
   }
 }
@@ -76,7 +76,7 @@ const performance = {
 
   clear() {
     this.marks.clear()
-  }
+  },
 }
 
 /**
@@ -86,7 +86,7 @@ const deprecated = (oldAPI, newAPI, version) => {
   if (!isDevelopment) return
   console.warn(
     `[Ryunix Deprecated] ${oldAPI} is deprecated and will be removed in version ${version}. ` +
-    `Use ${newAPI} instead.`
+      `Use ${newAPI} instead.`,
   )
 }
 
