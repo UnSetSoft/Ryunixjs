@@ -1,6 +1,3 @@
-import { getState } from '../utils/index'
-import { scheduleWork } from './workers'
-
 let isBatching = false
 let pendingUpdates = []
 
@@ -46,28 +43,7 @@ const flushUpdates = () => {
   updates.forEach((update) => update())
 }
 
-/**
- * Unstable feature: Concurrent mode priorities
- */
-const Priority = {
-  IMMEDIATE: 1,
-  USER_BLOCKING: 2,
-  NORMAL: 3,
-  LOW: 4,
-  IDLE: 5,
+
+export {
+  batchUpdates, queueUpdate, flushUpdates
 }
-
-let currentPriority = Priority.NORMAL
-
-const runWithPriority = (priority, callback) => {
-  const previousPriority = currentPriority
-  currentPriority = priority
-
-  try {
-    return callback()
-  } finally {
-    currentPriority = previousPriority
-  }
-}
-
-export { batchUpdates, queueUpdate, flushUpdates, Priority, runWithPriority }

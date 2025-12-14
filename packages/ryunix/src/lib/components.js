@@ -1,6 +1,6 @@
 import { createDom } from './dom'
 import { reconcileChildren } from './reconciler'
-import { RYUNIX_TYPES, getState } from '../utils/index'
+import { getState } from '../utils/index'
 import { createElement } from './createElement'
 
 const updateFunctionComponent = (fiber) => {

@@ -1,6 +1,7 @@
 import { RYUNIX_TYPES, getState, is } from '../utils/index'
 import { createElement, Fragment } from './createElement'
 import { scheduleWork } from './workers'
+import { Priority } from './priority'
 
 const validateHookCall = () => {
   const state = getState()
@@ -417,6 +418,64 @@ const NavLink = ({ to, exact = false, ...props }) => {
   )
 }
 
+
+/**
+ * useStore with priority support
+ */
+const useStorePriority = (initialState) => {
+  const reducer = (state, action) =>
+    typeof action === 'function' ? action.value(state) : action.value
+
+  const [state, baseDispatch] = useReducer(reducer, initialState)
+
+  const dispatch = (action, priority = Priority.NORMAL) => {
+    const wrappedAction = {
+      value: action,
+      priority,
+    }
+
+    baseDispatch(wrappedAction)
+  }
+
+  return [state, dispatch]
+}
+
+/**
+ * useTransition - Mark updates as non-urgent
+ */
+const useTransition = () => {
+  const [isPending, setIsPending] = useStorePriority(false)
+
+  const startTransition = (callback) => {
+    setIsPending(true, Priority.IMMEDIATE)
+
+    setTimeout(() => {
+      callback()
+      setIsPending(false, Priority.IMMEDIATE)
+    }, 0)
+  }
+
+  return [isPending, startTransition]
+}
+
+/**
+ * useDeferredValue - Defer value updates
+ */
+const useDeferredValue = (value) => {
+  const [deferredValue, setDeferredValue] = useStorePriority(value)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDeferredValue(value, Priority.LOW)
+    }, 100)
+
+    return () => clearTimeout(timeout)
+  }, [value])
+
+  return deferredValue
+}
+
+
 export {
   useStore,
   useReducer,
@@ -428,6 +487,9 @@ export {
   useQuery,
   useHash,
   useMetadata,
+  useStorePriority,
+  useTransition,
+  useDeferredValue,
   // Router exports
   RouterProvider,
   useRouter,
