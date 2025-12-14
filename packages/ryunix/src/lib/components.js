@@ -23,7 +23,8 @@ const updateHostComponent = (fiber) => {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
   }
-  reconcileChildren(fiber, fiber.props.children)
+  const children = fiber.props?.children || []
+  reconcileChildren(fiber, children)
 }
 
 const Image = ({ src, ...props }) => {

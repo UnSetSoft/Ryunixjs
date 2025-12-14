@@ -17,10 +17,12 @@ const createTextElement = (text) => {
  * Create element
  */
 const createElement = (type, props, ...children) => {
+  const safeProps = props || {}
+
   return {
     type,
     props: {
-      ...props,
+      ...safeProps,
       children: children
         .flat()
         .map((child) =>
@@ -69,7 +71,7 @@ const isValidElement = (object) => {
 }
 
 export {
-  createElement,
+  createElement, 
   createTextElement, 
   Fragment, 
   cloneElement,

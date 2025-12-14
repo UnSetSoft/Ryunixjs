@@ -30,4 +30,16 @@ const init = (MainElement, root = '__ryunix') => {
   return renderProcess
 }
 
-export { render, init }
+const safeRender = (component, props, onError) => {
+  try {
+    return component(props)
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Component error:', error)
+    }
+    if (onError) onError(error)
+    return null
+  }
+}
+
+export { init, render, safeRender }

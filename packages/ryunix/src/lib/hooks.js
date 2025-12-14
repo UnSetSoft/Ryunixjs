@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, STRINGS, getState, is } from '../utils/index'
+import { RYUNIX_TYPES, getState, is } from '../utils/index'
 import { createElement, Fragment } from './createElement'
 import { scheduleWork } from './workers'
 
