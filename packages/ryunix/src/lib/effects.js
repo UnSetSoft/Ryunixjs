@@ -1,94 +1,161 @@
-import { RYUNIX_TYPES, STRINGS } from '../utils/index'
-import { commitDeletion } from './commits'
-
-const isEvent = (key) => key.startsWith('on')
-const isProperty = (key) => key !== STRINGS.children && !isEvent(key)
-const isNew = (prev, next) => (key) => prev[key] !== next[key]
-const isGone = (next) => (key) => !(key in next)
-const hasDepsChanged = (prevDeps, nextDeps) =>
-  !prevDeps ||
-  !nextDeps ||
-  prevDeps.length !== nextDeps.length ||
-  prevDeps.some((dep, index) => dep !== nextDeps[index])
+import { RYUNIX_TYPES, STRINGS, is } from '../utils/index'
 
 /**
- * The function cancels all effect hooks in a given fiber.
- * @param fiber - The "fiber" parameter is likely referring to a data structure used in React.js to
- * represent a component and its state. It contains information about the component's props, state, and
- * children, as well as metadata used by React to manage updates and rendering. The function
- * "cancelEffects" is likely intended
+ * Check if a key is an event handler
+ * @param {string} key - Prop key
+ * @returns {boolean}
  */
-const cancelEffects = (fiber) => {
-  if (fiber.hooks && fiber.hooks.length > 0) {
-    fiber.hooks
-      .filter((hook) => hook.type === RYUNIX_TYPES.RYUNIX_EFFECT && hook.cancel)
-      .forEach((effectHook) => {
-        effectHook.cancel()
-      })
-  }
+const isEvent = (key) => key.startsWith('on')
+
+/**
+ * Check if a key is a property (not children or event)
+ * @param {string} key - Prop key
+ * @returns {boolean}
+ */
+const isProperty = (key) => key !== STRINGS.CHILDREN && !isEvent(key)
+
+/**
+ * Check if a property is new or changed
+ * @param {Object} prev - Previous props
+ * @param {Object} next - Next props
+ * @returns {Function}
+ */
+const isNew = (prev, next) => (key) => {
+  // Use Object.is for better comparison (handles NaN, -0, +0)
+  return !Object.is(prev[key], next[key])
 }
 
 /**
- * The function `cancelEffectsDeep` recursively cancels effects in a fiber tree by running cleanup
- * functions for each effect hook.
- * @param fiber - The `fiber` parameter in the `cancelEffectsDeep` function seems to be an object
- * representing a fiber node in a data structure. The function recursively traverses the fiber tree to
- * find hooks with effects and cancels them by calling their `cancel` function if it exists. It also
- * logs a message
- * @returns The `cancelEffectsDeep` function does not explicitly return a value. It is a recursive
- * function that traverses a fiber tree structure and cancels effects for hooks that have a `cancel`
- * function defined. The function performs cleanup operations by calling the `cancel` function for each
- * applicable hook.
+ * Check if a property was removed
+ * @param {Object} next - Next props
+ * @returns {Function}
+ */
+const isGone = (next) => (key) => !(key in next)
+
+/**
+ * Check if dependencies array has changed
+ * @param {Array} prevDeps - Previous dependencies
+ * @param {Array} nextDeps - Next dependencies
+ * @returns {boolean}
+ */
+const haveDepsChanged = (prevDeps, nextDeps) => {
+  if (!prevDeps || !nextDeps) return true
+  if (prevDeps.length !== nextDeps.length) return true
+  return prevDeps.some((dep, index) => !Object.is(dep, nextDeps[index]))
+}
+
+/**
+ * Cancel effects for a single fiber
+ * @param {Object} fiber - Fiber node
+ */
+const cancelEffects = (fiber) => {
+  if (!fiber?.hooks?.length) return
+
+  fiber.hooks
+    .filter((hook) =>
+      hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
+      is.function(hook.cancel)
+    )
+    .forEach((hook) => {
+      try {
+        hook.cancel()
+        hook.cancel = null // Clear reference to prevent memory leaks
+      } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Error in effect cleanup:', error)
+        }
+      }
+    })
+}
+
+/**
+ * Recursively cancel effects in fiber tree
+ * @param {Object} fiber - Root fiber node
  */
 const cancelEffectsDeep = (fiber) => {
   if (!fiber) return
 
-  if (fiber.hooks && fiber.hooks.length > 0) {
+  // Cancel effects for current fiber
+  if (fiber.hooks?.length > 0) {
     fiber.hooks
       .filter(
         (hook) =>
           hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
-          typeof hook.cancel === STRINGS.function,
+          is.function(hook.cancel)
       )
       .forEach((hook) => {
-        hook.cancel()
+        try {
+          hook.cancel()
+          hook.cancel = null // Clear reference
+        } catch (error) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.error('Error in deep effect cleanup:', error)
+          }
+        }
       })
   }
 
+  // Recursively process children
   if (fiber.child) cancelEffectsDeep(fiber.child)
   if (fiber.sibling) cancelEffectsDeep(fiber.sibling)
 }
 
 /**
- * The function runs all effect hooks in a given fiber.
- * @param fiber - The "fiber" parameter is likely referring to a data structure used in the
- * implementation of a fiber-based reconciliation algorithm, such as the one used in React. A fiber
- * represents a unit of work that needs to be performed by the reconciliation algorithm, and it
- * contains information about a component and its children, as
+ * Run effects for a fiber
+ * @param {Object} fiber - Fiber node
  */
 const runEffects = (fiber) => {
-  if (!fiber.hooks || fiber.hooks.length === 0) return
+  if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
     const hook = fiber.hooks[i]
+
     if (
       hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
-      typeof hook.effect === STRINGS.function &&
-      hook.effect !== null
+      is.function(hook.effect)
     ) {
-      if (typeof hook.cancel === STRINGS.function) {
-        hook.cancel()
+      // Cancel previous cleanup if exists
+      if (is.function(hook.cancel)) {
+        try {
+          hook.cancel()
+        } catch (error) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.error('Error in effect cleanup:', error)
+          }
+        }
       }
 
-      const cleanup = hook.effect()
+      // Run new effect
+      try {
+        const cleanup = hook.effect()
 
-      if (typeof cleanup === 'function') {
-        hook.cancel = cleanup
-      } else {
-        hook.cancel = undefined
+        // Store cleanup function if returned
+        if (is.function(cleanup)) {
+          hook.cancel = cleanup
+        } else {
+          hook.cancel = null
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Error in effect:', error)
+        }
+        hook.cancel = null
       }
+
+      // Clear effect reference after running
+      hook.effect = null
     }
   }
+}
+
+/**
+ * Batch multiple effect operations
+ * @param {Function} callback - Callback containing effect operations
+ */
+const batchEffects = (callback) => {
+  // Could implement batching logic here for performance
+  // For now, just execute immediately
+  callback()
 }
 
 export {
@@ -99,5 +166,6 @@ export {
   isProperty,
   isNew,
   isGone,
-  hasDepsChanged,
+  haveDepsChanged,
+  batchEffects,
 }
