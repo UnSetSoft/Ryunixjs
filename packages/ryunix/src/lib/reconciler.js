@@ -56,14 +56,16 @@ const reconcileChildren = (wipFiber, elements) => {
       oldFiber = oldFiber.sibling
     }
 
-    // Link fibers
-    if (index === 0) {
-      wipFiber.child = newFiber
-    } else if (element && prevSibling) {
-      prevSibling.sibling = newFiber
+    // Link fibers - only if newFiber exists
+    if (newFiber) {
+      if (index === 0) {
+        wipFiber.child = newFiber
+      } else if (prevSibling) {
+        prevSibling.sibling = newFiber
+      }
+      prevSibling = newFiber
     }
 
-    prevSibling = newFiber
     index++
   }
 }
