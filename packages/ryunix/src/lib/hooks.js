@@ -54,7 +54,6 @@ const useReducer = (reducer, initialState, init) => {
   }
 
   const dispatch = (action) => {
-
     if (action === undefined) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('dispatch called with undefined action')
@@ -275,6 +274,146 @@ const useMetadata = (tags = {}, options = {}) => {
   }, [JSON.stringify(tags), JSON.stringify(options)])
 }
 
+// Router Context
+const RouterContext = createContext('ryunix.navigation', {
+  location: '/',
+  params: {},
+  query: {},
+  navigate: (path) => { },
+  route: null,
+})
+
+const findRoute = (routes, path) => {
+  const pathname = path.split('?')[0].split('#')[0]
+  const notFoundRoute = routes.find((route) => route.NotFound)
+  const notFound = notFoundRoute
+    ? { route: { component: notFoundRoute.NotFound }, params: {} }
+    : { route: { component: null }, params: {} }
+
+  for (const route of routes) {
+    if (route.subRoutes) {
+      const childRoute = findRoute(route.subRoutes, path)
+      if (childRoute) return childRoute
+    }
+    if (route.path === '*') return notFound
+    if (!route.path || typeof route.path !== 'string') continue
+
+    const keys = []
+    const pattern = new RegExp(
+      `^${route.path.replace(/:\w+/g, (match) => {
+        keys.push(match.substring(1))
+        return '([^/]+)'
+      })}$`,
+    )
+
+    const match = pathname.match(pattern)
+    if (match) {
+      const params = keys.reduce((acc, key, index) => {
+        acc[key] = match[index + 1]
+        return acc
+      }, {})
+      return { route, params }
+    }
+  }
+  return notFound
+}
+
+const RouterProvider = ({ routes, children }) => {
+  const [location, setLocation] = useStore(window.location.pathname)
+
+  useEffect(() => {
+    const update = () => setLocation(window.location.pathname)
+    window.addEventListener('popstate', update)
+    window.addEventListener('hashchange', update)
+    return () => {
+      window.removeEventListener('popstate', update)
+      window.removeEventListener('hashchange', update)
+    }
+  }, [location])
+
+  const navigate = (path) => {
+    window.history.pushState({}, '', path)
+    setLocation(path)
+  }
+
+  const currentRouteData = findRoute(routes, location) || {}
+  const query = useQuery()
+
+  const contextValue = {
+    location,
+    params: currentRouteData.params || {},
+    query,
+    navigate,
+    route: currentRouteData.route,
+  }
+
+  return createElement(
+    RouterContext.Provider,
+    { value: contextValue },
+    Fragment({ children }),
+  )
+}
+
+const useRouter = () => {
+  return RouterContext.useContext('ryunix.navigation')
+}
+
+const Children = () => {
+  const { route, params, query, location } = useRouter()
+  if (!route || !route.component) return null
+  const hash = useHash()
+
+  useEffect(() => {
+    if (hash) {
+      const id = hash.slice(1)
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    }
+  }, [hash])
+
+  return createElement(route.component, {
+    key: location,
+    params,
+    query,
+    hash,
+  })
+}
+
+const NavLink = ({ to, exact = false, ...props }) => {
+  const { location, navigate } = useRouter()
+  const isActive = exact ? location === to : location.startsWith(to)
+
+  const resolveClass = (cls) =>
+    typeof cls === 'function' ? cls({ isActive }) : cls || ''
+
+  const handleClick = (e) => {
+    e.preventDefault()
+    navigate(to)
+  }
+
+  const classAttrName = props['ryunix-class'] ? 'ryunix-class' : 'className'
+  const classAttrValue = resolveClass(
+    props['ryunix-class'] || props['className'],
+  )
+
+  const {
+    ['ryunix-class']: _omitRyunix,
+    className: _omitClassName,
+    ...cleanedProps
+  } = props
+
+  return createElement(
+    'a',
+    {
+      href: to,
+      onClick: handleClick,
+      [classAttrName]: classAttrValue,
+      ...cleanedProps,
+    },
+    props.children,
+  )
+}
+
 export {
   useStore,
   useReducer,
@@ -286,4 +425,9 @@ export {
   useQuery,
   useHash,
   useMetadata,
+  // Router exports
+  RouterProvider,
+  useRouter,
+  Children,
+  NavLink,
 }
