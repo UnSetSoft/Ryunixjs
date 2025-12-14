@@ -54,9 +54,11 @@ const applyStyles = (dom, styleObj) => {
  * @param {string} nextClasses - Next class string
  */
 const applyClasses = (dom, prevClasses, nextClasses) => {
-  if (!nextClasses) {
-    if (process.env.NODE_ENV !== 'production') {
-      throw new Error('className/ryunix-class cannot be empty')
+  // Allow empty/undefined - just remove classes
+  if (!nextClasses || nextClasses.trim() === '') {
+    if (prevClasses) {
+      const oldClasses = prevClasses.split(/\s+/).filter(Boolean)
+      dom.classList.remove(...oldClasses)
     }
     return
   }
