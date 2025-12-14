@@ -1,10 +1,11 @@
 {
   "name": "RyunixJS",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "homepage": "./",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "test/*"
   ],
   "license": "MIT",
   "engines": {
@@ -27,7 +28,10 @@
     "cra:release": "pnpm run release --filter @unsetsoft/cra",
     "cra:nightly": "pnpm run nightly:release --filter @unsetsoft/cra",
     "changelog": "standard-version --header '# Changelog'",
-    "git:push": "git push --follow-tags origin"
+    "git:push": "git push --follow-tags origin",
+    "run:web": "pnpm --parallel --filter webpack-test run dev",
+    "run:vite": "pnpm --filter ./test/web/Vite run dev",
+    "run:rspack": "pnpm --filter ./test/web/Rspack run dev"
   },
   "devDependencies": {
     "@babel/preset-env": "7.27.2",

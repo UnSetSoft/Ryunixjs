@@ -6,6 +6,9 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import logger from 'terminal-log'
 import chalk from 'chalk'
+import { createRequire } from 'node:module'
+import { readFile } from 'node:fs/promises'
+
 
 const resolveApp = (appDirectory, relativePath) =>
   resolve(appDirectory, relativePath)
@@ -58,19 +61,14 @@ const getEnviroment = () =>
       },
     )
 
+const require = createRequire(import.meta.url)
+
 const getPackageVersion = async () => {
-  const __dirname = dirname(fileURLToPath(import.meta.url)) // Para obtener el directorio actual
-  const packageJsonPath = join(
-    __dirname,
-    '..',
-    '..',
-    '..',
-    'ryunixjs',
-    'package.json',
+  const packageJsonPath = require.resolve(
+    '@unsetsoft/ryunixjs/package.json'
   )
-  const data = await fs.readFile(packageJsonPath, 'utf-8')
-  const packageJson = JSON.parse(data)
-  return packageJson
+  const data = await readFile(packageJsonPath, 'utf-8')
+  return JSON.parse(data)
 }
 
 async function cleanCacheDir(dirPath) {
@@ -206,5 +204,5 @@ export {
   RYUNIX_APP,
   getPackageVersion,
   cleanCacheDir,
-  cleanBuildDirectory,
+  cleanBuildDirectory
 }
