@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.17",
+  "version": "1.0.23-canary.1",
   "author": "Neyunse",
   "type": "module",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
@@ -15,7 +15,7 @@
     "webpack/"
   ],
   "peerDependencies": {
-    "@unsetsoft/ryunixjs": "^1.2.1"
+    "@unsetsoft/ryunixjs": "^1.2.2"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
@@ -48,6 +48,8 @@
     "copy-webpack-plugin": "13.0.1",
     "css-loader": "7.1.2",
     "css-minimizer-webpack-plugin": "7.0.2",
+    "sass": "1.93.2",
+    "sass-loader": "16.0.6",
     "dotenv-webpack": "8.1.1",
     "eslint": "9.38.0",
     "eslint-plugin-react": "^7.37.5",
@@ -61,8 +63,6 @@
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.9.4",
     "rollup": "4.52.5",
-    "sass": "1.93.2",
-    "sass-loader": "16.0.6",
     "style-loader": "4.0.0",
     "terminal-log": "1.0.1",
     "terser-webpack-plugin": "5.3.14",

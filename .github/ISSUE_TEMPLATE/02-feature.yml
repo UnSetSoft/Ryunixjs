@@ -1,0 +1,28 @@
+name: Feature
+description: 'Request a new feature or improvement'
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > Remember use the last version before publish an issue.
+
+  - type: textarea
+    attributes:
+      label: Describe the feature
+      description: A clear and concise description of what you whant to add.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ask
+    attributes:
+      label: Do you whant to do this feature your self sending a PR?
+      multiple: false
+      options:
+        - Yes
+        - No
+    validations:
+      required: true

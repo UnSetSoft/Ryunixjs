@@ -14,6 +14,7 @@ import {
 } from '../utils/index.mjs'
 import { ESLint } from 'eslint'
 import eslintConfig from '../eslint.config.mjs'
+import fs from 'fs'
 const lint = {
   command: 'lint',
   describe: 'Lint code',
@@ -72,7 +73,7 @@ const build = {
       return
     }
 
-    if (defaultSettings.experimental.ssg.prerender.length > 0) {
+    if (fs.existsSync(resolveApp(process.cwd(), 'src/pages/routes.ryx'))) {
       await cleanBuildDirectory(
         resolveApp(
           process.cwd(),
@@ -96,8 +97,8 @@ const build = {
       const formattedTime =
         minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
 
-      if (defaultSettings.experimental.ssg.prerender.length > 0) {
-        await Prerender()
+      if (defaultSettings.webpack.production) {
+        await Prerender(defaultSettings.webpack.output.buildDirectory)
       }
 
       logger.info(chalk.green('Compilation successful! 🎉'))
