@@ -148,7 +148,7 @@
       }
     }
 
-    hook.emit('ready', { version: '1.3.0' })
+    hook.emit('ready', { status: 'ok' })
   }
 
   patchRyunix()
