@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.2.3-canary.11",
+  "version": "1.2.3-canary.12",
   "license": "MIT",
   "main": "./dist/Ryunix.umd.js",
   "module": "./dist/Ryunix.esm.js",
@@ -10,10 +10,21 @@
       "require": "./dist/Ryunix.umd.js",
       "default": "./dist/Ryunix.umd.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./jsx-runtime": {
+      "import": "./jsx/jsx-runtime.js",
+      "require": "./jsx/jsx-runtime.js",
+      "default": "./jsx/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "import": "./jsx/jsx-dev-runtime.js",
+      "require": "./jsx/jsx-dev-runtime.js",
+      "default": "./jsx/jsx-dev-runtime.js"
+    }
   },
   "files": [
-    "dist"
+    "dist",
+    "jsx"
   ],
   "type": "module",
   "scripts": {
