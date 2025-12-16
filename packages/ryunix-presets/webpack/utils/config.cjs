@@ -5,6 +5,7 @@ const config = getConfig()
 
 const defaultSettings = {
   experimental: {
+    mdx: config?.experimental?.mdx ? config.experimental.mdx : false,
     ssg: {
       sitemap: {
         // allow sitemap generation
@@ -34,6 +35,7 @@ const defaultSettings = {
       // prerendered pages
       // TODO: better form to import from routing system. but for now is the best method.
       // NEXT: rename this! :)
+      // TODO: THIS IS DEPRECATED. REMOVE IN FUTURE RELEASES.
       prerender: config?.experimental?.ssg?.prerender
         ? config.experimental.ssg.prerender
         : [],

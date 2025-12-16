@@ -141,8 +141,8 @@ export default {
   stats: 'errors-warnings',
   module: {
     rules: [
-      // MDX files - must come before JS/JSX rule
-      {
+      // MDX files support if enabled in config.
+      config.experimental.mdx && {
         test: /\.mdx?$/,
         use: [
           {
