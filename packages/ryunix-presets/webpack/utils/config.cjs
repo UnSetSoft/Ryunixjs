@@ -123,7 +123,10 @@ const defaultSettings = {
     root: getConfigValue('webpack.root', 'src'),
 
     output: {
-      buildDirectory: getConfigValue('webpack.output.buildDirectory', '.ryunix'),
+      buildDirectory: getConfigValue(
+        'webpack.output.buildDirectory',
+        '.ryunix',
+      ),
     },
 
     target: getConfigValue('webpack.target', 'web'),
@@ -149,7 +152,10 @@ const defaultSettings = {
     },
 
     experiments: {
-      lazyCompilation: getConfigValue('webpack.experiments.lazyCompilation', false),
+      lazyCompilation: getConfigValue(
+        'webpack.experiments.lazyCompilation',
+        false,
+      ),
     },
   },
 }
