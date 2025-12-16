@@ -28,7 +28,13 @@ const updateHostComponent = (fiber) => {
   reconcileChildren(fiber, children)
 }
 
-/* Image component */
+
+/**
+ * The Component `Image` takes in a `src` and other props, and returns an `img` element with the
+ * specified `src` and props.
+ * @returns The `Image` component is being returned. It is a functional component that renders an `img`
+ * element with the specified `src` and other props passed to it.
+ */
 const Image = ({ src, ...props }) => {
   return createElement('img', { ...props, src })
 }
