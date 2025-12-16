@@ -1,196 +1,155 @@
 'use strict'
 const { getConfig } = require('./settingfile.cjs')
 const reactPlugin = require('eslint-plugin-react')
-const config = getConfig()
+
+const userConfig = getConfig()
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/**
+ * Get nested config value with fallback
+ * @param {string} path - Dot notation path (e.g., 'webpack.production')
+ * @param {*} defaultValue - Fallback value
+ * @returns {*} Config value or default
+ */
+const getConfigValue = (path, defaultValue) => {
+  const keys = path.split('.')
+  let value = userConfig
+
+  for (const key of keys) {
+    if (value?.[key] === undefined) return defaultValue
+    value = value[key]
+  }
+
+  return value ?? defaultValue
+}
+
+/**
+ * Merge objects with defaults
+ * @param {Object} defaults - Default values
+ * @param {Object} overrides - User overrides
+ * @returns {Object} Merged object
+ */
+const mergeDefaults = (defaults, overrides = {}) => ({
+  ...defaults,
+  ...overrides,
+})
+
+// ============================================================================
+// Default Configurations
+// ============================================================================
+
+const DEFAULT_ESLINT_RULES = {
+  'max-len': ['error', { code: 400 }],
+  camelcase: 'off',
+  'no-unused-vars': 'warn',
+  'no-console': 'off',
+  'no-underscore-dangle': ['error', { allow: ['id_', '_id'] }],
+  'arrow-body-style': 'off',
+  indent: ['warn', 2],
+  'consistent-return': 'off',
+  'no-else-return': 'off',
+  'global-require': 'off',
+  'no-param-reassign': ['error', { props: false }],
+  'new-cap': 'off',
+  'arrow-parens': 'off',
+  'prefer-destructuring': 'warn',
+  'no-nested-ternary': 'off',
+  'react/jsx-uses-vars': 'warn',
+  'react/jsx-uses-react': 'off',
+  'react/react-in-jsx-scope': 'off',
+}
+
+const DEFAULT_SSG_SITEMAP_SETTINGS = {
+  changefreq: 'weekly',
+  priority: '0.7',
+}
+
+// ============================================================================
+// Configuration Builder
+// ============================================================================
 
 const defaultSettings = {
   experimental: {
-    mdx: config?.experimental?.mdx ? config.experimental.mdx : false,
+    mdx: getConfigValue('experimental.mdx', false),
+
     ssg: {
       sitemap: {
-        // allow sitemap generation
-        enable: config?.experimental?.ssg?.sitemap?.enable
-          ? config.experimental.ssg.sitemap.enable
-          : false,
-        // base url. ex: https://example.com
-        baseURL: config?.experimental?.ssg?.sitemap?.baseURL
-          ? config.experimental.ssg.sitemap.baseURL
-          : false,
-        // global settings for the sitemap.
-        settings: config?.experimental?.ssg?.sitemap?.settings
-          ? {
-              changefreq: config.experimental.ssg.sitemap.settings.changefreq
-                ? config.experimental.ssg.sitemap.settings.changefreq
-                : 'weekly',
-              priority: config.experimental.ssg.sitemap.settings.priority
-                ? config.experimental.ssg.sitemap.settings.priority
-                : '0.7',
-            }
-          : {
-              // default values
-              changefreq: 'weekly',
-              priority: '0.7',
-            },
+        enable: getConfigValue('experimental.ssg.sitemap.enable', false),
+        baseURL: getConfigValue('experimental.ssg.sitemap.baseURL', false),
+        settings: mergeDefaults(
+          DEFAULT_SSG_SITEMAP_SETTINGS,
+          getConfigValue('experimental.ssg.sitemap.settings', {}),
+        ),
       },
-      // prerendered pages
-      // TODO: better form to import from routing system. but for now is the best method.
-      // NEXT: rename this! :)
-      // TODO: THIS IS DEPRECATED. REMOVE IN FUTURE RELEASES.
-      prerender: config?.experimental?.ssg?.prerender
-        ? config.experimental.ssg.prerender
-        : [],
+      // TODO: DEPRECATED - Remove in future releases
+      prerender: getConfigValue('experimental.ssg.prerender', []),
     },
-    env: config?.experimental?.env ? config.experimental.env : {},
-  },
-  static: {
-    favicon: config?.static?.favicon ? config.static.favicon : false,
-    // if is true, public/index.html are required.
-    customTemplate: config?.static?.customTemplate
-      ? config.static.customTemplate
-      : false,
 
-    // global SEO.
+    env: getConfigValue('experimental.env', {}),
+  },
+
+  static: {
+    favicon: getConfigValue('static.favicon', false),
+    customTemplate: getConfigValue('static.customTemplate', false),
+
     seo: {
-      pageLang: config?.static?.seo?.pageLang
-        ? config.static.seo.pageLang
-        : 'en',
-      title: config?.static?.seo?.title
-        ? config.static.seo.title
-        : 'Ryunix App',
-      meta: config?.static?.seo?.meta ? config.static.seo.meta : {},
+      pageLang: getConfigValue('static.seo.pageLang', 'en'),
+      title: getConfigValue('static.seo.title', 'Ryunix App'),
+      meta: getConfigValue('static.seo.meta', {}),
     },
-    ssg: {}, // TODO: Move experimental.ssg here.
+
+    ssg: {}, // TODO: Move experimental.ssg here
   },
 
   eslint: {
-    files: config?.eslint?.files ? config.eslint.files : ['**/*.ryx'],
-    plugins: config?.eslint?.plugins
-      ? {
-          react: reactPlugin,
-          ...config.eslint.plugins,
-        }
-      : {
-          react: reactPlugin,
-        },
-    rules: config?.eslint?.rules
-      ? {
-          'max-len': config.eslint.rules['max-len']
-            ? config.eslint.rules['max-len']
-            : ['error', { code: 400 }],
-          camelcase: config.eslint.rules.camelcase
-            ? config.eslint.rules.camelcase
-            : 'off',
-          'no-unused-vars': config.eslint.rules['no-unused-vars']
-            ? config.eslint.rules['no-unused-vars']
-            : 'warn',
-          'no-console': config.eslint.rules['no-console']
-            ? config.eslint.rules['no-console']
-            : 'off',
-          'no-underscore-dangle': config.eslint.rules['no-underscore-dangle']
-            ? config.eslint.rules['no-underscore-dangle']
-            : ['error', { allow: ['id_', '_id'] }],
-          'arrow-body-style': config.eslint.rules['arrow-body-style']
-            ? config.eslint.rules['arrow-body-style']
-            : 'off',
-          indent: config.eslint.rules.indent
-            ? config.eslint.rules.indent
-            : 'warn',
-          'consistent-return': config.eslint.rules['consistent-return']
-            ? config.eslint.rules['consistent-return']
-            : 'off',
-          'no-else-return': config.eslint.rules['no-else-return']
-            ? config.eslint.rules['no-else-return']
-            : 'off',
-          'global-require': config.eslint.rules['global-require']
-            ? config.eslint.rules['global-require']
-            : 'off',
-          'no-param-reassign': config.eslint.rules['no-param-reassign']
-            ? config.eslint.rules['no-param-reassign']
-            : ['error', { props: false }],
-          'new-cap': config.eslint.rules['new-cap']
-            ? config.eslint.rules['new-cap']
-            : 'off',
-          'arrow-parens': config.eslint.rules['arrow-parens']
-            ? config.eslint.rules['arrow-parens']
-            : 'off',
-          'prefer-destructuring': config.eslint.rules['prefer-destructuring']
-            ? config.eslint.rules['prefer-destructuring']
-            : 'warn',
-          'no-nested-ternary': config.eslint.rules['no-nested-ternary']
-            ? config.eslint.rules['no-nested-ternary']
-            : 'off',
-          'react/jsx-uses-vars': config.eslint.rules['react/jsx-uses-vars']
-            ? config.eslint.rules['react/jsx-uses-vars']
-            : 'warn',
-          // by default only this
-          'react/jsx-uses-react': 'off',
-          'react/react-in-jsx-scope': 'off',
-          indent: [
-            'warn',
-            config?.eslint?.rules['indent']
-              ? config.eslint.rules['indent'][1]
-              : 2,
-          ],
-          ...config.eslint.rules,
-        }
-      : {
-          'max-len': ['error', { code: 400 }],
-          camelcase: 'off',
-          'no-unused-vars': 'warn',
-          'no-console': 'off',
-          'no-underscore-dangle': ['error', { allow: ['id_', '_id'] }],
-          'arrow-body-style': 'off',
-          indent: ['warn', 2],
-          'consistent-return': 'off',
-          'no-else-return': 'off',
-          'global-require': 'off',
-          'no-param-reassign': ['error', { props: false }],
-          'new-cap': 'off',
-          'arrow-parens': 'off',
-          'prefer-destructuring': 'warn',
-          'no-nested-ternary': 'off',
-          'react/jsx-uses-vars': 'warn',
-          'react/jsx-uses-react': 'off',
-          'react/react-in-jsx-scope': 'off',
-        },
+    files: getConfigValue('eslint.files', ['**/*.ryx']),
+
+    plugins: mergeDefaults(
+      { react: reactPlugin },
+      getConfigValue('eslint.plugins', {}),
+    ),
+
+    rules: mergeDefaults(
+      DEFAULT_ESLINT_RULES,
+      getConfigValue('eslint.rules', {}),
+    ),
   },
 
   webpack: {
-    production: config?.webpack?.production ?? false,
-    root: config?.webpack?.root ? config.webpack.root : 'src',
+    production: getConfigValue('webpack.production', false),
+    root: getConfigValue('webpack.root', 'src'),
+
     output: {
-      buildDirectory: config?.webpack?.output?.buildDirectory
-        ? config.webpack.output.buildDirectory
-        : '.ryunix',
+      buildDirectory: getConfigValue('webpack.output.buildDirectory', '.ryunix'),
     },
-    target: config?.webpack?.target ? config.webpack.target : 'web',
+
+    target: getConfigValue('webpack.target', 'web'),
+
     resolve: {
-      alias: config?.webpack?.resolve?.alias
-        ? config.webpack.resolve.alias
-        : {},
-      fallback: config?.webpack?.resolve?.fallback
-        ? config.webpack.resolve.fallback
-        : {},
-      extensions: config?.webpack?.resolve?.extensions
-        ? config.webpack.resolve.extensions
-        : [],
+      alias: getConfigValue('webpack.resolve.alias', {}),
+      fallback: getConfigValue('webpack.resolve.fallback', {}),
+      extensions: getConfigValue('webpack.resolve.extensions', []),
     },
-    plugins: config?.webpack?.plugins ? config.webpack.plugins : [],
+
+    plugins: getConfigValue('webpack.plugins', []),
+
     devServer: {
-      port: config?.webpack?.server?.port ? config.webpack.server.port : 3000,
-      proxy: config?.webpack?.server?.proxy ? config.webpack.server.proxy : [],
-      allowedHosts: config?.webpack?.server?.allowedHosts
-        ? config.webpack.server.allowedHosts
-        : 'auto',
+      port: getConfigValue('webpack.server.port', 3000),
+      proxy: getConfigValue('webpack.server.proxy', []),
+      allowedHosts: getConfigValue('webpack.server.allowedHosts', 'auto'),
     },
-    externals: config?.webpack?.externals ? config.webpack.externals : [{}],
+
+    externals: getConfigValue('webpack.externals', [{}]),
+
     module: {
-      rules: config?.webpack?.module?.rules ? config.webpack.module.rules : [],
+      rules: getConfigValue('webpack.module.rules', []),
     },
+
     experiments: {
-      lazyCompilation: config?.webpack?.experiments?.lazyCompilation
-        ? config.webpack.experiments.lazyCompilation
-        : false,
+      lazyCompilation: getConfigValue('webpack.experiments.lazyCompilation', false),
     },
   },
 }
