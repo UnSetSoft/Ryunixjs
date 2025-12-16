@@ -13,13 +13,16 @@ import {
   ENV_HASH,
   getEnviroment,
   resolveApp,
-  RYUNIX_APP,
 } from './utils/index.mjs'
 import fs from 'fs'
 import config from './utils/config.cjs'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.mjs'
 import RyunixRoutesPlugin from './utils/ssgPlugin.mjs'
+import remarkGfm from 'remark-gfm'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import rehypeHighlight from 'rehype-highlight'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -28,28 +31,40 @@ const __dirname = dirname(__filename)
 let dir
 
 const manager = getPackageManager()
-if (manager === 'yarn' || manager === 'npm' || manager === 'bun') {
-  dir = process.cwd()
-} else if (manager === 'pnpm') {
-  throw new Error(`The manager ${manager} is not supported.`)
+
+const loadDir = (pkm) => {
+  try {
+    switch (pkm) {
+      case 'pnpm':
+        throw new Error(`The manager ${pkm} is not supported.`)
+      default:
+        return process.cwd()
+    }
+  } catch (e) {
+    console.error(`[RYUNIX INIT ERROR]: ${e.message}`)
+    process.exit(1)
+  }
 }
 
+dir = loadDir(manager)
+
+/**
+ * Convert alias object to webpack alias format
+ * @param {Object} object - Alias configuration object
+ * @returns {Object} Webpack-compatible alias object
+ */
 function getAlias(object) {
-  const output = Object.entries(object)
-    .filter(([k, v]) => {
-      return true // some irrelevant conditions here
-    })
+  return Object.entries(object)
+    .filter(([k, v]) => v != null)
     .reduce((accum, [k, v]) => {
       accum[k] = resolveApp(dir, v)
       return accum
     }, {})
-  return output
 }
 
 const { version } = await getPackageVersion()
 
 export default {
-  // context: src
   experiments: {
     lazyCompilation: config.webpack.experiments.lazyCompilation,
   },
@@ -57,7 +72,6 @@ export default {
   entry: './main.ryx',
   devtool: config.webpack.production ? 'source-map' : false,
   output: {
-    // path: .ryunix
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
     publicPath: '/',
     chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
@@ -127,6 +141,61 @@ export default {
   stats: 'errors-warnings',
   module: {
     rules: [
+      // MDX files support if enabled in config.
+      config.experimental.mdx && {
+        test: /\.mdx?$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                [
+                  '@babel/preset-env',
+                  {
+                    targets: 'defaults and not IE 11',
+                    useBuiltIns: false,
+                    modules: false,
+                    bugfixes: true,
+                  },
+                ],
+                '@babel/preset-react',
+              ],
+              cacheDirectory: resolveApp(
+                dir,
+                `${config.webpack.output.buildDirectory}/cache/babel`,
+              ),
+              plugins: [
+                [
+                  '@babel/plugin-transform-react-jsx',
+                  {
+                    pragma: 'Ryunix.createElement',
+                    pragmaFrag: 'Ryunix.Fragment',
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            loader: '@mdx-js/loader',
+            options: {
+              jsxImportSource: '@unsetsoft/ryunixjs',
+              providerImportSource: '@unsetsoft/ryunixjs',
+              jsxRuntime: 'classic',
+              pragma: 'Ryunix.createElement',
+              pragmaFrag: 'Ryunix.Fragment',
+              pragmaImportSource: '@unsetsoft/ryunixjs',
+              remarkPlugins: [
+                remarkGfm,
+                remarkFrontmatter,
+
+                [remarkMdxFrontmatter, { name: 'frontmatter' }],
+              ],
+              rehypePlugins: [rehypeHighlight],
+            },
+          },
+        ],
+      },
+      // JavaScript/JSX/RYX files
       {
         test: /\.(js|jsx|ryx)$/,
         exclude: /node_modules/,
@@ -164,6 +233,7 @@ export default {
           },
         ],
       },
+      // CSS/SASS
       {
         test: /\.s[ac]ss|css$/i,
         exclude: /node_modules/,
@@ -174,6 +244,7 @@ export default {
           'css-loader',
         ],
       },
+      // Images
       {
         test: /\.(jpg|jpeg|png|gif|svg|ico)$/,
         exclude: /node_modules/,
@@ -182,6 +253,7 @@ export default {
           filename: 'assets/images/[name].[hash][ext]',
         },
       },
+      // Media files
       {
         test: /\.(mp3|mp4|pdf)$/,
         exclude: /node_modules/,
@@ -190,6 +262,7 @@ export default {
           filename: 'assets/files/[name].[hash][ext]',
         },
       },
+      // Custom rules from config
       ...config.webpack.module.rules,
     ],
   },
@@ -201,6 +274,8 @@ export default {
       '.js',
       '.jsx',
       '.ryx',
+      '.mdx',
+      '.md',
       ...config.webpack.resolve.extensions,
     ],
     fallback: config.webpack.resolve.fallback,
@@ -225,10 +300,17 @@ export default {
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),
     }),
+    // ESLintPlugin - excluir archivos MDX y MD
     new ESLintPlugin({
       cwd: dir,
       files: ['**/*.ryx', ...config.eslint.files],
       extensions: ['js', 'ryx', 'jsx'],
+      // Excluir explícitamente archivos MDX y MD
+      exclude: [
+        'node_modules',
+        '**/*.mdx',
+        '**/*.md',
+      ],
       emitError: true,
       emitWarning: true,
       failOnWarning: false,
@@ -261,8 +343,6 @@ export default {
         {
           from: resolveApp(dir, 'public'),
           to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
-          // Exclude any html files (index.html or others) to avoid duplicate emission
-          // when HtmlWebpackPlugin also generates index.html from a template.
           globOptions: {
             ignore: [
               '**/template.html',

@@ -5,6 +5,7 @@ const config = getConfig()
 
 const defaultSettings = {
   experimental: {
+    mdx: config?.experimental?.mdx ? config.experimental.mdx : false,
     ssg: {
       sitemap: {
         // allow sitemap generation
@@ -34,6 +35,7 @@ const defaultSettings = {
       // prerendered pages
       // TODO: better form to import from routing system. but for now is the best method.
       // NEXT: rename this! :)
+      // TODO: THIS IS DEPRECATED. REMOVE IN FUTURE RELEASES.
       prerender: config?.experimental?.ssg?.prerender
         ? config.experimental.ssg.prerender
         : [],
@@ -123,6 +125,12 @@ const defaultSettings = {
           // by default only this
           'react/jsx-uses-react': 'off',
           'react/react-in-jsx-scope': 'off',
+          indent: [
+            'warn',
+            config?.eslint?.rules['indent']
+              ? config.eslint.rules['indent'][1]
+              : 2,
+          ],
           ...config.eslint.rules,
         }
       : {
@@ -132,7 +140,7 @@ const defaultSettings = {
           'no-console': 'off',
           'no-underscore-dangle': ['error', { allow: ['id_', '_id'] }],
           'arrow-body-style': 'off',
-          indent: 'warn',
+          indent: ['warn', 2],
           'consistent-return': 'off',
           'no-else-return': 'off',
           'global-require': 'off',
