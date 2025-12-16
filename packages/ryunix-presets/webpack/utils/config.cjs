@@ -123,6 +123,12 @@ const defaultSettings = {
           // by default only this
           'react/jsx-uses-react': 'off',
           'react/react-in-jsx-scope': 'off',
+          indent: [
+            'warn',
+            config?.eslint?.rules['indent']
+              ? config.eslint.rules['indent'][1]
+              : 2,
+          ],
           ...config.eslint.rules,
         }
       : {
@@ -132,7 +138,7 @@ const defaultSettings = {
           'no-console': 'off',
           'no-underscore-dangle': ['error', { allow: ['id_', '_id'] }],
           'arrow-body-style': 'off',
-          indent: 'warn',
+          indent: ['warn', 2],
           'consistent-return': 'off',
           'no-else-return': 'off',
           'global-require': 'off',

@@ -1,37 +1,45 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.2.3-canary.1",
+  "version": "1.2.3-canary.9",
   "license": "MIT",
-  "main": "./dist/Ryunix.min.js",
-  "types": "./dist/Ryunix.d.ts",
-  "bugs": {
-    "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
+  "main": "./dist/Ryunix.umd.js",
+  "module": "./dist/Ryunix.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/Ryunix.esm.js",
+      "require": "./dist/Ryunix.umd.js",
+      "default": "./dist/Ryunix.umd.js"
+    },
+    "./package.json": "./package.json"
   },
-  "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "scripts": {
-    "build:js": "rollup ./src/main.js --file ./dist/Ryunix.min.js --format umd --name Ryunix --plugin @rollup/plugin-terser",
-    "build": "rollup ./src/main.js --file ./dist/Ryunix.js --format umd --name Ryunix",
-    "prepublishOnly": "npm run build:js | npm run build",
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish",
-    "lint": "eslint . --ext .ts --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc",
-    "build:test": "npm run build:js | npm run build",
+    "lint": "eslint . --ext .js --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc",
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
     "test": "jest --testPathPattern=src"
   },
   "dependencies": {
-    "@rollup/plugin-terser": "0.4.4",
-    "eslint": "9.31.0",
-    "lodash": "^4.17.21",
-    "rollup": "^4.41.0"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@babel/core": "7.27.4",
-    "@babel/preset-env": "^7.27.2",
-    "babel-jest": "30.0.2",
-    "jest": "30.0.2",
-    "jest-environment-jsdom": "^30.0.2"
+    "rollup": "^4.53.4",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-commonjs": "29.0.0",
+    "@rollup/plugin-terser": "0.4.4",
+    "eslint": "9.39.2",
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "jest": "30.2.0",
+    "babel-jest": "30.2.0",
+    "jest-environment-jsdom": "^30.2.0"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"
@@ -42,7 +50,8 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "files": [
-    "dist"
-  ]
+  "bugs": {
+    "url": "https://github.com/UnSetSoft/Ryunixjs/issues"
+  },
+  "homepage": "https://github.com/UnSetSoft/Ryunixjs#readme"
 }
