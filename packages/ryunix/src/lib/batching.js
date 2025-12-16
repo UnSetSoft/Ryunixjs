@@ -23,7 +23,6 @@ const batchUpdates = (callback) => {
   }
 }
 
-
 /**
  * The `queueUpdate` function adds an update to a queue and flushes the updates if not currently
  * batching.
@@ -37,7 +36,6 @@ const queueUpdate = (update) => {
     flushUpdates()
   }
 }
-
 
 /**
  * The `flushUpdates` function processes and executes pending updates stored in an array.

@@ -18,7 +18,6 @@ const createTextElement = (text) => {
   }
 }
 
-
 /**
  * The `createElement` function creates a virtual DOM element with specified type, properties, and
  * children.
@@ -51,7 +50,6 @@ const createElement = (type, props, ...children) => {
     },
   }
 }
-
 
 /**
  * The `Fragment` function in JavaScript creates a fragment element with the given children.

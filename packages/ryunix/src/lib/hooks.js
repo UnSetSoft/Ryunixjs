@@ -38,7 +38,7 @@ const useStore = (initialState) => {
 
 /**
  * The `useReducer` function in JavaScript is used to manage state and actions.
- * 
+ *
  * @param reducer - The `reducer` parameter in the `useReducer` function is a function that specifies
  * how the state should be updated in response to an action. It takes the current state and an action
  * as arguments and returns the new state based on the action.
@@ -61,9 +61,8 @@ const useReducer = (reducer, initialState, init) => {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_STORE,
     state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
-    queue: [],  
+    queue: [],
   }
-
 
   if (oldHook?.queue) {
     oldHook.queue.forEach((action) => {
@@ -337,7 +336,7 @@ const useHash = () => {
  * - `prefix`: A string that will be used as the default title if no specific page title is provided.
  * @returns The `useMetadata` function does not return anything. It is a custom hook that updates the
  * document's metadata (such as title and meta tags) based on the provided `tags` and `options` whenever
- * they change. 
+ * they change.
  * This hook can't be reached by google crawler.
  */
 

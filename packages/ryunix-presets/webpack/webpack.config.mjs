@@ -141,14 +141,13 @@ export default {
   stats: 'errors-warnings',
   module: {
     rules: [
-      // MDX files support if enabled in config  
+      // MDX files support if enabled in config
       config.experimental.mdx && {
         test: /\.mdx?$/,
         use: [
           {
             loader: '@mdx-js/loader',
             options: {
-
               jsxImportSource: '@unsetsoft/ryunixjs',
               providerImportSource: '@unsetsoft/ryunixjs',
 

@@ -28,7 +28,6 @@ const updateHostComponent = (fiber) => {
   reconcileChildren(fiber, children)
 }
 
-
 /**
  * The Component `Image` takes in a `src` and other props, and returns an `img` element with the
  * specified `src` and props.
