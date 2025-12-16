@@ -48,8 +48,6 @@ const loadDir = (pkm) => {
 
 dir = loadDir(manager)
 
-console.log(dir)
-
 /**
  * Convert alias object to webpack alias format
  * @param {Object} object - Alias configuration object
