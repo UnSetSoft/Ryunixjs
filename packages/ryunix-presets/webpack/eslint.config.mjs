@@ -1,15 +1,28 @@
 import config from './utils/config.cjs'
-import { resolveApp } from './utils/index.mjs'
 import { defineConfig } from 'eslint/config'
-const dir = process.cwd()
 
+/**
+ * ESLint Configuration for Ryunix
+ * 
+ * NOTE ABOUT MDX:
+ * .mdx and .md files are excluded from ESLint due to compatibility issues
+ * between eslint-plugin-mdx and ESM/flat config.
+ * 
+ * Error: “Could not find ESLint Linter in require cache”
+ * 
+ * MDX files are validated during compilation by @mdx-js/loader,
+ * which is sufficient for detecting syntax and JSX errors.
+ */
 const eslintConfig = defineConfig([
   {
+
     files: ['**/*.ryx', ...config?.eslint?.files],
+
+    ignores: ['**/*.mdx', '**/*.md', '**/node_modules/**'],
+
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',
-
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
@@ -19,8 +32,8 @@ const eslintConfig = defineConfig([
     },
     settings: {
       react: {
-        pragma: 'Ryunix.createElement', // Para JSX transpile a Ryunix.createElement
-        fragment: 'Ryunix.Fragment', // Para fragmentos JSX
+        pragma: 'Ryunix.createElement',
+        fragment: 'Ryunix.Fragment',
       },
     },
     plugins: config?.eslint?.plugins,
