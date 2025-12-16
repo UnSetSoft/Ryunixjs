@@ -21,12 +21,35 @@ const haveDepsChanged = (oldDeps, newDeps) => {
   return oldDeps.some((dep, i) => !Object.is(dep, newDeps[i]))
 }
 
+/**
+ * The `useStore` function in JavaScript is a custom hook that uses a reducer to manage state updates
+ * based on actions provided.
+ * @param initialState - The `initialState` parameter in the `useStore` function is the initial state
+ * of the store that will be used with the `useReducer` hook. It represents the starting state of the
+ * store before any actions are dispatched to update it.
+ * @returns The `useStore` function is returning the result of calling the `useReducer` hook with the
+ * `reducer` function and the `initialState` as arguments.
+ */
 const useStore = (initialState) => {
   const reducer = (state, action) =>
     is.function(action) ? action(state) : action
   return useReducer(reducer, initialState)
 }
 
+/**
+ * The `useReducer` function in JavaScript is used to manage state and actions.
+ *
+ * @param reducer - The `reducer` parameter in the `useReducer` function is a function that specifies
+ * how the state should be updated in response to an action. It takes the current state and an action
+ * as arguments and returns the new state based on the action.
+ * @param initialState - The `initialState` parameter in the `useReducer` function represents the
+ * initial state of the reducer. It is the state that will be used when the reducer is first called or
+ * when the state needs to be reset. This initial state can be a simple value, an object, an array, or
+ * @param init - The `init` parameter in the `useReducer` function is an optional function that can be
+ * used to initialize the state. If provided, it will be called with the `initialState` as its argument
+ * and the return value will be used as the initial state for the reducer. If `init`
+ * @returns An array containing the current state and the dispatch function is being returned.
+ */
 const useReducer = (reducer, initialState, init) => {
   validateHookCall()
 
@@ -38,10 +61,9 @@ const useReducer = (reducer, initialState, init) => {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_STORE,
     state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
-    queue: [], // Siempre nueva cola vacía
+    queue: [],
   }
 
-  // Procesar acciones del render anterior
   if (oldHook?.queue) {
     oldHook.queue.forEach((action) => {
       try {
@@ -80,6 +102,16 @@ const useReducer = (reducer, initialState, init) => {
   return [hook.state, dispatch]
 }
 
+/**
+ * The `useEffect` function in JavaScript is used to manage side effects in functional components by
+ * comparing dependencies and executing a callback function when dependencies change.
+ * @param callback - The `callback` parameter in the `useEffect` function is a function that will be
+ * executed as the effect. This function can perform side effects like data fetching, subscriptions, or
+ * DOM manipulations.
+ * @param deps - The `deps` parameter in the `useEffect` function stands for dependencies. It is an
+ * optional array that contains values that the effect depends on. The effect will only re-run if any
+ * of the values in the `deps` array have changed since the last render. If the `deps` array
+ */
 const useEffect = (callback, deps) => {
   validateHookCall()
 
@@ -107,6 +139,14 @@ const useEffect = (callback, deps) => {
   state.hookIndex++
 }
 
+/**
+ * The useRef function in JavaScript creates a reference object with an initial value for use in functional components.
+ * @param initialValue - The `initialValue` parameter in the `useRef` function represents the initial
+ * value that will be assigned to the `current` property of the reference object. This initial value
+ * will be used if there is no previous value stored in the hook.
+ * @returns The `useRef` function is returning the `current` property of the `hook.value` object, which
+ * contains the initial value passed to the `useRef` function.
+ */
 const useRef = (initialValue) => {
   validateHookCall()
 
@@ -125,6 +165,18 @@ const useRef = (initialValue) => {
   return hook.value
 }
 
+/**
+ * The useMemo function in JavaScript is used to memoize the result of a computation based on
+ * dependencies.
+ * @param compute - The `compute` parameter in the `useMemo` function is a callback function that
+ * calculates the value that `useMemo` will memoize and return. This function will be called to compute
+ * the memoized value when necessary.
+ * @param deps - The `deps` parameter in the `useMemo` function refers to an array of dependencies.
+ * These dependencies are used to determine whether the memoized value needs to be recalculated or if
+ * the previously calculated value can be reused. The `useMemo` hook will recompute the memoized value
+ * only if
+ * @returns The `useMemo` function is returning the `value` calculated by the `compute` function.
+ */
 const useMemo = (compute, deps) => {
   validateHookCall()
 
@@ -165,6 +217,17 @@ const useMemo = (compute, deps) => {
   return value
 }
 
+/**
+ * The useCallback function in JavaScript ensures that a callback function is memoized based on its
+ * dependencies.
+ * @param callback - A function that you want to memoize and return for later use.
+ * @param deps - The `deps` parameter in the `useCallback` function refers to an array of dependencies.
+ * These dependencies are used to determine when the callback function should be re-evaluated and
+ * memoized. If any of the dependencies change, the callback function will be re-executed and the
+ * memoized value will
+ * @returns The useCallback function is returning the memoized version of the callback function passed
+ * as the first argument, based on the dependencies array provided as the second argument.
+ */
 const useCallback = (callback, deps) => {
   if (!is.function(callback)) {
     throw new Error('useCallback requires a function as first argument')
@@ -172,6 +235,20 @@ const useCallback = (callback, deps) => {
   return useMemo(() => callback, deps)
 }
 
+/**
+ * The createContext function creates a context provider and useContext hook in JavaScript.
+ * @param [contextId] - The `contextId` parameter in the `createContext` function is used to specify
+ * the unique identifier for the context being created. It defaults to `RYUNIX_TYPES.RYUNIX_CONTEXT` if
+ * not provided.
+ * @param [defaultValue] - The `defaultValue` parameter in the `createContext` function is used to
+ * specify the default value that will be returned by the `useContext` hook if no provider is found in
+ * the component tree. It is an optional parameter, and if not provided, an empty object `{}` will be
+ * used as
+ * @returns The `createContext` function returns an object with two properties: `Provider` and
+ * `useContext`. The `Provider` property is a component that accepts `children` and `value` props, and
+ * sets the `_contextId` and `_contextValue` properties on the element. The `useContext` property is a
+ * hook function that retrieves the context value based on the context ID provided, or
+ */
 const createContext = (
   contextId = RYUNIX_TYPES.RYUNIX_CONTEXT,
   defaultValue = {},
@@ -209,6 +286,10 @@ const createContext = (
   return { Provider, useContext }
 }
 
+/**
+ * The `useQuery` function extracts query parameters from the URL in a browser environment.
+ * @returns An object containing the query parameters from the current URL is being returned.
+ */
 const useQuery = () => {
   if (typeof window === 'undefined') return {}
 
@@ -220,6 +301,14 @@ const useQuery = () => {
   return query
 }
 
+/**
+ * The function `useHash` in JavaScript is used to manage and update the hash portion of the URL in a
+ * web application.
+ * @returns The `useHash` function returns the current hash value from the window's location. If the
+ * window is undefined (e.g., in a server-side environment), it returns an empty string. The function
+ * also sets up an event listener to update the hash value when the hash in the URL changes and removes
+ * the event listener when the component unmounts.
+ */
 const useHash = () => {
   if (typeof window === 'undefined') return ''
 
@@ -231,6 +320,25 @@ const useHash = () => {
   }, [])
   return hash
 }
+
+/**
+ * The `useMetadata` function in JavaScript is used to dynamically update metadata tags in the document
+ * head based on provided tags and options.
+ * @param [tags] - The `tags` parameter in the `useMetadata` function is an object that contains
+ * metadata information for the webpage. It can include properties like `pageTitle`, `canonical`, and
+ * other custom metadata tags like `og:title`, `og:description`, `twitter:title`,
+ * `twitter:description`, etc. These tags
+ * @param [options] - The `options` parameter in the `useMetadata` function is an object that can
+ * contain the following properties:
+ * - `title`: An object that can have the following properties:
+ *  - `template`: A string that defines the template for the page title. It can include a placeholder
+ * `%s` that will be replaced with the actual page title.
+ * - `prefix`: A string that will be used as the default title if no specific page title is provided.
+ * @returns The `useMetadata` function does not return anything. It is a custom hook that updates the
+ * document's metadata (such as title and meta tags) based on the provided `tags` and `options` whenever
+ * they change.
+ * This hook can't be reached by google crawler.
+ */
 
 const useMetadata = (tags = {}, options = {}) => {
   useEffect(() => {
@@ -322,6 +430,12 @@ const findRoute = (routes, path) => {
   return notFound
 }
 
+/**
+ * The `RouterProvider` component manages routing in a Ryunix application by updating the location based
+ * on window events and providing context for the current route.
+ * @returns The `RouterProvider` component is returning a `RouterContext.Provider` component with a
+ * `value` prop set to `contextValue`, and wrapping the `children` within a `Fragment`.
+ */
 const RouterProvider = ({ routes, children }) => {
   const [location, setLocation] = useStore(window.location.pathname)
 
@@ -358,10 +472,24 @@ const RouterProvider = ({ routes, children }) => {
   )
 }
 
+/**
+ * The function `useRouter` returns the context of the Router for navigation in a Ryunix application.
+ * @returns The `useRouter` function is returning the result of calling
+ * `RouterContext.useContext('ryunix.navigation')`. This function is likely attempting to retrieve the
+ * navigation context from the RouterContext.
+ */
 const useRouter = () => {
   return RouterContext.useContext('ryunix.navigation')
 }
 
+/**
+ * The `Children` function in JavaScript uses router hooks to handle scrolling to a specific element
+ * based on the hash in the URL.
+ * @returns The `Children` component is returning the result of calling `createElement` with
+ * `route.component` as the first argument and an object with `key`, `params`, `query`, and `hash`
+ * properties as the second argument. The `key` property is set to `location`, and the `params`,
+ * `query`, and `hash` properties are passed as values from the component's props.
+ */
 const Children = () => {
   const { route, params, query, location } = useRouter()
   if (!route || !route.component) return null
@@ -383,6 +511,12 @@ const Children = () => {
   })
 }
 
+/**
+ * The NavLink function in JavaScript is a component that generates a link element with customizable
+ * classes and active state based on the current location.
+ * @returns The `NavLink` component is returning a JSX element representing an anchor (`<a>`) tag with
+ * the following attributes and properties:
+ */
 const NavLink = ({ to, exact = false, ...props }) => {
   const { location, navigate } = useRouter()
   const isActive = exact ? location === to : location.startsWith(to)

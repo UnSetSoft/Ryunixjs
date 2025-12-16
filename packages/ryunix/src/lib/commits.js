@@ -2,6 +2,9 @@ import { updateDom } from './dom'
 import { cancelEffects, cancelEffectsDeep, runEffects } from './effects'
 import { EFFECT_TAGS, getState } from '../utils/index'
 
+/**
+ * The `commitRoot` function commits the changes made to the virtual DOM by updating the actual DOM.
+ */
 const commitRoot = () => {
   const state = getState()
   state.deletions.forEach(commitWork)

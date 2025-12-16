@@ -141,53 +141,19 @@ export default {
   stats: 'errors-warnings',
   module: {
     rules: [
-      // MDX files support if enabled in config.
+      // MDX files support if enabled in config
       config.experimental.mdx && {
         test: /\.mdx?$/,
         use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  '@babel/preset-env',
-                  {
-                    targets: 'defaults and not IE 11',
-                    useBuiltIns: false,
-                    modules: false,
-                    bugfixes: true,
-                  },
-                ],
-                '@babel/preset-react',
-              ],
-              cacheDirectory: resolveApp(
-                dir,
-                `${config.webpack.output.buildDirectory}/cache/babel`,
-              ),
-              plugins: [
-                [
-                  '@babel/plugin-transform-react-jsx',
-                  {
-                    pragma: 'Ryunix.createElement',
-                    pragmaFrag: 'Ryunix.Fragment',
-                  },
-                ],
-              ],
-            },
-          },
           {
             loader: '@mdx-js/loader',
             options: {
               jsxImportSource: '@unsetsoft/ryunixjs',
               providerImportSource: '@unsetsoft/ryunixjs',
-              jsxRuntime: 'classic',
-              pragma: 'Ryunix.createElement',
-              pragmaFrag: 'Ryunix.Fragment',
-              pragmaImportSource: '@unsetsoft/ryunixjs',
+
               remarkPlugins: [
                 remarkGfm,
                 remarkFrontmatter,
-
                 [remarkMdxFrontmatter, { name: 'frontmatter' }],
               ],
               rehypePlugins: [rehypeHighlight],
@@ -306,11 +272,7 @@ export default {
       files: ['**/*.ryx', ...config.eslint.files],
       extensions: ['js', 'ryx', 'jsx'],
       // Excluir explícitamente archivos MDX y MD
-      exclude: [
-        'node_modules',
-        '**/*.mdx',
-        '**/*.md',
-      ],
+      exclude: ['node_modules', '**/*.mdx', '**/*.md'],
       emitError: true,
       emitWarning: true,
       failOnWarning: false,
