@@ -153,7 +153,7 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   }
 
   const template = fs.readFileSync(templatePath, 'utf-8')
-
+  const prerenderRoutes = []
   for (const route of routes) {
     const html = await prerenderRoute(route, template, config)
 
@@ -167,8 +167,11 @@ const buildSSG = async (routesConfig, config, buildDir) => {
     }
 
     fs.writeFileSync(path.join(outputDir, 'index.html'), html)
-    console.log(`✅ Prerendered ${route.path}`)
+    prerenderRoutes.push(route.path)
   }
+
+  console.log(`✅ Prerendered ${prerenderRoutes.length} routes:`)
+  prerenderRoutes.forEach((r) => console.log(` - ${r}`))
 
   // Generate sitemap in static/
   if (config.experimental?.ssg?.sitemap?.enable) {
