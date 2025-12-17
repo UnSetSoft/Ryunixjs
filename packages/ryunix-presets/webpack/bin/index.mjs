@@ -15,6 +15,12 @@ import {
 import { ESLint } from 'eslint'
 import eslintConfig from '../eslint.config.mjs'
 import fs from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+const __filename = fileURLToPath(import.meta.url)
+
+const __dirname = dirname(__filename)
+
 const lint = {
   command: 'lint',
   describe: 'Lint code',
@@ -115,4 +121,21 @@ const build = {
   },
 }
 
-yargs(hideBin(process.argv)).command(serv).command(build).command(lint).parse()
+const extractHTML = {
+  command: 'customHtml',
+  describe: 'Extract HTML for customization',
+  handler: async (arg) => {
+    const runPath = process.cwd()
+
+    fs.copyFile(join(__dirname, "..", "template/index.html"), join(runPath, "public/index.html"), (err) => {
+      if (err) {
+        console.error("Error extracting HTML: ", err.message);
+        return;
+      }
+      console.log("File extracted successfully. Now you can enable the template with static.customTemplate inside ryunix.config.js");
+    });
+  },
+}
+
+
+yargs(hideBin(process.argv)).command(serv).command(build).command(lint).command(extractHTML).parse()
