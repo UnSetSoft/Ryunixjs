@@ -98,6 +98,8 @@ const build = {
         minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
 
       if (defaultSettings.webpack.production) {
+
+
         await Prerender(defaultSettings.webpack.output.buildDirectory)
       }
 

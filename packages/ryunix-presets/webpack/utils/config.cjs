@@ -160,4 +160,5 @@ const defaultSettings = {
   },
 }
 
+
 module.exports = defaultSettings

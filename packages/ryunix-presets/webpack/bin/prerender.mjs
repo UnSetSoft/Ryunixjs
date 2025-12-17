@@ -28,6 +28,14 @@ const Prerender = async (directory) => {
     }
   }
 
+  const metaExist = routes.some((route) => route.meta)
+  if (metaExist && defaultSettings.static.seo.meta.length > 0) {
+
+    console.error("[Ryunix Error] You are mixing static and dynamic meta tags; you can only use one of the two. Remove static.seo.meta from ryunix.config.js.")
+    process.exit(1)
+
+  }
+
   if (routes.length === 0) {
     routes = defaultSettings.experimental?.ssg?.prerender || []
     if (routes.length > 0) {
