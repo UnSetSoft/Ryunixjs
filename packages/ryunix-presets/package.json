@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.23-canary.54",
+  "version": "1.0.23-canary.64",
   "author": "Neyunse",
   "type": "module",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
