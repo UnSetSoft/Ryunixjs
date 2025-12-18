@@ -1,13 +1,9 @@
-import { createElement, Fragment } from './createElement'
-import { render, init } from './render'
-import * as Hooks from './hooks'
-
-export { Fragment }
-
-export default {
-  createElement,
-  render,
-  init,
-  Fragment,
-  Hooks,
-}
+export { createElement, Fragment } from './createElement'
+export { render, init, safeRender } from './render'
+export * from './hooks'
+export * as Hooks from './hooks'
+export { memo } from './memo.js'
+export { lazy, Suspense } from './lazy.js'
+export { batchUpdates } from './batching.js'
+export { Priority } from './priority.js'
+export { profiler, useProfiler, withProfiler } from './profiler.js'

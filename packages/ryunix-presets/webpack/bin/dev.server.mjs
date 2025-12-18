@@ -49,11 +49,13 @@ const StartServer = async (cliSettings) => {
     `${defaultSettings.webpack.output.buildDirectory}/cache`,
   )
 
-  if (!defaultSettings.webpack.production) {
+  const mode = cliSettings.production || defaultSettings.webpack.production ? true : false
+
+  if (!mode) {
     cleanCacheDir(cacheDir)
   }
 
-  webpackConfig.mode = 'development'
+  webpackConfig.mode = mode ? 'production' : 'development'
   const compiler = Webpack(webpackConfig)
   let port = webpackConfig.devServer.port || 3000
 
@@ -65,7 +67,7 @@ const StartServer = async (cliSettings) => {
   const devServerOptions = { ...webpackConfig.devServer, ...cliSettings }
   const server = new WebpackDevServer(devServerOptions, compiler)
 
-  const devMode = Boolean(!defaultSettings.webpack.production)
+  const devMode = Boolean(!mode)
 
   const { version } = await getPackageVersion()
 
@@ -81,7 +83,7 @@ const StartServer = async (cliSettings) => {
       const envStatus = envPath()
         ? chalk.green('loaded')
         : chalk.yellow('not found')
-      const modeLabel = defaultSettings.webpack.production
+      const modeLabel = mode
         ? chalk.green('production')
         : chalk.yellow('development')
 
@@ -109,4 +111,4 @@ const StartServer = async (cliSettings) => {
   await startServer()
 }
 
-export { StartServer }
+export { StartServer as StartDevServer }

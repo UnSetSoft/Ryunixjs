@@ -1,4 +1,4 @@
-import { vars } from '../utils/index'
+import { getState } from '../utils/index'
 import { scheduleWork } from './workers'
 
 const clearContainer = (container) => {
@@ -8,43 +8,60 @@ const clearContainer = (container) => {
 }
 
 /**
- * Renders an element into a container using a work-in-progress (WIP) root.
- * @function render
- * @param {Object|HTMLElement} element - The element to be rendered in the container. It can be a Ryunix component (custom element) or a standard DOM element.
- * @param {HTMLElement} container - The container where the element will be rendered. This parameter is optional if `createRoot()` is used beforehand to set up the container.
- * @description The function assigns the `container` to a work-in-progress root and sets up properties for reconciliation, including children and the reference to the current root.
- * It also clears any scheduled deletions and establishes the next unit of work for incremental rendering.
+ * The `render` function in JavaScript updates the DOM with a new element and schedules work to be done
+ * on the element.
+ * @param element - The `element` parameter in the `render` function is the element that you want to
+ * render in the specified container. It could be a DOM element, a component, or any other valid
+ * element that you want to display on the screen.
+ * @param container - The `container` parameter in the `render` function is the DOM element where the
+ * `element` will be rendered. It is the target container where the element will be appended as a
+ * child.
+ * @returns The `render` function is returning the `state.wipRoot` object.
  */
 const render = (element, container) => {
-  vars.wipRoot = {
+  const state = getState()
+  state.wipRoot = {
     dom: container,
     props: {
       children: [element],
     },
-    alternate: vars.currentRoot,
+    alternate: state.currentRoot,
   }
 
-  vars.nextUnitOfWork = vars.wipRoot
-  vars.deletions = []
-  scheduleWork(vars.wipRoot)
-  return vars.wipRoot
+  state.nextUnitOfWork = state.wipRoot
+  state.deletions = []
+  scheduleWork(state.wipRoot)
+  return state.wipRoot
 }
 
 /**
- * Initializes the application by creating a reference to a DOM element with the specified ID and rendering the main component.
- * @function init
- * @param {Object} MainElement - The main component to render, typically the root component of the application.
- * @param {string} [root='__ryunix'] - The ID of the HTML element that serves as the container for the root element. Defaults to `'__ryunix'` if not provided.
- * @example
- * Ryunix.init(App, "__ryunix"); // Initializes and renders the App component into the <div id="__ryunix"></div> element.
- * @description This function retrieves the container element by its ID and invokes the `render` function to render the main component into it.
+ * The `init` function initializes a rendering process for a main element within a specified container
+ * root element.
+ * @param MainElement - MainElement is the main component or element that you want to render on the
+ * webpage. It could be a React component, a DOM element, or any other element that you want to display
+ * on the page.
+ * @param [root=__ryunix] - The `root` parameter in the `init` function is a default parameter with the
+ * value `'__ryunix'`. If no value is provided for `root` when calling the `init` function, it will
+ * default to `'__ryunix'`.
+ * @returns The `renderProcess` function is being returned from the `init` function.
  */
 const init = (MainElement, root = '__ryunix') => {
-  vars.containerRoot = document.getElementById(root)
-
-  const renderProcess = render(MainElement, vars.containerRoot)
-
+  const state = getState()
+  state.containerRoot = document.getElementById(root)
+  const renderProcess = render(MainElement, state.containerRoot)
   return renderProcess
 }
 
-export { render, init }
+const safeRender = (component, props, onError) => {
+  try {
+    return component(props)
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Component error:', error)
+    }
+    if (onError) onError(error)
+    return null
+  }
+}
+
+export { init, render, safeRender }
