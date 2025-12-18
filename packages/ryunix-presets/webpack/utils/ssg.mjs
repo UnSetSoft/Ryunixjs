@@ -9,7 +9,7 @@ import path from 'path'
 /**
  * Extract valid routes for SSG from routes configuration
  * Filters out dynamic routes and special routes
- * 
+ *
  * @param {Array} routes - Array of route objects
  * @returns {Array} - Array of valid SSG routes
  */
@@ -46,7 +46,7 @@ const extractSSGRoutes = (routes) => {
 
 /**
  * Generate robots.txt content
- * 
+ *
  * @param {string} baseURL - Base URL of the site
  * @param {Object} options - Configuration options
  * @param {Array<string>} options.disallow - Paths to disallow
@@ -73,7 +73,7 @@ const generateRobotsTxt = (baseURL, options = {}) => {
 
 /**
  * Generate XML sitemap with all routes
- * 
+ *
  * @param {Array} routes - Array of route objects
  * @param {string} baseURL - Base URL of the site
  * @param {Object} defaultSettings - Default sitemap settings
@@ -115,7 +115,7 @@ ${urls}
 
 /**
  * Generate HTML meta tags from metadata object
- * 
+ *
  * @param {Object} meta - Metadata object
  * @param {Object} defaultMeta - Default metadata
  * @returns {string} - HTML meta tags
@@ -181,7 +181,7 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
 
 /**
  * Prerender a route to static HTML
- * 
+ *
  * @param {Object} route - Route object
  * @param {string} template - HTML template
  * @param {Object} config - Configuration object
@@ -194,24 +194,15 @@ const prerenderRoute = async (route, template, config) => {
 
   // Replace title - use route meta or default
   const pageTitle = meta.title || defaultMeta.title || 'Ryunix App'
-  html = html.replace(
-    /<title>.*?<\/title>/,
-    `<title>${pageTitle}</title>`,
-  )
+  html = html.replace(/<title>.*?<\/title>/, `<title>${pageTitle}</title>`)
 
   // Generate and add meta tags
   const metaTags = generateMetaTags(meta, defaultMeta)
 
   // Remove existing meta tags (except framework/mode) and duplicate favicon
   // Remove all meta tags except framework and mode
-  html = html.replace(
-    /<meta\s+name="(?!framework|mode)[^"]*"[^>]*>/gi,
-    ''
-  )
-  html = html.replace(
-    /<meta\s+property="[^"]*"[^>]*>/gi,
-    ''
-  )
+  html = html.replace(/<meta\s+name="(?!framework|mode)[^"]*"[^>]*>/gi, '')
+  html = html.replace(/<meta\s+property="[^"]*"[^>]*>/gi, '')
 
   // Remove duplicate favicon links (keep only first one)
   const faviconMatches = html.match(/<link\s+rel="icon"[^>]*>/gi)
@@ -285,7 +276,7 @@ const prerenderRoute = async (route, template, config) => {
 /**
  * Full SSG build process
  * Generates prerendered HTML, sitemap, and robots.txt
- * 
+ *
  * @param {Array} routesConfig - Routes configuration
  * @param {Object} config - Site configuration
  * @param {string} buildDir - Build output directory
@@ -295,7 +286,6 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   const routes = extractSSGRoutes(routesConfig)
 
   if (routes.length === 0) {
-
     return
   }
 

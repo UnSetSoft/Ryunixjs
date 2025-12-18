@@ -104,10 +104,12 @@ const getAcceptedEncoding = (headers) => {
  * Check if MIME type is compressible
  */
 const isCompressible = (mimeType) => {
-  return mimeType.startsWith('text/') ||
+  return (
+    mimeType.startsWith('text/') ||
     mimeType.includes('javascript') ||
     mimeType.includes('json') ||
     mimeType.includes('css')
+  )
 }
 
 /**
@@ -131,9 +133,11 @@ const parseRange = (rangeHeader, fileSize) => {
  * Check if file should support range requests (media files)
  */
 const supportsRangeRequests = (mimeType) => {
-  return mimeType.startsWith('video/') ||
+  return (
+    mimeType.startsWith('video/') ||
     mimeType.startsWith('audio/') ||
     mimeType === 'application/pdf'
+  )
 }
 
 /**
@@ -156,7 +160,10 @@ const serveWithRange = async (filePath, req, res, stats) => {
 
     res.writeHead(206, headers)
 
-    const stream = createReadStream(filePath, { start: range.start, end: range.end })
+    const stream = createReadStream(filePath, {
+      start: range.start,
+      end: range.end,
+    })
     await pipeline(stream, res)
   } else {
     // Full content
@@ -205,7 +212,7 @@ const serveStaticFile = async (filePath, req, res) => {
 
       if (isCompressible(mimeType)) {
         try {
-          [brotli, gzipped] = await Promise.all([
+          ;[brotli, gzipped] = await Promise.all([
             brotliCompress(content, {
               params: {
                 [zlib.constants.BROTLI_PARAM_QUALITY]: 6,
@@ -257,7 +264,7 @@ const serveStaticFile = async (filePath, req, res) => {
     const headers = {
       'Content-Type': cached.mimeType,
       'Content-Length': responseContent.length,
-      'ETag': cached.etag,
+      ETag: cached.etag,
       'Cache-Control': 'public, max-age=31536000',
     }
 
@@ -268,7 +275,6 @@ const serveStaticFile = async (filePath, req, res) => {
     res.writeHead(200, headers)
     res.end(responseContent)
     return true
-
   } catch (error) {
     return false
   }
@@ -302,7 +308,7 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
         await fs.access(file)
         pageFile = file
         break
-      } catch { }
+      } catch {}
     }
 
     if (!pageFile) {
@@ -324,7 +330,7 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
     let responseContent = content
     const headers = {
       'Content-Type': 'text/html; charset=utf-8',
-      'ETag': etag,
+      ETag: etag,
       'Cache-Control': 'no-cache',
     }
 
@@ -350,7 +356,6 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
 
     res.writeHead(200, headers)
     res.end(responseContent)
-
   } catch (error) {
     res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' })
     res.end('500')
@@ -362,7 +367,11 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
  */
 const requestHandler = async (req, res) => {
   const rootDir = process.cwd()
-  const staticDir = path.join(rootDir, config.webpack.output.buildDirectory, 'static')
+  const staticDir = path.join(
+    rootDir,
+    config.webpack.output.buildDirectory,
+    'static',
+  )
 
   try {
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`)
@@ -380,7 +389,6 @@ const requestHandler = async (req, res) => {
     if (!fileServed) {
       await serveHTMLPage(pathname, staticDir, req, res)
     }
-
   } catch (error) {
     console.error('[Ryunix Server Error]:', error.message)
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' })

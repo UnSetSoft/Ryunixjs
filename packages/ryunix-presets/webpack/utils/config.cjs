@@ -67,7 +67,6 @@ const DEFAULT_SSG_SITEMAP_SETTINGS = {
   priority: '0.7',
 }
 
-
 // ============================================================================
 // Configuration Builder
 // ============================================================================
@@ -170,6 +169,5 @@ const defaultSettings = {
     },
   },
 }
-
 
 module.exports = defaultSettings

@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix",
-  "version": "1.2.3-canary.14",
+  "version": "1.2.4",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -25,8 +25,8 @@
     "kg:bump": "gmvu bump",
     "release:canary": "npm run kg:bump && pnpm run format && pnpm --parallel --filter @unsetsoft/ryunixjs run canary:release",
     "release:stable": "npm run kg:bump && pnpm run format && pnpm --parallel --filter @unsetsoft/ryunixjs run release",
-    "cra:release": "pnpm run release --filter @unsetsoft/cra",
-    "cra:nightly": "pnpm run nightly:release --filter @unsetsoft/cra",
+    "cra:release": "pnpm --parallel --filter @unsetsoft/cra run release",
+    "cra:nightly": "pnpm --parallel --filter @unsetsoft/cra run nightly:release",
     "changelog": "standard-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
     "run:web": "pnpm --parallel --filter webpack-test run dev",

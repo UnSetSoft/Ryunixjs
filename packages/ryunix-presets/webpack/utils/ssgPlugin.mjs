@@ -1,7 +1,7 @@
 /**
  * Ryunix Routes Plugin - SSG Manifest Generator
  * Extracts routes from routes.ryx file and generates manifest for static site generation
- * 
+ *
  * Features:
  * - Template literal support (`/docs/${var.field}`)
  * - Frontmatter extraction from MDX files
@@ -24,39 +24,31 @@ class RyunixRoutesPlugin {
     compiler.hooks.emit.tapAsync(
       'RyunixRoutesPlugin',
       (compilation, callback) => {
-
-
         // Skip in development mode
         if (compiler.options.mode !== 'production') {
           callback()
           return
         }
 
-
-
         const routesFile = path.resolve(process.cwd(), this.routesPath)
 
         if (!fs.existsSync(routesFile)) {
-          console.log(
-            '[SSG] ❌ The route file was not found:', this.routesPath,
-          )
+          console.log('[SSG] ❌ The route file was not found:', this.routesPath)
           callback()
           return
         }
-
 
         try {
           const content = fs.readFileSync(routesFile, 'utf-8')
 
           this.extractFrontmatter(content, path.dirname(routesFile))
 
-
-
           const routes = this.parseRoutes(content)
 
-
           // Count routes with meta
-          const routesWithMeta = routes.filter(r => r.meta && Object.keys(r.meta).length > 0)
+          const routesWithMeta = routes.filter(
+            (r) => r.meta && Object.keys(r.meta).length > 0,
+          )
 
           const manifest = JSON.stringify(routes, null, 2)
           const outputPath = path.resolve(process.cwd(), this.outputPath)
@@ -64,10 +56,7 @@ class RyunixRoutesPlugin {
           fs.mkdirSync(path.dirname(outputPath), { recursive: true })
           fs.writeFileSync(outputPath, manifest)
 
-
-
           console.log('✅ [SSG Plugin] Process successfully completed')
-
         } catch (error) {
           console.error('\n' + '='.repeat(70))
           console.error('[SSG] ❌ ERROR generating route manifest:')
@@ -98,7 +87,6 @@ class RyunixRoutesPlugin {
       // Resolve absolute path
       const absolutePath = path.resolve(baseDir, mdxPath)
 
-
       if (!fs.existsSync(absolutePath)) {
         if (this.debug) {
           console.warn(`⚠️  File not found: ${absolutePath}`)
@@ -112,7 +100,6 @@ class RyunixRoutesPlugin {
 
         // Remove BOM if present
         if (mdxContent.charCodeAt(0) === 0xfeff) {
-
           mdxContent = mdxContent.slice(1)
         }
 
@@ -120,17 +107,11 @@ class RyunixRoutesPlugin {
 
         if (Object.keys(frontmatter).length > 0) {
           this.frontmatterCache.set(alias, frontmatter)
-
-        }  
+        }
       } catch (error) {
-        console.error(
-          `❌ Error reading ${absolutePath}:`,
-          error.message,
-        )
+        console.error(`❌ Error reading ${absolutePath}:`, error.message)
       }
     }
-
-
   }
 
   /**
@@ -230,7 +211,8 @@ class RyunixRoutesPlugin {
     const routes = []
 
     // Match route objects - capture the entire object
-    const routeRegex = /\{\s*path:\s*[`"'][^`"']*[`"'](?:\s*\|\|\s*[`"'][^`"']*[`"'])?\s*,[\s\S]*?\}/g
+    const routeRegex =
+      /\{\s*path:\s*[`"'][^`"']*[`"'](?:\s*\|\|\s*[`"'][^`"']*[`"'])?\s*,[\s\S]*?\}/g
     let match
 
     while ((match = routeRegex.exec(content)) !== null) {
@@ -258,14 +240,11 @@ class RyunixRoutesPlugin {
 
       // Skip dynamic routes and wildcards
       if (evaluatedPath.includes(':') || evaluatedPath === '*') {
-
         continue
       }
 
       // Check for noRenderLink early
-      const noRenderLinkMatch = routeBlock.match(
-        /noRenderLink:\s*([^,}\s]+)/,
-      )
+      const noRenderLinkMatch = routeBlock.match(/noRenderLink:\s*([^,}\s]+)/)
       if (noRenderLinkMatch) {
         const noRenderValue = this.evaluateExpression(
           noRenderLinkMatch[1].trim(),
@@ -280,7 +259,6 @@ class RyunixRoutesPlugin {
 
       // Check for NotFound property
       if (routeBlock.includes('NotFound:')) {
-
         continue
       }
 
@@ -293,8 +271,6 @@ class RyunixRoutesPlugin {
       const metaContent = this.extractMetaObject(routeBlock)
 
       if (metaContent) {
-
-
         route.meta = {}
 
         // Temporalmente activar debug para esta ruta
@@ -307,16 +283,11 @@ class RyunixRoutesPlugin {
         this.extractField(metaContent, 'image', route.meta)
         this.extractField(metaContent, 'author', route.meta)
         this.extractField(metaContent, 'canonical', route.meta)
-
-
       } else {
         console.log(`   ❌ No object meta found in route: ${evaluatedPath}`)
-
       }
 
       routes.push(route)
-
-
     }
 
     return routes
@@ -526,7 +497,7 @@ class RyunixRoutesPlugin {
     // Only add field if value is meaningful
     if (value !== undefined && value !== null && value !== '') {
       target[fieldName] = value
-    } 
+    }
   }
 
   /**
