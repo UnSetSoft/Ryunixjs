@@ -22,7 +22,6 @@ const Prerender = async (directory) => {
   if (fs.existsSync(manifestPath)) {
     try {
       routes = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'))
-      console.log(`[SSG] Found ${routes.length} routes in manifest`)
     } catch (error) {
       console.error('[SSG] Error reading routes manifest:', error)
     }
