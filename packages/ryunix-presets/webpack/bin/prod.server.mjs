@@ -4,11 +4,14 @@ import path from 'path'
 import { createHash } from 'crypto'
 import zlib from 'zlib'
 import { promisify } from 'util'
+import { createReadStream } from 'fs'
+import { pipeline } from 'stream/promises'
 import config from '../utils/config.cjs'
 
 const gzip = promisify(zlib.gzip)
+const brotliCompress = promisify(zlib.brotliCompress)
 
-// MIME types dictionary (sin duplicados)
+// MIME types dictionary
 const MIME_TYPES = {
   '.js': 'application/javascript',
   '.mjs': 'application/javascript',
@@ -56,8 +59,6 @@ let currentCacheSize = 0
 
 /**
  * Get MIME type from file extension
- * @param {string} filePath - File path
- * @returns {string} MIME type
  */
 const getMimeType = (filePath) => {
   const ext = path.extname(filePath).toLowerCase()
@@ -66,16 +67,12 @@ const getMimeType = (filePath) => {
 
 /**
  * Validate path to prevent directory traversal attacks
- * @param {string} requestPath - Requested path
- * @param {string} rootDir - Root directory
- * @returns {string|null} Resolved safe path or null if unsafe
  */
 const validatePath = (requestPath, rootDir) => {
   try {
     const normalizedPath = path.normalize(requestPath)
     const resolvedPath = path.resolve(rootDir, normalizedPath.slice(1))
 
-    // Ensure the resolved path is within root directory
     if (!resolvedPath.startsWith(rootDir)) {
       return null
     }
@@ -88,72 +85,143 @@ const validatePath = (requestPath, rootDir) => {
 
 /**
  * Generate ETag from file content
- * @param {Buffer} content - File content
- * @returns {string} ETag hash
  */
 const generateETag = (content) => {
   return createHash('md5').update(content).digest('hex')
 }
 
 /**
- * Check if client supports gzip compression
- * @param {Object} headers - Request headers
- * @returns {boolean} True if gzip is supported
+ * Check compression support (Brotli preferred over Gzip)
  */
-const supportsGzip = (headers) => {
+const getAcceptedEncoding = (headers) => {
   const encoding = headers['accept-encoding'] || ''
-  return encoding.includes('gzip')
+  if (encoding.includes('br')) return 'br'
+  if (encoding.includes('gzip')) return 'gzip'
+  return null
+}
+
+/**
+ * Check if MIME type is compressible
+ */
+const isCompressible = (mimeType) => {
+  return mimeType.startsWith('text/') ||
+    mimeType.includes('javascript') ||
+    mimeType.includes('json') ||
+    mimeType.includes('css')
+}
+
+/**
+ * Parse Range header
+ */
+const parseRange = (rangeHeader, fileSize) => {
+  if (!rangeHeader) return null
+
+  const parts = rangeHeader.replace(/bytes=/, '').split('-')
+  const start = parseInt(parts[0], 10)
+  const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
+
+  if (isNaN(start) || isNaN(end) || start > end || end >= fileSize) {
+    return null
+  }
+
+  return { start, end, length: end - start + 1 }
+}
+
+/**
+ * Check if file should support range requests (media files)
+ */
+const supportsRangeRequests = (mimeType) => {
+  return mimeType.startsWith('video/') ||
+    mimeType.startsWith('audio/') ||
+    mimeType === 'application/pdf'
+}
+
+/**
+ * Serve file with range support (for video/audio)
+ */
+const serveWithRange = async (filePath, req, res, stats) => {
+  const mimeType = getMimeType(filePath)
+  const range = parseRange(req.headers.range, stats.size)
+
+  const headers = {
+    'Content-Type': mimeType,
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'public, max-age=31536000',
+  }
+
+  if (range) {
+    // Partial content
+    headers['Content-Range'] = `bytes ${range.start}-${range.end}/${stats.size}`
+    headers['Content-Length'] = range.length
+
+    res.writeHead(206, headers)
+
+    const stream = createReadStream(filePath, { start: range.start, end: range.end })
+    await pipeline(stream, res)
+  } else {
+    // Full content
+    headers['Content-Length'] = stats.size
+    res.writeHead(200, headers)
+
+    const stream = createReadStream(filePath)
+    await pipeline(stream, res)
+  }
+
+  return true
 }
 
 /**
  * Serve static file with caching and compression
- * @param {string} filePath - Absolute file path
- * @param {Object} req - HTTP request
- * @param {Object} res - HTTP response
- * @returns {Promise<boolean>} True if file was served
  */
 const serveStaticFile = async (filePath, req, res) => {
   try {
-    // Check cache first
+    let stats = await fs.stat(filePath)
+
+    // 👉 If is a directory
+    if (stats.isDirectory()) {
+      const indexPath = path.join(filePath, 'index.html')
+      await fs.access(indexPath)
+      stats = await fs.stat(indexPath)
+      filePath = indexPath
+    }
+
+    const mimeType = getMimeType(filePath)
+
+    // Use range requests for media files or large files
+    if (supportsRangeRequests(mimeType) || stats.size > 5 * 1024 * 1024) {
+      return await serveWithRange(filePath, req, res, stats)
+    }
+
     let cached = fileCache.get(filePath)
 
     if (!cached) {
-      const stats = await fs.stat(filePath)
-
-      // Don't cache very large files (>5MB)
-      if (stats.size > 5 * 1024 * 1024) {
-        const content = await fs.readFile(filePath)
-        const mimeType = getMimeType(filePath)
-
-        res.writeHead(200, {
-          'Content-Type': mimeType,
-          'Content-Length': content.length,
-        })
-        res.end(content)
-        return true
-      }
-
       // Read and cache file
       const content = await fs.readFile(filePath)
       const etag = generateETag(content)
 
       // Compress if text-based content
-      const mimeType = getMimeType(filePath)
-      let compressed = null
-      if (mimeType.startsWith('text/') ||
-        mimeType.includes('javascript') ||
-        mimeType.includes('json') ||
-        mimeType.includes('css')) {
+      let brotli = null
+      let gzipped = null
+
+      if (isCompressible(mimeType)) {
         try {
-          compressed = await gzip(content)
+          [brotli, gzipped] = await Promise.all([
+            brotliCompress(content, {
+              params: {
+                [zlib.constants.BROTLI_PARAM_QUALITY]: 6,
+              },
+            }),
+            gzip(content),
+          ])
         } catch {
-          compressed = null
+          // Compression failed, serve uncompressed
         }
       }
 
       cached = {
         content,
-        compressed,
+        brotli,
+        gzipped,
         etag,
         mimeType,
         size: stats.size,
@@ -173,72 +241,86 @@ const serveStaticFile = async (filePath, req, res) => {
       return true
     }
 
-    // Serve compressed or regular content
-    const useGzip = supportsGzip(req.headers) && cached.compressed
-    const content = useGzip ? cached.compressed : cached.content
+    // Select best encoding
+    const encoding = getAcceptedEncoding(req.headers)
+    let responseContent = cached.content
+    let contentEncoding = null
+
+    if (encoding === 'br' && cached.brotli) {
+      responseContent = cached.brotli
+      contentEncoding = 'br'
+    } else if (encoding === 'gzip' && cached.gzipped) {
+      responseContent = cached.gzipped
+      contentEncoding = 'gzip'
+    }
 
     const headers = {
       'Content-Type': cached.mimeType,
-      'Content-Length': content.length,
+      'Content-Length': responseContent.length,
       'ETag': cached.etag,
       'Cache-Control': 'public, max-age=31536000',
     }
 
-    if (useGzip) {
-      headers['Content-Encoding'] = 'gzip'
+    if (contentEncoding) {
+      headers['Content-Encoding'] = contentEncoding
     }
 
     res.writeHead(200, headers)
-    res.end(content)
+    res.end(responseContent)
     return true
 
   } catch (error) {
-    // File doesn't exist or read error
     return false
   }
 }
 
 /**
  * Serve HTML page with SPA fallback support
- * @param {string} pathname - Request pathname
- * @param {string} staticDir - Static files directory
- * @param {Object} req - HTTP request
- * @param {Object} res - HTTP response
  */
 const serveHTMLPage = async (pathname, staticDir, req, res) => {
   try {
-    // Normalize pathname
-    let htmlPath = pathname === '/' ? '/index' : pathname
-    let pageFile = path.join(staticDir, `${htmlPath}.html`)
+    const candidates = []
 
-    // Try direct path first
-    try {
-      await fs.access(pageFile)
-    } catch {
-      // Fallback to index.html for SPA routing
-      pageFile = path.join(staticDir, 'index.html')
+    // / → /index.html
+    if (pathname === '/') {
+      candidates.push(path.join(staticDir, 'index.html'))
+    } else {
+      // /test → /test/index.html
+      candidates.push(path.join(staticDir, pathname, 'index.html'))
 
+      // /test → /test.html
+      candidates.push(path.join(staticDir, `${pathname}.html`))
+
+      // SPA fallback
+      candidates.push(path.join(staticDir, 'index.html'))
+    }
+
+    let pageFile = null
+
+    for (const file of candidates) {
       try {
-        await fs.access(pageFile)
-      } catch {
-        // No index.html found
-        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' })
-        res.end('404')
-        return
-      }
+        await fs.access(file)
+        pageFile = file
+        break
+      } catch { }
+    }
+
+    if (!pageFile) {
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' })
+      res.end('404')
+      return
     }
 
     const content = await fs.readFile(pageFile, 'utf-8')
     const etag = generateETag(Buffer.from(content))
 
-    // Check ETag
     if (req.headers['if-none-match'] === etag) {
       res.writeHead(304)
       res.end()
       return
     }
 
-    // Compress HTML if supported
+    // Compress HTML
     let responseContent = content
     const headers = {
       'Content-Type': 'text/html; charset=utf-8',
@@ -246,10 +328,18 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
       'Cache-Control': 'no-cache',
     }
 
-    if (supportsGzip(req.headers)) {
+    const encoding = getAcceptedEncoding(req.headers)
+
+    if (encoding === 'br') {
       try {
-        const compressed = await gzip(Buffer.from(content))
-        responseContent = compressed
+        responseContent = await brotliCompress(Buffer.from(content))
+        headers['Content-Encoding'] = 'br'
+      } catch {
+        // Fallback to uncompressed
+      }
+    } else if (encoding === 'gzip') {
+      try {
+        responseContent = await gzip(Buffer.from(content))
         headers['Content-Encoding'] = 'gzip'
       } catch {
         // Fallback to uncompressed
@@ -275,11 +365,9 @@ const requestHandler = async (req, res) => {
   const staticDir = path.join(rootDir, config.webpack.output.buildDirectory, 'static')
 
   try {
-    // Parse URL
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`)
     const pathname = decodeURIComponent(parsedUrl.pathname)
 
-    // Validate path security
     const safePath = validatePath(pathname, staticDir)
     if (!safePath) {
       res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' })
@@ -287,11 +375,9 @@ const requestHandler = async (req, res) => {
       return
     }
 
-    // Try to serve as static file
     const fileServed = await serveStaticFile(safePath, req, res)
 
     if (!fileServed) {
-      // Serve HTML page with SPA fallback
       await serveHTMLPage(pathname, staticDir, req, res)
     }
 
@@ -302,7 +388,6 @@ const requestHandler = async (req, res) => {
   }
 }
 
-// Create HTTP server
 const httpServ = http.createServer(requestHandler)
 
 export default httpServ

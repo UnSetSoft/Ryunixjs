@@ -59,6 +59,10 @@ const dev = {
   command: 'dev',
   describe: 'Run server for developer mode.',
   handler: async (arg) => {
+    if (defaultSettings.webpack.production) {
+      logger.error("You need use development mode! change webpack.production to false in ryunix.config.js.")
+      return
+    }
     const open = Boolean(arg.browser) || false
     const settings = {
       open,
