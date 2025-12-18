@@ -49,7 +49,8 @@ const StartServer = async (cliSettings) => {
     `${defaultSettings.webpack.output.buildDirectory}/cache`,
   )
 
-  const mode = cliSettings.production || defaultSettings.webpack.production ? true : false
+  const mode =
+    cliSettings.production || defaultSettings.webpack.production ? true : false
 
   if (!mode) {
     cleanCacheDir(cacheDir)

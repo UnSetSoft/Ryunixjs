@@ -118,6 +118,16 @@ const defaultSettings = {
     ),
   },
 
+  server: {
+    csp: getConfigValue('server.csp', false),
+    cors: {
+      enabled: getConfigValue('server.cors.enabled', false),
+      origin: getConfigValue('server.cors.origin', '*'),
+      methods: getConfigValue('server.cors.methods', 'GET, HEAD, OPTIONS'),
+      headers: getConfigValue('server.cors.headers', 'Content-Type'),
+      credentials: getConfigValue('server.cors.credentials', false),
+    },
+  },
   webpack: {
     production: getConfigValue('webpack.production', false),
     root: getConfigValue('webpack.root', 'src'),
@@ -159,6 +169,5 @@ const defaultSettings = {
     },
   },
 }
-
 
 module.exports = defaultSettings

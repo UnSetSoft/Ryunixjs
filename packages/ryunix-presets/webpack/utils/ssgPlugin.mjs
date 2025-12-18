@@ -1,3 +1,14 @@
+/**
+ * Ryunix Routes Plugin - SSG Manifest Generator
+ * Extracts routes from routes.ryx file and generates manifest for static site generation
+ *
+ * Features:
+ * - Template literal support (`/docs/${var.field}`)
+ * - Frontmatter extraction from MDX files
+ * - Expression evaluation with fallbacks
+ * - Array and object literal parsing
+ */
+
 import fs from 'fs'
 import path from 'path'
 
@@ -22,9 +33,7 @@ class RyunixRoutesPlugin {
         const routesFile = path.resolve(process.cwd(), this.routesPath)
 
         if (!fs.existsSync(routesFile)) {
-          console.log(
-            '[SSG] No se encontró el archivo de rutas, omitiendo generación del manifiesto.',
-          )
+          console.log('[SSG] ❌ The route file was not found:', this.routesPath)
           callback()
           return
         }
@@ -32,25 +41,27 @@ class RyunixRoutesPlugin {
         try {
           const content = fs.readFileSync(routesFile, 'utf-8')
 
-          // Extract frontmatter from MDX files
           this.extractFrontmatter(content, path.dirname(routesFile))
 
-          // Parse routes with evaluated expressions
           const routes = this.parseRoutes(content)
 
-          if (routes.length === 0) {
-            console.warn(
-              '[SSG] ⚠️  No valid routes were found for prerendering.',
-            )
-          }
+          // Count routes with meta
+          const routesWithMeta = routes.filter(
+            (r) => r.meta && Object.keys(r.meta).length > 0,
+          )
 
           const manifest = JSON.stringify(routes, null, 2)
           const outputPath = path.resolve(process.cwd(), this.outputPath)
 
           fs.mkdirSync(path.dirname(outputPath), { recursive: true })
           fs.writeFileSync(outputPath, manifest)
+
+          console.log('✅ [SSG Plugin] Process successfully completed')
         } catch (error) {
-          console.error('[SSG] ❌ Error generating route manifest:', error)
+          console.error('\n' + '='.repeat(70))
+          console.error('[SSG] ❌ ERROR generating route manifest:')
+          console.error(error)
+          console.error('='.repeat(70) + '\n')
         }
 
         callback()
@@ -76,14 +87,9 @@ class RyunixRoutesPlugin {
       // Resolve absolute path
       const absolutePath = path.resolve(baseDir, mdxPath)
 
-      if (this.debug) {
-        console.log(`\n🔍 Procesando: ${alias} desde ${mdxPath}`)
-        console.log(`   Ruta absoluta: ${absolutePath}`)
-      }
-
       if (!fs.existsSync(absolutePath)) {
         if (this.debug) {
-          console.warn(`⚠️  Archivo no encontrado: ${absolutePath}`)
+          console.warn(`⚠️  File not found: ${absolutePath}`)
         }
         continue
       }
@@ -94,9 +100,6 @@ class RyunixRoutesPlugin {
 
         // Remove BOM if present
         if (mdxContent.charCodeAt(0) === 0xfeff) {
-          if (this.debug) {
-            console.log('   🔧 Removiendo BOM del archivo')
-          }
           mdxContent = mdxContent.slice(1)
         }
 
@@ -104,31 +107,10 @@ class RyunixRoutesPlugin {
 
         if (Object.keys(frontmatter).length > 0) {
           this.frontmatterCache.set(alias, frontmatter)
-          if (this.debug) {
-            console.log(
-              `✅ Frontmatter cargado: ${alias} desde ${path.basename(absolutePath)}`,
-            )
-            console.log(`   Datos:`, JSON.stringify(frontmatter, null, 2))
-          }
-        } else {
-          if (this.debug) {
-            console.warn(
-              `⚠️  No se encontró frontmatter en ${path.basename(absolutePath)}`,
-            )
-          }
         }
       } catch (error) {
-        console.error(
-          `❌ Error leyendo ${absolutePath}:`,
-          error.message,
-        )
+        console.error(`❌ Error reading ${absolutePath}:`, error.message)
       }
-    }
-
-    if (this.debug) {
-      console.log(
-        `\n📊 Total frontmatter cargados: ${this.frontmatterCache.size}`,
-      )
     }
   }
 
@@ -229,7 +211,8 @@ class RyunixRoutesPlugin {
     const routes = []
 
     // Match route objects - capture the entire object
-    const routeRegex = /\{\s*path:\s*[`"'][^`"']*[`"'](?:\s*\|\|\s*[`"'][^`"']*[`"'])?\s*,[\s\S]*?\}/g
+    const routeRegex =
+      /\{\s*path:\s*[`"'][^`"']*[`"'](?:\s*\|\|\s*[`"'][^`"']*[`"'])?\s*,[\s\S]*?\}/g
     let match
 
     while ((match = routeRegex.exec(content)) !== null) {
@@ -257,16 +240,11 @@ class RyunixRoutesPlugin {
 
       // Skip dynamic routes and wildcards
       if (evaluatedPath.includes(':') || evaluatedPath === '*') {
-        if (this.debug) {
-          console.log(`⏭️  Omitiendo ruta dinámica/wildcard: ${evaluatedPath}`)
-        }
         continue
       }
 
       // Check for noRenderLink early
-      const noRenderLinkMatch = routeBlock.match(
-        /noRenderLink:\s*([^,}\s]+)/,
-      )
+      const noRenderLinkMatch = routeBlock.match(/noRenderLink:\s*([^,}\s]+)/)
       if (noRenderLinkMatch) {
         const noRenderValue = this.evaluateExpression(
           noRenderLinkMatch[1].trim(),
@@ -281,9 +259,6 @@ class RyunixRoutesPlugin {
 
       // Check for NotFound property
       if (routeBlock.includes('NotFound:')) {
-        if (this.debug) {
-          console.log(`⏭️  Omitiendo ruta NotFound: ${evaluatedPath}`)
-        }
         continue
       }
 
@@ -293,22 +268,26 @@ class RyunixRoutesPlugin {
       this.extractField(routeBlock, 'label', route)
       this.extractField(routeBlock, 'section', route)
 
-      // Extract meta object
-      const metaMatch = routeBlock.match(/meta:\s*\{([\s\S]*?)\}(?:\s*[,}])/)
-      if (metaMatch) {
+      const metaContent = this.extractMetaObject(routeBlock)
+
+      if (metaContent) {
         route.meta = {}
-        this.extractField(metaMatch[1], 'title', route.meta)
-        this.extractField(metaMatch[1], 'description', route.meta)
-        this.extractField(metaMatch[1], 'keywords', route.meta)
-        this.extractField(metaMatch[1], 'image', route.meta)
-        this.extractField(metaMatch[1], 'author', route.meta)
+
+        // Temporalmente activar debug para esta ruta
+        const oldDebug = this.debug
+        this.debug = true
+
+        this.extractField(metaContent, 'title', route.meta)
+        this.extractField(metaContent, 'description', route.meta)
+        this.extractField(metaContent, 'keywords', route.meta)
+        this.extractField(metaContent, 'image', route.meta)
+        this.extractField(metaContent, 'author', route.meta)
+        this.extractField(metaContent, 'canonical', route.meta)
+      } else {
+        console.log(`   ❌ No object meta found in route: ${evaluatedPath}`)
       }
 
       routes.push(route)
-
-      if (this.debug) {
-        console.log(`✅ Ruta añadida: ${evaluatedPath}`)
-      }
     }
 
     return routes
@@ -360,6 +339,61 @@ class RyunixRoutesPlugin {
     }
 
     return result
+  }
+
+  /**
+   * Extract meta object content with proper brace matching
+   * Handles nested braces and arrays correctly
+   */
+  extractMetaObject(routeBlock) {
+    const metaStart = routeBlock.indexOf('meta:')
+    if (metaStart === -1) return null
+
+    // Find the opening brace after "meta:"
+    let pos = metaStart + 5 // length of "meta:"
+    while (pos < routeBlock.length && routeBlock[pos] !== '{') {
+      pos++
+    }
+
+    if (pos >= routeBlock.length) return null
+
+    // Now extract content respecting brace nesting
+    let braceCount = 0
+    let startPos = pos + 1 // Skip the opening brace
+    let endPos = pos
+
+    for (let i = pos; i < routeBlock.length; i++) {
+      const char = routeBlock[i]
+
+      // Check if we're inside quotes
+      if (char === '"' || char === "'" || char === '`') {
+        // Skip quoted strings
+        const quote = char
+        i++
+        while (i < routeBlock.length && routeBlock[i] !== quote) {
+          if (routeBlock[i] === '\\') i++ // Skip escaped characters
+          i++
+        }
+        continue
+      }
+
+      if (char === '{') {
+        braceCount++
+      } else if (char === '}') {
+        braceCount--
+        if (braceCount === 0) {
+          endPos = i
+          break
+        }
+      }
+    }
+
+    if (braceCount !== 0) {
+      // Unmatched braces
+      return null
+    }
+
+    return routeBlock.substring(startPos, endPos)
   }
 
   /**
