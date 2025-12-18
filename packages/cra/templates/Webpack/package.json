@@ -4,7 +4,8 @@
   "main": "index.js",
   "homepage": "./",
   "scripts": {
-    "dev": "ryunix server",
+    "dev": "ryunix dev",
+    "start": "ryunix start",
     "build": "ryunix build",
     "lint": "ryunix lint",
     "lint:fix": "ryunix lint --fix"

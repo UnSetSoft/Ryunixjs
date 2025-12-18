@@ -1,3 +1,13 @@
+/**
+ * Ryunix Routes Plugin - SSG Manifest Generator
+ * Extracts routes from routes.ryx file and generates manifest for static site generation
+ *
+ * Features:
+ * - Template literal support (`/docs/${var.field}`)
+ * - Frontmatter extraction from MDX files
+ * - Expression evaluation with fallbacks
+ * - Array and object literal parsing
+ */
 
 import fs from 'fs'
 import path from 'path'
@@ -23,9 +33,7 @@ class RyunixRoutesPlugin {
         const routesFile = path.resolve(process.cwd(), this.routesPath)
 
         if (!fs.existsSync(routesFile)) {
-          console.log(
-            '[SSG] No routes file found, skipping manifest generation.',
-          )
+          console.log('[SSG] ❌ The route file was not found:', this.routesPath)
           callback()
           return
         }
@@ -33,25 +41,27 @@ class RyunixRoutesPlugin {
         try {
           const content = fs.readFileSync(routesFile, 'utf-8')
 
-          // Extract frontmatter from MDX files
           this.extractFrontmatter(content, path.dirname(routesFile))
 
-          // Parse routes with evaluated expressions
           const routes = this.parseRoutes(content)
-          console.log('✅ Extracted routes:')
 
-          routes.map((route) => {
-            console.log(`- ${route.path}`)
-          })
+          // Count routes with meta
+          const routesWithMeta = routes.filter(
+            (r) => r.meta && Object.keys(r.meta).length > 0,
+          )
 
           const manifest = JSON.stringify(routes, null, 2)
           const outputPath = path.resolve(process.cwd(), this.outputPath)
 
           fs.mkdirSync(path.dirname(outputPath), { recursive: true })
           fs.writeFileSync(outputPath, manifest)
-          console.log('📦 SSG manifest saved:', routes.length, 'routes')
+
+          console.log('✅ [SSG Plugin] Process successfully completed')
         } catch (error) {
-          console.error('❌ Error generating routes manifest:', error)
+          console.error('\n' + '='.repeat(70))
+          console.error('[SSG] ❌ ERROR generating route manifest:')
+          console.error(error)
+          console.error('='.repeat(70) + '\n')
         }
 
         callback()
@@ -61,26 +71,26 @@ class RyunixRoutesPlugin {
 
   /**
    * Extract frontmatter from MDX files referenced in imports
+   * Matches: import X, { frontmatter as Y } from "path.mdx"
+   * Supports multiline imports
    */
   extractFrontmatter(content, baseDir) {
-    // Match: import X, { frontmatter as Y } from "path.mdx"
+    // Updated regex to support multiline imports
     const importRegex =
-      /import\s+\w+\s*,\s*{\s*frontmatter\s+as\s+(\w+)\s*}\s+from\s+["']([^"']+\.mdx)["']/g
+      /import\s+\w+\s*,\s*\{[\s\S]*?frontmatter\s+as\s+(\w+)[\s\S]*?\}\s+from\s+["']([^"']+\.mdx)["']/g
     let match
 
     while ((match = importRegex.exec(content)) !== null) {
-      const alias = match[1] // e.g., "TestPage"
-      const mdxPath = match[2] // e.g., "./doc/content/Test.mdx"
+      const alias = match[1] // e.g., "gettingStarted"
+      const mdxPath = match[2] // e.g., "./doc/introduction/getting-started.mdx"
 
       // Resolve absolute path
       const absolutePath = path.resolve(baseDir, mdxPath)
 
-      if (this.debug) {
-        console.log(`\n🔍 Processing: ${alias} from ${mdxPath}`)
-        console.log(`   Absolute path: ${absolutePath}`)
-      }
-
       if (!fs.existsSync(absolutePath)) {
+        if (this.debug) {
+          console.warn(`⚠️  File not found: ${absolutePath}`)
+        }
         continue
       }
 
@@ -89,10 +99,7 @@ class RyunixRoutesPlugin {
         let mdxContent = fs.readFileSync(absolutePath, 'utf-8')
 
         // Remove BOM if present
-        if (mdxContent.charCodeAt(0) === 0xFEFF) {
-          if (this.debug) {
-            console.log('   🔧 Removing BOM from file')
-          }
+        if (mdxContent.charCodeAt(0) === 0xfeff) {
           mdxContent = mdxContent.slice(1)
         }
 
@@ -100,16 +107,6 @@ class RyunixRoutesPlugin {
 
         if (Object.keys(frontmatter).length > 0) {
           this.frontmatterCache.set(alias, frontmatter)
-          if (this.debug) {
-            console.log(
-              `✅ Loaded frontmatter: ${alias} from ${path.basename(absolutePath)}`,
-            )
-            console.log(`   Data:`, JSON.stringify(frontmatter, null, 2))
-          }
-        } else {
-          console.warn(
-            `⚠️  No frontmatter found in ${path.basename(absolutePath)}`,
-          )
         }
       } catch (error) {
         console.error(`❌ Error reading ${absolutePath}:`, error.message)
@@ -119,17 +116,18 @@ class RyunixRoutesPlugin {
 
   /**
    * Parse YAML frontmatter from MDX content
+   * Handles multiple formats and edge cases
    */
   parseFrontmatter(content) {
     // Remove BOM if present
-    if (content.charCodeAt(0) === 0xFEFF) {
+    if (content.charCodeAt(0) === 0xfeff) {
       content = content.slice(1)
     }
 
     // Normalize line endings (CRLF -> LF)
     content = content.replace(/\r\n/g, '\n')
 
-    // Try multiple regex patterns
+    // Try multiple regex patterns for frontmatter
     const patterns = [
       /^---\s*\n([\s\S]*?)\n---/,
       /^---\s*\n([\s\S]*?)\n\s*---/,
@@ -207,50 +205,86 @@ class RyunixRoutesPlugin {
 
   /**
    * Parse routes from content with expression evaluation
+   * Handles: string literals, template literals, and fallback expressions
    */
   parseRoutes(content) {
     const routes = []
-    const routeRegex = /\{\s*path:\s*["']([^"']+)["'][\s\S]*?\}/g
+
+    // Match route objects - capture the entire object
+    const routeRegex =
+      /\{\s*path:\s*[`"'][^`"']*[`"'](?:\s*\|\|\s*[`"'][^`"']*[`"'])?\s*,[\s\S]*?\}/g
     let match
 
     while ((match = routeRegex.exec(content)) !== null) {
-      const path = match[1]
+      const routeBlock = match[0]
 
-      // Skip dynamic and special routes
-      if (path.includes(':') || path === '*') continue
+      // Extract path expression (including template literals and fallbacks)
+      const pathMatch = routeBlock.match(
+        /path:\s*([`"'][^`"']*[`"'](?:\s*\|\|\s*[`"'][^`"']*[`"'])?)/,
+      )
 
-      const route = { path }
+      if (!pathMatch) continue
 
-      // Get full route block
-      const startIdx = match.index
-      let braceCount = 1
-      let endIdx = startIdx + 1
+      const pathExpression = pathMatch[1]
 
-      for (let i = startIdx + 1; i < content.length; i++) {
-        if (content[i] === '{') braceCount++
-        if (content[i] === '}') braceCount--
-        if (braceCount === 0) {
-          endIdx = i
-          break
+      // Evaluate the path expression
+      const evaluatedPath = this.evaluatePathExpression(pathExpression)
+
+      // Skip invalid paths
+      if (!evaluatedPath) {
+        if (this.debug) {
+          console.log(`⏭️  Omitiendo ruta sin path válido`)
+        }
+        continue
+      }
+
+      // Skip dynamic routes and wildcards
+      if (evaluatedPath.includes(':') || evaluatedPath === '*') {
+        continue
+      }
+
+      // Check for noRenderLink early
+      const noRenderLinkMatch = routeBlock.match(/noRenderLink:\s*([^,}\s]+)/)
+      if (noRenderLinkMatch) {
+        const noRenderValue = this.evaluateExpression(
+          noRenderLinkMatch[1].trim(),
+        )
+        if (noRenderValue === true) {
+          if (this.debug) {
+            console.log(`⏭️  Omitiendo ruta con noRenderLink: ${evaluatedPath}`)
+          }
+          continue
         }
       }
 
-      const routeBlock = content.substring(startIdx, endIdx + 1)
+      // Check for NotFound property
+      if (routeBlock.includes('NotFound:')) {
+        continue
+      }
+
+      const route = { path: evaluatedPath }
 
       // Extract fields with expression evaluation
       this.extractField(routeBlock, 'label', route)
       this.extractField(routeBlock, 'section', route)
-      this.extractField(routeBlock, 'noRenderLink', route)
 
-      // Extract meta object
-      const metaMatch = routeBlock.match(/meta:\s*\{([\s\S]*?)\}(?:\s*[,}])/)
-      if (metaMatch) {
+      const metaContent = this.extractMetaObject(routeBlock)
+
+      if (metaContent) {
         route.meta = {}
-        this.extractField(metaMatch[1], 'title', route.meta)
-        this.extractField(metaMatch[1], 'description', route.meta)
-        this.extractField(metaMatch[1], 'keywords', route.meta)
-        this.extractField(metaMatch[1], 'image', route.meta)
-        this.extractField(metaMatch[1], 'author', route.meta)
+
+        // Temporalmente activar debug para esta ruta
+        const oldDebug = this.debug
+        this.debug = true
+
+        this.extractField(metaContent, 'title', route.meta)
+        this.extractField(metaContent, 'description', route.meta)
+        this.extractField(metaContent, 'keywords', route.meta)
+        this.extractField(metaContent, 'image', route.meta)
+        this.extractField(metaContent, 'author', route.meta)
+        this.extractField(metaContent, 'canonical', route.meta)
+      } else {
+        console.log(`   ❌ No object meta found in route: ${evaluatedPath}`)
       }
 
       routes.push(route)
@@ -260,8 +294,135 @@ class RyunixRoutesPlugin {
   }
 
   /**
-   * Extract and evaluate field from route block - FIXED
-   * Now correctly handles array literals with brackets
+   * Evaluate path expressions including template literals
+   * Handles: `/docs/${variable.field}` || "/fallback"
+   */
+  evaluatePathExpression(expression) {
+    // Handle fallback expressions: `...` || "..."
+    const fallbackMatch = expression.match(
+      /([`"'][^`"']*[`"'])\s*\|\|\s*([`"'][^`"']*[`"'])/,
+    )
+
+    if (fallbackMatch) {
+      const primary = this.evaluateSinglePath(fallbackMatch[1])
+      if (primary && !primary.includes('undefined')) {
+        return primary
+      }
+      return this.evaluateSinglePath(fallbackMatch[2])
+    }
+
+    return this.evaluateSinglePath(expression)
+  }
+
+  /**
+   * Evaluate a single path expression (template literal or string)
+   */
+  evaluateSinglePath(pathExpr) {
+    // Remove surrounding quotes/backticks
+    pathExpr = pathExpr.trim().replace(/^[`"']|[`"']$/g, '')
+
+    // Match template literal expressions: ${variable.field}
+    const templateRegex = /\$\{([^}]+)\}/g
+    let result = pathExpr
+    let match
+
+    while ((match = templateRegex.exec(pathExpr)) !== null) {
+      const expression = match[1].trim()
+      const value = this.resolveExpression(expression)
+
+      if (value !== undefined && value !== null) {
+        result = result.replace(match[0], value)
+      } else {
+        // If can't resolve, return undefined to try fallback
+        return undefined
+      }
+    }
+
+    return result
+  }
+
+  /**
+   * Extract meta object content with proper brace matching
+   * Handles nested braces and arrays correctly
+   */
+  extractMetaObject(routeBlock) {
+    const metaStart = routeBlock.indexOf('meta:')
+    if (metaStart === -1) return null
+
+    // Find the opening brace after "meta:"
+    let pos = metaStart + 5 // length of "meta:"
+    while (pos < routeBlock.length && routeBlock[pos] !== '{') {
+      pos++
+    }
+
+    if (pos >= routeBlock.length) return null
+
+    // Now extract content respecting brace nesting
+    let braceCount = 0
+    let startPos = pos + 1 // Skip the opening brace
+    let endPos = pos
+
+    for (let i = pos; i < routeBlock.length; i++) {
+      const char = routeBlock[i]
+
+      // Check if we're inside quotes
+      if (char === '"' || char === "'" || char === '`') {
+        // Skip quoted strings
+        const quote = char
+        i++
+        while (i < routeBlock.length && routeBlock[i] !== quote) {
+          if (routeBlock[i] === '\\') i++ // Skip escaped characters
+          i++
+        }
+        continue
+      }
+
+      if (char === '{') {
+        braceCount++
+      } else if (char === '}') {
+        braceCount--
+        if (braceCount === 0) {
+          endPos = i
+          break
+        }
+      }
+    }
+
+    if (braceCount !== 0) {
+      // Unmatched braces
+      return null
+    }
+
+    return routeBlock.substring(startPos, endPos)
+  }
+
+  /**
+   * Resolve expression like "variable.field" or "variable?.field" using frontmatter cache
+   * Handles optional chaining
+   */
+  resolveExpression(expression) {
+    // Remove optional chaining operator if present
+    expression = expression.replace(/\?\./, '.')
+
+    const parts = expression.split('.')
+
+    if (parts.length !== 2) {
+      return undefined
+    }
+
+    const [varName, field] = parts
+    const frontmatter = this.frontmatterCache.get(varName)
+
+    if (!frontmatter || frontmatter[field] === undefined) {
+      return undefined
+    }
+
+    return frontmatter[field]
+  }
+
+  /**
+   * Extract and evaluate field from route block
+   * Handles arrays, objects, and expressions with fallbacks
    */
   extractField(block, fieldName, target) {
     // Find the field name
@@ -274,9 +435,10 @@ class RyunixRoutesPlugin {
       valueStart++
     }
 
-    // Extract value respecting brackets
+    // Extract value respecting brackets and braces
     let expression = ''
     let bracketCount = 0
+    let braceCount = 0
     let inQuotes = false
     let quoteChar = null
 
@@ -284,7 +446,7 @@ class RyunixRoutesPlugin {
       const char = block[i]
 
       // Track quotes
-      if ((char === '"' || char === "'") && !inQuotes) {
+      if ((char === '"' || char === "'" || char === '`') && !inQuotes) {
         inQuotes = true
         quoteChar = char
         expression += char
@@ -304,21 +466,18 @@ class RyunixRoutesPlugin {
         continue
       }
 
-      // Track brackets
-      if (char === '[') {
-        bracketCount++
-        expression += char
-        continue
-      }
+      // Track brackets and braces
+      if (char === '[') bracketCount++
+      if (char === ']') bracketCount--
+      if (char === '{') braceCount++
+      if (char === '}') braceCount--
 
-      if (char === ']') {
-        bracketCount--
-        expression += char
-        continue
-      }
-
-      // Stop at comma or closing brace if not inside brackets/quotes
-      if ((char === ',' || char === '}') && bracketCount === 0) {
+      // Stop at comma or closing brace if not inside brackets/braces/quotes
+      if (
+        (char === ',' || char === '}') &&
+        bracketCount === 0 &&
+        braceCount === 0
+      ) {
         break
       }
 
@@ -343,6 +502,7 @@ class RyunixRoutesPlugin {
 
   /**
    * Evaluate expression with frontmatter data
+   * Handles: variable?.field || fallback
    */
   evaluateExpression(expression) {
     // Match: Variable?.field || fallback
@@ -419,7 +579,8 @@ class RyunixRoutesPlugin {
     // Remove quotes from strings
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
+      (value.startsWith("'") && value.endsWith("'")) ||
+      (value.startsWith('`') && value.endsWith('`'))
     ) {
       return value.slice(1, -1)
     }
