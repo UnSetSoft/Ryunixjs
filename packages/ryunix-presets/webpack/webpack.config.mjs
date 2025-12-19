@@ -70,7 +70,7 @@ export default {
   },
   context: resolveApp(dir, config.webpack.root),
   entry: './main.ryx',
-  devtool: config.webpack.production ? 'source-map' : false,
+  devtool: config.webpack.production ? false : 'source-map',
   output: {
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
     publicPath: '/',
