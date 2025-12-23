@@ -608,6 +608,73 @@ const useDeferredValue = (value) => {
   return deferredValue
 }
 
+
+/**
+ * The `usePersitentStore` function manages state using local storage in JavaScript, allowing for easy
+ * storage and retrieval of data.
+ * @param key - The `key` parameter in the `usePersitentStore` function is a string that represents the key
+ * under which the data will be stored in the browser's local storage. It is used to retrieve and store
+ * data associated with this specific key.
+ * @param [initialState] - The `initialState` parameter in the `usePersitentStore` function is the initial
+ * value that will be used if there is no data stored in the local storage under the specified `key`.
+ * It serves as the default value for the state if no data is retrieved from the local storage.
+ * @returns The `usePersitentStore` function returns an array containing two elements:
+ * 1. The current state value retrieved from local storage or the initial state if not found.
+ * 2. The `setValue` function that updates the state value and stores it in the local storage as a JSON
+ * string.
+ */
+const usePersitentStore = (key, initialState = '') => {
+  const [state, dispatch] = useStore(() => {
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialState
+    } catch (error) {
+      return initialState
+    }
+  })
+
+  /**
+   * The function `setValue` dispatches a value and stores it in the local storage as a JSON string,
+   * handling any errors with a console log.
+   * @param value - The `value` parameter in the `setValue` function is the data that you want to set.
+   * It is dispatched to update the state and then stored in the browser's local storage after being
+   * converted to a JSON string.
+   */
+  const setValue = (value) => {
+    try {
+      dispatch(value)
+      window.localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+
+  return [state, setValue]
+}
+
+/**
+ * The `useSwitch` function returns a state value and a toggle function to switch the state between
+ * true and false.
+ * @param [initialState=false] - The `initialState` parameter in the `useSwitch` function is used to
+ * set the initial value of the state. If no value is provided when calling `useSwitch`, the default
+ * initial state will be `false`.
+ * @returns An array containing the current state value and a function `toggle` that toggles the state
+ * value.
+ */
+const useSwitch = (initialState = false) => {
+  const [state, dispatch] = useStore(initialState)
+
+  /**
+   * The function `toggle` toggles the state by dispatching the opposite value of the current state.
+   */
+  const toggle = () => {
+    dispatch(!state)
+  }
+
+  return [state, toggle]
+}
+
 export {
   useStore,
   useReducer,
@@ -622,6 +689,8 @@ export {
   useStorePriority,
   useTransition,
   useDeferredValue,
+  usePersitentStore,
+  useSwitch,
   // Router exports
   RouterProvider,
   useRouter,
