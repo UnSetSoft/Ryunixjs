@@ -608,7 +608,6 @@ const useDeferredValue = (value) => {
   return deferredValue
 }
 
-
 /**
  * The `usePersitentStore` function manages state using local storage in JavaScript, allowing for easy
  * storage and retrieval of data.
@@ -648,7 +647,6 @@ const usePersitentStore = (key, initialState = '') => {
       console.error(error)
     }
   }
-
 
   return [state, setValue]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix",
-  "version": "1.2.4",
+  "version": "1.2.4-canary.2",
   "private": true,
   "homepage": "./",
   "workspaces": [
