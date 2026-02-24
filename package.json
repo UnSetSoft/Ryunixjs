@@ -31,7 +31,9 @@
     "git:push": "git push --follow-tags origin",
     "run:vite": "pnpm --filter ./test/web/Vite run dev",
     "run:rspack": "pnpm --filter ./test/web/Rspack run dev",
-    "run:web": "pnpm --filter ./test/webpack run dev"
+    "run:web": "pnpm --filter ./test/webpack run dev",
+    "run:web:build": "pnpm --filter ./test/webpack run build",
+    "run:web:start": "pnpm --filter ./test/webpack run start"
   },
   "devDependencies": {
     "@babel/preset-env": "7.28.5",
