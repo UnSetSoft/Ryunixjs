@@ -13,14 +13,14 @@
     "pnpm": ">=8"
   },
   "scripts": {
-    "dev": "pnpm --parallel run dev",
-    "build": "pnpm --stream run build",
-    "lint": "eslint . --max-warnings=0 --config eslint.config.mjs",
-    "lint:fix": "pnpm run format && eslint . --fix --max-warnings=0 --config eslint.config.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "eslint . --max-warnings=0 --config eslint.config.mjs && turbo run lint",
+    "lint:fix": "pnpm run format && eslint . --fix --max-warnings=0 --config eslint.config.mjs && turbo run lint -- --fix",
     "format": "prettier -w .",
     "format:check": "prettier -c .",
-    "test": "pnpm -r run test",
-    "clean": "pnpm -r exec rimraf node_modules && rimraf node_modules",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rimraf node_modules",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
     "release:canary": "npm run kg:bump && pnpm run format && pnpm --parallel --filter @unsetsoft/ryunixjs run canary:release",
@@ -50,6 +50,7 @@
     "prettier": "3.7.4",
     "rimraf": "6.1.2",
     "standard-version": "9.5.0",
+    "turbo": "^2.8.10",
     "typescript": "5.9.3"
   },
   "packageManager": "pnpm@10.26.0"

@@ -8,3 +8,4 @@ test
 .yarn
 .pnp.loader.mjs
 .pnp.cjs
+.turbo
