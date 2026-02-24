@@ -8,6 +8,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import ESLintPlugin from 'eslint-webpack-plugin'
 import eslintConfig from './eslint.config.mjs'
+import { createRequire } from 'module'
 import {
   getPackageManager,
   ENV_HASH,
@@ -35,8 +36,6 @@ const manager = getPackageManager()
 const loadDir = (pkm) => {
   try {
     switch (pkm) {
-      case 'pnpm':
-        throw new Error(`The manager ${pkm} is not supported.`)
       default:
         return process.cwd()
     }
@@ -63,6 +62,10 @@ function getAlias(object) {
 }
 
 const { version } = await getPackageVersion()
+
+const ryunixRequire = createRequire(import.meta.url)
+// Using thread-loader as a reference to find where my-app/node_modules/ryunix-presets/node_modules or .pnpm node_modules are located
+const presetsNodeModules = dirname(dirname(ryunixRequire.resolve('thread-loader/package.json')))
 
 export default {
   experiments: {
@@ -146,7 +149,7 @@ export default {
         test: /\.mdx?$/,
         use: [
           {
-            loader: '@mdx-js/loader',
+            loader: ryunixRequire.resolve('@mdx-js/loader'),
             options: {
               jsxImportSource: '@unsetsoft/ryunixjs',
               providerImportSource: '@unsetsoft/ryunixjs',
@@ -166,9 +169,9 @@ export default {
         test: /\.(js|jsx|ryx)$/,
         exclude: /node_modules/,
         use: [
-          'thread-loader',
+          ryunixRequire.resolve('thread-loader'),
           {
-            loader: 'babel-loader',
+            loader: ryunixRequire.resolve('babel-loader'),
             options: {
               presets: [
                 [
@@ -206,8 +209,8 @@ export default {
         use: [
           config.webpack.production
             ? MiniCssExtractPlugin.loader
-            : 'style-loader',
-          'css-loader',
+            : ryunixRequire.resolve('style-loader'),
+          ryunixRequire.resolve('css-loader'),
         ],
       },
       // Images
@@ -245,6 +248,9 @@ export default {
       ...config.webpack.resolve.extensions,
     ],
     fallback: config.webpack.resolve.fallback,
+  },
+  resolveLoader: {
+    modules: ['node_modules', presetsNodeModules],
   },
 
   plugins: [
