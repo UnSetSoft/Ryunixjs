@@ -20,6 +20,7 @@ import config from './utils/config.cjs'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.mjs'
 import RyunixRoutesPlugin from './utils/ssgPlugin.mjs'
+import AppRouterPlugin from './utils/appRouterPlugin.mjs'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
@@ -85,7 +86,7 @@ export default {
   },
   target: config.webpack.target,
   devServer: {
-    watchFiles: [resolveApp(dir, 'src/**/*')],
+    watchFiles: [resolveApp(dir, 'src/**/*'), resolveApp(dir, 'app/**/*')],
     hot: true,
     historyApiFallback: {
       index: '/',
@@ -268,6 +269,10 @@ export default {
         dir,
         `${config.webpack.output.buildDirectory}/ssg/routes.json`,
       ),
+    }),
+    new AppRouterPlugin({
+      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router.js`),
     }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),
