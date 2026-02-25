@@ -54,32 +54,59 @@ const extractSSGRoutes = (routes) => {
  * @param {Array<string>} options.userAgents - User agents to target
  * @returns {string} - robots.txt content
  */
+/**
+ * Generate robots.txt content
+ *
+ * Supports two formats:
+ *
+ * Legacy (ryunix.config.js):
+ *   { userAgents: ['*'], allow: ['/'], disallow: ['/api/'] }
+ *
+ * Next.js-style (app/robots.js):
+ *   { rules: [{ userAgent: '*', allow: '/', disallow: '/api/' }], sitemap: 'https://...' }
+ *
+ * @param {string|null} baseURL
+ * @param {Object} options
+ */
 const generateRobotsTxt = (baseURL, options = {}) => {
-  const { disallow = [], allow = [], userAgents = ['*'] } = options
-
   const lines = []
 
-  userAgents.forEach((agent) => {
-    lines.push(`User-agent: ${agent}`)
-    allow.forEach((p) => lines.push(`Allow: ${p}`))
-    disallow.forEach((p) => lines.push(`Disallow: ${p}`))
-    lines.push('') // Empty line between user agents
-  })
+  if (Array.isArray(options.rules)) {
+    // Next.js-style: rules array
+    for (const rule of options.rules) {
+      const agents = Array.isArray(rule.userAgent) ? rule.userAgent : [rule.userAgent || '*']
+      agents.forEach((agent) => lines.push(`User-agent: ${agent}`))
 
-  lines.push(`Sitemap: ${baseURL}/sitemap.xml`)
+      const allows = Array.isArray(rule.allow) ? rule.allow : (rule.allow ? [rule.allow] : [])
+      const disallows = Array.isArray(rule.disallow) ? rule.disallow : (rule.disallow ? [rule.disallow] : [])
+      allows.forEach((p) => lines.push(`Allow: ${p}`))
+      disallows.forEach((p) => lines.push(`Disallow: ${p}`))
+      lines.push('')
+    }
+
+    // Explicit sitemap URL overrides baseURL inference
+    const sitemapUrl = options.sitemap || (baseURL ? `${baseURL}/sitemap.xml` : null)
+    if (sitemapUrl) lines.push(`Sitemap: ${sitemapUrl}`)
+  } else {
+    // Legacy format
+    const { disallow = [], allow = [], userAgents = ['*'] } = options
+    userAgents.forEach((agent) => {
+      lines.push(`User-agent: ${agent}`)
+      allow.forEach((p) => lines.push(`Allow: ${p}`))
+      disallow.forEach((p) => lines.push(`Disallow: ${p}`))
+      lines.push('')
+    })
+    if (baseURL) lines.push(`Sitemap: ${baseURL}/sitemap.xml`)
+  }
 
   return lines.join('\n')
 }
 
 /**
- * Generate XML sitemap with all routes
- *
- * @param {Array} routes - Array of route objects
- * @param {string} baseURL - Base URL of the site
- * @param {Object} defaultSettings - Default sitemap settings
- * @param {string} defaultSettings.changefreq - Default change frequency
- * @param {string} defaultSettings.priority - Default priority
- * @returns {string} - Sitemap XML content
+ * Generate XML sitemap from an array of route objects (config-based)
+ * @param {Array} routes - Route objects from App Router
+ * @param {string} baseURL
+ * @param {Object} defaultSettings
  */
 const generateSitemap = (routes, baseURL, defaultSettings = {}) => {
   const { changefreq = 'weekly', priority = '0.7' } = defaultSettings
@@ -90,7 +117,6 @@ const generateSitemap = (routes, baseURL, defaultSettings = {}) => {
       const meta = route.meta || {}
       const sitemap = route.sitemap || {}
 
-      // Get metadata with fallbacks
       const lastmod =
         meta.lastmod ||
         sitemap.lastmod ||
@@ -114,7 +140,63 @@ ${urls}
 }
 
 /**
+ * Generate XML sitemap from direct entries returned by sitemap.js
+ * Each entry: { url, lastModified?, changefreq?, priority? }
+ * @param {Array} entries
+ */
+const generateSitemapFromEntries = (entries) => {
+  const urls = entries
+    .map((entry) => {
+      if (!entry.url) return ''
+      const lastmod = entry.lastModified
+        ? (entry.lastModified instanceof Date
+          ? entry.lastModified.toISOString().split('T')[0]
+          : String(entry.lastModified))
+        : new Date().toISOString().split('T')[0]
+      const freq = entry.changefreq || 'weekly'
+      const prio = entry.priority != null ? String(entry.priority) : '0.7'
+
+      return `  <url>
+    <loc>${entry.url}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${freq}</changefreq>
+    <priority>${prio}</priority>
+  </url>`
+    })
+    .filter(Boolean)
+    .join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`
+}
+
+/**
+ * Generate a sitemap index XML for multiple sitemaps
+ * @param {string} baseURL
+ * @param {number} count - number of indexed sitemap files
+ */
+const generateSitemapIndex = (baseURL, count) => {
+  const sitemaps = Array.from({ length: count }, (_, i) =>
+    `  <sitemap>
+    <loc>${baseURL}/sitemap-${i}.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>`
+  ).join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemaps}
+</sitemapindex>`
+}
+
+/**
  * Generate HTML meta tags from metadata object
+ *
+ * Internal Ryunix keys (titleTemplate, titleDefault, etc.) are never emitted
+ * as <meta> tags. To add arbitrary meta tags use the `custom` key:
+ *   export const Metatags = { title: 'Page', custom: { 'theme-color': '#fff' } }
  *
  * @param {Object} meta - Metadata object
  * @param {Object} defaultMeta - Default metadata
@@ -124,7 +206,19 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
   const tags = { ...defaultMeta, ...meta }
   const lines = []
 
-  // Order of meta tags for better SEO
+  // Keys that are handled separately (title tag, link tag) — never emit as <meta>
+  const INTERNAL_KEYS = new Set([
+    'title',
+    'canonical',
+    'titleTemplate',
+    'titleDefault',
+    'lastmod',
+    'changefreq',
+    'priority',
+    'custom',
+  ])
+
+  // Standard meta keys that are allowed at the top level (in order for SEO)
   const orderedKeys = [
     'description',
     'keywords',
@@ -142,39 +236,43 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
     'twitter:image',
   ]
 
-  // Function to add a meta tag
+  // Function to add a single meta tag
   const addMetaTag = (key, value) => {
-    if (!value || ['title', 'canonical'].includes(key)) return
+    if (!value || INTERNAL_KEYS.has(key)) return
 
     const isProperty = key.startsWith('og:') || key.startsWith('twitter:')
     const attr = isProperty ? 'property' : 'name'
 
-    // Handle arrays (e.g., keywords)
     if (Array.isArray(value)) {
       const content = value.join(', ')
-      if (content) {
-        lines.push(`<meta ${attr}="${key}" content="${content}" />`)
-      }
+      if (content) lines.push(`<meta ${attr}="${key}" content="${content}" />`)
     } else if (value) {
-      // Escape quotes in content
       const escapedValue = String(value).replace(/"/g, '&quot;')
       lines.push(`<meta ${attr}="${key}" content="${escapedValue}" />`)
     }
   }
 
-  // Add ordered meta tags first
+  // Add ordered standard keys first
   orderedKeys.forEach((key) => {
-    if (key in tags) {
-      addMetaTag(key, tags[key])
+    if (key in tags) addMetaTag(key, tags[key])
+  })
+
+  // Add any other top-level standard keys not in the ordered list
+  // (must NOT be internal and must match known patterns: og:, twitter:, or simple name)
+  Object.entries(tags).forEach(([key, value]) => {
+    if (!orderedKeys.includes(key) && !INTERNAL_KEYS.has(key)) {
+      // Only emit if it looks like a real meta key (og:, twitter:, or simple word)
+      const isStandardPattern = /^[a-z][a-z0-9:_-]*$/.test(key)
+      if (isStandardPattern) addMetaTag(key, value)
     }
   })
 
-  // Add remaining meta tags
-  Object.entries(tags).forEach(([key, value]) => {
-    if (!orderedKeys.includes(key)) {
+  // Process custom: { ... } — explicit user-defined meta tags
+  if (tags.custom && typeof tags.custom === 'object') {
+    Object.entries(tags.custom).forEach(([key, value]) => {
       addMetaTag(key, value)
-    }
-  })
+    })
+  }
 
   return lines.length > 0 ? '    ' + lines.join('\n    ') : ''
 }
@@ -304,7 +402,42 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   }
 
   const template = fs.readFileSync(templatePath, 'utf-8')
+  let activeTemplate = template // may be mutated by manifest injection
   const prerenderRoutes = []
+
+  // ─── app/manifest.js ───────────────────────────────────────────────────────
+  const manifestFileCandidates = [
+    path.join(process.cwd(), 'app', 'manifest.js'),
+    path.join(process.cwd(), 'app', 'manifest.mjs'),
+    path.join(process.cwd(), 'src', 'app', 'manifest.js'),
+    path.join(process.cwd(), 'src', 'app', 'manifest.mjs'),
+  ]
+  const manifestFilePath = manifestFileCandidates.find((p) => fs.existsSync(p))
+
+  if (manifestFilePath) {
+    try {
+      const mod = await import(`file://${manifestFilePath}?update=${Date.now()}`)
+      const manifestFn = mod.default
+      if (typeof manifestFn !== 'function') {
+        console.warn('[SSG] app/manifest.js must have a default function export. Skipping.')
+      } else {
+        const data = await manifestFn()
+        if (data && typeof data === 'object') {
+          const manifestJson = JSON.stringify(data, null, 2)
+          fs.writeFileSync(path.join(buildDir, 'static', 'manifest.webmanifest'), manifestJson)
+          console.log('[SSG] ✅ manifest.webmanifest created')
+
+          // Inject <link rel="manifest"> into the template for all prerendered pages
+          const manifestLink = '<link rel="manifest" href="/manifest.webmanifest" />'
+          if (!activeTemplate.includes('rel="manifest"')) {
+            activeTemplate = activeTemplate.replace('</head>', `${manifestLink}\n</head>`)
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[SSG] ❌ Error loading app/manifest.js:', e.message)
+    }
+  }
 
   let AppRouterApp = null;
   let ryunixRenderToString = null;
@@ -353,7 +486,7 @@ const buildSSG = async (routesConfig, config, buildDir) => {
         console.warn(`[SSG] Missing SSR dependencies for ${route.path}. AppRouterApp: ${!!AppRouterApp}, renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement}`)
       }
 
-      const html = await prerenderRoute(route, template, config, renderedString)
+      const html = await prerenderRoute(route, activeTemplate, config, renderedString)
 
       const outputDir =
         route.path === '/'
@@ -379,36 +512,121 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   console.log(`✅ Prerendered ${prerenderRoutes.length} routes:`)
   prerenderRoutes.forEach((r) => console.log(` - ${r}`))
 
-  // Generate sitemap if enabled
-  if (config.experimental?.ssg?.sitemap?.enable) {
+  // ─── Sitemap generation ──────────────────────────────────────────────────
+  // Priority: app/sitemap.js (Next.js-style) > ryunix.config.js
+
+  const sitemapFileCandidates = [
+    path.join(process.cwd(), 'app', 'sitemap.js'),
+    path.join(process.cwd(), 'app', 'sitemap.mjs'),
+    path.join(process.cwd(), 'src', 'app', 'sitemap.js'),
+    path.join(process.cwd(), 'src', 'app', 'sitemap.mjs'),
+  ]
+  const sitemapFilePath = sitemapFileCandidates.find((p) => fs.existsSync(p))
+
+  if (sitemapFilePath) {
+    // ── Next.js-style sitemap.js API ─────────────────────────────────────
+    try {
+      const mod = await import(`file://${sitemapFilePath}?update=${Date.now()}`)
+      const sitemapFn = mod.default
+      const generateSitemaps = mod.generateSitemaps
+
+      if (typeof sitemapFn !== 'function') {
+        console.warn('[SSG] app/sitemap.js must have a default function export. Skipping.')
+      } else {
+        console.log(`[SSG] Using ${path.relative(process.cwd(), sitemapFilePath)}`)
+
+        if (typeof generateSitemaps === 'function') {
+          // ── Split sitemap mode ──────────────────────────────────────────
+          const segments = await generateSitemaps()
+          let baseURL = ''
+
+          for (let i = 0; i < segments.length; i++) {
+            const entries = await sitemapFn({ ...segments[i], id: i })
+            if (!Array.isArray(entries) || entries.length === 0) continue
+
+            if (!baseURL && entries[0]?.url) {
+              try { baseURL = new URL(entries[0].url).origin } catch { }
+            }
+
+            const xml = generateSitemapFromEntries(entries)
+            fs.writeFileSync(path.join(buildDir, 'static', `sitemap-${i}.xml`), xml)
+            console.log(`✅ sitemap-${i}.xml (${entries.length} URLs)`)
+          }
+
+          if (baseURL && segments.length > 0) {
+            const indexXml = generateSitemapIndex(baseURL, segments.length)
+            fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), indexXml)
+            console.log(`✅ sitemap.xml (index of ${segments.length} sitemaps)`)
+          }
+        } else {
+          // ── Single sitemap mode ─────────────────────────────────────────
+          const entries = await sitemapFn({})
+          if (Array.isArray(entries) && entries.length > 0) {
+            const xml = generateSitemapFromEntries(entries)
+            fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), xml)
+            console.log(`✅ Sitemap created (${entries.length} URLs)`)
+          } else {
+            console.warn('[SSG] sitemap() returned no entries.')
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[SSG] ❌ Error running app/sitemap.js:', e.message)
+    }
+  } else if (config.experimental?.ssg?.sitemap?.enable) {
+  // ── Fallback: ryunix.config.js ───────────────────────────────────────
     try {
       const baseURL = config.experimental.ssg.sitemap.baseURL
-
       if (!baseURL) {
-        console.warn(
-          '[SSG] ⚠️  baseURL not configured, skipping sitemap generation.',
-        )
-        return
+        console.warn('[SSG] ⚠️  baseURL not set — skipping sitemap.')
+      } else {
+        const xml = generateSitemap(routes, baseURL, config.experimental.ssg.sitemap.settings)
+        fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), xml)
+        console.log('✅ Sitemap created')
       }
-
-      // Generate sitemap
-      const sitemap = generateSitemap(
-        routes,
-        baseURL,
-        config.experimental.ssg.sitemap.settings,
-      )
-      fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), sitemap)
-      console.log('✅ Sitemap created')
-
-      // Generate robots.txt
-      const robots = generateRobotsTxt(
-        baseURL,
-        config.experimental?.ssg?.robots,
-      )
-      fs.writeFileSync(path.join(buildDir, 'static', 'robots.txt'), robots)
-      console.log('✅ Robots.txt created')
     } catch (error) {
-      console.error('[SSG] ❌ Error generating Sitemap/Robots:', error)
+      console.error('[SSG] ❌ Error generating Sitemap:', error)
+    }
+  }
+
+  // ─── robots.txt generation ────────────────────────────────────────────────
+  // Priority: app/robots.js > ryunix.config.js
+
+  const robotsFileCandidates = [
+    path.join(process.cwd(), 'app', 'robots.js'),
+    path.join(process.cwd(), 'app', 'robots.mjs'),
+    path.join(process.cwd(), 'src', 'app', 'robots.js'),
+    path.join(process.cwd(), 'src', 'app', 'robots.mjs'),
+  ]
+  const robotsFilePath = robotsFileCandidates.find((p) => fs.existsSync(p))
+
+  if (robotsFilePath) {
+    try {
+      const mod = await import(`file://${robotsFilePath}?update=${Date.now()}`)
+      const robotsFn = mod.default
+      if (typeof robotsFn !== 'function') {
+        console.warn('[SSG] app/robots.js must have a default function export. Skipping.')
+      } else {
+        console.log(`[SSG] Using ${path.relative(process.cwd(), robotsFilePath)}`)
+        const data = await robotsFn()
+        const robotsTxt = generateRobotsTxt(null, data)
+        fs.writeFileSync(path.join(buildDir, 'static', 'robots.txt'), robotsTxt)
+        console.log('✅ Robots.txt created')
+      }
+    } catch (e) {
+      console.error('[SSG] ❌ Error running app/robots.js:', e.message)
+    }
+  } else if (config.experimental?.ssg?.robots || config.experimental?.ssg?.sitemap?.baseURL) {
+    // ── Fallback: ryunix.config.js ───────────────────────────────────────
+    const baseURL = config.experimental.ssg.sitemap?.baseURL
+    if (baseURL) {
+      try {
+        const robotsTxt = generateRobotsTxt(baseURL, config.experimental?.ssg?.robots)
+        fs.writeFileSync(path.join(buildDir, 'static', 'robots.txt'), robotsTxt)
+        console.log('✅ Robots.txt created')
+      } catch (error) {
+        console.error('[SSG] ❌ Error generating Robots.txt:', error)
+      }
     }
   }
 }
