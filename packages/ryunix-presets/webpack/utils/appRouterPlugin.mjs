@@ -65,7 +65,7 @@ class AppRouterPlugin {
     for (const entry of entries) {
       if (entry.isFile()) {
         const ext = path.extname(entry.name);
-        if (!['.ryx', '.js', '.jsx'].includes(ext)) continue;
+        if (!['.ryx', '.js', '.jsx', '.ts', '.tsx', '.mdx'].includes(ext)) continue;
 
         const name = path.basename(entry.name, ext);
         const fullPath = path.join(dir, entry.name).replace(/\\/g, '/');
@@ -112,7 +112,36 @@ class AppRouterPlugin {
     const extractMeta = (filePath) => {
       if (!filePath) return null;
       try {
-        const content = fs.readFileSync(filePath, 'utf8');
+        let content = fs.readFileSync(filePath, 'utf8');
+
+        // Remove BOM if present
+        if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+        content = content.replace(/\r\n/g, '\n');
+
+        // Check for MDX YAML frontmatter
+        if (filePath.endsWith('.mdx')) {
+          const mdxMatch = content.match(/^---\s*\n([\s\S]*?)\n\s*---/);
+          if (mdxMatch) {
+            const yamlContent = mdxMatch[1];
+            const frontmatter = {};
+            const lines = yamlContent.split('\n').filter(line => line.trim());
+
+            for (const line of lines) {
+              const keyValueMatch = line.match(/^\s*(\w+)\s*:\s*(.+)$/);
+              if (keyValueMatch) {
+                const key = keyValueMatch[1].trim();
+                let value = keyValueMatch[2].trim();
+                if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+                  value = value.slice(1, -1);
+                }
+                frontmatter[key] = value;
+              }
+            }
+            // Title and description are the standard keys in YAML used for metatags
+            if (Object.keys(frontmatter).length > 0) return frontmatter;
+          }
+        }
+
         const metatagMatch = content.match(/export\s+const\s+Metatags?\s*=\s*(\{[\s\S]*?\})(?=\s*(?:export|;|$))/);
         if (metatagMatch) {
           return new Function(`return ${metatagMatch[1]}`)();
@@ -125,10 +154,32 @@ class AppRouterPlugin {
 
     const layoutMeta = extractMeta(layout) || {};
     const indexMeta = extractMeta(index) || {};
-    let meta = null;
+    let meta = {};
 
-    if (Object.keys(layoutMeta).length > 0 || Object.keys(indexMeta).length > 0) {
-      meta = { ...layoutMeta, ...indexMeta };
+    const mergeMeta = (target, source) => {
+      if (!source) return;
+      Object.keys(source).forEach(key => {
+        if (key === 'title') {
+          if (typeof source.title === 'object') {
+            target.titleTemplate = source.title.template || target.titleTemplate;
+            target.titleDefault = source.title.default || target.titleDefault;
+            target.title = source.title.default || target.title;
+          } else {
+            target.title = source.title;
+          }
+        } else {
+          target[key] = source[key];
+        }
+      });
+    };
+
+    mergeMeta(meta, layoutMeta);
+    mergeMeta(meta, indexMeta);
+
+
+
+    if (Object.keys(meta).length === 0) {
+      meta = null;
     }
 
     if (!layout && !index && children.length === 0 && !errorFile && !loadingFile) {
@@ -188,15 +239,38 @@ class AppRouterPlugin {
       importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`;
     }
 
-    const traverse = (node, parentLayouts = []) => {
+    const mergeStaticMeta = (target, source) => {
+      if (!source) return;
+      Object.keys(source).forEach(key => {
+        if (key === 'title') {
+          if (typeof source.title === 'object') {
+            target.titleTemplate = source.title.template || target.titleTemplate;
+            target.titleDefault = source.title.default || target.titleDefault;
+            target.title = source.title.default || target.title;
+          } else {
+            target.title = source.title;
+          }
+        } else {
+          target[key] = source[key];
+        }
+      });
+    };
+
+    const traverse = (node, parentLayouts = [], inheritedMeta = {}) => {
       if (Array.isArray(node)) {
         for (const child of node) {
-          traverse(child, parentLayouts);
+          traverse(child, parentLayouts, inheritedMeta);
         }
         return;
       }
 
       const currentLayouts = [...parentLayouts];
+      const currentMeta = { ...inheritedMeta };
+      if (node.meta) Object.assign(currentMeta, JSON.parse(JSON.stringify(node.meta))); // deep clone workaround
+
+      if (node.meta) {
+        mergeStaticMeta(currentMeta, node.meta);
+      }
       if (node.layout) {
         const layoutId = `Layout_${getNextId()}`;
         importStatements += `import * as ${layoutId} from '${this.getRelativeImport(node.layout, outputPath)}';\n`;
@@ -210,8 +284,8 @@ class AppRouterPlugin {
         const indexId = `Index_${getNextId()}`;
         importStatements += `import * as ${indexId} from '${this.getRelativeImport(node.index, outputPath)}';\n`;
 
-        const layoutsArrayStr = `[${currentLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isAsync: ${l.isAsync} }`).join(', ')}]`;
-        const indexConfigStr = `{ default: getOptExport(${indexId}, 'default'), isAsync: ${!!node.indexIsAsync}, Metatags: getOptExport(${indexId}, 'Metatags') || {} }`;
+        const layoutsArrayStr = `[${currentLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
+        const indexConfigStr = `{ default: getOptExport(${indexId}, 'default'), isAsync: ${!!node.indexIsAsync}, Metatags: getOptExport(${indexId}, 'Metatags') || getOptExport(${indexId}, 'frontmatter') || {} }`;
         const errorPropStr = errorsId ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'UnknowError') || getOptExport(${errorsId}, 'default') })` : indexConfigStr;
 
         let componentBody = `<RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} props={props} />`;
@@ -222,15 +296,22 @@ class AppRouterPlugin {
     component: (props) => ${componentBody}
   }`);
 
+        const finalMeta = { ...currentMeta };
+        if (finalMeta.titleTemplate && finalMeta.title && finalMeta.title !== finalMeta.titleDefault) {
+          finalMeta.title = finalMeta.titleTemplate.replace('%s', finalMeta.title);
+        } else if (finalMeta.titleDefault && !finalMeta.title) {
+          finalMeta.title = finalMeta.titleDefault;
+        }
+
         ssgRoutes.push({
           path: node.path,
-          meta: node.meta || {}
+          meta: Object.keys(finalMeta).length > 0 ? finalMeta : {}
         });
       }
 
       if (Array.isArray(node.children)) {
         for (const child of node.children) {
-          traverse(child, currentLayouts);
+          traverse(child, currentLayouts, currentMeta);
         }
       }
     };
@@ -240,12 +321,12 @@ class AppRouterPlugin {
     }
 
     if (errorsPath) {
-      const layoutsArrayStr = `[${rootLayouts.map(l => `{ default: ${l.id}.default, isAsync: ${l.isAsync} }`).join(', ')}]`;
+      const layoutsArrayStr = `[${rootLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
       flattenedRoutes.push(`
   {
     path: '*',
-    NotFound: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || {} }} props={props} />,
-    ErrorBuild: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'ErrorBuild') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || {} }} props={props} />
+    NotFound: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />,
+    ErrorBuild: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'ErrorBuild') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
   }`);
     }
 

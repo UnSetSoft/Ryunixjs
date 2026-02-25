@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.2.4-canary.3",
+  "version": "1.2.4-canary.4",
   "license": "MIT",
   "main": "./dist/Ryunix.umd.js",
   "module": "./dist/Ryunix.esm.js",
@@ -53,7 +53,7 @@
     "jest-environment-jsdom": "^30.2.0"
   },
   "engines": {
-    "node": "^18 || ^20 || ^22"
+    "node": "^20 || ^22 || ^24"
   },
   "keywords": [
     "ryunixjs"

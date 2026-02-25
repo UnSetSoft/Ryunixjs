@@ -4,6 +4,38 @@ const reactPlugin = require('eslint-plugin-react')
 
 const userConfig = getConfig()
 
+const path = require('path')
+const fs = require('fs')
+
+/**
+ * Check if a config path exists in userConfig and warn if it's deprecated.
+ */
+const warnDeprecated = (configPath, message) => {
+  if (!userConfig) return
+
+  const keys = configPath.split('.')
+  let value = userConfig
+  for (const key of keys) {
+    if (value?.[key] === undefined) return
+    value = value[key]
+  }
+  if (value !== undefined) {
+    console.warn(`\x1b[33m[Ryunix Warn]\x1b[0m \x1b[1m${configPath}\x1b[0m is deprecated. ${message}`)
+  }
+}
+
+// Check for App Router presence
+const rootDir = userConfig?.webpack?.root ?? 'src'
+const hasAppDir = fs.existsSync(path.resolve(process.cwd(), 'app')) || fs.existsSync(path.resolve(process.cwd(), `${rootDir}/app`))
+
+// Global old SSG deprecations
+warnDeprecated('experimental.ssg', 'The old SSG configuration is deprecated and will be removed in future versions in favor of App Router SSG conventions.')
+
+// App Router specific deprecations
+if (hasAppDir) {
+  warnDeprecated('static.seo', 'The global static.seo configuration is redundant when using the App Router. Use exported metadata in layout.ryx/page.ryx instead.')
+  warnDeprecated('static.customTemplate', 'Custom templates are replaced by the root layout.ryx when using the App Router.')
+}
 // ============================================================================
 // Helpers
 // ============================================================================

@@ -2036,7 +2036,7 @@ packages:
 
   '@unsetsoft/ryunixjs@1.2.2':
     resolution: {integrity: sha512-TBfOYFfoGiElyfA50GgtvdZaQ6c0ZhKDccQsuRlURtE7GQI39jw+KWUI1BIaHvZ/KPDZ7UsG9zouoE6Vhzrt4g==}
-    engines: {node: ^18 || ^20 || ^22}
+    engines: {node: ^20 || ^22 || ^24}
 
   '@webassemblyjs/ast@1.14.1':
     resolution: {integrity: sha512-nuBEDgQfm1ccRp/8bCQrx1frohyufl4JlbMMZ4P1wpeOfDhF6FQkxZJ1b/e+PLwr6X1Nhw6OLme5usuBWYBvuQ==}

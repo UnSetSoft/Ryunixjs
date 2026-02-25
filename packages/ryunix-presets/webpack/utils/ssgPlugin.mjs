@@ -33,7 +33,12 @@ class RyunixRoutesPlugin {
         const routesFile = path.resolve(process.cwd(), this.routesPath)
 
         if (!fs.existsSync(routesFile)) {
-          console.log('[SSG] ❌ The route file was not found:', this.routesPath)
+          const hasAppDir = fs.existsSync(path.resolve(process.cwd(), 'app')) || fs.existsSync(path.resolve(process.cwd(), 'src/app'))
+          if (!hasAppDir) {
+            console.log('[SSG] ❌ The route file was not found:', this.routesPath)
+          } else if (this.debug) {
+            console.log('[SSG] ℹ️ Skipping legacy SSG generation (App Router in use, routes.ryx not found).')
+          }
           callback()
           return
         }

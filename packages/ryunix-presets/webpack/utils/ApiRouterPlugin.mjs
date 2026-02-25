@@ -5,7 +5,7 @@ import { transformSync } from '@swc/core'
 /**
  * Valid API route file names
  */
-const API_FILE_NAMES = ['route.js', 'route.ryx', 'endpoint.js']
+const API_FILE_NAMES = ['route.js', 'route.ts', 'route.ryx', 'router.js', 'router.ts', 'router.ryx', 'endpoint.js', 'endpoint.ts']
 
 class ApiRouterPlugin {
   constructor(options = {}) {
@@ -40,13 +40,7 @@ class ApiRouterPlugin {
       }
 
       try {
-        const stats = fs.statSync(apiDirPath)
-        const mtime = stats.mtimeMs
-
-        if (mtime > lastScanTime) {
-          this.compileApiRoutes(apiDirPath, path.resolve(process.cwd(), this.outputPath))
-          lastScanTime = mtime
-        }
+        this.compileApiRoutes(apiDirPath, path.resolve(process.cwd(), this.outputPath))
       } catch (error) {
         console.error('[ApiRouter] ❌ ERROR compiling api routes:', error)
       }

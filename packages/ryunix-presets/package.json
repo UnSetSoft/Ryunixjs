@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.26-canary.1",
+  "version": "1.0.26-canary.11",
   "author": "Neyunse",
   "type": "module",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
@@ -15,7 +15,7 @@
     "webpack/"
   ],
   "peerDependencies": {
-    "@unsetsoft/ryunixjs": "^1.2.3-canary.0 || ^1.2.2"
+    "@unsetsoft/ryunixjs": "^1.2.4-canary.0 || ^1.2.4"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
@@ -30,7 +30,7 @@
     "ryunix": "./webpack/bin/index.mjs"
   },
   "engines": {
-    "node": "^18 || ^20 || ^22"
+    "node": "^20 || ^22 || ^24"
   },
   "dependencies": {
     "@babel/cli": "7.28.3",
