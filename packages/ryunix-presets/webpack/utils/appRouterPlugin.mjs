@@ -4,7 +4,8 @@ import path from 'path';
 class AppRouterPlugin {
   constructor(options = {}) {
     this.appDir = options.appDir || 'src/app';
-    this.outputPath = options.outputPath || '.ryunix/app-router.js';
+    this.outputPath = options.outputPath || '.ryunix/server/app/app-router.js';
+    this.ssgOutputPath = options.ssgOutputPath || null; // explicit path for routes.json
     this.debug = options.debug || false;
   }
 
@@ -558,7 +559,9 @@ export default AppRouter;
     }
 
     // SSG Output
-    const ssgManifestPath = path.join(path.dirname(outputPath), 'ssg', 'routes.json');
+    const ssgManifestPath = this.ssgOutputPath
+      ? path.resolve(process.cwd(), this.ssgOutputPath)
+      : path.join(path.dirname(outputPath), 'ssg', 'routes.json');
     const ssgManifestContent = JSON.stringify(ssgRoutes, null, 2);
 
     let shouldWriteSsg = true;

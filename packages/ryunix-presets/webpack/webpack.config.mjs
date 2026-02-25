@@ -70,9 +70,38 @@ const ryunixRequire = createRequire(import.meta.url)
 // Using thread-loader as a reference to find where my-app/node_modules/ryunix-presets/node_modules or .pnpm node_modules are located
 const presetsNodeModules = dirname(dirname(ryunixRequire.resolve('thread-loader/package.json')))
 
+// A require() rooted at the user project — resolves user-installed packages (e.g. tailwind, postcss plugins)
+const projectRequire = createRequire(resolveApp(dir, 'package.json'))
+
+/**
+ * Load postcss plugins from the user project's postcss.config.js
+ * resolving each plugin name via projectRequire so they are found
+ * in the user's node_modules even in pnpm monorepos.
+ */
+const resolvePostcssPlugins = () => {
+  const configPath = resolveApp(dir, 'postcss.config.js')
+  if (!fs.existsSync(configPath)) return []
+  try {
+    const config = projectRequire(configPath)
+    const plugins = config.plugins || {}
+    if (Array.isArray(plugins)) return plugins
+    // Object form: { 'plugin-name': options }
+    return Object.entries(plugins).map(([name, opts]) => {
+      const pluginFn = projectRequire(name)
+      const fn = pluginFn.default || pluginFn
+      return opts && typeof opts === 'object' && Object.keys(opts).length > 0 ? fn(opts) : fn()
+    })
+  } catch (e) {
+    console.warn(`[Ryunix] Could not load postcss.config.js: ${e.message}`)
+    return []
+  }
+}
+
+const postcssPlugins = resolvePostcssPlugins()
+
 const hasAppDir = fs.existsSync(resolveApp(dir, 'app')) || fs.existsSync(resolveApp(dir, `${config.webpack.root}/app`));
 const entryPoint = hasAppDir
-  ? resolveApp(dir, `${config.webpack.output.buildDirectory}/main.ryx`)
+  ? resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/main.ryx`)
   : './main.ryx';
 
 const sharedWebpackConfig = {
@@ -167,7 +196,7 @@ const sharedWebpackConfig = {
               ],
               cacheDirectory: resolveApp(
                 dir,
-                `${config.webpack.output.buildDirectory}/cache/babel`,
+                `${config.webpack.output.buildDirectory}/cache/babel-loader`,
               ),
               plugins: [
                 [
@@ -188,7 +217,7 @@ const sharedWebpackConfig = {
         exclude: /node_modules/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/images/[name].[hash][ext]',
+          filename: 'images/[name].[hash][ext]',
         },
       },
       // Media files
@@ -197,7 +226,7 @@ const sharedWebpackConfig = {
         exclude: /node_modules/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/files/[name].[hash][ext]',
+          filename: 'media/[name].[hash][ext]',
         },
       },
       // Custom rules from config
@@ -269,7 +298,7 @@ const getPlugins = (isServer = false) => [
   !isServer &&
     config.webpack.production &&
   new MiniCssExtractPlugin({
-    filename: 'assets/css/[name].[contenthash].css',
+    filename: 'css/[name].[contenthash].css',
   }),
   !isServer &&
     new CopyWebpackPlugin({
@@ -299,11 +328,11 @@ const clientConfig = {
   output: {
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
     publicPath: '/',
-    chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
-    assetModuleFilename: './assets/media/[name].[hash][ext]',
-    filename: './assets/js/[name].[fullhash:8].bundle.js',
+    chunkFilename: './chunks/[name].[fullhash:8].chunk.js',
+    assetModuleFilename: './media/[name].[hash][ext]',
+    filename: './chunks/[name].[fullhash:8].bundle.js',
     devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
-    clean: config.experimental.ssg.prerender.length > 0 ? false : true,
+    clean: false, // Pre-build cleanup is handled explicitly in index.mjs
   },
   devServer: {
     watchFiles: [resolveApp(dir, 'src/**/*'), resolveApp(dir, 'app/**/*')],
@@ -328,7 +357,7 @@ const clientConfig = {
 
       devServer.app.use(async (req, res, next) => {
         try {
-          const apiRootPath = resolveApp(dir, `${config.webpack.output.buildDirectory}/api`)
+          const apiRootPath = resolveApp(dir, `${config.webpack.output.buildDirectory}/server/api`)
           const handled = await handleApiRequest(req, res, apiRootPath)
           if (!handled) {
             next()
@@ -358,7 +387,8 @@ const clientConfig = {
             loader: ryunixRequire.resolve('postcss-loader'),
             options: {
               postcssOptions: {
-                // If a user has tailwind or postcss configs, it will load them
+                config: false, // disable auto-detect; we load plugins explicitly
+                plugins: postcssPlugins,
               }
             }
           }
@@ -372,16 +402,17 @@ const clientConfig = {
       routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
       outputPath: resolveApp(
         dir,
-        `${config.webpack.output.buildDirectory}/ssg/routes.json`,
+        `${config.webpack.output.buildDirectory}/cache/ssg/routes.json`,
       ),
     }),
     new AppRouterPlugin({
       appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router.js`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/app-router.js`),
+      ssgOutputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/cache/ssg/routes.json`),
     }),
     new ApiRouterPlugin({
       appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/api`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/api`),
     }),
     // ESLintPlugin - excluding MDX and MD files
     new ESLintPlugin({
@@ -405,14 +436,16 @@ const serverConfig = {
   ...sharedWebpackConfig,
   name: 'server',
   target: 'node', // Compile for Node.js
-  entry: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router-server.js`),
+  entry: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/app-router-server.js`),
   output: {
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/server`),
     filename: 'app-router-server.bundle.mjs',
+    chunkFilename: 'chunks/[name].[fullhash:8].chunk.mjs',
     publicPath: '/',
     library: { type: 'module' },
     chunkFormat: 'module',
-    clean: true,
+    // Keep api/ subdirectory — it's written by ApiRouterPlugin, not by webpack
+    clean: { keep: /^api[\\/]/ },
   },
   experiments: {
     outputModule: true,
@@ -424,11 +457,24 @@ const serverConfig = {
     ...sharedWebpackConfig.module,
     rules: [
       ...sharedWebpackConfig.module.rules.filter(Boolean),
-      // Ignore CSS files for the Node build (they are extracted by the client build)
+      // Ignore CSS for the Node build (extracted by the client build)
       {
         test: /\.s[ac]ss|css$/i,
-        type: 'asset/source', // Just process them as strings to avoid crashing Node
-      }
+        type: 'asset/source',
+      },
+      // Images/media: assign URL without emitting files (client build handles emission)
+      {
+        test: /\.(jpg|jpeg|png|gif|svg|ico)$/,
+        exclude: /node_modules/,
+        type: 'asset/resource',
+        generator: { emit: false, filename: 'images/[name].[hash][ext]' },
+      },
+      {
+        test: /\.(mp3|mp4|pdf)$/,
+        exclude: /node_modules/,
+        type: 'asset/resource',
+        generator: { emit: false, filename: 'media/[name].[hash][ext]' },
+      },
     ]
   },
   plugins: getPlugins(true),
