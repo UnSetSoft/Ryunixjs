@@ -428,6 +428,24 @@ export default function AppRouter() {
       fs.writeFileSync(outputPath, fileContent);
     }
 
+    const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx');
+    const mainEntryContent = `import Ryunix from '@unsetsoft/ryunixjs';
+import AppRouter from './${path.basename(outputPath)}';
+
+Ryunix.init(<AppRouter />);
+`;
+    let shouldWriteMain = true;
+    if (fs.existsSync(mainEntryPath)) {
+      const existingMainContent = fs.readFileSync(mainEntryPath, 'utf8');
+      if (existingMainContent === mainEntryContent) {
+        shouldWriteMain = false;
+      }
+    }
+    if (shouldWriteMain) {
+      fs.writeFileSync(mainEntryPath, mainEntryContent);
+      if (this.debug) console.log(`[AppRouter] Generating main entry at ${mainEntryPath}`);
+    }
+
     // SSG Output
     const ssgManifestPath = path.join(path.dirname(outputPath), 'ssg', 'routes.json');
     const ssgManifestContent = JSON.stringify(ssgRoutes, null, 2);

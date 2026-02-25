@@ -70,12 +70,17 @@ const ryunixRequire = createRequire(import.meta.url)
 // Using thread-loader as a reference to find where my-app/node_modules/ryunix-presets/node_modules or .pnpm node_modules are located
 const presetsNodeModules = dirname(dirname(ryunixRequire.resolve('thread-loader/package.json')))
 
+const hasAppDir = fs.existsSync(resolveApp(dir, 'app')) || fs.existsSync(resolveApp(dir, `${config.webpack.root}/app`));
+const entryPoint = hasAppDir
+  ? resolveApp(dir, `${config.webpack.output.buildDirectory}/main.ryx`)
+  : './main.ryx';
+
 export default {
   experiments: {
     lazyCompilation: config.webpack.experiments.lazyCompilation,
   },
   context: resolveApp(dir, config.webpack.root),
-  entry: './main.ryx',
+  entry: entryPoint,
   devtool: config.webpack.production ? false : 'source-map',
   output: {
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
