@@ -9,6 +9,9 @@ class AppRouterPlugin {
   }
 
   apply(compiler) {
+    let lastScanTime = 0;
+    let lastRoutes = null;
+
     compiler.hooks.beforeCompile.tapAsync('AppRouterPlugin', (params, callback) => {
       const appDirPath = path.resolve(process.cwd(), this.appDir);
 
@@ -19,8 +22,17 @@ class AppRouterPlugin {
       }
 
       try {
-        const routes = this.scanDirectory(appDirPath, '');
-        this.generateRouterFile(routes, path.resolve(process.cwd(), this.outputPath));
+        // Simple optimization: check if any file in the directory has changed
+        // This is a bit coarse but better than scanning everything every time
+        const stats = fs.statSync(appDirPath);
+        const mtime = stats.mtimeMs;
+
+        if (mtime > lastScanTime || !lastRoutes) {
+          const routes = this.scanDirectory(appDirPath, '');
+          this.generateRouterFile(routes, path.resolve(process.cwd(), this.outputPath));
+          lastScanTime = mtime;
+          lastRoutes = routes;
+        }
       } catch (error) {
         console.error('[AppRouter] ❌ ERROR generating app router:', error);
       }
