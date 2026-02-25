@@ -379,7 +379,7 @@ const requestHandler = async (req, res) => {
     const pathname = decodeURIComponent(parsedUrl.pathname)
 
     // Check for API Request
-    const apiRootPath = path.join(rootDir, config.webpack.output.buildDirectory, 'api')
+    const apiRootPath = path.join(rootDir, config.webpack.output.buildDirectory, 'server/api')
     const handledApi = await handleApiRequest(req, res, apiRootPath)
     if (handledApi) return
 

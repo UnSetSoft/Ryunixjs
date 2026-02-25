@@ -5,6 +5,28 @@
 
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
+import { randomBytes } from 'crypto'
+
+/**
+ * Import a file as ES module — works for both .mjs and .js files.
+ * For .js files with ESM syntax, creates a temp .mjs copy to avoid the
+ * NODE_TYPELESS_PACKAGE_JSON warning and performance overhead.
+ * The temp file is cleaned up automatically after import.
+ */
+const importEsmFile = async (filePath) => {
+  if (filePath.endsWith('.mjs') || filePath.endsWith('.cjs')) {
+    return import(`file://${filePath}?update=${Date.now()}`)
+  }
+  // For .js: copy to a temp .mjs so Node.js treats it as ESM without warnings
+  const tmpPath = path.join(os.tmpdir(), `ryunix-ssg-${randomBytes(8).toString('hex')}.mjs`)
+  try {
+    fs.copyFileSync(filePath, tmpPath)
+    return await import(`file://${tmpPath}`)
+  } finally {
+    try { fs.unlinkSync(tmpPath) } catch { }
+  }
+}
 
 /**
  * Extract valid routes for SSG from routes configuration
@@ -407,16 +429,16 @@ const buildSSG = async (routesConfig, config, buildDir) => {
 
   // ─── app/manifest.js ───────────────────────────────────────────────────────
   const manifestFileCandidates = [
-    path.join(process.cwd(), 'app', 'manifest.js'),
     path.join(process.cwd(), 'app', 'manifest.mjs'),
-    path.join(process.cwd(), 'src', 'app', 'manifest.js'),
+    path.join(process.cwd(), 'app', 'manifest.js'),
     path.join(process.cwd(), 'src', 'app', 'manifest.mjs'),
+    path.join(process.cwd(), 'src', 'app', 'manifest.js'),
   ]
   const manifestFilePath = manifestFileCandidates.find((p) => fs.existsSync(p))
 
   if (manifestFilePath) {
     try {
-      const mod = await import(`file://${manifestFilePath}?update=${Date.now()}`)
+      const mod = await importEsmFile(manifestFilePath)
       const manifestFn = mod.default
       if (typeof manifestFn !== 'function') {
         console.warn('[SSG] app/manifest.js must have a default function export. Skipping.')
@@ -424,11 +446,11 @@ const buildSSG = async (routesConfig, config, buildDir) => {
         const data = await manifestFn()
         if (data && typeof data === 'object') {
           const manifestJson = JSON.stringify(data, null, 2)
-          fs.writeFileSync(path.join(buildDir, 'static', 'manifest.webmanifest'), manifestJson)
-          console.log('[SSG] ✅ manifest.webmanifest created')
+          fs.writeFileSync(path.join(buildDir, 'static', 'manifest.json'), manifestJson)
+          console.log('[SSG] ✅ manifest.json created')
 
           // Inject <link rel="manifest"> into the template for all prerendered pages
-          const manifestLink = '<link rel="manifest" href="/manifest.webmanifest" />'
+          const manifestLink = '<link rel="manifest" href="/manifest.json" />'
           if (!activeTemplate.includes('rel="manifest"')) {
             activeTemplate = activeTemplate.replace('</head>', `${manifestLink}\n</head>`)
           }
@@ -516,17 +538,17 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   // Priority: app/sitemap.js (Next.js-style) > ryunix.config.js
 
   const sitemapFileCandidates = [
-    path.join(process.cwd(), 'app', 'sitemap.js'),
     path.join(process.cwd(), 'app', 'sitemap.mjs'),
-    path.join(process.cwd(), 'src', 'app', 'sitemap.js'),
+    path.join(process.cwd(), 'app', 'sitemap.js'),
     path.join(process.cwd(), 'src', 'app', 'sitemap.mjs'),
+    path.join(process.cwd(), 'src', 'app', 'sitemap.js'),
   ]
   const sitemapFilePath = sitemapFileCandidates.find((p) => fs.existsSync(p))
 
   if (sitemapFilePath) {
     // ── Next.js-style sitemap.js API ─────────────────────────────────────
     try {
-      const mod = await import(`file://${sitemapFilePath}?update=${Date.now()}`)
+      const mod = await importEsmFile(sitemapFilePath)
       const sitemapFn = mod.default
       const generateSitemaps = mod.generateSitemaps
 
@@ -593,16 +615,16 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   // Priority: app/robots.js > ryunix.config.js
 
   const robotsFileCandidates = [
-    path.join(process.cwd(), 'app', 'robots.js'),
     path.join(process.cwd(), 'app', 'robots.mjs'),
-    path.join(process.cwd(), 'src', 'app', 'robots.js'),
+    path.join(process.cwd(), 'app', 'robots.js'),
     path.join(process.cwd(), 'src', 'app', 'robots.mjs'),
+    path.join(process.cwd(), 'src', 'app', 'robots.js'),
   ]
   const robotsFilePath = robotsFileCandidates.find((p) => fs.existsSync(p))
 
   if (robotsFilePath) {
     try {
-      const mod = await import(`file://${robotsFilePath}?update=${Date.now()}`)
+      const mod = await importEsmFile(robotsFilePath)
       const robotsFn = mod.default
       if (typeof robotsFn !== 'function') {
         console.warn('[SSG] app/robots.js must have a default function export. Skipping.')

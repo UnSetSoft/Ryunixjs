@@ -10,7 +10,7 @@ const API_FILE_NAMES = ['route.js', 'route.ts', 'route.ryx', 'router.js', 'route
 class ApiRouterPlugin {
   constructor(options = {}) {
     this.appDir = options.appDir || 'src/app'
-    this.outputPath = options.outputPath || '.ryunix/api'
+    this.outputPath = options.outputPath || '.ryunix/server/api'
     this.debug = options.debug || false
   }
 
