@@ -35,6 +35,12 @@ const commitWork = (fiber) => {
       updateDom(fiber.dom, fiber.alternate.props, fiber.props)
     }
     runEffects(fiber)
+  } else if (fiber.effectTag === EFFECT_TAGS.HYDRATE) {
+    // Only attach event listeners and fix props, do not append to domParent
+    if (fiber.dom != null) {
+      updateDom(fiber.dom, {}, fiber.props)
+    }
+    runEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
     cancelEffectsDeep(fiber)
     commitDeletion(fiber, domParent)

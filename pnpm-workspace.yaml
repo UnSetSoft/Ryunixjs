@@ -1,4 +1,4 @@
 packages:
   - 'packages/*'
   - 'test/*'
-  - 'test/web/*'
+  - 'test/webpack/*'

@@ -58,6 +58,7 @@ const EFFECT_TAGS = Object.freeze({
   UPDATE: Symbol.for('ryunix.reconciler.status.update'),
   DELETION: Symbol.for('ryunix.reconciler.status.deletion'),
   NO_EFFECT: Symbol.for('ryunix.reconciler.status.no_effect'),
+  HYDRATE: Symbol.for('ryunix.reconciler.status.hydrate'),
 })
 
 /**

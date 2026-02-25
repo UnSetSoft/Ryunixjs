@@ -60,5 +60,12 @@
     "postcss": "^8.4.49",
     "postcss-loader": "^7.0.2"
   },
-  "packageManager": "pnpm@10.26.0"
+  "packageManager": "pnpm@10.26.0",
+  "pnpm": {
+    "overrides": {
+      "@unsetsoft/ryunixjs": "workspace:*",
+      "@unsetsoft/ryunix-presets": "workspace:*",
+      "@unsetsoft/cra": "workspace:*"
+    }
+  }
 }

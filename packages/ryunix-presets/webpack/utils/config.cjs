@@ -106,6 +106,7 @@ const DEFAULT_SSG_SITEMAP_SETTINGS = {
 const defaultSettings = {
   experimental: {
     mdx: getConfigValue('experimental.mdx', false),
+    ssr: getConfigValue('experimental.ssr', false),
 
     ssg: {
       sitemap: {

@@ -1,5 +1,6 @@
 export { createElement, Fragment } from './createElement'
-export { render, init, safeRender } from './render'
+export { render, init, safeRender, hydrate } from './render'
+export { renderToString } from './server'
 export * from './hooks'
 export * as Hooks from './hooks'
 export { memo } from './memo.js'

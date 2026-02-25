@@ -524,7 +524,7 @@ export default function AppRouter() {
     const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx');
     const mainEntryContent = `import Ryunix from '@unsetsoft/ryunixjs';
 import AppRouter from './${path.basename(outputPath)}';
-
+ 
 Ryunix.init(<AppRouter />);
 `;
     let shouldWriteMain = true;
@@ -537,6 +537,24 @@ Ryunix.init(<AppRouter />);
     if (shouldWriteMain) {
       fs.writeFileSync(mainEntryPath, mainEntryContent);
       if (this.debug) console.log(`[AppRouter] Generating main entry at ${mainEntryPath}`);
+    }
+
+    // Server Entry for SSG/SSR
+    const serverEntryPath = path.join(path.dirname(outputPath), 'app-router-server.js');
+    const serverEntryContent = `import AppRouter from './${path.basename(outputPath)}';
+export const ssgRoutes = ${JSON.stringify(ssgRoutes, null, 2)};
+export default AppRouter;
+`;
+    let shouldWriteServer = true;
+    if (fs.existsSync(serverEntryPath)) {
+      const existingServerContent = fs.readFileSync(serverEntryPath, 'utf8');
+      if (existingServerContent === serverEntryContent) {
+        shouldWriteServer = false;
+      }
+    }
+    if (shouldWriteServer) {
+      fs.writeFileSync(serverEntryPath, serverEntryContent);
+      if (this.debug) console.log(`[AppRouter] Generating server entry at ${serverEntryPath}`);
     }
 
     // SSG Output

@@ -4,6 +4,10 @@ import { getState } from '../utils/index'
 import { getCurrentPriority, Priority } from './priority'
 import { profiler } from './profiler'
 
+const runIdle = typeof requestIdleCallback !== 'undefined'
+  ? requestIdleCallback
+  : (cb) => setTimeout(() => cb({ timeRemaining: () => 1 }), 1);
+
 const workLoop = (deadline) => {
   const state = getState()
   let shouldYield = false
@@ -17,10 +21,10 @@ const workLoop = (deadline) => {
     commitRoot()
   }
 
-  requestIdleCallback(workLoop)
+  runIdle(workLoop)
 }
 
-requestIdleCallback(workLoop)
+runIdle(workLoop)
 
 const performUnitOfWork = (fiber) => {
   const componentName = fiber.type?.name || fiber.type?.displayName || 'Unknown'
@@ -59,9 +63,9 @@ const scheduleWork = (root, priority = Priority.NORMAL) => {
 
   // Higher priority = faster scheduling
   if (priority <= Priority.USER_BLOCKING) {
-    requestIdleCallback(workLoop)
+    runIdle(workLoop)
   } else {
-    setTimeout(() => requestIdleCallback(workLoop), 0)
+    setTimeout(() => runIdle(workLoop), 0)
   }
 }
 
