@@ -93,7 +93,15 @@ const createDom = (fiber) => {
     if (fiber.type === RYUNIX_TYPES.TEXT_ELEMENT) {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
-      dom = document.createElement(fiber.type)
+      const isSvg = [
+        'svg', 'path', 'g', 'circle', 'polygon', 'rect', 'line', 'polyline', 'ellipse', 'text', 'tspan'
+      ].includes(fiber.type)
+
+      if (isSvg) {
+        dom = document.createElementNS('http://www.w3.org/2000/svg', fiber.type)
+      } else {
+        dom = document.createElement(fiber.type)
+      }
     } else {
       if (process.env.NODE_ENV !== 'production') {
         console.warn(
@@ -152,7 +160,20 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
       ) {
         return
       }
-      dom[name] = ''
+      if (dom instanceof SVGElement) {
+        let attrName = name
+        if (name === 'strokeWidth') attrName = 'stroke-width'
+        if (name === 'strokeLinecap') attrName = 'stroke-linecap'
+        if (name === 'strokeLinejoin') attrName = 'stroke-linejoin'
+        if (name === 'strokeDasharray') attrName = 'stroke-dasharray'
+        if (name === 'strokeDashoffset') attrName = 'stroke-dashoffset'
+        if (name === 'fillRule') attrName = 'fill-rule'
+        if (name === 'clipRule') attrName = 'clip-rule'
+        dom.removeAttribute(attrName)
+      } else {
+        dom[name] = ''
+        dom.removeAttribute(name)
+      }
     })
 
   // Set new properties
@@ -188,7 +209,26 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
               dom[name] = nextProps[name]
             }
           } else {
-            dom[name] = nextProps[name]
+            const isSvgNode = dom instanceof SVGElement
+            // Camel case to true attribute map (e.g. strokeWidth -> stroke-width)
+            let attrName = name
+            if (isSvgNode) {
+              if (name === 'strokeWidth') attrName = 'stroke-width'
+              if (name === 'strokeLinecap') attrName = 'stroke-linecap'
+              if (name === 'strokeLinejoin') attrName = 'stroke-linejoin'
+              if (name === 'strokeDasharray') attrName = 'stroke-dasharray'
+              if (name === 'strokeDashoffset') attrName = 'stroke-dashoffset'
+              if (name === 'fillRule') attrName = 'fill-rule'
+              if (name === 'clipRule') attrName = 'clip-rule'
+              // viewBox is case sensitive, we respect the camelCase for it.
+              dom.setAttribute(attrName, nextProps[name])
+            } else {
+              dom[name] = nextProps[name]
+              // Best effort: set html attributes if it's not a primitive component property
+              if (typeof nextProps[name] !== 'object' && typeof nextProps[name] !== 'function') {
+                dom.setAttribute(name, nextProps[name])
+              }
+            }
           }
         }
       } catch (error) {
