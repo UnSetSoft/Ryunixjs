@@ -238,6 +238,15 @@ export default {
             ? MiniCssExtractPlugin.loader
             : ryunixRequire.resolve('style-loader'),
           ryunixRequire.resolve('css-loader'),
+          {
+            loader: ryunixRequire.resolve('postcss-loader'),
+            options: {
+              postcssOptions: {
+                // If a user has tailwind or postcss configs, it will load them
+                // Webpack handles config resolving intrinsically
+              }
+            }
+          }
         ],
       },
       // Images

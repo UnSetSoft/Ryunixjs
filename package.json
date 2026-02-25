@@ -56,7 +56,9 @@
     "rimraf": "6.1.2",
     "standard-version": "9.5.0",
     "turbo": "^2.8.10",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "postcss": "^8.4.49",
+    "postcss-loader": "^7.0.2"
   },
   "packageManager": "pnpm@10.26.0"
 }
