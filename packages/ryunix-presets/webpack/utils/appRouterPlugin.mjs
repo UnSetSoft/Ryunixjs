@@ -21,6 +21,10 @@ class AppRouterPlugin {
         return;
       }
 
+      if (params && params.compilationDependencies) {
+        params.contextDependencies.add(appDirPath)
+      }
+
       try {
         // Simple optimization: check if any file in the directory has changed
         // This is a bit coarse but better than scanning everything every time
@@ -39,6 +43,14 @@ class AppRouterPlugin {
 
       callback();
     });
+
+    compiler.hooks.afterCompile.tapAsync('AppRouterPlugin', (compilation, callback) => {
+      const appDirPath = path.resolve(process.cwd(), this.appDir)
+      if (fs.existsSync(appDirPath)) {
+        compilation.contextDependencies.add(appDirPath)
+      }
+      callback()
+    })
   }
 
   scanDirectory(dir, basePath) {

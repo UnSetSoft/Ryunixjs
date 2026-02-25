@@ -21,6 +21,8 @@ import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.mjs'
 import RyunixRoutesPlugin from './utils/ssgPlugin.mjs'
 import AppRouterPlugin from './utils/appRouterPlugin.mjs'
+import ApiRouterPlugin from './utils/ApiRouterPlugin.mjs'
+import { handleApiRequest } from './utils/apiHandler.mjs'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
@@ -101,6 +103,25 @@ export default {
     allowedHosts: config.webpack.devServer.allowedHosts,
     port: config.webpack.devServer.port,
     proxy: config.webpack.devServer.proxy,
+    setupMiddlewares: (middlewares, devServer) => {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined')
+      }
+
+      devServer.app.use(async (req, res, next) => {
+        try {
+          const apiRootPath = resolveApp(dir, `${config.webpack.output.buildDirectory}/api`)
+          const handled = await handleApiRequest(req, res, apiRootPath)
+          if (!handled) {
+            next()
+          }
+        } catch (err) {
+          next(err)
+        }
+      })
+
+      return middlewares
+    },
   },
   optimization: {
     moduleIds: 'deterministic',
@@ -273,6 +294,10 @@ export default {
     new AppRouterPlugin({
       appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
       outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router.js`),
+    }),
+    new ApiRouterPlugin({
+      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/api`),
     }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.experimental.env),
