@@ -412,16 +412,17 @@ const findRoute = (routes, path) => {
 
     const keys = []
     const pattern = new RegExp(
-      `^${route.path.replace(/:\w+/g, (match) => {
-        keys.push(match.substring(1))
-        return '([^/]+)'
+      `^${route.path.replace(/:(\.\.\.)?(\w+)/g, (match, isCatchAll, key) => {
+        keys.push({ key, isCatchAll: !!isCatchAll })
+        return isCatchAll ? '(.+)' : '([^/]+)'
       })}$`,
     )
 
-    const match = pathname.match(pattern)
-    if (match) {
-      const params = keys.reduce((acc, key, index) => {
-        acc[key] = match[index + 1]
+    const matchPath = pathname.match(pattern)
+    if (matchPath) {
+      const params = keys.reduce((acc, keyObj, index) => {
+        const val = matchPath[index + 1]
+        acc[keyObj.key] = keyObj.isCatchAll && val ? val.split('/') : val
         return acc
       }, {})
       return { route, params }

@@ -7,6 +7,7 @@ import { promisify } from 'util'
 import { createReadStream } from 'fs'
 import { pipeline } from 'stream/promises'
 import config from '../utils/config.cjs'
+import { handleApiRequest } from '../utils/apiHandler.mjs'
 
 const gzip = promisify(zlib.gzip)
 const brotliCompress = promisify(zlib.brotliCompress)
@@ -376,6 +377,11 @@ const requestHandler = async (req, res) => {
   try {
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`)
     const pathname = decodeURIComponent(parsedUrl.pathname)
+
+    // Check for API Request
+    const apiRootPath = path.join(rootDir, config.webpack.output.buildDirectory, 'api')
+    const handledApi = await handleApiRequest(req, res, apiRootPath)
+    if (handledApi) return
 
     const safePath = validatePath(pathname, staticDir)
     if (!safePath) {

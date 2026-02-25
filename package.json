@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunix",
-  "version": "1.2.4-canary.2",
+  "version": "1.2.4-canary.3",
   "private": true,
   "homepage": "./",
   "workspaces": [
@@ -27,11 +27,15 @@
     "release:stable": "npm run kg:bump && pnpm run format && pnpm --parallel --filter @unsetsoft/ryunixjs run release",
     "cra:release": "pnpm --parallel --filter @unsetsoft/cra run release",
     "cra:nightly": "pnpm --parallel --filter @unsetsoft/cra run nightly:release",
+    "publish:all": "pnpm -r --filter \"!./test/**\" --filter \"!./dev-tools/**\" publish",
+    "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!./dev-tools/**\" publish --tag canary",
     "changelog": "standard-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
     "run:vite": "pnpm --filter ./test/web/Vite run dev",
     "run:rspack": "pnpm --filter ./test/web/Rspack run dev",
-    "run:web": "pnpm --filter ./test/webpack run dev"
+    "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",
+    "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run build",
+    "run:web:start": "pnpm --filter ./test/webpack run start"
   },
   "devDependencies": {
     "@babel/preset-env": "7.28.5",
@@ -41,6 +45,7 @@
     "@rollup/plugin-terser": "0.4.4",
     "@typescript-eslint/eslint-plugin": "8.50.0",
     "@typescript-eslint/parser": "8.50.0",
+    "cross-env": "^10.1.0",
     "eslint": "9.39.2",
     "eslint-plugin-eslint-plugin": "7.2.0",
     "eslint-plugin-import": "2.32.0",
