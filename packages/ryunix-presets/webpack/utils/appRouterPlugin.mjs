@@ -251,7 +251,6 @@ class AppRouterPlugin {
 
     const fileContent = `/* AUTO-GENERATED APP ROUTER */
 ${importStatements}
-
 const getOptExport = (mod, key) => mod ? mod[key] : undefined;
 
 const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
@@ -262,7 +261,7 @@ const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) =>
     const run = async () => {
       try {
         const res = await Component(componentProps);
-        if (active) setContent(res);
+        if (active) setContent(<Ryunix.Fragment>{res}</Ryunix.Fragment>);
       } catch(err) {
         console.error('Error rendering async component:', err);
         if (ErrorFallback) {
@@ -277,6 +276,19 @@ const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) =>
   }, []); // Only run once on mount
 
   return content;
+};
+
+const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
+  try {
+    const res = Component(componentProps);
+    return <Ryunix.Fragment>{res}</Ryunix.Fragment>;
+  } catch(err) {
+    console.error('Error rendering sync component:', err);
+    if (ErrorFallback) {
+      return <ErrorFallback error={err} />;
+    }
+    return <div style={{ padding: '2rem', color: 'red' }}>Error rendering component</div>;
+  }
 };
 
 const RouteWrapper = ({ layouts, index, props }) => {
@@ -378,7 +390,7 @@ const RouteWrapper = ({ layouts, index, props }) => {
     if (isAsync) {
       content = <AsyncComponentRenderer Component={IndexComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery }} ErrorFallback={ErrorFallback} />;
     } else {
-      content = <IndexComp {...props} params={asyncParams} searchParams={asyncQuery} />;
+      content = <SyncComponentRenderer Component={IndexComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery }} ErrorFallback={ErrorFallback} />;
     }
   }
 
@@ -391,7 +403,7 @@ const RouteWrapper = ({ layouts, index, props }) => {
       if (isAsync) {
         content = <AsyncComponentRenderer Component={LayoutComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery, children: content }} ErrorFallback={ErrorFallback} />;
       } else {
-        content = <LayoutComp {...props} params={asyncParams} searchParams={asyncQuery}>{content}</LayoutComp>;
+        content = <SyncComponentRenderer Component={LayoutComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery, children: content }} ErrorFallback={ErrorFallback} />;
       }
     }
   }
