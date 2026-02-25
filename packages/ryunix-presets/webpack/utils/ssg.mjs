@@ -185,12 +185,18 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
  * @param {Object} route - Route object
  * @param {string} template - HTML template
  * @param {Object} config - Configuration object
+ * @param {string} renderedString - Processed HTML string from renderToString
  * @returns {Promise<string>} - Prerendered HTML
  */
-const prerenderRoute = async (route, template, config) => {
+const prerenderRoute = async (route, template, config, renderedString = '') => {
   const meta = route.meta || {}
   const defaultMeta = config.static.seo.meta || {}
   let html = template
+
+  if (renderedString) {
+    // Find the Ryunix root and inject the rendered HTML
+    html = html.replace(/(<div[^>]*id="__ryunix"[^>]*>)(<\/div>)/i, `$1${renderedString}$2`);
+  }
 
   // Replace title - use route meta or default
   const pageTitle = meta.title || defaultMeta.title || 'Ryunix App'
@@ -300,10 +306,54 @@ const buildSSG = async (routesConfig, config, buildDir) => {
   const template = fs.readFileSync(templatePath, 'utf-8')
   const prerenderRoutes = []
 
+  let AppRouterApp = null;
+  let ryunixRenderToString = null;
+  let ryunixCreateElement = null;
+
+  try {
+    const serverBundlePath = path.join(buildDir, 'server', 'app-router-server.bundle.mjs');
+    if (fs.existsSync(serverBundlePath)) {
+      // Mock global browser APIs before importing the bundle in case of top-level references
+      if (typeof global.window === 'undefined') {
+        global.window = { location: { pathname: '/' } };
+      }
+      if (typeof global.document === 'undefined') {
+        global.document = { querySelector: () => null, getElementById: () => null };
+      }
+
+      const serverModule = await import(`file://${serverBundlePath}?update=${Date.now()}`);
+      AppRouterApp = serverModule.default?.default || serverModule.default;
+
+      const ryunixCore = await import('@unsetsoft/ryunixjs');
+      const Ryunix = ryunixCore.default || ryunixCore;
+      global.Ryunix = Ryunix;
+      ryunixRenderToString = Ryunix.renderToString;
+      ryunixCreateElement = Ryunix.createElement;
+    }
+  } catch (e) {
+    console.warn(`[SSG] ⚠️ Failed to load server bundle for true SSR. Falling back to simple template SSG: ${e.message}`);
+  }
+
   // Prerender each route
   for (const route of routes) {
     try {
-      const html = await prerenderRoute(route, template, config)
+      let renderedString = ''
+
+      if (AppRouterApp && ryunixRenderToString && ryunixCreateElement) {
+        // Mock the window location for Ryunix router
+        global.window = { location: { pathname: route.path } };
+        console.log(`[SSG] Rendering ${route.path} with server App component...`)
+        try {
+          const element = ryunixCreateElement(AppRouterApp);
+          renderedString = ryunixRenderToString(element);
+        } catch (err) {
+          console.error(`[SSG] Error executing SSR render for ${route.path}:`, err)
+        }
+      } else {
+        console.warn(`[SSG] Missing SSR dependencies for ${route.path}. AppRouterApp: ${!!AppRouterApp}, renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement}`)
+      }
+
+      const html = await prerenderRoute(route, template, config, renderedString)
 
       const outputDir =
         route.path === '/'
@@ -322,6 +372,8 @@ const buildSSG = async (routesConfig, config, buildDir) => {
       console.error(`[SSG] ❌ Error prerendering ${route.path}:`, error)
     }
   }
+
+  if (global.window) delete global.window; // Cleanup
 
   // Log results
   console.log(`✅ Prerendered ${prerenderRoutes.length} routes:`)

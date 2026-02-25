@@ -75,59 +75,12 @@ const entryPoint = hasAppDir
   ? resolveApp(dir, `${config.webpack.output.buildDirectory}/main.ryx`)
   : './main.ryx';
 
-export default {
+const sharedWebpackConfig = {
   experiments: {
     lazyCompilation: config.webpack.experiments.lazyCompilation,
   },
   context: resolveApp(dir, config.webpack.root),
-  entry: entryPoint,
   devtool: config.webpack.production ? false : 'source-map',
-  output: {
-    path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
-    publicPath: '/',
-    chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
-    assetModuleFilename: './assets/media/[name].[hash][ext]',
-    filename: './assets/js/[name].[fullhash:8].bundle.js',
-    devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
-    clean: config.experimental.ssg.prerender.length > 0 ? false : true,
-  },
-  target: config.webpack.target,
-  devServer: {
-    watchFiles: [resolveApp(dir, 'src/**/*'), resolveApp(dir, 'app/**/*')],
-    hot: true,
-    historyApiFallback: {
-      index: '/',
-      disableDotRule: true,
-    },
-    liveReload: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': '*',
-      'Access-Control-Allow-Headers': '*',
-    },
-    allowedHosts: config.webpack.devServer.allowedHosts,
-    port: config.webpack.devServer.port,
-    proxy: config.webpack.devServer.proxy,
-    setupMiddlewares: (middlewares, devServer) => {
-      if (!devServer) {
-        throw new Error('webpack-dev-server is not defined')
-      }
-
-      devServer.app.use(async (req, res, next) => {
-        try {
-          const apiRootPath = resolveApp(dir, `${config.webpack.output.buildDirectory}/api`)
-          const handled = await handleApiRequest(req, res, apiRootPath)
-          if (!handled) {
-            next()
-          }
-        } catch (err) {
-          next(err)
-        }
-      })
-
-      return middlewares
-    },
-  },
   optimization: {
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
@@ -202,7 +155,7 @@ export default {
             options: {
               presets: [
                 [
-                  '@babel/preset-env',
+                  ryunixRequire.resolve('@babel/preset-env'),
                   {
                     targets: 'defaults and not IE 11',
                     useBuiltIns: false,
@@ -210,7 +163,7 @@ export default {
                     bugfixes: true,
                   },
                 ],
-                '@babel/preset-react',
+                ryunixRequire.resolve('@babel/preset-react'),
               ],
               cacheDirectory: resolveApp(
                 dir,
@@ -218,7 +171,7 @@ export default {
               ),
               plugins: [
                 [
-                  '@babel/plugin-transform-react-jsx',
+                  ryunixRequire.resolve('@babel/plugin-transform-react-jsx'),
                   {
                     pragma: 'Ryunix.createElement',
                     pragmaFrag: 'Ryunix.Fragment',
@@ -227,26 +180,6 @@ export default {
               ],
             },
           },
-        ],
-      },
-      // CSS/SASS
-      {
-        test: /\.s[ac]ss|css$/i,
-        exclude: /node_modules/,
-        use: [
-          config.webpack.production
-            ? MiniCssExtractPlugin.loader
-            : ryunixRequire.resolve('style-loader'),
-          ryunixRequire.resolve('css-loader'),
-          {
-            loader: ryunixRequire.resolve('postcss-loader'),
-            options: {
-              postcssOptions: {
-                // If a user has tailwind or postcss configs, it will load them
-                // Webpack handles config resolving intrinsically
-              }
-            }
-          }
         ],
       },
       // Images
@@ -288,48 +221,35 @@ export default {
   resolveLoader: {
     modules: ['node_modules', presetsNodeModules],
   },
+  externals: [
+    {
+      ryunix: '@unsetsoft/ryunixjs',
+    },
+    ...config.webpack.externals,
+  ],
+}
 
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    fs.existsSync(resolveApp(dir, '.env')) &&
-      new Dotenv({
-        path: resolveApp(dir, '.env'),
-        prefix: 'ryunix.env.RYUNIX_APP_',
-        systemvars: false,
-        ignoreStub: true,
-      }),
-    new RyunixRoutesPlugin({
-      routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
-      outputPath: resolveApp(
-        dir,
-        `${config.webpack.output.buildDirectory}/ssg/routes.json`,
-      ),
-    }),
-    new AppRouterPlugin({
-      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router.js`),
-    }),
-    new ApiRouterPlugin({
-      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/api`),
-    }),
-    new webpack.DefinePlugin({
-      'ryunix.config.env': JSON.stringify(config.experimental.env),
-    }),
-    // ESLintPlugin - excluir archivos MDX y MD
-    new ESLintPlugin({
-      cwd: dir,
-      files: ['**/*.ryx', ...config.eslint.files],
-      extensions: ['js', 'ryx', 'jsx'],
-      // Excluir explícitamente archivos MDX y MD
-      exclude: ['node_modules', '**/*.mdx', '**/*.md'],
-      emitError: true,
-      emitWarning: true,
-      failOnWarning: false,
-      failOnError: false,
-      overrideConfigFile: true,
-      overrideConfig: eslintConfig[0],
-    }),
+// Plugin factory — called once per compiler so each gets fresh instances.
+// isServer=true omits browser-only plugins (HtmlWebpackPlugin, MiniCssExtractPlugin, CopyPlugin).
+const getPlugins = (isServer = false) => [
+  fs.existsSync(resolveApp(dir, '.env')) &&
+  new Dotenv({
+    path: resolveApp(dir, '.env'),
+    prefix: 'ryunix.env.RYUNIX_APP_',
+    systemvars: false,
+    ignoreStub: true,
+  }),
+  new webpack.DefinePlugin({
+    'ryunix.config.env': JSON.stringify(config.experimental.env),
+    'process.env.RYUNIX_SSR': JSON.stringify(
+      isServer
+        ? true
+        : (config.experimental.ssr || (config.experimental.ssg?.prerender?.length ?? 0) > 0),
+    ),
+    'process.env.RYUNIX_IS_SERVER': JSON.stringify(isServer),
+  }),
+  // Only inject HTML for the client build
+  !isServer &&
     new HtmlWebpackPlugin({
       pageLang: config.static.seo.pageLang,
       title: config.static.seo.title,
@@ -346,40 +266,182 @@ export default {
         mode: config.webpack.production ? 'production' : 'dev',
       },
     }),
+  !isServer &&
     config.webpack.production &&
-      new MiniCssExtractPlugin({
-        filename: 'assets/css/[name].[contenthash].css',
-      }),
+  new MiniCssExtractPlugin({
+    filename: 'assets/css/[name].[contenthash].css',
+  }),
+  !isServer &&
     new CopyWebpackPlugin({
       patterns: [
         {
           from: resolveApp(dir, 'public'),
           to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
           globOptions: {
-            ignore: [
-              '**/template.html',
-              '**/index.html',
-              '**/*.html',
-              '**/favicon.png',
-            ],
+            ignore: ['**/template.html', '**/index.html', '**/*.html', '**/favicon.png'],
           },
           filter: (resourcePath) => {
-            try {
-              return !resourcePath.toLowerCase().endsWith('.html')
-            } catch (e) {
-              return true
-            }
+            try { return !resourcePath.toLowerCase().endsWith('.html') } catch { return true }
           },
           noErrorOnMissing: true,
         },
       ],
     }),
-    ...config.webpack.plugins,
+  ...(!isServer ? config.webpack.plugins : []),
+].filter(Boolean)
+
+// 1. CLIENT CONFIGURATION (The standard web output)
+const clientConfig = {
+  ...sharedWebpackConfig,
+  name: 'client',
+  entry: entryPoint,
+  target: config.webpack.target, // usually 'web'
+  output: {
+    path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
+    publicPath: '/',
+    chunkFilename: './assets/js/[name].[fullhash:8].bundle.js',
+    assetModuleFilename: './assets/media/[name].[hash][ext]',
+    filename: './assets/js/[name].[fullhash:8].bundle.js',
+    devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
+    clean: config.experimental.ssg.prerender.length > 0 ? false : true,
+  },
+  devServer: {
+    watchFiles: [resolveApp(dir, 'src/**/*'), resolveApp(dir, 'app/**/*')],
+    hot: true,
+    historyApiFallback: {
+      index: '/',
+      disableDotRule: true,
+    },
+    liveReload: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*',
+    },
+    allowedHosts: config.webpack.devServer.allowedHosts,
+    port: config.webpack.devServer.port,
+    proxy: config.webpack.devServer.proxy,
+    setupMiddlewares: (middlewares, devServer) => {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined')
+      }
+
+      devServer.app.use(async (req, res, next) => {
+        try {
+          const apiRootPath = resolveApp(dir, `${config.webpack.output.buildDirectory}/api`)
+          const handled = await handleApiRequest(req, res, apiRootPath)
+          if (!handled) {
+            next()
+          }
+        } catch (err) {
+          next(err)
+        }
+      })
+
+      return middlewares
+    },
+  },
+  module: {
+    ...sharedWebpackConfig.module,
+    rules: [
+      ...sharedWebpackConfig.module.rules.filter(Boolean),
+      // CSS/SASS for Client
+      {
+        test: /\.s[ac]ss|css$/i,
+        exclude: /node_modules/,
+        use: [
+          config.webpack.production
+            ? MiniCssExtractPlugin.loader
+            : ryunixRequire.resolve('style-loader'),
+          ryunixRequire.resolve('css-loader'),
+          {
+            loader: ryunixRequire.resolve('postcss-loader'),
+            options: {
+              postcssOptions: {
+                // If a user has tailwind or postcss configs, it will load them
+              }
+            }
+          }
+        ],
+      },
+    ]
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new RyunixRoutesPlugin({
+      routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
+      outputPath: resolveApp(
+        dir,
+        `${config.webpack.output.buildDirectory}/ssg/routes.json`,
+      ),
+    }),
+    new AppRouterPlugin({
+      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router.js`),
+    }),
+    new ApiRouterPlugin({
+      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
+      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/api`),
+    }),
+    // ESLintPlugin - excluding MDX and MD files
+    new ESLintPlugin({
+      cwd: dir,
+      files: ['**/*.ryx', ...config.eslint.files],
+      extensions: ['js', 'ryx', 'jsx'],
+      exclude: ['node_modules', '**/*.mdx', '**/*.md'],
+      emitError: true,
+      emitWarning: true,
+      failOnWarning: false,
+      failOnError: false,
+      overrideConfigFile: true,
+      overrideConfig: eslintConfig[0],
+    }),
+    ...getPlugins(false),
   ].filter(Boolean),
+}
+
+// 2. SERVER CONFIGURATION (For SSG HTML rendering)
+const serverConfig = {
+  ...sharedWebpackConfig,
+  name: 'server',
+  target: 'node', // Compile for Node.js
+  entry: resolveApp(dir, `${config.webpack.output.buildDirectory}/app-router-server.js`),
+  output: {
+    path: resolveApp(dir, `${config.webpack.output.buildDirectory}/server`),
+    filename: 'app-router-server.bundle.mjs',
+    publicPath: '/',
+    library: { type: 'module' },
+    chunkFormat: 'module',
+    clean: true,
+  },
+  experiments: {
+    outputModule: true,
+  },
+  optimization: {
+    minimize: false, // Don't minimize server bundle for faster builds
+  },
+  module: {
+    ...sharedWebpackConfig.module,
+    rules: [
+      ...sharedWebpackConfig.module.rules.filter(Boolean),
+      // Ignore CSS files for the Node build (they are extracted by the client build)
+      {
+        test: /\.s[ac]ss|css$/i,
+        type: 'asset/source', // Just process them as strings to avoid crashing Node
+      }
+    ]
+  },
+  plugins: getPlugins(true),
   externals: [
     {
       ryunix: '@unsetsoft/ryunixjs',
+      '@unsetsoft/ryunixjs': '@unsetsoft/ryunixjs',
     },
     ...config.webpack.externals,
-  ],
+  ]
 }
+
+// Export dual compilers only in production if SSR or SSG prerender is enabled
+export default (config.webpack.production && (config.experimental.ssr || config.experimental.ssg?.prerender?.length > 0))
+  ? [clientConfig, serverConfig]
+  : clientConfig;
