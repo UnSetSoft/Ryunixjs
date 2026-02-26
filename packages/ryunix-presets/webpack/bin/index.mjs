@@ -113,32 +113,67 @@ const build = {
       return
     }
 
-    if (fs.existsSync(resolveApp(process.cwd(), 'src/pages/routes.ryx'))) {
-      await cleanBuildDirectory(
-        resolveApp(
-          process.cwd(),
-          `${defaultSettings.webpack.output.buildDirectory}/static`,
-        ),
-      )
+    // ── Clean build output before each production build ───────────────────
+    // Clears static/ and server/ (except server/api/) but keeps cache/ intact.
+    const buildRoot = resolveApp(process.cwd(), defaultSettings.webpack.output.buildDirectory)
+    const clean = (dir) => {
+      if (fs.existsSync(dir)) {
+        fs.rmSync(dir, { recursive: true, force: true })
+      }
     }
+    clean(join(buildRoot, 'static'))
+    clean(join(buildRoot, 'server', 'app'))
+    clean(join(buildRoot, 'server', 'app-router-server.bundle.mjs'))
+    // Note: server/api/ is cleaned by ApiRouterPlugin on its own (incremental recompile)
+
+    const buildStart = Date.now()
 
     compiler.run(async (err, stats) => {
       if (err || stats.hasErrors()) {
-        logger.error(chalk.red('Error during compilation:'))
-        logger.error(err || stats.toString('errors-only'))
+        logger.error(chalk.red('✘ Error during compilation:'))
+        if (err) {
+          logger.error(err)
+        } else {
+          // MultiStats or Stats — toString works on both
+          const output = stats.toString('errors-only')
+          const lines = output.split('\n').filter(Boolean)
+          lines.forEach((line) => logger.error(line))
+        }
+        compiler.close(() => process.exit(1))
         return
       }
 
-      const buildTimeMs = stats.endTime - stats.startTime
-
+      // ── Build time ─────────────────────────────────────────────────────────
+      const buildTimeMs = Date.now() - buildStart
       const minutes = Math.floor(buildTimeMs / 60000)
       const seconds = ((buildTimeMs % 60000) / 1000).toFixed(1)
+      const formattedTime = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
 
-      const formattedTime =
-        minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
-
+      // ── SSG Prerender ──────────────────────────────────────────────────────
       if (defaultSettings.webpack.production) {
         await Prerender(defaultSettings.webpack.output.buildDirectory)
+      }
+
+      // ── API Routes log ─────────────────────────────────────────────────────
+      const apiOutputDir = join(buildRoot, 'server', 'api')
+      if (fs.existsSync(apiOutputDir)) {
+        const collectRoutes = (dir, base = '') => {
+          const routes = []
+          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const fullPath = join(dir, entry.name)
+            if (entry.isDirectory()) {
+              routes.push(...collectRoutes(fullPath, `${base}/${entry.name}`))
+            } else if (/^(route|router|endpoint)\.(mjs|js)$/.test(entry.name)) {
+              routes.push(base || '/')
+            }
+          }
+          return routes
+        }
+        const apiRoutes = collectRoutes(apiOutputDir)
+        if (apiRoutes.length > 0) {
+          console.log(`✅ API routes (${apiRoutes.length}):`)
+          apiRoutes.forEach((r) => console.log(` - /api${r}`))
+        }
       }
 
       logger.info(chalk.green('Compilation successful! 🎉'))
@@ -148,6 +183,7 @@ const build = {
         if (closeErr) {
           logger.error(chalk.red('Error closing the compiler:'), closeErr)
         }
+        process.exit(0)
       })
     })
   },

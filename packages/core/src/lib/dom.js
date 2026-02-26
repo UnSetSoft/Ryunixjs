@@ -82,8 +82,11 @@ const applyClasses = (dom, prevClasses, nextClasses) => {
  * @returns {HTMLElement|Text|null}
  */
 const createDom = (fiber) => {
-  // Fragments don't create real DOM nodes
-  if (fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+  // Fragments and Context Providers don't create real DOM nodes
+  if (
+    fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT ||
+    fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT
+  ) {
     return null
   }
 
@@ -270,6 +273,17 @@ const removeDom = (dom) => {
   }
 }
 
+/**
+ * Clear all children from a DOM element
+ * @param {HTMLElement} container - DOM element to clear
+ */
+const clearContainer = (container) => {
+  if (!container) return
+  while (container.firstChild) {
+    container.removeChild(container.firstChild)
+  }
+}
+
 export {
   createDom,
   updateDom,
@@ -277,4 +291,5 @@ export {
   applyClasses,
   removeDom,
   camelToKebab,
+  clearContainer,
 }

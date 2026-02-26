@@ -1,11 +1,6 @@
+import { clearContainer } from './dom'
 import { getState } from '../utils/index'
 import { scheduleWork } from './workers'
-
-const clearContainer = (container) => {
-  while (container.firstChild) {
-    container.removeChild(container.firstChild)
-  }
-}
 
 /**
  * The `render` function in JavaScript updates the DOM with a new element and schedules work to be done
@@ -20,6 +15,10 @@ const clearContainer = (container) => {
  */
 const render = (element, container) => {
   const state = getState()
+
+  // Clear container before CSR render to avoid duplication
+  clearContainer(container)
+
   state.wipRoot = {
     dom: container,
     props: {
@@ -28,10 +27,23 @@ const render = (element, container) => {
     alternate: state.currentRoot,
   }
 
+  state.isHydrating = false
   state.nextUnitOfWork = state.wipRoot
   state.deletions = []
   scheduleWork(state.wipRoot)
   return state.wipRoot
+}
+
+/**
+ * The `hydrate` function attaches Ryunix elements to an existing HTML DOM.
+ * Note: We clear the SSR content and do a clean CSR render.
+ * The SSR HTML serves its purpose for first-paint and SEO; once JS loads
+ * it takes over with a full CSR render to ensure correctness and interactivity.
+ */
+const hydrate = (element, container) => {
+  // Clear SSR content — prevents duplicate DOM nodes when hooks trigger re-renders
+  clearContainer(container)
+  return render(element, container)
 }
 
 /**
@@ -48,8 +60,12 @@ const render = (element, container) => {
 const init = (MainElement, root = '__ryunix') => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
-  const renderProcess = render(MainElement, state.containerRoot)
-  return renderProcess
+
+  if (process.env.RYUNIX_SSR && state.containerRoot.hasChildNodes()) {
+    return hydrate(MainElement, state.containerRoot)
+  }
+
+  return render(MainElement, state.containerRoot)
 }
 
 const safeRender = (component, props, onError) => {
@@ -64,4 +80,4 @@ const safeRender = (component, props, onError) => {
   }
 }
 
-export { init, render, safeRender }
+export { init, render, safeRender, hydrate, clearContainer }

@@ -1,6 +1,6 @@
-import { createDom } from './dom'
+import { createDom, clearContainer } from './dom'
 import { reconcileChildren } from './reconciler'
-import { getState } from '../utils/index'
+import { getState, RYUNIX_TYPES } from '../utils/index'
 import { createElement } from './createElement'
 import { createContext } from './hooks'
 
@@ -9,6 +9,10 @@ const updateFunctionComponent = (fiber) => {
   state.wipFiber = fiber
   state.hookIndex = 0
   state.wipFiber.hooks = []
+
+  if (state.isHydrating) {
+    fiber.effectTag = state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate')
+  }
 
   const children = [fiber.type(fiber.props)]
 
@@ -21,12 +25,60 @@ const updateFunctionComponent = (fiber) => {
 }
 
 const updateHostComponent = (fiber) => {
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber)
+  const state = getState()
+
+  if (fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
+    fiber._contextId = fiber.props?._contextId
+    fiber._contextValue = fiber.props?.value
   }
+
+  const isPassthrough = fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT || fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT
+
+  if (state.isHydrating && isPassthrough) {
+    fiber.effectTag = state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate')
+  } else if (!fiber.dom) {
+    if (state.isHydrating && state.hydrateCursor) {
+      const domNode = state.hydrateCursor
+      const isText = fiber.type === RYUNIX_TYPES.TEXT_ELEMENT && domNode.nodeType === 3
+      const isElement = typeof fiber.type === 'string' && domNode.nodeType === 1 && domNode.tagName.toLowerCase() === fiber.type.toLowerCase()
+
+      if (isText || isElement) {
+        fiber.dom = domNode
+        fiber.effectTag = state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate')
+        state.hydrateCursor = domNode.nextSibling
+      } else {
+        console.warn(`[Hydration] Mismatch at ${fiber.type}. Falling back to CSR.`)
+
+        // On mismatch, safest approach: clear the entire root so no stale SSR
+        // content remains alongside the freshly-rendered CSR tree.
+        state.isHydrating = false
+        clearContainer(state.containerRoot)
+
+        fiber.dom = createDom(fiber)
+        fiber.effectTag = state.EFFECT_TAGS?.PLACEMENT || Symbol.for('ryunix.reconciler.status.placement')
+      }
+    } else {
+      fiber.dom = createDom(fiber)
+    }
+  }
+
+  let prevCursor = state.hydrateCursor
+  const isRealDom = fiber.dom != null
+
+  if (state.isHydrating && isRealDom && fiber.effectTag === (state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate'))) {
+    state.hydrateCursor = fiber.dom.firstChild
+  }
+
   const children = fiber.props?.children || []
   reconcileChildren(fiber, children)
+
+  if (state.isHydrating && fiber.effectTag === (state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate'))) {
+    if (isRealDom) {
+      state.hydrateCursor = prevCursor
+    }
+  }
 }
+
 
 /**
  * The Component `Image` takes in a `src` and other props, and returns an `img` element with the

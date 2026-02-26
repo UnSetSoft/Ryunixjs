@@ -16,7 +16,7 @@ const Prerender = async (directory) => {
     process.exit(1)
   }
 
-  const manifestPath = path.join(process.cwd(), directory, 'ssg', 'routes.json')
+  const manifestPath = path.join(process.cwd(), directory, 'cache/ssg', 'routes.json')
   let routes = []
 
   if (fs.existsSync(manifestPath)) {

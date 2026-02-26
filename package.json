@@ -29,7 +29,7 @@
     "cra:nightly": "pnpm --parallel --filter @unsetsoft/cra run nightly:release",
     "publish:all": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish",
     "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish --tag canary",
-    "changelog": "standard-version --header '# Changelog'",
+    "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
     "run:vite": "pnpm --filter ./test/web/Vite run dev",
     "run:rspack": "pnpm --filter ./test/web/Rspack run dev",
@@ -54,11 +54,20 @@
     "jest-environment-jsdom": "30.2.0",
     "prettier": "3.7.4",
     "rimraf": "6.1.2",
-    "standard-version": "9.5.0",
+    "commit-and-tag-version": "^12.5.0",
     "turbo": "^2.8.10",
     "typescript": "5.9.3",
     "postcss": "^8.4.49",
     "postcss-loader": "^7.0.2"
   },
-  "packageManager": "pnpm@10.26.0"
+  "packageManager": "pnpm@10.26.0",
+  "pnpm": {
+    "overrides": {
+      "@unsetsoft/ryunixjs": "workspace:*",
+      "@unsetsoft/ryunix-presets": "workspace:*",
+      "@unsetsoft/cra": "workspace:*",
+      "tmp": "^0.2.4",
+      "lodash": "^4.17.23"
+    }
+  }
 }

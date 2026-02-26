@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, getState, is } from '../utils/index'
+import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index'
 import { createElement, Fragment } from './createElement'
 import { scheduleWork } from './workers'
 import { Priority } from './priority'
@@ -31,6 +31,11 @@ const haveDepsChanged = (oldDeps, newDeps) => {
  * `reducer` function and the `initialState` as arguments.
  */
 const useStore = (initialState) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    return [is.function(initialState) ? initialState() : initialState, () => { }]
+  }
+
   const reducer = (state, action) =>
     is.function(action) ? action(state) : action
   return useReducer(reducer, initialState)
@@ -51,9 +56,13 @@ const useStore = (initialState) => {
  * @returns An array containing the current state and the dispatch function is being returned.
  */
 const useReducer = (reducer, initialState, init) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    return [init ? init(initialState) : initialState, () => { }]
+  }
+
   validateHookCall()
 
-  const state = getState()
   const { wipFiber, hookIndex } = state
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
@@ -113,6 +122,11 @@ const useReducer = (reducer, initialState, init) => {
  * of the values in the `deps` array have changed since the last render. If the `deps` array
  */
 const useEffect = (callback, deps) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    return
+  }
+
   validateHookCall()
 
   if (!is.function(callback)) {
@@ -122,7 +136,6 @@ const useEffect = (callback, deps) => {
     throw new Error('useEffect dependencies must be an array or undefined')
   }
 
-  const state = getState()
   const { wipFiber, hookIndex } = state
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
   const hasChanged = haveDepsChanged(oldHook?.deps, deps)
@@ -148,9 +161,13 @@ const useEffect = (callback, deps) => {
  * contains the initial value passed to the `useRef` function.
  */
 const useRef = (initialValue) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    return { current: initialValue }
+  }
+
   validateHookCall()
 
-  const state = getState()
   const { wipFiber, hookIndex } = state
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
@@ -178,6 +195,11 @@ const useRef = (initialValue) => {
  * @returns The `useMemo` function is returning the `value` calculated by the `compute` function.
  */
 const useMemo = (compute, deps) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    return compute()
+  }
+
   validateHookCall()
 
   if (!is.function(compute)) {
@@ -187,7 +209,6 @@ const useMemo = (compute, deps) => {
     throw new Error('useMemo requires a dependencies array')
   }
 
-  const state = getState()
   const { wipFiber, hookIndex } = state
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
@@ -253,19 +274,26 @@ const createContext = (
   contextId = RYUNIX_TYPES.RYUNIX_CONTEXT,
   defaultValue = {},
 ) => {
-  const Provider = ({ children, value }) => {
-    const element = Fragment({ children })
-    element._contextId = contextId
-    element._contextValue = value
-    return element
+  const Provider = ({ value, children }) => {
+    return createElement(
+      RYUNIX_TYPES.RYUNIX_CONTEXT,
+      { value, children, _contextId: contextId },
+      ...flattenArray([children])
+    )
   }
 
   Provider._contextId = contextId
 
   const useContext = (ctxID = contextId) => {
+    const state = getState()
+    if (state.isServerRendering) {
+      return (state.ssrContexts && state.ssrContexts[ctxID] !== undefined)
+        ? state.ssrContexts[ctxID]
+        : defaultValue
+    }
+
     validateHookCall()
 
-    const state = getState()
     let fiber = state.wipFiber
 
     while (fiber) {
