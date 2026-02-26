@@ -38,10 +38,10 @@
     "test": "jest --testPathPattern=src"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
-    "rollup": "^4.53.4",
+    "rollup": "^4.59.0",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-commonjs": "29.0.0",
     "@rollup/plugin-terser": "0.4.4",
