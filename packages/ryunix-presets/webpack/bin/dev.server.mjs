@@ -56,16 +56,25 @@ const StartServer = async (cliSettings) => {
     cleanCacheDir(cacheDir)
   }
 
-  webpackConfig.mode = mode ? 'production' : 'development'
+  const clientConfig = Array.isArray(webpackConfig) ? webpackConfig.find(c => c.name === 'client') || webpackConfig[0] : webpackConfig
+
+  if (Array.isArray(webpackConfig)) {
+    webpackConfig.forEach(c => c.mode = mode ? 'production' : 'development')
+  } else {
+    webpackConfig.mode = mode ? 'production' : 'development'
+  }
+
   const compiler = Webpack(webpackConfig)
-  let port = webpackConfig.devServer.port || 3000
+  let port = clientConfig.devServer?.port || 3000
 
   // Encontrar un puerto disponible
   port = await findAvailablePort(port)
 
   // Modificamos el puerto en la configuración
-  webpackConfig.devServer.port = port
-  const devServerOptions = { ...webpackConfig.devServer, ...cliSettings }
+  if (clientConfig.devServer) {
+    clientConfig.devServer.port = port
+  }
+  const devServerOptions = { ...(clientConfig.devServer || {}), ...cliSettings }
   const server = new WebpackDevServer(devServerOptions, compiler)
 
   const devMode = Boolean(!mode)

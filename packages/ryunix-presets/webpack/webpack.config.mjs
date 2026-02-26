@@ -23,6 +23,7 @@ import RyunixRoutesPlugin from './utils/ssgPlugin.mjs'
 import AppRouterPlugin from './utils/appRouterPlugin.mjs'
 import ApiRouterPlugin from './utils/ApiRouterPlugin.mjs'
 import { handleApiRequest } from './utils/apiHandler.mjs'
+import { renderDevRoute } from './utils/ssrDevHandler.mjs'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
@@ -296,7 +297,7 @@ const getPlugins = (isServer = false) => [
       },
     }),
   !isServer &&
-    config.webpack.production &&
+  (config.webpack.production || config.experimental.ssr) &&
   new MiniCssExtractPlugin({
     filename: 'css/[name].[contenthash].css',
   }),
@@ -336,6 +337,11 @@ const clientConfig = {
   },
   devServer: {
     watchFiles: [resolveApp(dir, 'src/**/*'), resolveApp(dir, 'app/**/*')],
+    devMiddleware: {
+      writeToDisk: (filePath) => {
+        try { return filePath.includes('/server/') || filePath.includes('\\server\\') } catch { return false }
+      },
+    },
     hot: true,
     historyApiFallback: {
       index: '/',
@@ -367,6 +373,18 @@ const clientConfig = {
         }
       })
 
+      devServer.app.use(async (req, res, next) => {
+        try {
+          if (config.experimental.ssr) {
+            const handled = await renderDevRoute(req, res, devServer, dir, config)
+            if (handled) return
+          }
+        } catch (err) {
+          console.error('[Ryunix Dev SSR]', err)
+        }
+        next()
+      })
+
       return middlewares
     },
   },
@@ -379,7 +397,7 @@ const clientConfig = {
         test: /\.s[ac]ss|css$/i,
         exclude: /node_modules/,
         use: [
-          config.webpack.production
+          (config.webpack.production || config.experimental.ssr)
             ? MiniCssExtractPlugin.loader
             : ryunixRequire.resolve('style-loader'),
           ryunixRequire.resolve('css-loader'),
@@ -487,7 +505,8 @@ const serverConfig = {
   ]
 }
 
-// Export dual compilers only in production if SSR or SSG prerender is enabled
-export default (config.webpack.production && (config.experimental.ssr || config.experimental.ssg?.prerender?.length > 0))
+// Export dual compilers if SSR is enabled, or in production if SSG prerender is enabled
+const enableServerDualCompiler = config.experimental.ssr || (config.webpack.production && config.experimental.ssg?.prerender?.length > 0);
+export default enableServerDualCompiler
   ? [clientConfig, serverConfig]
   : clientConfig;

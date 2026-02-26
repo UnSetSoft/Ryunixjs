@@ -660,4 +660,5 @@ export {
   generateMetaTags,
   prerenderRoute,
   buildSSG,
+  importEsmFile,
 }
