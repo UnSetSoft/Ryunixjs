@@ -117,7 +117,26 @@ const sharedWebpackConfig = {
     splitChunks: {
       chunks: 'all',
       minSize: 20000,
-      maxSize: 70000,
+      maxSize: 244000,
+      cacheGroups: {
+        framework: {
+          test: /[\\/]node_modules[\\/](@unsetsoft[\\/]ryunixjs)[\\/]/,
+          name: 'framework',
+          priority: 40,
+          enforce: true,
+        },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          priority: 20,
+        },
+        common: {
+          name: 'commons',
+          minChunks: 2,
+          priority: 10,
+          reuseExistingChunk: true,
+        }
+      },
     },
     minimize: config.webpack.production === true,
     minimizer: config.webpack.production
@@ -348,9 +367,9 @@ const clientConfig = {
   output: {
     path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
     publicPath: '/',
-    chunkFilename: './chunks/[name].[fullhash:8].chunk.js',
+    chunkFilename: './chunks/[name].[contenthash:8].chunk.js',
     assetModuleFilename: './media/[name].[hash][ext]',
-    filename: './chunks/[name].[fullhash:8].bundle.js',
+    filename: './chunks/[name].[contenthash:8].bundle.js',
     devtoolModuleFilenameTemplate: 'ryunix/[resource-path]',
     clean: false, // Pre-build cleanup is handled explicitly in index.mjs
   },
