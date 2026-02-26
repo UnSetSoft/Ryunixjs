@@ -13,12 +13,8 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
-    <noscript style="background: #f4f47f;color: black;padding: 10px;">
-      <div style="display: flex;justify-content: center;align-items: center;">
-        <p><b>Warning:</b> JavaScript is not enabled. Some features may not work.
-        </p>
-      </div>
-    </noscript>
+    <%= htmlWebpackPlugin.options.ssrScript %>
+
     <div id="__ryunix"></div>
   </body>
 </html>

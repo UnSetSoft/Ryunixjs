@@ -122,17 +122,17 @@ const sharedWebpackConfig = {
     minimize: config.webpack.production === true,
     minimizer: config.webpack.production
       ? [
-          new TerserPlugin({
-            parallel: true,
-            terserOptions: {
-              compress: {
-                dead_code: true,
-                passes: 2,
-              },
+        new TerserPlugin({
+          parallel: true,
+          terserOptions: {
+            compress: {
+              dead_code: true,
+              passes: 2,
             },
-          }),
-          new CssMinimizerPlugin(),
-        ]
+          },
+        }),
+        new CssMinimizerPlugin(),
+      ]
       : [],
   },
   cache: {
@@ -258,6 +258,7 @@ const sharedWebpackConfig = {
     ...config.webpack.externals,
   ],
 }
+const isSSR = config.experimental.ssr
 
 // Plugin factory — called once per compiler so each gets fresh instances.
 // isServer=true omits browser-only plugins (HtmlWebpackPlugin, MiniCssExtractPlugin, CopyPlugin).
@@ -280,43 +281,61 @@ const getPlugins = (isServer = false) => [
   }),
   // Only inject HTML for the client build
   !isServer &&
-    new HtmlWebpackPlugin({
-      pageLang: config.static.seo.pageLang,
-      title: config.static.seo.title,
-      favicon: config.static.favicon
-        ? join(dir, 'public', 'favicon.png')
-        : false,
-      meta: config.static.seo.meta,
-      template: config.static.customTemplate
-        ? join(dir, 'public', 'index.html')
-        : join(__dirname, 'template', 'index.html'),
-      info: {
-        framework: 'Ryunix',
-        version,
-        mode: config.webpack.production ? 'production' : 'dev',
-      },
-    }),
+  new HtmlWebpackPlugin({
+    pageLang: config.static.seo.pageLang,
+    title: config.static.seo.title,
+    favicon: config.static.favicon
+      ? join(dir, 'public', 'favicon.png')
+      : false,
+    meta: config.static.seo.meta,
+    template: config.static.customTemplate
+      ? join(dir, 'public', 'index.html')
+      : join(__dirname, 'template', 'index.html'),
+    info: {
+      framework: 'Ryunix',
+      version,
+      mode: config.webpack.production ? 'production' : 'dev',
+    },
+    ssrScript: isSSR ? `
+       <noscript
+        style="background: #f4f47f;color: black;padding: 10px;width: 100%;display: block;position: fixed;bottom: 0;z-index: 99;">
+      <div style="display: flex;justify-content: center;align-items: center;">
+        <p><b>Warning:</b> JavaScript is not enabled. Some features may not work.
+        </p>
+      </div>
+    </noscript>
+      ` : `
+       <noscript
+        style="background: #f57070ff;color: black;padding: 10px;width: 100%;display: block;position: fixed;bottom: 0;z-index: 99;">
+      <div style="display: flex;justify-content: center;align-items: center;">
+        <p><b>Error:</b> JavaScript is disabled. Please enable it to use this application.
+        </p>
+      </div>
+    </noscript>
+      
+      `,
+  }),
   !isServer &&
   (config.webpack.production || config.experimental.ssr) &&
   new MiniCssExtractPlugin({
     filename: 'css/[name].[contenthash].css',
   }),
   !isServer &&
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: resolveApp(dir, 'public'),
-          to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
-          globOptions: {
-            ignore: ['**/template.html', '**/index.html', '**/*.html', '**/favicon.png'],
-          },
-          filter: (resourcePath) => {
-            try { return !resourcePath.toLowerCase().endsWith('.html') } catch { return true }
-          },
-          noErrorOnMissing: true,
+  new CopyWebpackPlugin({
+    patterns: [
+      {
+        from: resolveApp(dir, 'public'),
+        to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
+        globOptions: {
+          ignore: ['**/template.html', '**/index.html', '**/*.html', '**/favicon.png'],
         },
-      ],
-    }),
+        filter: (resourcePath) => {
+          try { return !resourcePath.toLowerCase().endsWith('.html') } catch { return true }
+        },
+        noErrorOnMissing: true,
+      },
+    ],
+  }),
   ...(!isServer ? config.webpack.plugins : []),
 ].filter(Boolean)
 
