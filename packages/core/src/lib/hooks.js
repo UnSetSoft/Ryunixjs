@@ -96,10 +96,14 @@ const useReducer = (reducer, initialState, init) => {
     hook.queue.push(action)
 
     const currentState = getState()
+    const activeRoot = currentState.currentRoot || currentState.wipRoot
+
+    if (!activeRoot) return
+
     currentState.wipRoot = {
-      dom: currentState.currentRoot.dom,
-      props: currentState.currentRoot.props,
-      alternate: currentState.currentRoot,
+      dom: activeRoot.dom,
+      props: activeRoot.props,
+      alternate: currentState.currentRoot || null,
     }
     currentState.deletions = []
     currentState.hookIndex = 0

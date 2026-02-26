@@ -8,9 +8,19 @@ import { EFFECT_TAGS, getState } from '../utils/index'
 const commitRoot = () => {
   const state = getState()
   state.deletions.forEach(commitWork)
-  commitWork(state.wipRoot.child)
-  state.currentRoot = state.wipRoot
-  state.wipRoot = null
+
+  const finishedWork = state.wipRoot
+
+  // Swap the currentRoot pointer BEFORE running effects
+  // This allows dispatches inside effects to base their new work on the just-finished tree
+  state.currentRoot = finishedWork
+
+  commitWork(finishedWork.child)
+
+  // If wipRoot was not reassigned by a synchronous dispatch during effects, clear it
+  if (state.wipRoot === finishedWork) {
+    state.wipRoot = null
+  }
 }
 
 const commitWork = (fiber) => {
@@ -53,7 +63,9 @@ const commitWork = (fiber) => {
 
 const commitDeletion = (fiber, domParent) => {
   if (fiber.dom) {
-    domParent.removeChild(fiber.dom)
+    if (fiber.dom.parentNode) {
+      fiber.dom.parentNode.removeChild(fiber.dom)
+    }
   } else {
     let child = fiber.child
     while (child) {

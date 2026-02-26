@@ -7,6 +7,7 @@ const reconcileChildren = (wipFiber, elements) => {
   const state = getState()
   let index = 0
   let prevSibling
+  let isFirstChild = true
 
   // Build map of old fibers by key/index
   const oldFiberMap = new Map()
@@ -14,7 +15,7 @@ const reconcileChildren = (wipFiber, elements) => {
   let position = 0
 
   while (oldFiber) {
-    const key = oldFiber.key ?? `__index_${position}__`
+    const key = oldFiber.key ?? `__index_${oldFiber.index ?? position}__`
     oldFiberMap.set(key, oldFiber)
     oldFiber = oldFiber.sibling
     position++
@@ -45,6 +46,7 @@ const reconcileChildren = (wipFiber, elements) => {
         effectTag: EFFECT_TAGS.UPDATE,
         hooks: matchedFiber.hooks,
         key: element.key,
+        index,
       }
       oldFiberMap.delete(key)
     } else {
@@ -57,6 +59,7 @@ const reconcileChildren = (wipFiber, elements) => {
         alternate: null,
         effectTag: EFFECT_TAGS.PLACEMENT,
         key: element.key,
+        index,
       }
 
       // Mark matched fiber for deletion if exists
@@ -68,8 +71,9 @@ const reconcileChildren = (wipFiber, elements) => {
     }
 
     // Link fibers
-    if (index === 0) {
+    if (isFirstChild) {
       wipFiber.child = newFiber
+      isFirstChild = false
     } else if (newFiber) {
       prevSibling.sibling = newFiber
     }
