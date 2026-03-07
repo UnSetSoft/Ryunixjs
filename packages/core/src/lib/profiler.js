@@ -1,3 +1,7 @@
+// Safe performance.now() wrapper for SSR/Node environments
+const perfNow = () =>
+  typeof performance !== 'undefined' ? performance.now() : Date.now()
+
 /**
  * Performance profiler for Ryunix
  */
@@ -11,7 +15,7 @@ class Profiler {
 
   startMeasure(name) {
     if (!this.enabled) return
-    this.measures.set(name, performance.now())
+    this.measures.set(name, perfNow())
   }
 
   endMeasure(name) {
@@ -19,7 +23,7 @@ class Profiler {
     const start = this.measures.get(name)
     if (!start) return
 
-    const duration = performance.now() - start
+    const duration = perfNow() - start
     this.measures.delete(name)
 
     return duration
@@ -122,10 +126,10 @@ const profiler = new Profiler()
  * Hook to profile component render
  */
 const useProfiler = (componentName) => {
-  const startTime = performance.now()
+  const startTime = perfNow()
 
   return () => {
-    const duration = performance.now() - startTime
+    const duration = perfNow() - startTime
     profiler.recordRender(componentName, duration)
   }
 }

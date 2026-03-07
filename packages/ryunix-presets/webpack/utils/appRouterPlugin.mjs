@@ -27,15 +27,13 @@ class AppRouterPlugin {
       }
 
       try {
-        // Simple optimization: check if any file in the directory has changed
-        // This is a bit coarse but better than scanning everything every time
-        const stats = fs.statSync(appDirPath);
-        const mtime = stats.mtimeMs;
+        // Deep scan: check the newest mtime across all files recursively
+        const newestMtime = this.getNewestMtime(appDirPath);
 
-        if (mtime > lastScanTime || !lastRoutes) {
+        if (newestMtime > lastScanTime || !lastRoutes) {
           const routes = this.scanDirectory(appDirPath, '');
           this.generateRouterFile(routes, path.resolve(process.cwd(), this.outputPath));
-          lastScanTime = mtime;
+          lastScanTime = newestMtime;
           lastRoutes = routes;
         }
       } catch (error) {
@@ -145,7 +143,8 @@ class AppRouterPlugin {
 
         const metatagMatch = content.match(/export\s+const\s+Metatags?\s*=\s*(\{[\s\S]*?\})(?=\s*(?:export|;|$))/);
         if (metatagMatch) {
-          return new Function(`return ${metatagMatch[1]}`)();
+          // Safe parsing: extract key-value pairs via regex instead of eval/new Function
+          return this.parseObjectLiteral(metatagMatch[1]);
         }
       } catch (e) {
         if (this.debug) console.error(`[AppRouter] Error parsing Metatag in ${filePath}:`, e.message);
@@ -191,7 +190,10 @@ class AppRouterPlugin {
       if (!filePath) return false;
       try {
         const content = fs.readFileSync(filePath, 'utf8');
-        return content.includes('async function') || content.includes('async (');
+        // Look for common async component signatures at the top level
+        return /export\s+async\s+default\s+function/i.test(content) ||
+          /export\s+default\s+async\s+function/i.test(content) ||
+          /async\s+function\s+([A-Z][\w]*)/.test(content);
       } catch (e) {
         return false;
       }
@@ -582,6 +584,71 @@ export default AppRouter;
   getRelativeImport(targetPath, outputPath) {
     const relativePath = path.relative(path.dirname(outputPath), targetPath).replace(/\\/g, '/');
     return relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
+  }
+
+  /**
+   * Recursively find the newest mtime across all files in a directory.
+   * This ensures subdirectory changes are detected, not just root dir changes.
+   */
+  getNewestMtime(dirPath) {
+    let newest = 0;
+    try {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        try {
+          const stats = fs.statSync(fullPath);
+          const mtime = stats.mtimeMs;
+          if (mtime > newest) newest = mtime;
+          if (entry.isDirectory()) {
+            const childNewest = this.getNewestMtime(fullPath);
+            if (childNewest > newest) newest = childNewest;
+          }
+        } catch {
+          // Skip inaccessible files
+        }
+      }
+    } catch {
+      // Directory not readable
+    }
+    return newest;
+  }
+
+  /**
+   * Safely parse a simple JS object literal string into an object.
+   * Handles string values (single/double quoted), numbers, booleans, and nested objects.
+   * This replaces the unsafe `new Function()` eval approach.
+   */
+  parseObjectLiteral(str) {
+    try {
+      // Clean up the string: normalize whitespace
+      let cleaned = str.trim();
+
+      // Replace single-quoted strings with double-quoted for JSON compatibility
+      cleaned = cleaned.replace(/'/g, '"');
+
+      // Remove trailing commas before closing braces/brackets (invalid JSON but common in JS)
+      cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
+
+      // Handle unquoted keys: add quotes around bare identifier keys
+      cleaned = cleaned.replace(/(\{|,)\s*([a-zA-Z_$][\w$]*)\s*:/g, '$1 "$2":');
+
+      // Try JSON.parse first
+      return JSON.parse(cleaned);
+    } catch {
+      // Fallback: manual key-value extraction for simple cases
+      const result = {};
+      const kvRegex = /(?:['"]?)([\w$]+)(?:['"]?)\s*:\s*(?:'([^']*)'|"([^"]*)"|(\d+(?:\.\d+)?)|(\btrue\b|\bfalse\b))/g;
+      let match;
+      while ((match = kvRegex.exec(str)) !== null) {
+        const key = match[1];
+        const value = match[2] ?? match[3] ?? (match[4] != null ? Number(match[4]) : (match[5] === 'true' ? true : match[5] === 'false' ? false : undefined));
+        if (value !== undefined) {
+          result[key] = value;
+        }
+      }
+      return Object.keys(result).length > 0 ? result : null;
+    }
   }
 }
 

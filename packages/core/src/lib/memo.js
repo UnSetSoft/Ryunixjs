@@ -1,19 +1,24 @@
-import { useMemo } from './hooks'
-
 /**
  * memo - Memoize component to prevent unnecessary re-renders
+ * @param {Function} Component - Component to memoize
+ * @param {Function} [arePropsEqual] - Custom comparison function (defaults to shallowEqual)
+ * @returns {Function} Memoized component
  */
-const memo = (Component, arePropsEqual) => {
-  return (props) => {
-    const memoizedElement = useMemo(() => {
-      return Component(props)
-    }, [
-      // Default comparison: shallow props comparison
-      ...Object.values(props),
-    ])
+const memo = (Component, arePropsEqual = shallowEqual) => {
+  let prevProps = null
+  let prevResult = null
 
-    return memoizedElement
+  const MemoizedComponent = (props) => {
+    if (prevProps && arePropsEqual(prevProps, props)) {
+      return prevResult
+    }
+    prevProps = props
+    prevResult = Component(props)
+    return prevResult
   }
+
+  MemoizedComponent.displayName = `Memo(${Component.displayName || Component.name || 'Component'})`
+  return MemoizedComponent
 }
 
 /**

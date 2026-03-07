@@ -144,14 +144,49 @@ const runEffects = (fiber) => {
   }
 }
 
+let isBatchingEffects = false
+let pendingEffectCallbacks = []
+
 /**
- * Batch multiple effect operations
+ * Batch multiple effect operations for performance.
+ * Effects queued during the batch are flushed together after the callback completes.
  * @param {Function} callback - Callback containing effect operations
  */
 const batchEffects = (callback) => {
-  // Could implement batching logic here for performance
-  // For now, just execute immediately
-  callback()
+  const wasBatching = isBatchingEffects
+  isBatchingEffects = true
+
+  try {
+    callback()
+  } finally {
+    isBatchingEffects = wasBatching
+
+    if (!isBatchingEffects && pendingEffectCallbacks.length > 0) {
+      const effects = pendingEffectCallbacks
+      pendingEffectCallbacks = []
+      effects.forEach((fn) => {
+        try {
+          fn()
+        } catch (error) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.error('Error in batched effect:', error)
+          }
+        }
+      })
+    }
+  }
+}
+
+/**
+ * Queue an effect to be run. If we're inside a batch, it's deferred.
+ * @param {Function} fn - Effect function
+ */
+const queueEffect = (fn) => {
+  if (isBatchingEffects) {
+    pendingEffectCallbacks.push(fn)
+  } else {
+    fn()
+  }
 }
 
 export {
@@ -164,4 +199,5 @@ export {
   isGone,
   haveDepsChanged,
   batchEffects,
+  queueEffect,
 }

@@ -44,6 +44,7 @@ const createElement = (type, props, ...children) => {
       ...safeProps,
       children: children
         .flat()
+        .filter((child) => child != null && child !== false && child !== true)
         .map((child) =>
           typeof child === STRINGS.OBJECT ? child : createTextElement(child),
         ),

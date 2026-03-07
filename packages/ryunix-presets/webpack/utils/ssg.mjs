@@ -314,8 +314,9 @@ const prerenderRoute = async (route, template, config, renderedString = '') => {
   let html = template
 
   if (renderedString) {
-    // Find the Ryunix root and inject the rendered HTML
-    html = html.replace(/(<div[^>]*id="__ryunix"[^>]*>)(<\/div>)/i, `$1${renderedString}$2`);
+    // Find the Ryunix root and inject the rendered HTML.
+    // Improved regex to handle whitespace or existing content inside the div.
+    html = html.replace(/(<div[^>]*id="__ryunix"[^>]*>)([\s\S]*?)(<\/div>)/i, `$1${renderedString}$3`);
   }
 
   // Replace title - use route meta or default
@@ -470,10 +471,44 @@ const buildSSG = async (routesConfig, config, buildDir) => {
     if (fs.existsSync(serverBundlePath)) {
       // Mock global browser APIs before importing the bundle in case of top-level references
       if (typeof global.window === 'undefined') {
-        global.window = { location: { pathname: '/' } };
+        const noop = () => { }
+        global.window = {
+          location: { pathname: '/', search: '', hash: '', href: 'http://localhost/' },
+          history: { pushState: noop, replaceState: noop, back: noop, forward: noop },
+          addEventListener: noop,
+          removeEventListener: noop,
+          dispatchEvent: noop,
+          scrollTo: noop,
+          innerWidth: 1024,
+          innerHeight: 768,
+          navigator: { userAgent: 'ryunix-ssg' },
+          localStorage: { getItem: () => null, setItem: noop, removeItem: noop },
+          sessionStorage: { getItem: () => null, setItem: noop, removeItem: noop },
+          requestAnimationFrame: (cb) => setTimeout(cb, 0),
+          cancelAnimationFrame: (id) => clearTimeout(id),
+          matchMedia: () => ({ matches: false, addListener: noop, removeListener: noop }),
+        }
       }
       if (typeof global.document === 'undefined') {
-        global.document = { querySelector: () => null, getElementById: () => null };
+        const noop = () => { }
+        global.document = {
+          querySelector: () => null,
+          querySelectorAll: () => [],
+          getElementById: () => null,
+          getElementsByClassName: () => [],
+          getElementsByTagName: () => [],
+          createElement: (tag) => ({
+            tagName: tag, style: {}, setAttribute: noop, appendChild: noop,
+            addEventListener: noop, removeEventListener: noop
+          }),
+          createTextNode: () => ({ nodeType: 3 }),
+          head: { querySelector: () => null, appendChild: noop },
+          body: { appendChild: noop },
+          title: '',
+        }
+      }
+      if (typeof global.navigator === 'undefined') {
+        global.navigator = { userAgent: 'ryunix-ssg' }
       }
 
       const serverModule = await import(`file://${serverBundlePath}?update=${Date.now()}`);

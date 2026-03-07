@@ -1,0 +1,48 @@
+/**
+ * SVG attribute name mapping: camelCase → kebab-case
+ * Centralized to avoid duplication across dom.js and server.js
+ */
+const SVG_ATTR_MAP = {
+  strokeWidth: 'stroke-width',
+  strokeLinecap: 'stroke-linecap',
+  strokeLinejoin: 'stroke-linejoin',
+  strokeDasharray: 'stroke-dasharray',
+  strokeDashoffset: 'stroke-dashoffset',
+  strokeMiterlimit: 'stroke-miterlimit',
+  strokeOpacity: 'stroke-opacity',
+  fillRule: 'fill-rule',
+  fillOpacity: 'fill-opacity',
+  clipRule: 'clip-rule',
+  clipPath: 'clip-path',
+  fontFamily: 'font-family',
+  fontSize: 'font-size',
+  fontWeight: 'font-weight',
+  textAnchor: 'text-anchor',
+  textDecoration: 'text-decoration',
+  dominantBaseline: 'dominant-baseline',
+  alignmentBaseline: 'alignment-baseline',
+  baselineShift: 'baseline-shift',
+  stopColor: 'stop-color',
+  stopOpacity: 'stop-opacity',
+  floodColor: 'flood-color',
+  floodOpacity: 'flood-opacity',
+  lightingColor: 'lighting-color',
+  colorInterpolation: 'color-interpolation',
+  colorInterpolationFilters: 'color-interpolation-filters',
+  pointerEvents: 'pointer-events',
+  shapeRendering: 'shape-rendering',
+  imageRendering: 'image-rendering',
+  markerStart: 'marker-start',
+  markerMid: 'marker-mid',
+  markerEnd: 'marker-end',
+}
+
+/**
+ * Convert a camelCase SVG attribute name to its kebab-case equivalent.
+ * Returns the original name if no mapping exists.
+ * @param {string} name - camelCase attribute name
+ * @returns {string} kebab-case attribute name
+ */
+const toSvgAttrName = (name) => SVG_ATTR_MAP[name] || name
+
+export { SVG_ATTR_MAP, toSvgAttrName }

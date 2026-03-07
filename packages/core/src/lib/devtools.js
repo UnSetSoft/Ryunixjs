@@ -27,7 +27,7 @@ const getComponentName = (component) => {
 /**
  * Hook call validation
  */
-const validateHookContext = (hookName) => {
+const validateHookContext = (hookName = 'A hook') => {
   const state = getState()
   if (!state.wipFiber) {
     throw new Error(
@@ -35,29 +35,15 @@ const validateHookContext = (hookName) => {
         'Make sure you are calling hooks at the top level of your component.',
     )
   }
+  if (!Array.isArray(state.wipFiber.hooks)) {
+    state.wipFiber.hooks = []
+  }
 }
 
 /**
- * Props validation
+ * Performance tracking utilities
  */
-const validateProps = (component, props, propTypes) => {
-  if (!isDevelopment || !propTypes) return
-
-  Object.keys(propTypes).forEach((key) => {
-    const validator = propTypes[key]
-    const value = props[key]
-    const error = validator(props, key, getComponentName(component))
-
-    if (error) {
-      console.error(`[Ryunix PropTypes] ${error.message}`)
-    }
-  })
-}
-
-/**
- * Performance tracking
- */
-const performance = {
+const perfTracker = {
   marks: new Map(),
 
   mark(name) {
@@ -95,7 +81,6 @@ export {
   error,
   getComponentName,
   validateHookContext,
-  validateProps,
-  performance,
+  perfTracker,
   deprecated,
 }

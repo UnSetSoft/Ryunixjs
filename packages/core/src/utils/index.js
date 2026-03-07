@@ -1,6 +1,13 @@
 // Improved state management - avoid global mutable object
 // Instead, create a state manager that can be instantiated per render tree
 
+const IS_BROWSER = typeof window !== 'undefined' && typeof document !== 'undefined'
+
+const rIC =
+  typeof requestIdleCallback !== 'undefined'
+    ? requestIdleCallback
+    : (cb) => setTimeout(() => cb({ timeRemaining: () => 1 }), 1)
+
 const createRenderState = () => ({
   containerRoot: null,
   nextUnitOfWork: null,
@@ -191,4 +198,6 @@ export {
   haveDepsChanged,
   flattenArray,
   is,
+  IS_BROWSER,
+  rIC,
 }

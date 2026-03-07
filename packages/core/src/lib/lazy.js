@@ -1,61 +1,125 @@
-import { createElement } from './createElement'
+import { createElement, Fragment } from './createElement'
 import { useStore, useEffect } from './hooks'
 
 /**
- * Lazy load component
+ * Suspense status tracking
+ */
+const SUSPENSE_STATUS = {
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+}
+
+/**
+ * Lazy load component with real Suspense integration.
+ * The loaded module is cached so subsequent renders are synchronous.
+ *
+ * @param {Function} importFn - Function returning a dynamic import() promise
+ * @returns {Function} A Ryunix component
  */
 const lazy = (importFn) => {
+  let status = SUSPENSE_STATUS.PENDING
   let Component = null
-  let promise = null
   let error = null
+  let promise = null
 
-  return (props) => {
+  const LazyComponent = (props) => {
+    // If already resolved, render synchronously
+    if (status === SUSPENSE_STATUS.RESOLVED && Component) {
+      return createElement(Component, props)
+    }
+
+    // If already errored, throw to nearest error boundary
+    if (status === SUSPENSE_STATUS.REJECTED && error) {
+      throw error
+    }
+
+    // Start loading if not already
+    if (!promise) {
+      promise = importFn()
+        .then((module) => {
+          Component = module.default || module
+          status = SUSPENSE_STATUS.RESOLVED
+        })
+        .catch((err) => {
+          error = err
+          status = SUSPENSE_STATUS.REJECTED
+        })
+    }
+
+    // Use useStore + useEffect to re-render when loading completes
     const [, forceUpdate] = useStore(0)
 
     useEffect(() => {
-      if (Component || error) return
-
-      if (!promise) {
-        promise = importFn()
-          .then((module) => {
-            Component = module.default || module
-            forceUpdate((x) => x + 1)
-          })
-          .catch((err) => {
-            error = err
-            forceUpdate((x) => x + 1)
-          })
+      if (status === SUSPENSE_STATUS.PENDING && promise) {
+        let active = true
+        promise.then(() => {
+          if (active) forceUpdate((x) => x + 1)
+        }).catch(() => {
+          if (active) forceUpdate((x) => x + 1)
+        })
+        return () => { active = false }
       }
     }, [])
 
-    if (error) throw error
-    if (!Component) return null
-    return createElement(Component, props)
+    // While pending, return null — Suspense will show fallback
+    return null
   }
+
+  // Mark as lazy for Suspense detection
+  LazyComponent._isLazy = true
+  LazyComponent._getStatus = () => status
+
+  return LazyComponent
 }
 
 /**
- * Suspense component (basic implementation)
+ * Suspense component — shows a fallback while lazy children are loading.
+ *
+ * @param {Object} props
+ * @param {*} props.fallback - Element to show while loading
+ * @param {*} props.children - Lazy component(s)
+ * @returns {*} Rendered element
  */
 const Suspense = ({ fallback, children }) => {
-  const [isLoading, setIsLoading] = useStore(true)
+  const [isLoaded, setIsLoaded] = useStore(false)
 
-  useEffect(() => {
-    setIsLoading(false)
-  }, [])
+  // Check if any child is a lazy component still pending
+  const childArray = Array.isArray(children) ? children : [children]
+  let anyPending = false
 
-  if (isLoading && fallback) {
-    return fallback
+  for (const child of childArray) {
+    if (child && child.type && child.type._isLazy) {
+      const status = child.type._getStatus()
+      if (status === SUSPENSE_STATUS.PENDING) {
+        anyPending = true
+      }
+    }
   }
 
-  return children
+  useEffect(() => {
+    if (!anyPending && !isLoaded) {
+      setIsLoaded(true)
+    }
+  }, [anyPending])
+
+  // Show fallback while any child is pending
+  if (anyPending) {
+    return fallback || null
+  }
+
+  return createElement(Fragment, { children })
 }
 
 /**
- * Preload component for prefetching
+ * Preload component for prefetching — starts the import immediately
+ * so it's cached when later rendered.
+ *
+ * @param {Function} importFn - Dynamic import function
+ * @returns {Promise} The import promise
  */
 const preload = (importFn) => {
   return importFn()
 }
 
-export { lazy, Suspense, preload }
+export { lazy, Suspense, preload, SUSPENSE_STATUS }

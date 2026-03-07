@@ -9,6 +9,8 @@ const Priority = {
   IDLE: 5, // Background tasks
 }
 
+import { rIC } from '../utils/index'
+
 let currentPriority = Priority.NORMAL
 let pendingUpdates = []
 let isScheduling = false
@@ -21,7 +23,7 @@ const scheduleUpdate = (callback, priority = Priority.NORMAL) => {
 
   if (!isScheduling) {
     isScheduling = true
-    requestIdleCallback(processPendingUpdates)
+    rIC(processPendingUpdates)
   }
 }
 
@@ -38,7 +40,7 @@ const processPendingUpdates = (deadline) => {
   }
 
   if (pendingUpdates.length > 0) {
-    requestIdleCallback(processPendingUpdates)
+    rIC(processPendingUpdates)
   } else {
     isScheduling = false
     currentPriority = Priority.NORMAL
