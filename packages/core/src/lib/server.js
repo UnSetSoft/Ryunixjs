@@ -1,5 +1,6 @@
 import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, is, getState } from '../utils/index'
 import { camelToKebab } from './dom'
+import { toSvgAttrName } from '../utils/svgAttributes'
 
 const escapeHtml = (unsafe) => {
   if (typeof unsafe !== 'string') return String(unsafe)
@@ -105,15 +106,7 @@ const renderToStringImpl = (element) => {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
-        let attrName = key
-        // Map some common SVG props (like we do in dom.js)
-        if (key === 'strokeWidth') attrName = 'stroke-width'
-        if (key === 'strokeLinecap') attrName = 'stroke-linecap'
-        if (key === 'strokeLinejoin') attrName = 'stroke-linejoin'
-        if (key === 'strokeDasharray') attrName = 'stroke-dasharray'
-        if (key === 'strokeDashoffset') attrName = 'stroke-dashoffset'
-        if (key === 'fillRule') attrName = 'fill-rule'
-        if (key === 'clipRule') attrName = 'clip-rule'
+        let attrName = toSvgAttrName(key)
 
         attributes += ` ${attrName}="${escapeHtml(value)}"`
       }

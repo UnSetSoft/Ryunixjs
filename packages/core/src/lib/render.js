@@ -35,15 +35,30 @@ const render = (element, container) => {
 }
 
 /**
- * The `hydrate` function attaches Ryunix elements to an existing HTML DOM.
- * Note: We clear the SSR content and do a clean CSR render.
- * The SSR HTML serves its purpose for first-paint and SEO; once JS loads
- * it takes over with a full CSR render to ensure correctness and interactivity.
+ * The `hydrate` function attaches Ryunix to an existing server-rendered DOM tree.
+ * Instead of clearing and re-rendering, it walks the existing DOM nodes and
+ * attaches event listeners and reconciles state, preserving SSR HTML.
  */
 const hydrate = (element, container) => {
-  // Clear SSR content — prevents duplicate DOM nodes when hooks trigger re-renders
-  clearContainer(container)
-  return render(element, container)
+  const state = getState()
+
+  state.containerRoot = container
+
+  state.wipRoot = {
+    dom: container,
+    props: {
+      children: [element],
+    },
+    alternate: state.currentRoot,
+  }
+
+  // Enable hydration mode — updateHostComponent will reuse existing DOM nodes
+  state.isHydrating = true
+  state.hydrateCursor = container.firstChild
+  state.nextUnitOfWork = state.wipRoot
+  state.deletions = []
+  scheduleWork(state.wipRoot)
+  return state.wipRoot
 }
 
 /**
@@ -61,11 +76,21 @@ const init = (MainElement, root = '__ryunix') => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
 
+  // Reset any stale hydration flags
+  state.isHydrating = false
+  state.hydrationFailed = false
+
   if (process.env.RYUNIX_SSR && state.containerRoot.hasChildNodes()) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`);
+    }
     return hydrate(MainElement, state.containerRoot)
   }
 
-  return render(MainElement, state.containerRoot)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[Ryunix Debug] init: No SSR content or SSR disabled. Starting normal render on #${root}`);
+  }
+  return render(MainElement, root)
 }
 
 const safeRender = (component, props, onError) => {

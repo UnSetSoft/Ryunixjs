@@ -1,19 +1,11 @@
 import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index'
 import { createElement, Fragment } from './createElement'
 import { scheduleWork } from './workers'
-import { Priority } from './priority'
+import { Priority, scheduleUpdate, runWithPriority } from './priority'
+import { RYUNIX_PORTAL } from './portal'
+import { queueUpdate } from './batching'
+import { validateHookContext as validateHookCall } from './devtools'
 
-const validateHookCall = () => {
-  const state = getState()
-  if (!state.wipFiber) {
-    throw new Error(
-      'Hooks can only be called inside the body of a function component.',
-    )
-  }
-  if (!Array.isArray(state.wipFiber.hooks)) {
-    state.wipFiber.hooks = []
-  }
-}
 
 const haveDepsChanged = (oldDeps, newDeps) => {
   if (!oldDeps || !newDeps) return true
@@ -107,7 +99,7 @@ const useReducer = (reducer, initialState, init) => {
     }
     currentState.deletions = []
     currentState.hookIndex = 0
-    scheduleWork(currentState.wipRoot)
+    queueUpdate(() => scheduleWork(currentState.wipRoot))
   }
 
   wipFiber.hooks[hookIndex] = hook
@@ -226,7 +218,7 @@ const useMemo = (compute, deps) => {
       if (process.env.NODE_ENV !== 'production') {
         console.error('Error in useMemo computation:', error)
       }
-      value = undefined
+      throw error
     }
   }
 
@@ -470,7 +462,9 @@ const findRoute = (routes, path) => {
  * `value` prop set to `contextValue`, and wrapping the `children` within a `Fragment`.
  */
 const RouterProvider = ({ routes, children }) => {
-  const [location, setLocation] = useStore(window.location.pathname)
+  const [location, setLocation] = useStore(
+    typeof window !== 'undefined' ? window.location.pathname : '/'
+  )
 
   useEffect(() => {
     const update = () => setLocation(window.location.pathname)
@@ -480,7 +474,7 @@ const RouterProvider = ({ routes, children }) => {
       window.removeEventListener('popstate', update)
       window.removeEventListener('hashchange', update)
     }
-  }, [location])
+  }, [])
 
   const navigate = (path) => {
     window.history.pushState({}, '', path)
@@ -600,7 +594,7 @@ const useStorePriority = (initialState) => {
       priority,
     }
 
-    baseDispatch(wrappedAction)
+    scheduleUpdate(() => baseDispatch(wrappedAction), priority)
   }
 
   return [state, dispatch]
@@ -616,8 +610,10 @@ const useTransition = () => {
     setIsPending(true, Priority.IMMEDIATE)
 
     setTimeout(() => {
-      callback()
-      setIsPending(false, Priority.IMMEDIATE)
+      runWithPriority(Priority.LOW, () => {
+        callback()
+        setIsPending(false, Priority.LOW)
+      })
     }, 0)
   }
 
@@ -655,7 +651,7 @@ const useDeferredValue = (value) => {
  * 2. The `setValue` function that updates the state value and stores it in the local storage as a JSON
  * string.
  */
-const usePersitentStore = (key, initialState = '') => {
+const usePersistentStore = (key, initialState = '') => {
   const [state, dispatch] = useStore(() => {
     try {
       const item = window.localStorage.getItem(key)
@@ -698,18 +694,141 @@ const useSwitch = (initialState = false) => {
 
   /**
    * The function `toggle` toggles the state by dispatching the opposite value of the current state.
+   * Uses functional update to avoid stale closure issues with rapid calls.
    */
   const toggle = () => {
-    dispatch(!state)
+    dispatch((prev) => !prev)
   }
 
   return [state, toggle]
+}
+
+/**
+ * useLayoutEffect - Like useEffect but runs synchronously after DOM mutations
+ * and before the browser paints. Use for DOM measurements.
+ * @param {Function} callback - Effect callback
+ * @param {Array} deps - Dependencies array
+ */
+const useLayoutEffect = (callback, deps) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    return
+  }
+
+  validateHookCall()
+
+  if (!is.function(callback)) {
+    throw new Error('useLayoutEffect callback must be a function')
+  }
+  if (deps !== undefined && !Array.isArray(deps)) {
+    throw new Error('useLayoutEffect dependencies must be an array or undefined')
+  }
+
+  const { wipFiber, hookIndex } = state
+  const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
+  const hasChanged = haveDepsChanged(oldHook?.deps, deps)
+
+  const hook = {
+    hookID: hookIndex,
+    type: RYUNIX_TYPES.RYUNIX_EFFECT,
+    deps,
+    effect: hasChanged ? callback : null,
+    cancel: oldHook?.cancel,
+    isLayout: true, // Flag to run synchronously during commit
+  }
+
+  wipFiber.hooks[hookIndex] = hook
+  state.hookIndex++
+}
+
+// Counter for deterministic ID generation
+let idCounter = 0
+
+/**
+ * useId - Generate a deterministic, unique ID that is stable across SSR and hydration.
+ * @returns {string} A unique ID string
+ */
+const useId = () => {
+  const state = getState()
+
+  if (state.isServerRendering) {
+    // On server, use a simple incrementing counter (reset per renderToString call)
+    return `:r${idCounter++}:`
+  }
+
+  validateHookCall()
+
+  const { wipFiber, hookIndex } = state
+  const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
+
+  const hook = {
+    hookID: hookIndex,
+    type: RYUNIX_TYPES.RYUNIX_REF,
+    value: oldHook ? oldHook.value : `:r${idCounter++}:`,
+  }
+
+  wipFiber.hooks[hookIndex] = hook
+  state.hookIndex++
+  return hook.value
+}
+
+/**
+ * useDebounce - Returns a debounced version of the value that only updates
+ * after the specified delay has passed since the last change.
+ * @param {*} value - Value to debounce
+ * @param {number} delay - Delay in milliseconds (default: 300)
+ * @returns {*} Debounced value
+ */
+const useDebounce = (value, delay = 300) => {
+  const [debouncedValue, setDebouncedValue] = useStore(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+/**
+ * useThrottle - Returns a throttled version of the value that only updates
+ * at most once per specified interval.
+ * @param {*} value - Value to throttle
+ * @param {number} interval - Minimum interval in milliseconds (default: 300)
+ * @returns {*} Throttled value
+ */
+const useThrottle = (value, interval = 300) => {
+  const [throttledValue, setThrottledValue] = useStore(value)
+  const lastUpdated = useRef(Date.now())
+
+  useEffect(() => {
+    const now = Date.now()
+    const elapsed = now - lastUpdated.current
+
+    if (elapsed >= interval) {
+      lastUpdated.current = now
+      setThrottledValue(value)
+    } else {
+      const timer = setTimeout(() => {
+        lastUpdated.current = Date.now()
+        setThrottledValue(value)
+      }, interval - elapsed)
+
+      return () => clearTimeout(timer)
+    }
+  }, [value, interval])
+
+  return throttledValue
 }
 
 export {
   useStore,
   useReducer,
   useEffect,
+  useLayoutEffect,
   useRef,
   useMemo,
   useCallback,
@@ -717,10 +836,14 @@ export {
   useQuery,
   useHash,
   useMetadata,
+  useId,
+  useDebounce,
+  useThrottle,
   useStorePriority,
   useTransition,
   useDeferredValue,
-  usePersitentStore,
+  usePersistentStore,
+  usePersistentStore as usePersitentStore, // backwards-compatible alias
   useSwitch,
   // Router exports
   RouterProvider,
@@ -728,3 +851,4 @@ export {
   Children,
   NavLink,
 }
+

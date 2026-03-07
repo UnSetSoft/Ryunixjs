@@ -6,6 +6,7 @@ import {
   CAMEL_TO_KEBAB_REGEX,
   is,
 } from '../utils/index'
+import { toSvgAttrName } from '../utils/svgAttributes'
 
 /**
  * Convert camelCase to kebab-case for CSS properties
@@ -85,7 +86,8 @@ const createDom = (fiber) => {
   // Fragments and Context Providers don't create real DOM nodes
   if (
     fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT ||
-    fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT
+    fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT ||
+    fiber.type === Symbol.for('ryunix.portal')
   ) {
     return null
   }
@@ -97,7 +99,12 @@ const createDom = (fiber) => {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
       const isSvg = [
-        'svg', 'path', 'g', 'circle', 'polygon', 'rect', 'line', 'polyline', 'ellipse', 'text', 'tspan'
+        'svg', 'path', 'g', 'circle', 'polygon', 'rect', 'line', 'polyline',
+        'ellipse', 'text', 'tspan', 'defs', 'use', 'symbol', 'mask',
+        'clipPath', 'linearGradient', 'radialGradient', 'stop', 'filter',
+        'feGaussianBlur', 'feOffset', 'feMerge', 'feMergeNode', 'feBlend',
+        'feColorMatrix', 'feComposite', 'foreignObject', 'image', 'marker',
+        'pattern', 'textPath',
       ].includes(fiber.type)
 
       if (isSvg) {
@@ -164,14 +171,7 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
         return
       }
       if (dom instanceof SVGElement) {
-        let attrName = name
-        if (name === 'strokeWidth') attrName = 'stroke-width'
-        if (name === 'strokeLinecap') attrName = 'stroke-linecap'
-        if (name === 'strokeLinejoin') attrName = 'stroke-linejoin'
-        if (name === 'strokeDasharray') attrName = 'stroke-dasharray'
-        if (name === 'strokeDashoffset') attrName = 'stroke-dashoffset'
-        if (name === 'fillRule') attrName = 'fill-rule'
-        if (name === 'clipRule') attrName = 'clip-rule'
+        const attrName = toSvgAttrName(name)
         dom.removeAttribute(attrName)
       } else {
         dom[name] = ''
@@ -213,16 +213,8 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
             }
           } else {
             const isSvgNode = dom instanceof SVGElement
-            // Camel case to true attribute map (e.g. strokeWidth -> stroke-width)
-            let attrName = name
             if (isSvgNode) {
-              if (name === 'strokeWidth') attrName = 'stroke-width'
-              if (name === 'strokeLinecap') attrName = 'stroke-linecap'
-              if (name === 'strokeLinejoin') attrName = 'stroke-linejoin'
-              if (name === 'strokeDasharray') attrName = 'stroke-dasharray'
-              if (name === 'strokeDashoffset') attrName = 'stroke-dashoffset'
-              if (name === 'fillRule') attrName = 'fill-rule'
-              if (name === 'clipRule') attrName = 'clip-rule'
+              const attrName = toSvgAttrName(name)
               // viewBox is case sensitive, we respect the camelCase for it.
               dom.setAttribute(attrName, nextProps[name])
             } else {

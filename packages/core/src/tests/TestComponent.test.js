@@ -1,6 +1,6 @@
-import Ryunix from '../lib/index'
-import { workLoop } from '../lib/workers'
-import { useStore } from '../lib/hooks'
+import Ryunix from '../lib/index.js'
+import { workLoop } from '../lib/workers.js'
+import { useStore } from '../lib/hooks.js'
 
 describe('useStore Hook', () => {
   let container
@@ -17,28 +17,34 @@ describe('useStore Hook', () => {
       container = null
     }
   })
-  const [message, setMessage] = useStore('')
 
   test('updates state correctly and reflects in DOM', () => {
-    const button = Ryunix.createElement(
-      'button',
-      {
-        onClick: () => setMessage('hola'),
-      },
-      'Click me',
-    )
+    // Define a function component that uses hooks properly
+    const TestComponent = () => {
+      const [message, setMessage] = useStore('')
 
-    const paragraph = Ryunix.createElement(
-      'p',
-      null,
-      `Muestra en home el valor: ${message}`,
-    )
+      const button = Ryunix.createElement(
+        'button',
+        {
+          onClick: () => setMessage('hola'),
+        },
+        'Click me',
+      )
 
-    const Root = Ryunix.createElement('div', null, [button, paragraph])
+      const paragraph = Ryunix.createElement(
+        'p',
+        null,
+        `Muestra en home el valor: ${message}`,
+      )
 
-    container = Ryunix.init(Root())
+      return Ryunix.createElement('div', null, button, paragraph)
+    }
 
-    // Verificar que el contenedor tiene la propiedad `dom` configurada
+    const Root = Ryunix.createElement(TestComponent, null)
+
+    container = Ryunix.init(Root)
+
+    // Verify the container has the `dom` property configured
     expect(container.dom).toBeDefined()
 
     workLoop({ timeRemaining: () => 100 })

@@ -1,6 +1,6 @@
 import { createDom, clearContainer } from './dom'
 import { reconcileChildren } from './reconciler'
-import { getState, RYUNIX_TYPES } from '../utils/index'
+import { getState, RYUNIX_TYPES, EFFECT_TAGS } from '../utils/index'
 import { createElement } from './createElement'
 import { createContext } from './hooks'
 
@@ -11,7 +11,7 @@ const updateFunctionComponent = (fiber) => {
   state.wipFiber.hooks = []
 
   if (state.isHydrating) {
-    fiber.effectTag = state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate')
+    fiber.effectTag = EFFECT_TAGS.HYDRATE
   }
 
   const children = [fiber.type(fiber.props)]
@@ -32,10 +32,13 @@ const updateHostComponent = (fiber) => {
     fiber._contextValue = fiber.props?.value
   }
 
-  const isPassthrough = fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT || fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT
+  const isPassthrough =
+    fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT ||
+    fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT ||
+    fiber.type === Symbol.for('ryunix.portal')
 
   if (state.isHydrating && isPassthrough) {
-    fiber.effectTag = state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate')
+    fiber.effectTag = EFFECT_TAGS.HYDRATE
   } else if (!fiber.dom) {
     if (state.isHydrating && state.hydrateCursor) {
       const domNode = state.hydrateCursor
@@ -44,18 +47,21 @@ const updateHostComponent = (fiber) => {
 
       if (isText || isElement) {
         fiber.dom = domNode
-        fiber.effectTag = state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate')
+        fiber.effectTag = EFFECT_TAGS.HYDRATE
         state.hydrateCursor = domNode.nextSibling
       } else {
-        console.warn(`[Hydration] Mismatch at ${fiber.type}. Falling back to CSR.`)
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`[Hydration] Mismatch at ${fiber.type}. Falling back to CSR.`)
+        }
 
-        // On mismatch, safest approach: clear the entire root so no stale SSR
-        // content remains alongside the freshly-rendered CSR tree.
+        // On mismatch, mark as failed. The commit phase will handle appending
+        // and commitRoot will handle clearing the container if needed.
         state.isHydrating = false
-        clearContainer(state.containerRoot)
+        state.hydrationFailed = true
+        state.hydrateCursor = null
 
         fiber.dom = createDom(fiber)
-        fiber.effectTag = state.EFFECT_TAGS?.PLACEMENT || Symbol.for('ryunix.reconciler.status.placement')
+        fiber.effectTag = EFFECT_TAGS.PLACEMENT
       }
     } else {
       fiber.dom = createDom(fiber)
@@ -65,16 +71,36 @@ const updateHostComponent = (fiber) => {
   let prevCursor = state.hydrateCursor
   const isRealDom = fiber.dom != null
 
-  if (state.isHydrating && isRealDom && fiber.effectTag === (state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate'))) {
+  if (state.isHydrating && isRealDom && fiber.effectTag === EFFECT_TAGS.HYDRATE) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[Ryunix Debug] Stepping into children of: ${fiber.type}`);
+    }
     state.hydrateCursor = fiber.dom.firstChild
   }
 
   const children = fiber.props?.children || []
   reconcileChildren(fiber, children)
 
-  if (state.isHydrating && fiber.effectTag === (state.EFFECT_TAGS?.HYDRATE || Symbol.for('ryunix.reconciler.status.hydrate'))) {
+  if (state.isHydrating && fiber.effectTag === EFFECT_TAGS.HYDRATE) {
     if (isRealDom) {
-      state.hydrateCursor = prevCursor
+      // After reconciling all children, if there are still siblings in the DOM,
+      // they were NOT matched by any client fiber. We must remove them.
+      let cursor = state.hydrateCursor
+      if (process.env.NODE_ENV !== 'production' && cursor) {
+        console.log(`[Ryunix Debug] Cleaning up unconsumed children of: ${fiber.type}`);
+      }
+      while (cursor) {
+        const next = cursor.nextSibling
+        if (cursor.parentNode) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('[Ryunix Debug] Removing stale SSR child:', cursor);
+          }
+          cursor.parentNode.removeChild(cursor)
+        }
+        cursor = next
+      }
+      // Restore cursor to the next sibling of THIS node for the next sibling fiber
+      state.hydrateCursor = prevCursor ? prevCursor.nextSibling : null
     }
   }
 }
@@ -168,7 +194,7 @@ export {
   updateFunctionComponent,
   updateHostComponent,
 
-  // Buil-in components
+  // Built-in components
 
   // MDX Support
   MDXContent,

@@ -257,7 +257,6 @@ const sharedWebpackConfig = {
     alias:
       config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
     extensions: [
-      '.*',
       '.js',
       '.jsx',
       '.ryx',
