@@ -477,7 +477,7 @@ const RouterProvider = ({ routes, children }) => {
   }, [])
 
   const navigate = (path) => {
-    if (typeof window !== 'undefined' && window.__RYUNIX_ISLANDS__) {
+    if (typeof window !== 'undefined' && window.__RYUNIX_MPA__) {
       window.location.assign(path)
       return
     }
@@ -543,6 +543,59 @@ const Children = () => {
 }
 
 /**
+ * usePathname - Returns the current pathname
+ */
+const usePathname = () => {
+  const { location } = useRouter()
+  return location.split('?')[0].split('#')[0]
+}
+
+/**
+ * useSearchParams - Returns the current URLSearchParams object
+ */
+const useSearchParams = () => {
+  const { query } = useRouter()
+  return new URLSearchParams(query)
+}
+
+/**
+ * Link - Base link component for SPA navigation
+ * Supports optional prefetching of lazy components.
+ */
+const Link = ({ to, prefetch = true, ...props }) => {
+  const { navigate } = useRouter()
+
+  const handleClick = (e) => {
+    if (e.button !== 0 || e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) {
+      return
+    }
+
+    e.preventDefault()
+    navigate(to)
+  }
+
+  const handleMouseEnter = () => {
+    if (prefetch && typeof window !== 'undefined') {
+      // Logic for prefetching could go here if route component is known
+    }
+  }
+
+  const { className: _omitClassName, ...cleanedProps } = props
+
+  return createElement(
+    'a',
+    {
+      href: to,
+      onClick: handleClick,
+      onMouseEnter: handleMouseEnter,
+      className: props.className || props['ryunix-class'],
+      ...cleanedProps,
+    },
+    props.children,
+  )
+}
+
+/**
  * The NavLink function in JavaScript is a component that generates a link element with customizable
  * classes and active state based on the current location.
  * @returns The `NavLink` component is returning a JSX element representing an anchor (`<a>`) tag with
@@ -556,6 +609,9 @@ const NavLink = ({ to, exact = false, ...props }) => {
     typeof cls === 'function' ? cls({ isActive }) : cls || ''
 
   const handleClick = (e) => {
+    if (e.button !== 0 || e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) {
+      return
+    }
     e.preventDefault()
     navigate(to)
   }
@@ -854,5 +910,8 @@ export {
   useRouter,
   Children,
   NavLink,
+  Link,
+  usePathname,
+  useSearchParams,
 }
 
