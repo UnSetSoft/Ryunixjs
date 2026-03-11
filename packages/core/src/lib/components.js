@@ -62,16 +62,8 @@ const updateHostComponent = (fiber) => {
       if (isText || isElement) {
         fiber.dom = domNode
         fiber.effectTag = EFFECT_TAGS.HYDRATE
-        const isBoundary =
-          fiber.props && fiber.props['data-ryunix-server'] !== undefined
-        // If it's a server boundary, the cursor must move to the next sibling,
-        // effectively skipping all its server-rendered children.
-        if (isBoundary) {
-          state.hydrateCursor = nextValidSibling(domNode.nextSibling)
-        } else {
-          // Move cursor to first child for children to consume
-          state.hydrateCursor = nextValidSibling(domNode.firstChild)
-        }
+        // Move cursor to first child for children to consume
+        state.hydrateCursor = nextValidSibling(domNode.firstChild)
       } else {
         if (process.env.NODE_ENV !== 'production') {
           console.warn(
@@ -90,13 +82,8 @@ const updateHostComponent = (fiber) => {
     }
   }
 
-  const isServerBoundary =
-    fiber.props && fiber.props['data-ryunix-server'] !== undefined
-
-  if (!isServerBoundary) {
-    const children = fiber.props?.children || []
-    reconcileChildren(fiber, children)
-  }
+  const children = fiber.props?.children || []
+  reconcileChildren(fiber, children)
 }
 
 const getTypeLabel = (type) => {
