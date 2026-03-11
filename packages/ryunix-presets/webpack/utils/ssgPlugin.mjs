@@ -61,7 +61,7 @@ class RyunixRoutesPlugin {
           fs.mkdirSync(path.dirname(outputPath), { recursive: true })
           fs.writeFileSync(outputPath, manifest)
 
-          console.log('✅ [SSG Plugin] Process successfully completed')
+          if (this.debug) console.log('✅ [SSG Plugin] Process successfully completed')
         } catch (error) {
           console.error('\n' + '='.repeat(70))
           console.error('[SSG] ❌ ERROR generating route manifest:')
