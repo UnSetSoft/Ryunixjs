@@ -554,7 +554,8 @@ const buildSSG = async (routesConfig, config, buildDir) => {
         console.warn(`[SSG] Missing SSR dependencies for ${route.path}. AppRouterApp: ${!!AppRouterApp}, renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement}`)
       }
 
-      const html = await prerenderRoute(route, activeTemplate, config, renderedString)
+      const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {};
+      const html = await prerenderRoute({ ...route, meta: { ...route.meta, ...ssrMetadata } }, activeTemplate, config, renderedString)
       console.log(`[SSG Debug] renderedString for ${route.path}:`, renderedString ? renderedString.substring(0, 100) + '...' : 'EMPTY');
 
       const outputDir =

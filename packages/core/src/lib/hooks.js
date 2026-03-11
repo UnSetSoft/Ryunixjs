@@ -365,8 +365,15 @@ const useHash = () => {
  */
 
 const useMetadata = (tags = {}, options = {}) => {
+  const state = getState()
+  if (state.isServerRendering) {
+    state.ssrMetadata = { ...state.ssrMetadata, ...tags }
+    return
+  }
+
   useEffect(() => {
     if (typeof document === 'undefined') return
+    // ...
 
     let finalTitle = 'Ryunix App'
     const template = options.title?.template

@@ -354,7 +354,42 @@ const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => 
   }
 };
 
-const RouteWrapper = ({ layouts, index, props, loading, error }) => {
+const RouteWrapper = (props) => {
+  const isServer = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';
+  if (isServer) {
+    return RouteWrapperServer(props);
+  }
+  return RouteWrapperClient(props);
+};
+
+const RouteWrapperServer = async ({ layouts, index, props, loading, error }) => {
+  let combinedMeta = {};
+  if (layouts) {
+    for (const l of layouts) {
+      if (l.Metatags) combinedMeta = { ...combinedMeta, ...l.Metatags };
+      if (l.generateMetadata) {
+        try {
+          const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
+          combinedMeta = { ...combinedMeta, ...dynamic };
+        } catch (e) { console.error('Error in layout generateMetadata:', e); }
+      }
+    }
+  }
+  if (index) {
+    if (index.Metatags) combinedMeta = { ...combinedMeta, ...index.Metatags };
+    if (index.generateMetadata) {
+      try {
+        const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
+        combinedMeta = { ...combinedMeta, ...dynamic };
+      } catch (e) { console.error('Error in index generateMetadata:', e); }
+    }
+  }
+  useMetadata(combinedMeta);
+
+  return <RouteWrapperRender layouts={layouts} index={index} props={props} loading={loading} error={error} />;
+};
+
+const RouteWrapperClient = ({ layouts, index, props, loading, error }) => {
   const getStaticMeta = () => {
     let meta = {};
     if (layouts) {
@@ -373,44 +408,32 @@ const RouteWrapper = ({ layouts, index, props, loading, error }) => {
 
   useEffect(() => {
     const runMetadata = async () => {
-      let combinedMeta = {};
-      
-      // Merge metadata from layouts (root to leaf)
+      let combinedMeta = getStaticMeta();
       if (layouts) {
         for (const l of layouts) {
-          if (l.Metatags) {
-            combinedMeta = { ...combinedMeta, ...l.Metatags };
-          }
           if (l.generateMetadata) {
             try {
               const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
               combinedMeta = { ...combinedMeta, ...dynamic };
-            } catch (e) {
-              console.error('Error in layout generateMetadata:', e);
-            }
+            } catch (e) { console.error('Error in layout generateMetadata:', e); }
           }
         }
       }
-
-      // Merge metadata from index (leaf)
-      if (index) {
-        if (index.Metatags) {
-          combinedMeta = { ...combinedMeta, ...index.Metatags };
-        }
-        if (index.generateMetadata) {
-          try {
-            const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
-            combinedMeta = { ...combinedMeta, ...dynamic };
-          } catch (e) {
-            console.error('Error in index generateMetadata:', e);
-          }
-        }
+      if (index && index.generateMetadata) {
+        try {
+          const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
+          combinedMeta = { ...combinedMeta, ...dynamic };
+        } catch (e) { console.error('Error in index generateMetadata:', e); }
       }
-
       setCurrentMeta(combinedMeta);
     };
     runMetadata();
   }, [props.params, props.query, props.location]);
+
+  return <RouteWrapperRender layouts={layouts} index={index} props={props} loading={loading} error={error} />;
+};
+
+const RouteWrapperRender = ({ layouts, index, props, loading, error }) => {
 
   let content = null;
   const isServerRender = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';

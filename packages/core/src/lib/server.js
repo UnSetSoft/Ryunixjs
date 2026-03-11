@@ -332,6 +332,7 @@ export const renderToReadableStream = (element) => {
     async start(controller) {
       const wasServerRendering = state.isServerRendering
       state.isServerRendering = true
+      state.ssrMetadata = {}
 
       const push = (text) => controller.enqueue(encoder.encode(text))
       const suspenseTasks = []
@@ -369,6 +370,7 @@ export const renderToString = (element) => {
   const state = getState()
   const wasServerRendering = state.isServerRendering
   state.isServerRendering = true
+  state.ssrMetadata = {}
   try {
     return renderToStringImpl(element)
   } finally {
