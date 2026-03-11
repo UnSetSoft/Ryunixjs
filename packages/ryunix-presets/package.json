@@ -47,6 +47,7 @@
     "@rollup/plugin-terser": "0.4.4",
     "@swc/core": "1.15.5",
     "babel-loader": "10.0.0",
+    "boxen": "^8.0.1",
     "chalk": "5.6.2",
     "copy-webpack-plugin": "13.0.1",
     "css-loader": "7.1.2",

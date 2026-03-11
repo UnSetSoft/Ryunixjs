@@ -200,4 +200,10 @@ warnDeprecated('static.seo', 'Static SEO configuration is legacy. Use layouts an
 warnDeprecated('static.customTemplate', 'Custom templates are legacy. Use root layouts instead.')
 warnDeprecated('experimental.ssg', 'Configuration-based SSG is legacy. Use file-based metadata in the "app" directory.')
 
+if (defaultSettings.debug) {
+  process.env.RYUNIX_DEBUG = 'true'
+} else {
+  delete process.env.RYUNIX_DEBUG
+}
+
 module.exports = defaultSettings

@@ -5,6 +5,7 @@ import { StartDevServer } from './dev.server.mjs'
 import { compiler } from './compiler.mjs'
 import logger from 'terminal-log'
 import chalk from 'chalk'
+import boxen from 'boxen'
 import defaultSettings from '../utils/config.cjs'
 import Prerender from './prerender.mjs'
 import {
@@ -83,9 +84,26 @@ const prod = {
       return
     }
 
+    const { version } = await getPackageVersion()
+
     server.listen(config.port, () => {
+      const content = [
+        `${chalk.bold(chalk.cyanBright('<Ryunix/>'))} ${chalk.gray(`v${version}`)}`,
+        '',
+        `${chalk.white('Ready at:')} ${chalk.underline(chalk.cyan(`http://localhost:${config.port}/`))}`,
+        `${chalk.white('Mode:')}     ${chalk.bold(chalk.magenta('production'))}`,
+      ]
+
       console.log(
-        `Server running at http://localhost:${config.port}/`,
+        boxen(content.join('\n'), {
+          padding: 1,
+          margin: 1,
+          borderStyle: 'round',
+          borderColor: 'magenta',
+          title: chalk.bold('Production Server'),
+          titleAlignment: 'center',
+          minimumWidth: 50,
+        })
       )
     })
   },
@@ -155,13 +173,14 @@ const build = {
         }
         const apiRoutes = collectRoutes(apiOutputDir)
         if (apiRoutes.length > 0) {
-          console.log(`✅ API routes (${apiRoutes.length}):`)
-          apiRoutes.forEach((r) => console.log(` - /api${r}`))
+          console.log(`${chalk.cyan('○')}  API routes (${chalk.bold(apiRoutes.length)}):`)
+          apiRoutes.forEach((r) => console.log(`   ${chalk.green('✔')} ${chalk.gray(`/api${r}`)}`))
+          console.log('')
         }
       }
 
-      logger.info(chalk.green('Compilation successful! 🎉'))
-      logger.info(`Done in ${formattedTime}`)
+      logger.info(`${chalk.green('✔')} ${chalk.bold('Compilation successful! 🎉')}`)
+      logger.info(`${chalk.gray('Done in')} ${chalk.bold(formattedTime)}`)
 
       compiler.close((closeErr) => {
         if (closeErr) {

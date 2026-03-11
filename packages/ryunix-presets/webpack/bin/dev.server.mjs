@@ -11,6 +11,7 @@ import {
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import net from 'net' // Para verificar si el puerto está disponible
+import boxen from 'boxen'
 import defaultSettings from '../utils/config.cjs'
 
 const checkPortInUse = (port) => {
@@ -85,34 +86,45 @@ const StartServer = async (cliSettings) => {
     try {
       await server.start() // Iniciar el servidor con el nuevo puerto
 
-      // Mejor formato de información para el servidor
       const url = `http://localhost:${port}`
       const cfgStatus = configFileExist()
-        ? chalk.green('loaded')
-        : chalk.red('not found')
+        ? chalk.green('✔ Loaded')
+        : chalk.red('✘ Not found')
       const envStatus = envPath()
-        ? chalk.green('loaded')
-        : chalk.yellow('not found')
+        ? chalk.green('✔ Loaded')
+        : chalk.yellow('✘ Not found')
       const modeLabel = mode
-        ? chalk.green('production')
-        : chalk.yellow('development')
+        ? chalk.bold(chalk.magenta('production'))
+        : chalk.bold(chalk.cyan('development'))
 
-      const lines = []
-      lines.push(chalk.bold(chalk.cyanBright(`<Ryunix/> ${version}`)))
-      lines.push('')
-      lines.push(`${chalk.gray('-')} Running at: ${chalk.underline(url)}`)
-      lines.push(`${chalk.gray('-')} Config file: ${cfgStatus}`)
-      lines.push(`${chalk.gray('-')} Environment file: ${envStatus}`)
-      lines.push(`${chalk.gray('-')} Mode: ${modeLabel}`)
-      if (devMode)
-        lines.push(
-          chalk.yellow(
-            '⚠️  You are in development mode — update ryunix.config.js for production',
-          ),
-        )
+      const { version } = await getPackageVersion()
 
-      lines.push('---------------------------')
-      logger.info(lines.join('\n'))
+      const content = [
+        `${chalk.bold(chalk.cyanBright('<Ryunix/>'))} ${chalk.gray(`v${version}`)}`,
+        '',
+        `${chalk.white('Ready at:')} ${chalk.underline(chalk.cyan(url))}`,
+        `${chalk.white('Config:')}   ${cfgStatus}`,
+        `${chalk.white('Env:')}      ${envStatus}`,
+        `${chalk.white('Mode:')}     ${modeLabel}`,
+      ]
+
+      if (devMode) {
+        content.push('')
+        content.push(`${chalk.yellow('⚠️')}  ${chalk.yellow('Development mode active')}`)
+        content.push(chalk.gray('Build for production to optimize performance'))
+      }
+
+      console.log(
+        boxen(content.join('\n'), {
+          padding: 1,
+          margin: 1,
+          borderStyle: 'round',
+          borderColor: 'cyan',
+          title: chalk.bold('Dev Server'),
+          titleAlignment: 'center',
+          minimumWidth: 50,
+        })
+      )
     } catch (err) {
       logger.error(`[error] ${err.message}`)
     }
