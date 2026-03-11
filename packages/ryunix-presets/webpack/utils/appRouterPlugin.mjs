@@ -108,8 +108,9 @@ class AppRouterPlugin {
           } else if (hasAsyncExport) {
             isServer = true;
           } else {
-            // Default to server for route files if ambiguous
-            isServer = true;
+            // Default to shared for ambiguous components
+            isServer = false;
+            isClient = false;
           }
         }
 
