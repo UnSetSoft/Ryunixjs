@@ -222,7 +222,12 @@ class AppRouterPlugin {
 
         if (node.layout) {
           const layoutInfo = processComponent('Layout', node.layout, !!node.layoutIsAsync);
+          const layoutLoadingInfo = processComponent('Loading', node.loading, false);
+          const layoutErrorInfo = processComponent('Error', node.error, false);
+
           if (layoutInfo) {
+            layoutInfo.loading = layoutLoadingInfo;
+            layoutInfo.error = layoutErrorInfo;
             currentLayouts.push(layoutInfo);
             if (parentLayouts.length === 0 && !rootLayouts.some(l => l.id === layoutInfo.id)) {
               rootLayouts.push(layoutInfo);
@@ -232,20 +237,27 @@ class AppRouterPlugin {
 
         if (node.index) {
           const indexInfo = processComponent('Index', node.index, !!node.indexIsAsync);
+          const loadingInfo = processComponent('Loading', node.loading, false);
+          const errorFileInfo = processComponent('Error', node.error, false);
+
           if (indexInfo) {
             const formatComp = (info) => {
-              if (info.isProxy) return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync} }`;
-              return `{ default: getOptExport(${info.id}, 'default'), isServerComponent: ${info.isServerComponent}, id: '${info.id}', isAsync: ${info.isAsync}, Metatags: getOptExport(${info.id}, 'Metatags') || getOptExport(${info.id}, 'frontmatter') || {} }`;
+              if (!info) return 'null';
+              if (info.isProxy) return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)} }`;
+              return `{ default: getOptExport(${info.id}, 'default'), isServerComponent: ${info.isServerComponent}, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)}, Metatags: getOptExport(${info.id}, 'Metatags') || getOptExport(${info.id}, 'frontmatter') || {}, generateMetadata: getOptExport(${info.id}, 'generateMetadata') }`;
             };
 
             const layoutsArrayStr = `[${currentLayouts.map(l => formatComp(l)).join(', ')}]`;
             const indexConfigStr = formatComp(indexInfo);
+            const loadingConfigStr = formatComp(loadingInfo);
+            const errorConfigStr = formatComp(errorFileInfo);
+
             const errorPropStr = errorsId ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })` : indexConfigStr;
 
             flattenedRoutes.push(`
     {
       path: '${node.path}',
-      component: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} props={props} />
+      component: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} loading={${loadingConfigStr}} error={${errorConfigStr}} props={props} />
     }`);
 
             if (isServerBuild) {
@@ -342,9 +354,50 @@ const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => 
   }
 };
 
-const RouteWrapper = ({ layouts, index, props }) => {
+const RouteWrapper = ({ layouts, index, props, loading, error }) => {
   const [currentMeta, setCurrentMeta] = useStore({});
   useMetadata(currentMeta);
+
+  useEffect(() => {
+    const runMetadata = async () => {
+      let combinedMeta = {};
+      
+      // Merge metadata from layouts (root to leaf)
+      if (layouts) {
+        for (const l of layouts) {
+          if (l.Metatags) {
+            combinedMeta = { ...combinedMeta, ...l.Metatags };
+          }
+          if (l.generateMetadata) {
+            try {
+              const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
+              combinedMeta = { ...combinedMeta, ...dynamic };
+            } catch (e) {
+              console.error('Error in layout generateMetadata:', e);
+            }
+          }
+        }
+      }
+
+      // Merge metadata from index (leaf)
+      if (index) {
+        if (index.Metatags) {
+          combinedMeta = { ...combinedMeta, ...index.Metatags };
+        }
+        if (index.generateMetadata) {
+          try {
+            const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
+            combinedMeta = { ...combinedMeta, ...dynamic };
+          } catch (e) {
+            console.error('Error in index generateMetadata:', e);
+          }
+        }
+      }
+
+      setCurrentMeta(combinedMeta);
+    };
+    runMetadata();
+  }, [props.params, props.query]);
 
   let content = null;
   const isServerRender = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';
@@ -362,6 +415,17 @@ const RouteWrapper = ({ layouts, index, props }) => {
     return <SyncComponentRenderer Component={compInfo.default} componentProps={props} ErrorFallback={compInfo.errorComponent} />;
   }
 
+  const wrapBoundaries = (element, l, e) => {
+    let result = element;
+    if (l && l.default) {
+      result = <Ryunix.Suspense fallback={<l.default />}>{result}</Ryunix.Suspense>;
+    }
+    if (e && e.default) {
+      result = <Ryunix.ErrorBoundary fallback={e.default}>{result}</Ryunix.ErrorBoundary>;
+    }
+    return result;
+  }
+
   if (index) {
     if (index.isServerComponent) {
       if (index.default) {
@@ -376,26 +440,31 @@ const RouteWrapper = ({ layouts, index, props }) => {
     } else if (index.default) {
       content = renderComponent(index, props);
     }
+    
+    // Wrap index with its segment boundaries
+    content = wrapBoundaries(content, loading, error);
   }
 
   if (layouts) {
     for (let i = layouts.length - 1; i >= 0; i--) {
       const l = layouts[i];
+      let layoutContent = null;
       if (l.isServerComponent) {
          if (l.default) {
-           content = (
+           layoutContent = (
              <ServerBoundary id={l.id}>
                {renderComponent(l, { ...props, children: content })}
              </ServerBoundary>
            );
          } else {
-           content = <ServerBoundary id={l.id}>{content}</ServerBoundary>;
+           layoutContent = <ServerBoundary id={l.id}>{content}</ServerBoundary>;
          }
-         continue;
+      } else if (l.default) {
+        layoutContent = renderComponent(l, { ...props, children: content });
       }
-      
-      if (l.default) {
-        content = renderComponent(l, { ...props, children: content });
+
+      if (layoutContent) {
+        content = wrapBoundaries(layoutContent, l.loading, l.error);
       }
     }
   }
