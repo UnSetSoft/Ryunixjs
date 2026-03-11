@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { dirname, join, resolve } from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
 import webpack from 'webpack'
@@ -199,6 +199,7 @@ const sharedWebpackConfig = {
         exclude: /node_modules/,
         use: [
           ryunixRequire.resolve('thread-loader'),
+          resolve(__dirname, 'loaders/ryunix-rsc-loader.mjs'),
           {
             loader: ryunixRequire.resolve('babel-loader'),
             options: {
@@ -291,9 +292,7 @@ const getPlugins = (isServer = false) => [
   new webpack.DefinePlugin({
     'ryunix.config.env': JSON.stringify(config.experimental.env),
     'process.env.RYUNIX_SSR': JSON.stringify(
-      isServer
-        ? true
-        : (config.experimental.ssr || (config.experimental.ssg?.prerender?.length ?? 0) > 0),
+      config.experimental.ssr || (config.experimental.ssg?.prerender?.length ?? 0) > 0
     ),
     'process.env.RYUNIX_IS_SERVER': JSON.stringify(isServer),
   }),
@@ -357,7 +356,6 @@ const getPlugins = (isServer = false) => [
   ...(!isServer ? config.webpack.plugins : []),
 ].filter(Boolean)
 
-// 1. CLIENT CONFIGURATION (The standard web output)
 const clientConfig = {
   ...sharedWebpackConfig,
   name: 'client',
@@ -428,10 +426,21 @@ const clientConfig = {
   module: {
     ...sharedWebpackConfig.module,
     rules: [
-      ...sharedWebpackConfig.module.rules.filter(Boolean),
+      ...sharedWebpackConfig.module.rules.map(rule => {
+        if (rule.test && rule.test.toString().includes('js|jsx|ryx')) {
+          return {
+            ...rule,
+            exclude: [
+              /node_modules/,
+              /\.server\.(js|jsx|ryx)$/
+            ]
+          };
+        }
+        return rule;
+      }).filter(Boolean),
       // CSS/SASS for Client
       {
-        test: /\.s[ac]ss|css$/i,
+        test: /\.(s[ac]ss|css)$/i,
         exclude: /node_modules/,
         use: [
           (config.webpack.production || config.experimental.ssr)
@@ -452,6 +461,9 @@ const clientConfig = {
     ]
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      Ryunix: '@unsetsoft/ryunixjs',
+    }),
     new webpack.HotModuleReplacementPlugin(),
     new RyunixRoutesPlugin({
       routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
@@ -464,6 +476,7 @@ const clientConfig = {
       appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
       outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/app-router.js`),
       ssgOutputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/cache/ssg/routes.json`),
+      debug: true
     }),
     new ApiRouterPlugin({
       appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
@@ -500,7 +513,8 @@ const serverConfig = {
     library: { type: 'module' },
     chunkFormat: 'module',
     // Keep api/ subdirectory — it's written by ApiRouterPlugin, not by webpack
-    clean: { keep: /^api[\\/]/ },
+    // Keep api/ and app/ subdirectories
+    clean: { keep: /^(api|app)[\\/]/ },
   },
   experiments: {
     outputModule: true,

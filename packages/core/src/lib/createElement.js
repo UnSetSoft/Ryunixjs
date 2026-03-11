@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, STRINGS, is } from '../utils/index'
+import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
 
 /**
  * The `createTextElement` function creates a text element with the specified text content.
@@ -37,17 +37,39 @@ const createTextElement = (text) => {
  */
 const createElement = (type, props, ...children) => {
   const safeProps = props || {}
+  let rawChildren = children
+  if (children.length === 0 && safeProps.children !== undefined) {
+    rawChildren = Array.isArray(safeProps.children) ? safeProps.children : [safeProps.children]
+  }
+
+  rawChildren = rawChildren
+    .flat()
+    .filter((child) => child != null && child !== false && child !== true)
+
+  const normalizedChildren = []
+  let currentText = ''
+
+  for (const child of rawChildren) {
+    if (typeof child !== STRINGS.OBJECT) {
+      currentText += String(child)
+    } else {
+      if (currentText !== '') {
+        normalizedChildren.push(createTextElement(currentText))
+        currentText = ''
+      }
+      normalizedChildren.push(child)
+    }
+  }
+
+  if (currentText !== '') {
+    normalizedChildren.push(createTextElement(currentText))
+  }
 
   return {
     type,
     props: {
       ...safeProps,
-      children: children
-        .flat()
-        .filter((child) => child != null && child !== false && child !== true)
-        .map((child) =>
-          typeof child === STRINGS.OBJECT ? child : createTextElement(child),
-        ),
+      children: normalizedChildren,
     },
   }
 }

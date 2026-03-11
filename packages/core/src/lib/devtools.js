@@ -1,4 +1,4 @@
-import { getState } from '../utils/index'
+import { getState } from '../utils/index.js'
 
 /**
  * Development warnings

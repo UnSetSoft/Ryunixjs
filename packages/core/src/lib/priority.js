@@ -9,7 +9,7 @@ const Priority = {
   IDLE: 5, // Background tasks
 }
 
-import { rIC } from '../utils/index'
+import { rIC } from '../utils/index.js'
 
 let currentPriority = Priority.NORMAL
 let pendingUpdates = []

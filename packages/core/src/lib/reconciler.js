@@ -1,4 +1,4 @@
-import { EFFECT_TAGS, getState } from '../utils/index'
+import { EFFECT_TAGS, getState } from '../utils/index.js'
 
 /**
  * Reconcile children with key optimization
@@ -57,7 +57,7 @@ const reconcileChildren = (wipFiber, elements) => {
         dom: null,
         parent: wipFiber,
         alternate: null,
-        effectTag: EFFECT_TAGS.PLACEMENT,
+        effectTag: state.isHydrating ? EFFECT_TAGS.HYDRATE : EFFECT_TAGS.PLACEMENT,
         key: element.key,
         index,
       }

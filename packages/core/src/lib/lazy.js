@@ -1,5 +1,6 @@
-import { createElement, Fragment } from './createElement'
-import { useStore, useEffect } from './hooks'
+import { RYUNIX_TYPES, getState } from '../utils/index.js'
+import { createElement, Fragment } from './createElement.js'
+import { useStore, useEffect } from './hooks.js'
 
 /**
  * Suspense status tracking
@@ -104,12 +105,15 @@ const Suspense = ({ fallback, children }) => {
   }, [anyPending])
 
   // Show fallback while any child is pending
-  if (anyPending) {
+  // On server background task, we want to render ACTUAL children to capture them
+  if (anyPending && !getState().isSuspenseBackground) {
     return fallback || null
   }
 
   return createElement(Fragment, { children })
 }
+
+Suspense.type = RYUNIX_TYPES.RYUNIX_SUSPENSE
 
 /**
  * Preload component for prefetching — starts the import immediately

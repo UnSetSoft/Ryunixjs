@@ -1,10 +1,10 @@
-import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index'
-import { createElement, Fragment } from './createElement'
-import { scheduleWork } from './workers'
-import { Priority, scheduleUpdate, runWithPriority } from './priority'
-import { RYUNIX_PORTAL } from './portal'
-import { queueUpdate } from './batching'
-import { validateHookContext as validateHookCall } from './devtools'
+import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index.js'
+import { createElement, Fragment } from './createElement.js'
+import { scheduleWork } from './bridge.js'
+import { Priority, scheduleUpdate, runWithPriority } from './priority.js'
+import { RYUNIX_PORTAL } from './portal.js'
+import { queueUpdate } from './batching.js'
+import { validateHookContext as validateHookCall } from './devtools.js'
 
 
 const haveDepsChanged = (oldDeps, newDeps) => {
@@ -477,6 +477,10 @@ const RouterProvider = ({ routes, children }) => {
   }, [])
 
   const navigate = (path) => {
+    if (typeof window !== 'undefined' && window.__RYUNIX_ISLANDS__) {
+      window.location.assign(path)
+      return
+    }
     window.history.pushState({}, '', path)
     setLocation(path)
   }

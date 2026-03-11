@@ -5,7 +5,7 @@ class AppRouterPlugin {
   constructor(options = {}) {
     this.appDir = options.appDir || 'src/app';
     this.outputPath = options.outputPath || '.ryunix/server/app/app-router.js';
-    this.ssgOutputPath = options.ssgOutputPath || null; // explicit path for routes.json
+    this.ssgOutputPath = options.ssgOutputPath || null;
     this.debug = options.debug || false;
   }
 
@@ -27,7 +27,6 @@ class AppRouterPlugin {
       }
 
       try {
-        // Deep scan: check the newest mtime across all files recursively
         const newestMtime = this.getNewestMtime(appDirPath);
 
         if (newestMtime > lastScanTime || !lastRoutes) {
@@ -60,137 +59,10 @@ class AppRouterPlugin {
     let loadingFile = null;
     const children = [];
 
-    // Find special files
-    for (const entry of entries) {
-      if (entry.isFile()) {
-        const ext = path.extname(entry.name);
-        if (!['.ryx', '.js', '.jsx', '.ts', '.tsx', '.mdx'].includes(ext)) continue;
-
-        const name = path.basename(entry.name, ext);
-        const fullPath = path.join(dir, entry.name).replace(/\\/g, '/');
-
-        if (name === 'layout') layout = fullPath;
-        else if (name === 'index') index = fullPath;
-        else if (name === 'error') errorFile = fullPath;
-        else if (name === 'loading') loadingFile = fullPath;
-      }
-    }
-
-    // Process subdirectories
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const routeSegment = entry.name;
-        // Convert [...slug] to :...slug and [slug] to :slug
-        const routePath = routeSegment.replace(/\[(\.\.\.)?([^\]]+)\]/g, ':$1$2');
-
-        let newBasePath = basePath;
-        if (newBasePath === '/') {
-          newBasePath = `/${routePath}`;
-        } else if (newBasePath === '') {
-          newBasePath = `/${routePath}`;
-        } else {
-          newBasePath = `${basePath}/${routePath}`;
-        }
-
-        const childRoutes = this.scanDirectory(
-          path.join(dir, entry.name),
-          newBasePath
-        );
-        if (childRoutes) {
-          // If the child is an array (flattened from a folder with only children but no index/layout), concat it.
-          // Otherwise, push it.
-          if (Array.isArray(childRoutes)) {
-            children.push(...childRoutes);
-          } else {
-            children.push(childRoutes);
-          }
-        }
-      }
-    }
-
-    const extractMeta = (filePath) => {
-      if (!filePath) return null;
-      try {
-        let content = fs.readFileSync(filePath, 'utf8');
-
-        // Remove BOM if present
-        if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
-        content = content.replace(/\r\n/g, '\n');
-
-        // Check for MDX YAML frontmatter
-        if (filePath.endsWith('.mdx')) {
-          const mdxMatch = content.match(/^---\s*\n([\s\S]*?)\n\s*---/);
-          if (mdxMatch) {
-            const yamlContent = mdxMatch[1];
-            const frontmatter = {};
-            const lines = yamlContent.split('\n').filter(line => line.trim());
-
-            for (const line of lines) {
-              const keyValueMatch = line.match(/^\s*(\w+)\s*:\s*(.+)$/);
-              if (keyValueMatch) {
-                const key = keyValueMatch[1].trim();
-                let value = keyValueMatch[2].trim();
-                if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-                  value = value.slice(1, -1);
-                }
-                frontmatter[key] = value;
-              }
-            }
-            // Title and description are the standard keys in YAML used for metatags
-            if (Object.keys(frontmatter).length > 0) return frontmatter;
-          }
-        }
-
-        const metatagMatch = content.match(/export\s+const\s+Metatags?\s*=\s*(\{[\s\S]*?\})(?=\s*(?:export|;|$))/);
-        if (metatagMatch) {
-          // Safe parsing: extract key-value pairs via regex instead of eval/new Function
-          return this.parseObjectLiteral(metatagMatch[1]);
-        }
-      } catch (e) {
-        if (this.debug) console.error(`[AppRouter] Error parsing Metatag in ${filePath}:`, e.message);
-      }
-      return null;
-    };
-
-    const layoutMeta = extractMeta(layout) || {};
-    const indexMeta = extractMeta(index) || {};
-    let meta = {};
-
-    const mergeMeta = (target, source) => {
-      if (!source) return;
-      Object.keys(source).forEach(key => {
-        if (key === 'title') {
-          if (typeof source.title === 'object') {
-            target.titleTemplate = source.title.template || target.titleTemplate;
-            target.titleDefault = source.title.default || target.titleDefault;
-            target.title = source.title.default || target.title;
-          } else {
-            target.title = source.title;
-          }
-        } else {
-          target[key] = source[key];
-        }
-      });
-    };
-
-    mergeMeta(meta, layoutMeta);
-    mergeMeta(meta, indexMeta);
-
-
-
-    if (Object.keys(meta).length === 0) {
-      meta = null;
-    }
-
-    if (!layout && !index && children.length === 0 && !errorFile && !loadingFile) {
-      return null;
-    }
-
     const isAsync = (filePath) => {
       if (!filePath) return false;
       try {
         const content = fs.readFileSync(filePath, 'utf8');
-        // Look for common async component signatures at the top level
         return /export\s+async\s+default\s+function/i.test(content) ||
           /export\s+default\s+async\s+function/i.test(content) ||
           /async\s+function\s+([A-Z][\w]*)/.test(content);
@@ -199,147 +71,249 @@ class AppRouterPlugin {
       }
     };
 
+    const getPath = (obj) => {
+      if (!obj) return null;
+      if (typeof obj === 'string') return obj;
+      return obj.path || obj.serverPath || obj.clientPath;
+    };
+
+    for (const entry of entries) {
+      if (entry.isFile()) {
+        const ext = path.extname(entry.name);
+        if (!['.ryx', '.js', '.jsx', '.ts', '.tsx', '.mdx'].includes(ext)) continue;
+
+        const base = path.basename(entry.name, ext);
+        let name = base;
+
+        const fullPath = path.join(dir, entry.name).replace(/\\/g, '/');
+        const content = fs.readFileSync(fullPath, 'utf8');
+
+        // Robust directive detection using regex
+        let isServer = base.endsWith('.server') || /^\s*\/\/\s*@server/im.test(content);
+        let isClient = base.endsWith('.client') || /^\s*\/\/\s*@client/im.test(content);
+
+        if (base.endsWith('.server')) {
+          name = base.slice(0, -7);
+        } else if (base.endsWith('.client')) {
+          name = base.slice(0, -7);
+        }
+
+        // Auto-detection if no explicit directives/suffixes
+        if (!isServer && !isClient) {
+          const hasHooks = /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(content);
+          const hasAsyncExport = /export\s+async\s+default|export\s+default\s+async/.test(content);
+
+          if (hasHooks) {
+            isClient = true;
+          } else if (hasAsyncExport) {
+            isServer = true;
+          } else {
+            // Default to server for route files if ambiguous
+            isServer = true;
+          }
+        }
+
+        if (this.debug) {
+          console.log(`[AppRouter] File: ${entry.name} -> isServer: ${isServer}, isClient: ${isClient}`);
+        }
+
+        const assign = (type, path) => {
+          if (!type) {
+            return {
+              path: isServer || isClient ? null : path,
+              serverPath: isServer ? path : null,
+              clientPath: isClient ? path : null
+            };
+          }
+          if (isServer) type.serverPath = path;
+          else if (isClient) type.clientPath = path;
+          else type.path = path;
+          return type;
+        };
+
+        if (name === 'layout') layout = assign(layout, fullPath);
+        else if (name === 'index') index = assign(index, fullPath);
+        else if (name === 'error') errorFile = assign(errorFile, fullPath);
+        else if (name === 'loading') loadingFile = assign(loadingFile, fullPath);
+      }
+    }
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const routeSegment = entry.name;
+        const routePath = routeSegment.replace(/\[(\.\.\.)?([^\]]+)\]/g, ':$1$2');
+
+        let newBasePath = basePath;
+        if (newBasePath === '/' || newBasePath === '') {
+          newBasePath = `/${routePath}`;
+        } else {
+          newBasePath = `${basePath}/${routePath}`;
+        }
+
+        const childRoutes = this.scanDirectory(path.join(dir, entry.name), newBasePath);
+        if (childRoutes) {
+          if (Array.isArray(childRoutes)) children.push(...childRoutes);
+          else children.push(childRoutes);
+        }
+      }
+    }
+
+    if (!layout && !index && children.length === 0 && !errorFile && !loadingFile) {
+      return null;
+    }
+
     const node = {
       path: basePath === '' ? '/' : basePath,
       layout,
-      layoutIsAsync: isAsync(layout),
+      layoutIsAsync: isAsync(getPath(layout)),
       index,
-      indexIsAsync: isAsync(index),
-      meta,
+      indexIsAsync: isAsync(getPath(index)),
       error: errorFile,
       loading: loadingFile,
       children,
     };
 
-    if (!layout && !index && !errorFile && !loadingFile) {
-      return children;
-    }
+    if (!layout && !index && !errorFile && !loadingFile) return children;
 
     return node;
   }
 
   generateRouterFile(routeNode, outputPath) {
-    let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore } from '@unsetsoft/ryunixjs';\n`;
-    let routeDefinitions = '';
+    const generate = (isServerBuild) => {
+      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary } from '@unsetsoft/ryunixjs';\n`;
+      let componentIdCounter = 0;
+      const getNextId = () => componentIdCounter++;
+      const flattenedRoutes = [];
+      const ssgRoutes = [];
+      let rootLayouts = [];
 
-    let componentIdCounter = 0;
-    const getNextId = () => componentIdCounter++;
+      const appDirPath = path.resolve(process.cwd(), this.appDir);
+      const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx')) ? path.join(appDirPath, 'error.ryx') : (fs.existsSync(path.join(appDirPath, 'errors.ryx')) ? path.join(appDirPath, 'errors.ryx') : null);
 
-    // Flatten logic
-    const flattenedRoutes = [];
-    const ssgRoutes = [];
+      let errorsId = null;
+      if (errorsPath) {
+        errorsId = `Errors_App`;
+        importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`;
+      }
 
-    let rootLayouts = [];
+      const traverse = (node, parentLayouts = []) => {
+        if (Array.isArray(node)) {
+          for (const child of node) traverse(child, parentLayouts);
+          return;
+        }
 
-    const appDirPath = path.resolve(process.cwd(), this.appDir);
-    const errorsPath = Math.max(fs.existsSync(path.join(appDirPath, 'errors.ryx')), fs.existsSync(path.join(appDirPath, 'error.ryx')))
-      ? fs.existsSync(path.join(appDirPath, 'errors.ryx')) ? path.join(appDirPath, 'errors.ryx') : path.join(appDirPath, 'error.ryx')
-      : null;
+        const currentLayouts = [...parentLayouts];
 
-    let errorsId = null;
-    if (errorsPath) {
-      errorsId = `Errors_App`;
-      importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`;
-    }
+        const processComponent = (prefix, componentObj, isAsync) => {
+          if (!componentObj) return null;
+          const id = `${prefix}_${getNextId()}`;
+          const compPath = isServerBuild
+            ? (componentObj.serverPath || componentObj.path || componentObj.clientPath)
+            : (componentObj.clientPath || componentObj.path);
 
-    const mergeStaticMeta = (target, source) => {
-      if (!source) return;
-      Object.keys(source).forEach(key => {
-        if (key === 'title') {
-          if (typeof source.title === 'object') {
-            target.titleTemplate = source.title.template || target.titleTemplate;
-            target.titleDefault = source.title.default || target.titleDefault;
-            target.title = source.title.default || target.title;
-          } else {
-            target.title = source.title;
+          if (!compPath) {
+            return { id, isServerComponent: true, isAsync, isProxy: true };
           }
-        } else {
-          target[key] = source[key];
+
+          importStatements += `import * as ${id} from '${this.getRelativeImport(compPath, outputPath)}';\n`;
+          return { id, isServerComponent: !!componentObj.serverPath, isAsync };
+        };
+
+        if (node.layout) {
+          const layoutInfo = processComponent('Layout', node.layout, !!node.layoutIsAsync);
+          if (layoutInfo) {
+            currentLayouts.push(layoutInfo);
+            if (parentLayouts.length === 0 && !rootLayouts.some(l => l.id === layoutInfo.id)) {
+              rootLayouts.push(layoutInfo);
+            }
+          }
         }
-      });
-    };
 
-    const traverse = (node, parentLayouts = [], inheritedMeta = {}) => {
-      if (Array.isArray(node)) {
-        for (const child of node) {
-          traverse(child, parentLayouts, inheritedMeta);
+        if (node.index) {
+          const indexInfo = processComponent('Index', node.index, !!node.indexIsAsync);
+          if (indexInfo) {
+            const formatComp = (info) => {
+              if (info.isProxy) return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync} }`;
+              return `{ default: getOptExport(${info.id}, 'default'), isServerComponent: ${info.isServerComponent}, id: '${info.id}', isAsync: ${info.isAsync}, Metatags: getOptExport(${info.id}, 'Metatags') || getOptExport(${info.id}, 'frontmatter') || {} }`;
+            };
+
+            const layoutsArrayStr = `[${currentLayouts.map(l => formatComp(l)).join(', ')}]`;
+            const indexConfigStr = formatComp(indexInfo);
+            const errorPropStr = errorsId ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })` : indexConfigStr;
+
+            flattenedRoutes.push(`
+    {
+      path: '${node.path}',
+      component: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} props={props} />
+    }`);
+
+            if (isServerBuild) {
+              ssgRoutes.push({ path: node.path, meta: {} });
+            }
+          }
         }
-        return;
-      }
 
-      const currentLayouts = [...parentLayouts];
-      const currentMeta = { ...inheritedMeta };
-      if (node.meta) Object.assign(currentMeta, JSON.parse(JSON.stringify(node.meta))); // deep clone workaround
-
-      if (node.meta) {
-        mergeStaticMeta(currentMeta, node.meta);
-      }
-      if (node.layout) {
-        const layoutId = `Layout_${getNextId()}`;
-        importStatements += `import * as ${layoutId} from '${this.getRelativeImport(node.layout, outputPath)}';\n`;
-        currentLayouts.push({ id: layoutId, isAsync: !!node.layoutIsAsync });
-        if (parentLayouts.length === 0 && !rootLayouts.some(l => l.id === layoutId)) {
-          rootLayouts.push({ id: layoutId, isAsync: !!node.layoutIsAsync });
+        if (Array.isArray(node.children)) {
+          for (const child of node.children) traverse(child, currentLayouts);
         }
-      }
+      };
 
-      if (node.index) {
-        const indexId = `Index_${getNextId()}`;
-        importStatements += `import * as ${indexId} from '${this.getRelativeImport(node.index, outputPath)}';\n`;
+      if (routeNode) traverse(routeNode);
 
-        const layoutsArrayStr = `[${currentLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
-        const indexConfigStr = `{ default: getOptExport(${indexId}, 'default'), isAsync: ${!!node.indexIsAsync}, Metatags: getOptExport(${indexId}, 'Metatags') || getOptExport(${indexId}, 'frontmatter') || {} }`;
-        const errorPropStr = errorsId ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'UnknowError') || getOptExport(${errorsId}, 'default') })` : indexConfigStr;
-
-        let componentBody = `<RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} props={props} />`;
-
+      if (errorsId) {
+        const layoutsArrayStr = `[${rootLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isServerComponent: ${l.isServerComponent}, id: '${l.id}', isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
         flattenedRoutes.push(`
-  {
-    path: '${node.path}',
-    component: (props) => ${componentBody}
-  }`);
-
-        const finalMeta = { ...currentMeta };
-        if (finalMeta.titleTemplate && finalMeta.title && finalMeta.title !== finalMeta.titleDefault) {
-          finalMeta.title = finalMeta.titleTemplate.replace('%s', finalMeta.title);
-        } else if (finalMeta.titleDefault && !finalMeta.title) {
-          finalMeta.title = finalMeta.titleDefault;
-        }
-
-        ssgRoutes.push({
-          path: node.path,
-          meta: Object.keys(finalMeta).length > 0 ? finalMeta : {}
-        });
+    {
+      path: '*',
+      NotFound: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
+    }`);
       }
 
-      if (Array.isArray(node.children)) {
-        for (const child of node.children) {
-          traverse(child, currentLayouts, currentMeta);
-        }
-      }
+      return {
+        content: this.assembleFileContent(importStatements, flattenedRoutes),
+        ssgRoutes
+      };
     };
 
-    if (routeNode) {
-      traverse(routeNode);
+    const clientResult = generate(false);
+    const serverResult = generate(true);
+
+    this.writeIfChanged(outputPath, clientResult.content);
+
+    const serverEntryPath = path.join(path.dirname(outputPath), 'app-router-server.js');
+    const serverEntryContent = `/* AUTO-GENERATED SERVER ROUTER */\n${serverResult.content}\nexport const ssgRoutes = ${JSON.stringify(serverResult.ssgRoutes, null, 2)};\n`;
+    this.writeIfChanged(serverEntryPath, serverEntryContent);
+
+    const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx');
+
+    // Look for global CSS to include in the client bundle
+    let globalCssImport = '';
+    const possibleCssPaths = [
+      path.resolve(process.cwd(), 'styles/global.css'),
+      path.resolve(process.cwd(), 'src/styles/global.css'),
+      path.resolve(process.cwd(), 'app/globals.css'),
+      path.resolve(process.cwd(), 'src/app/globals.css'),
+    ];
+
+    const foundCss = possibleCssPaths.find(p => fs.existsSync(p));
+    if (foundCss) {
+      const relCss = this.getRelativeImport(foundCss, mainEntryPath);
+      globalCssImport = `import '${relCss}';\n`;
     }
 
-    if (errorsPath) {
-      const layoutsArrayStr = `[${rootLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
-      flattenedRoutes.push(`
-  {
-    path: '*',
-    NotFound: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />,
-    ErrorBuild: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'ErrorBuild') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
-  }`);
-    }
+    this.writeIfChanged(mainEntryPath, `import Ryunix from '@unsetsoft/ryunixjs';\n${globalCssImport}import AppRouter from './${path.basename(outputPath)}';\nif (typeof window !== 'undefined') { globalThis.Ryunix = Ryunix; }\nRyunix.init(<AppRouter />);\n`);
 
-    const fileContent = `/* AUTO-GENERATED APP ROUTER */
+    const ssgManifestPath = this.ssgOutputPath ? path.resolve(process.cwd(), this.ssgOutputPath) : path.join(path.dirname(outputPath), 'ssg', 'routes.json');
+    this.writeIfChanged(ssgManifestPath, JSON.stringify(serverResult.ssgRoutes, null, 2));
+  }
+
+  assembleFileContent(importStatements, flattenedRoutes) {
+    return `/* AUTO-GENERATED APP ROUTER */
 ${importStatements}
 const getOptExport = (mod, key) => mod ? mod[key] : undefined;
 
 const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
   const [content, setContent] = useStore(null);
-  
   useEffect(() => {
     let active = true;
     const run = async () => {
@@ -348,17 +322,12 @@ const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) =>
         if (active) setContent(<Ryunix.Fragment>{res}</Ryunix.Fragment>);
       } catch(err) {
         console.error('Error rendering async component:', err);
-        if (ErrorFallback) {
-          if (active) setContent(<ErrorFallback error={err} />);
-        } else {
-          if (active) setContent(<div style={{ padding: '2rem', color: 'red' }}>Error rendering async component</div>);
-        }
+        if (active) setContent(ErrorFallback ? <ErrorFallback error={err} /> : <div style={{ padding: '2rem', color: 'red' }}>Error rendering async component</div>);
       }
     };
     run();
     return () => { active = false; };
-  }, []); // Only run once on mount
-
+  }, []);
   return content;
 };
 
@@ -368,217 +337,89 @@ const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => 
     return <Ryunix.Fragment>{res}</Ryunix.Fragment>;
   } catch(err) {
     console.error('Error rendering sync component:', err);
-    if (ErrorFallback) {
-      return <ErrorFallback error={err} />;
-    }
-    return <div style={{ padding: '2rem', color: 'red' }}>Error rendering component</div>;
+    return ErrorFallback ? <ErrorFallback error={err} /> : <div style={{ padding: '2rem', color: 'red' }}>Error rendering component</div>;
   }
 };
 
 const RouteWrapper = ({ layouts, index, props }) => {
-  const staticMeta = {};
-  
-  const mergeMeta = (target, source) => {
-    if (!source) return;
-    Object.keys(source).forEach(key => {
-      if (key === 'title') {
-        if (typeof source.title === 'object') {
-          target.titleTemplate = source.title.template || target.titleTemplate;
-          target.titleDefault = source.title.default || target.titleDefault;
-          target.title = source.title.default || target.title;
-        } else {
-          target.title = source.title;
-        }
-      } else {
-        target[key] = source[key];
-      }
-    });
-  };
-
-  layouts.forEach(l => { if (l && l.Metatags) mergeMeta(staticMeta, l.Metatags); });
-  if (index && index.Metatags) mergeMeta(staticMeta, index.Metatags);
-
-  const formatMeta = (metaObj) => {
-    const formattedMeta = { ...metaObj };
-    if (metaObj.titleTemplate && metaObj.title) {
-       formattedMeta.title = metaObj.titleTemplate.replace('%s', metaObj.title);
-    } else if (metaObj.titleDefault && !metaObj.title) {
-       formattedMeta.title = metaObj.titleDefault;
-    }
-    return formattedMeta;
-  };
-
-  const [currentMeta, setCurrentMeta] = useStore(formatMeta(staticMeta));
-
-  // Ensure parameter proxies are available for both synchronous and asynchronous contexts
-  const promiseProps = (obj) => {
-    const promise = Promise.resolve(obj);
-    return new Proxy(promise, {
-      get(target, prop) {
-        if (prop === 'then' || prop === 'catch' || prop === 'finally') {
-          return target[prop].bind(target);
-        }
-        return obj[prop];
-      }
-    });
-  };
-
-  const asyncParams = promiseProps(props.params || {});
-  const asyncQuery = promiseProps(props.query || {});
-
-  useEffect(() => {
-    let active = true;
-    const loadMeta = async () => {
-      // Defer execution to cleanly escape the Ryunix commitWork synchronous phase
-      await Promise.resolve();
-      
-      let resolvedMeta = { ...staticMeta };
-      
-      for (const layout of layouts) {
-        if (layout?.DynamicMetadata) {
-          try {
-            const res = await layout.DynamicMetadata({ params: asyncParams, searchParams: asyncQuery }, resolvedMeta);
-            mergeMeta(resolvedMeta, res);
-            if (active) setCurrentMeta(formatMeta(resolvedMeta));
-          } catch (e) {
-            console.error('Error in layout DynamicMetadata:', e);
-          }
-        }
-      }
-      
-      if (index?.DynamicMetadata) {
-        try {
-          const res = await index.DynamicMetadata({ params: asyncParams, searchParams: asyncQuery }, resolvedMeta);
-          mergeMeta(resolvedMeta, res);
-          if (active) setCurrentMeta(formatMeta(resolvedMeta));
-        } catch (e) {
-          console.error('Error in index DynamicMetadata:', e);
-        }
-      }
-    };
-    
-    loadMeta();
-    return () => { active = false; };
-  }, [JSON.stringify(props.params), JSON.stringify(props.query)]);
-
+  const [currentMeta, setCurrentMeta] = useStore({});
   useMetadata(currentMeta);
 
-  const ErrorFallback = index?.errorComponent;
-
-  // Build root content synchronously so Ryunix Fiber can track hooks for synchronous components
   let content = null;
-  if (index?.default) {
-    const IndexComp = index.default;
-    const isAsync = index.isAsync || (IndexComp.constructor.name === 'AsyncFunction' || IndexComp[Symbol.toStringTag] === 'AsyncFunction');
-    
-    if (isAsync) {
-      content = <AsyncComponentRenderer Component={IndexComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery }} ErrorFallback={ErrorFallback} />;
-    } else {
-      content = <SyncComponentRenderer Component={IndexComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery }} ErrorFallback={ErrorFallback} />;
+  const isServerRender = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';
+
+  const renderComponent = (compInfo, props) => {
+    if (!compInfo || !compInfo.default) return null;
+    if (isServerRender) {
+       // Server side: directly render to support Server Components returning Promises
+       return <compInfo.default {...props} />;
+    }
+    // Client side: use wrapper for async components
+    if (compInfo.isAsync) {
+      return <AsyncComponentRenderer Component={compInfo.default} componentProps={props} ErrorFallback={compInfo.errorComponent} />;
+    }
+    return <SyncComponentRenderer Component={compInfo.default} componentProps={props} ErrorFallback={compInfo.errorComponent} />;
+  }
+
+  if (index) {
+    if (index.isServerComponent) {
+      if (index.default) {
+        content = (
+          <ServerBoundary id={index.id}>
+            {renderComponent(index, props)}
+          </ServerBoundary>
+        );
+      } else {
+        content = <ServerBoundary id={index.id} />;
+      }
+    } else if (index.default) {
+      content = renderComponent(index, props);
     }
   }
 
-  // Wrap with Layouts
-  for (let i = layouts.length - 1; i >= 0; i--) {
-    const LayoutComp = layouts[i]?.default;
-    const isAsync = layouts[i]?.isAsync || (LayoutComp && (LayoutComp.constructor.name === 'AsyncFunction' || LayoutComp[Symbol.toStringTag] === 'AsyncFunction'));
-    
-    if (LayoutComp) {
-      if (isAsync) {
-        content = <AsyncComponentRenderer Component={LayoutComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery, children: content }} ErrorFallback={ErrorFallback} />;
-      } else {
-        content = <SyncComponentRenderer Component={LayoutComp} componentProps={{ ...props, params: asyncParams, searchParams: asyncQuery, children: content }} ErrorFallback={ErrorFallback} />;
+  if (layouts) {
+    for (let i = layouts.length - 1; i >= 0; i--) {
+      const l = layouts[i];
+      if (l.isServerComponent) {
+         if (l.default) {
+           content = (
+             <ServerBoundary id={l.id}>
+               {renderComponent(l, { ...props, children: content })}
+             </ServerBoundary>
+           );
+         } else {
+           content = <ServerBoundary id={l.id}>{content}</ServerBoundary>;
+         }
+         continue;
+      }
+      
+      if (l.default) {
+        content = renderComponent(l, { ...props, children: content });
       }
     }
   }
 
-  // Handle fallback if it's an error boundary route (optional, Ryunix handles its own suspense/errors generally)
   return content;
 };
 
-const routes = [${flattenedRoutes.join(',\n')}
-];
+const routes = [${flattenedRoutes.join(',\n')}];
 
 export default function AppRouter() {
   return (
-    <RouterProvider routes={routes}>
-      <Children />
-    </RouterProvider>
+    <Ryunix.RouterProvider routes={routes}>
+      <Ryunix.Children />
+    </Ryunix.RouterProvider>
   );
 }
 `;
+  }
 
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-
-    // Only write if the content actually changed to avoid Webpack infinite loops
-    let shouldWrite = true;
-    if (fs.existsSync(outputPath)) {
-      const existingContent = fs.readFileSync(outputPath, 'utf8');
-      if (existingContent === fileContent) {
-        shouldWrite = false;
-      }
+  writeIfChanged(filePath, content) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    if (fs.existsSync(filePath)) {
+      if (fs.readFileSync(filePath, 'utf8') === content) return;
     }
-
-    if (shouldWrite) {
-      if (this.debug) console.log(`[AppRouter] Generating routes at ${outputPath}`);
-      fs.writeFileSync(outputPath, fileContent);
-    }
-
-    const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx');
-    const mainEntryContent = `import Ryunix from '@unsetsoft/ryunixjs';
-import AppRouter from './${path.basename(outputPath)}';
- 
-Ryunix.init(<AppRouter />);
-`;
-    let shouldWriteMain = true;
-    if (fs.existsSync(mainEntryPath)) {
-      const existingMainContent = fs.readFileSync(mainEntryPath, 'utf8');
-      if (existingMainContent === mainEntryContent) {
-        shouldWriteMain = false;
-      }
-    }
-    if (shouldWriteMain) {
-      fs.writeFileSync(mainEntryPath, mainEntryContent);
-      if (this.debug) console.log(`[AppRouter] Generating main entry at ${mainEntryPath}`);
-    }
-
-    // Server Entry for SSG/SSR
-    const serverEntryPath = path.join(path.dirname(outputPath), 'app-router-server.js');
-    const serverEntryContent = `import AppRouter from './${path.basename(outputPath)}';
-export const ssgRoutes = ${JSON.stringify(ssgRoutes, null, 2)};
-export default AppRouter;
-`;
-    let shouldWriteServer = true;
-    if (fs.existsSync(serverEntryPath)) {
-      const existingServerContent = fs.readFileSync(serverEntryPath, 'utf8');
-      if (existingServerContent === serverEntryContent) {
-        shouldWriteServer = false;
-      }
-    }
-    if (shouldWriteServer) {
-      fs.writeFileSync(serverEntryPath, serverEntryContent);
-      if (this.debug) console.log(`[AppRouter] Generating server entry at ${serverEntryPath}`);
-    }
-
-    // SSG Output
-    const ssgManifestPath = this.ssgOutputPath
-      ? path.resolve(process.cwd(), this.ssgOutputPath)
-      : path.join(path.dirname(outputPath), 'ssg', 'routes.json');
-    const ssgManifestContent = JSON.stringify(ssgRoutes, null, 2);
-
-    let shouldWriteSsg = true;
-    if (fs.existsSync(ssgManifestPath)) {
-      const existingSsgContent = fs.readFileSync(ssgManifestPath, 'utf8');
-      if (existingSsgContent === ssgManifestContent) {
-        shouldWriteSsg = false;
-      }
-    }
-
-    if (shouldWriteSsg) {
-      fs.mkdirSync(path.dirname(ssgManifestPath), { recursive: true });
-      if (this.debug) console.log(`[AppRouter] Generating SSG manifest at ${ssgManifestPath}`);
-      fs.writeFileSync(ssgManifestPath, ssgManifestContent);
-    }
+    fs.writeFileSync(filePath, content);
   }
 
   getRelativeImport(targetPath, outputPath) {
@@ -586,10 +427,6 @@ export default AppRouter;
     return relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
   }
 
-  /**
-   * Recursively find the newest mtime across all files in a directory.
-   * This ensures subdirectory changes are detected, not just root dir changes.
-   */
   getNewestMtime(dirPath) {
     let newest = 0;
     try {
@@ -604,51 +441,10 @@ export default AppRouter;
             const childNewest = this.getNewestMtime(fullPath);
             if (childNewest > newest) newest = childNewest;
           }
-        } catch {
-          // Skip inaccessible files
-        }
+        } catch { }
       }
-    } catch {
-      // Directory not readable
-    }
+    } catch { }
     return newest;
-  }
-
-  /**
-   * Safely parse a simple JS object literal string into an object.
-   * Handles string values (single/double quoted), numbers, booleans, and nested objects.
-   * This replaces the unsafe `new Function()` eval approach.
-   */
-  parseObjectLiteral(str) {
-    try {
-      // Clean up the string: normalize whitespace
-      let cleaned = str.trim();
-
-      // Replace single-quoted strings with double-quoted for JSON compatibility
-      cleaned = cleaned.replace(/'/g, '"');
-
-      // Remove trailing commas before closing braces/brackets (invalid JSON but common in JS)
-      cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
-
-      // Handle unquoted keys: add quotes around bare identifier keys
-      cleaned = cleaned.replace(/(\{|,)\s*([a-zA-Z_$][\w$]*)\s*:/g, '$1 "$2":');
-
-      // Try JSON.parse first
-      return JSON.parse(cleaned);
-    } catch {
-      // Fallback: manual key-value extraction for simple cases
-      const result = {};
-      const kvRegex = /(?:['"]?)([\w$]+)(?:['"]?)\s*:\s*(?:'([^']*)'|"([^"]*)"|(\d+(?:\.\d+)?)|(\btrue\b|\bfalse\b))/g;
-      let match;
-      while ((match = kvRegex.exec(str)) !== null) {
-        const key = match[1];
-        const value = match[2] ?? match[3] ?? (match[4] != null ? Number(match[4]) : (match[5] === 'true' ? true : match[5] === 'false' ? false : undefined));
-        if (value !== undefined) {
-          result[key] = value;
-        }
-      }
-      return Object.keys(result).length > 0 ? result : null;
-    }
   }
 }
 

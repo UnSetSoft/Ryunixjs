@@ -1,7 +1,7 @@
-import { updateDom } from './dom'
-import { cancelEffects, cancelEffectsDeep } from './effects'
-import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../utils/index'
-import { RYUNIX_PORTAL } from './portal'
+import { updateDom } from './dom.js'
+import { cancelEffects, cancelEffectsDeep } from './effects.js'
+import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../utils/index.js'
+import { RYUNIX_PORTAL } from './portal.js'
 
 /**
  * Run layout effects (useLayoutEffect) synchronously during commit.
@@ -108,7 +108,10 @@ function commitRoot() {
       if (process.env.NODE_ENV !== 'production') {
         console.log('[Ryunix Debug] Hydration failed. Clearing container.');
       }
-      clearContainer(state.containerRoot || finishedWork.dom)
+      const container = state.containerRoot || finishedWork.dom
+      if (container) {
+        container.textContent = ''
+      }
     } else {
       // If there is a cursor left, it means these are SSR nodes that weren't matched
       // by any client fiber. We must remove them to avoid duplication.

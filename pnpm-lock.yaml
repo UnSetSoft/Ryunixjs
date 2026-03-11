@@ -80,10 +80,6 @@ importers:
         version: 5.9.3
 
   packages/core:
-    dependencies:
-      lodash:
-        specifier: ^4.17.23
-        version: 4.17.23
     devDependencies:
       '@babel/core':
         specifier: 7.28.5

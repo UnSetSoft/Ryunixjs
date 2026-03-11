@@ -1,8 +1,8 @@
-import { createDom, clearContainer } from './dom'
-import { reconcileChildren } from './reconciler'
-import { getState, RYUNIX_TYPES, EFFECT_TAGS } from '../utils/index'
-import { createElement } from './createElement'
-import { createContext } from './hooks'
+import { createDom, clearContainer } from './dom.js'
+import { reconcileChildren } from './reconciler.js'
+import { getState, RYUNIX_TYPES, EFFECT_TAGS, nextValidSibling } from '../utils/index.js'
+import { createElement } from './createElement.js'
+import { createContext } from './hooks.js'
 
 const updateFunctionComponent = (fiber) => {
   const state = getState()
@@ -14,7 +14,17 @@ const updateFunctionComponent = (fiber) => {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
   }
 
-  const children = [fiber.type(fiber.props)]
+  let children = [fiber.type(fiber.props)]
+
+  if (fiber.type.ryunix_client_id) {
+    children = [
+      createElement(
+        'div',
+        { 'data-ryunix-island': fiber.type.ryunix_client_id },
+        ...children,
+      ),
+    ]
+  }
 
   if (fiber.type._contextId && fiber.props.value !== undefined) {
     fiber._contextId = fiber.type._contextId
@@ -42,24 +52,36 @@ const updateHostComponent = (fiber) => {
   } else if (!fiber.dom) {
     if (state.isHydrating && state.hydrateCursor) {
       const domNode = state.hydrateCursor
-      const isText = fiber.type === RYUNIX_TYPES.TEXT_ELEMENT && domNode.nodeType === 3
-      const isElement = typeof fiber.type === 'string' && domNode.nodeType === 1 && domNode.tagName.toLowerCase() === fiber.type.toLowerCase()
+      const isText =
+        fiber.type === RYUNIX_TYPES.TEXT_ELEMENT && domNode.nodeType === 3
+      const isElement =
+        typeof fiber.type === 'string' &&
+        domNode.nodeType === 1 &&
+        domNode.tagName.toLowerCase() === fiber.type.toLowerCase()
 
       if (isText || isElement) {
         fiber.dom = domNode
         fiber.effectTag = EFFECT_TAGS.HYDRATE
-        state.hydrateCursor = domNode.nextSibling
+        const isBoundary =
+          fiber.props && fiber.props['data-ryunix-server'] !== undefined
+        // If it's a server boundary, the cursor must move to the next sibling,
+        // effectively skipping all its server-rendered children.
+        if (isBoundary) {
+          state.hydrateCursor = nextValidSibling(domNode.nextSibling)
+        } else {
+          // Move cursor to first child for children to consume
+          state.hydrateCursor = nextValidSibling(domNode.firstChild)
+        }
       } else {
         if (process.env.NODE_ENV !== 'production') {
-          console.warn(`[Hydration] Mismatch at ${fiber.type}. Falling back to CSR.`)
+          console.warn(
+            `[Hydration] Mismatch at ${getTypeLabel(fiber.type)}. Expected ${domNode.nodeType === 1 ? domNode.tagName : 'text'
+            } but got ${fiber.type}. Falling back to CSR.`,
+          )
         }
-
-        // On mismatch, mark as failed. The commit phase will handle appending
-        // and commitRoot will handle clearing the container if needed.
         state.isHydrating = false
         state.hydrationFailed = true
         state.hydrateCursor = null
-
         fiber.dom = createDom(fiber)
         fiber.effectTag = EFFECT_TAGS.PLACEMENT
       }
@@ -68,41 +90,19 @@ const updateHostComponent = (fiber) => {
     }
   }
 
-  let prevCursor = state.hydrateCursor
-  const isRealDom = fiber.dom != null
+  const isServerBoundary =
+    fiber.props && fiber.props['data-ryunix-server'] !== undefined
 
-  if (state.isHydrating && isRealDom && fiber.effectTag === EFFECT_TAGS.HYDRATE) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[Ryunix Debug] Stepping into children of: ${fiber.type}`);
-    }
-    state.hydrateCursor = fiber.dom.firstChild
+  if (!isServerBoundary) {
+    const children = fiber.props?.children || []
+    reconcileChildren(fiber, children)
   }
+}
 
-  const children = fiber.props?.children || []
-  reconcileChildren(fiber, children)
-
-  if (state.isHydrating && fiber.effectTag === EFFECT_TAGS.HYDRATE) {
-    if (isRealDom) {
-      // After reconciling all children, if there are still siblings in the DOM,
-      // they were NOT matched by any client fiber. We must remove them.
-      let cursor = state.hydrateCursor
-      if (process.env.NODE_ENV !== 'production' && cursor) {
-        console.log(`[Ryunix Debug] Cleaning up unconsumed children of: ${fiber.type}`);
-      }
-      while (cursor) {
-        const next = cursor.nextSibling
-        if (cursor.parentNode) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.log('[Ryunix Debug] Removing stale SSR child:', cursor);
-          }
-          cursor.parentNode.removeChild(cursor)
-        }
-        cursor = next
-      }
-      // Restore cursor to the next sibling of THIS node for the next sibling fiber
-      state.hydrateCursor = prevCursor ? prevCursor.nextSibling : null
-    }
-  }
+const getTypeLabel = (type) => {
+  if (typeof type === 'symbol') return type.description || type.toString()
+  if (typeof type === 'function') return type.name || 'anonymous'
+  return String(type)
 }
 
 

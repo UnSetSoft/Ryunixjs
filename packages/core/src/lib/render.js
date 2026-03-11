@@ -1,6 +1,7 @@
-import { clearContainer } from './dom'
-import { getState } from '../utils/index'
-import { scheduleWork } from './workers'
+import { clearContainer } from './dom.js'
+import { getState } from '../utils/index.js'
+import { scheduleWork } from './workers.js'
+import { createElement } from './createElement.js'
 
 /**
  * The `render` function in JavaScript updates the DOM with a new element and schedules work to be done
@@ -19,19 +20,26 @@ const render = (element, container) => {
   // Clear container before CSR render to avoid duplication
   clearContainer(container)
 
-  state.wipRoot = {
+  const root = {
     dom: container,
     props: {
       children: [element],
     },
     alternate: state.currentRoot,
+    isHydrating: false,
+    hydrateCursor: null,
   }
 
-  state.isHydrating = false
-  state.nextUnitOfWork = state.wipRoot
-  state.deletions = []
-  scheduleWork(state.wipRoot)
-  return state.wipRoot
+  scheduleWork(root)
+  return root
+}
+
+const nextValidSibling = (node) => {
+  let next = node
+  while (next && (next.nodeType === 3 && !next.nodeValue.trim() || next.nodeType === 8)) {
+    next = next.nextSibling
+  }
+  return next
 }
 
 /**
@@ -44,21 +52,18 @@ const hydrate = (element, container) => {
 
   state.containerRoot = container
 
-  state.wipRoot = {
+  const root = {
     dom: container,
     props: {
       children: [element],
     },
     alternate: state.currentRoot,
+    isHydrating: true,
+    hydrateCursor: nextValidSibling(container.firstChild),
   }
 
-  // Enable hydration mode — updateHostComponent will reuse existing DOM nodes
-  state.isHydrating = true
-  state.hydrateCursor = container.firstChild
-  state.nextUnitOfWork = state.wipRoot
-  state.deletions = []
-  scheduleWork(state.wipRoot)
-  return state.wipRoot
+  scheduleWork(root)
+  return root
 }
 
 /**
@@ -72,7 +77,36 @@ const hydrate = (element, container) => {
  * default to `'__ryunix'`.
  * @returns The `renderProcess` function is being returned from the `init` function.
  */
-const init = (MainElement, root = '__ryunix') => {
+const hydrateIslands = (components = {}, hasMainElement = false) => {
+  if (typeof window === 'undefined') return
+  const elements = document.querySelectorAll('[data-ryunix-island]')
+  const globalRegistry = window.__RYUNIX_ISLANDS__ || {}
+
+  elements.forEach((container) => {
+    // If a main element is hydrating the page, it will automatically hydrate islands 
+    // unless they are shielded inside a ServerBoundary.
+    if (hasMainElement && !container.closest('[data-ryunix-server]')) {
+      return
+    }
+
+    const id = container.getAttribute('data-ryunix-island')
+    const Component = components[id] || globalRegistry[id]
+    if (!Component) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[Ryunix Islands] Component "${id}" not found in registry.`)
+      }
+      return
+    }
+    try {
+      const props = JSON.parse(container.getAttribute('data-props') || '{}')
+      hydrate(createElement(Component, props), container)
+    } catch (e) {
+      console.error(`[Ryunix Islands] Error hydrating island "${id}":`, e)
+    }
+  })
+}
+
+const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
 
@@ -80,17 +114,25 @@ const init = (MainElement, root = '__ryunix') => {
   state.isHydrating = false
   state.hydrationFailed = false
 
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[Ryunix Debug] init: RYUNIX_SSR=${process.env.RYUNIX_SSR}, hasChildNodes=${state.containerRoot.hasChildNodes()}`);
+  }
+
   if (process.env.RYUNIX_SSR && state.containerRoot.hasChildNodes()) {
     if (process.env.NODE_ENV !== 'production') {
       console.log(`[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`);
     }
-    return hydrate(MainElement, state.containerRoot)
+    const res = hydrate(MainElement, state.containerRoot)
+    hydrateIslands(components, !!MainElement)
+    return res
   }
 
   if (process.env.NODE_ENV !== 'production') {
     console.log(`[Ryunix Debug] init: No SSR content or SSR disabled. Starting normal render on #${root}`);
   }
-  return render(MainElement, root)
+  const res = render(MainElement, state.containerRoot)
+  hydrateIslands(components)
+  return res
 }
 
 const safeRender = (component, props, onError) => {
@@ -105,4 +147,4 @@ const safeRender = (component, props, onError) => {
   }
 }
 
-export { init, render, safeRender, hydrate, clearContainer }
+export { init, render, safeRender, hydrate, hydrateIslands, clearContainer }

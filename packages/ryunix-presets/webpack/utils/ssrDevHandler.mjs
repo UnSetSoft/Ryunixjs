@@ -60,7 +60,17 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     global.window = { location: { pathname: req.url } }
     try {
       const element = ryunixCreateElement(AppRouterApp)
-      renderedString = ryunixRenderToString(element)
+      if (typeof global.Ryunix?.renderToReadableStream === 'function') {
+        const stream = global.Ryunix.renderToReadableStream(element);
+        const reader = stream.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          renderedString += new TextDecoder().decode(value);
+        }
+      } else {
+        renderedString = ryunixRenderToString(element)
+      }
     } catch (err) {
       console.error(`[Ryunix SSR Dev] Render error:`, err)
     }
@@ -78,6 +88,7 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
       const cssDir = resolveApp(dir, `${buildDir}/static/css`)
       if (outputFs.existsSync(cssDir)) {
         const cssFiles = outputFs.readdirSync(cssDir).filter(f => f.endsWith('.css'))
+        console.log(`[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`);
         const styleLinks = cssFiles.map(f => `<link rel="stylesheet" href="/css/${f}" />`).join('\n')
 
         if (styleLinks) {
