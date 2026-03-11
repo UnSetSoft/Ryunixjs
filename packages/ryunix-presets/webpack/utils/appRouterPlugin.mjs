@@ -355,7 +355,20 @@ const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => 
 };
 
 const RouteWrapper = ({ layouts, index, props, loading, error }) => {
-  const [currentMeta, setCurrentMeta] = useStore({});
+  const getStaticMeta = () => {
+    let meta = {};
+    if (layouts) {
+      for (const l of layouts) {
+        if (l.Metatags) meta = { ...meta, ...l.Metatags };
+      }
+    }
+    if (index && index.Metatags) {
+      meta = { ...meta, ...index.Metatags };
+    }
+    return meta;
+  };
+
+  const [currentMeta, setCurrentMeta] = useStore(getStaticMeta());
   useMetadata(currentMeta);
 
   useEffect(() => {
