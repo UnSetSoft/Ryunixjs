@@ -42,6 +42,7 @@ const RYUNIX_TYPES = Object.freeze({
   RYUNIX_REDUCE: Symbol.for('ryunix.reduce'),
   RYUNIX_FRAGMENT: Symbol.for('ryunix.fragment'),
   RYUNIX_CONTEXT: Symbol.for('ryunix.context'),
+  RYUNIX_SUSPENSE: Symbol.for('ryunix.suspense'),
 })
 
 const STRINGS = Object.freeze({
@@ -170,9 +171,6 @@ const flattenArray = (arr, depth = 1) => {
   }, [])
 }
 
-/**
- * Type checking utilities
- */
 const is = {
   object: (val) => val !== null && typeof val === STRINGS.OBJECT,
   function: (val) => typeof val === STRINGS.FUNCTION,
@@ -181,6 +179,20 @@ const is = {
   null: (val) => val === null,
   array: (val) => Array.isArray(val),
   promise: (val) => val instanceof Promise,
+}
+
+const getTypeLabel = (type) => {
+  if (typeof type === 'symbol') return type.description || type.toString()
+  if (typeof type === 'function') return type.name || 'anonymous'
+  return String(type)
+}
+
+const nextValidSibling = (node) => {
+  let next = node
+  while (next && (next.nodeType === 3 && !next.nodeValue.trim() || next.nodeType === 8)) {
+    next = next.nextSibling
+  }
+  return next
 }
 
 export {
@@ -200,4 +212,6 @@ export {
   is,
   IS_BROWSER,
   rIC,
+  nextValidSibling,
+  getTypeLabel,
 }

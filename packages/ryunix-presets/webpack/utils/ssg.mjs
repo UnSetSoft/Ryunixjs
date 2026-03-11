@@ -535,7 +535,18 @@ const buildSSG = async (routesConfig, config, buildDir) => {
         console.log(`[SSG] Rendering ${route.path} with server App component...`)
         try {
           const element = ryunixCreateElement(AppRouterApp);
-          renderedString = ryunixRenderToString(element);
+
+          if (typeof global.Ryunix?.renderToReadableStream === 'function') {
+            const stream = global.Ryunix.renderToReadableStream(element);
+            const reader = stream.getReader();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              renderedString += new TextDecoder().decode(value);
+            }
+          } else {
+            renderedString = ryunixRenderToString(element);
+          }
         } catch (err) {
           console.error(`[SSG] Error executing SSR render for ${route.path}:`, err)
         }
@@ -544,6 +555,7 @@ const buildSSG = async (routesConfig, config, buildDir) => {
       }
 
       const html = await prerenderRoute(route, activeTemplate, config, renderedString)
+      console.log(`[SSG Debug] renderedString for ${route.path}:`, renderedString ? renderedString.substring(0, 100) + '...' : 'EMPTY');
 
       const outputDir =
         route.path === '/'

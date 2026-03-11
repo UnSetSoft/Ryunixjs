@@ -1,4 +1,4 @@
-import { RYUNIX_TYPES, STRINGS, is } from '../utils/index'
+import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
 
 /**
  * Check if a key is an event handler

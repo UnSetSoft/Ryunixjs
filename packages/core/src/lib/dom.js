@@ -1,12 +1,12 @@
-import { isEvent, isGone, isNew, isProperty } from './effects'
+import { isEvent, isGone, isNew, isProperty } from './effects.js'
 import {
   RYUNIX_TYPES,
   STRINGS,
   OLD_STRINGS,
   CAMEL_TO_KEBAB_REGEX,
   is,
-} from '../utils/index'
-import { toSvgAttrName } from '../utils/svgAttributes'
+} from '../utils/index.js'
+import { toSvgAttrName } from '../utils/svgAttributes.js'
 
 /**
  * Convert camelCase to kebab-case for CSS properties
@@ -139,6 +139,12 @@ const createDom = (fiber) => {
  * @param {Object} nextProps - Next props
  */
 const updateDom = (dom, prevProps = {}, nextProps = {}) => {
+  if (dom.nodeType === 3) {
+    if (prevProps.nodeValue !== nextProps.nodeValue) {
+      dom.nodeValue = nextProps.nodeValue
+    }
+    return
+  }
   // Remove old event listeners
   Object.keys(prevProps)
     .filter(isEvent)

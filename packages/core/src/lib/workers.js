@@ -1,38 +1,20 @@
-import { commitRoot } from './commits'
-import { updateFunctionComponent, updateHostComponent } from './components'
-import { getState, rIC } from '../utils/index'
-import { getCurrentPriority, Priority } from './priority'
-import { profiler } from './profiler'
+import { commitRoot } from './commits.js'
+import { updateFunctionComponent, updateHostComponent } from './components.js'
+import { getState, rIC, nextValidSibling, getTypeLabel } from '../utils/index.js'
+import { getCurrentPriority, Priority } from './priority.js'
+import { profiler } from './profiler.js'
+import { setScheduleWork } from './bridge.js'
 
+let workQueue = []
 let isWorkLoopScheduled = false
 
-const workLoop = (deadline) => {
+
+function performUnitOfWork(fiber) {
   const state = getState()
-  let shouldYield = false
-
-  while (state.nextUnitOfWork && !shouldYield) {
-    state.nextUnitOfWork = performUnitOfWork(state.nextUnitOfWork)
-    shouldYield = deadline.timeRemaining() < 1
-  }
-
-  if (!state.nextUnitOfWork && state.wipRoot) {
-    commitRoot()
-  }
-
-  if (state.nextUnitOfWork) {
-    rIC(workLoop)
-  } else {
-    isWorkLoopScheduled = false
-  }
-}
-
-const performUnitOfWork = (fiber) => {
-  const componentName = fiber.type?.name || fiber.type?.displayName || 'Unknown'
-
-  profiler.startMeasure(componentName)
+  const isFunctionComponent =
+    fiber.type instanceof Function || typeof fiber.type === 'function'
 
   try {
-    const isFunctionComponent = fiber.type instanceof Function
     if (isFunctionComponent) {
       updateFunctionComponent(fiber)
     } else {
@@ -40,60 +22,132 @@ const performUnitOfWork = (fiber) => {
     }
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
-      console.error(`[Ryunix Error Boundary] Error in component "${componentName}":`, error)
+      console.error('[Ryunix ErrorBoundary] Caught error during render:', error)
     }
 
-    // Walk up the fiber tree to find an error boundary
-    let errorFiber = fiber.parent
-    let handled = false
-    while (errorFiber) {
-      // Check if this fiber's type has an onError handler (error boundary)
-      if (errorFiber.type?.onError && typeof errorFiber.type.onError === 'function') {
-        try {
-          errorFiber.type.onError(error, { componentName, fiber })
-          handled = true
-          break
-        } catch (boundaryError) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.error('[Ryunix Error Boundary] Error in error boundary itself:', boundaryError)
-          }
-        }
+    // Traverse upwards to find nearest ErrorBoundary
+    let boundaryFiber = fiber.parent
+    let foundBoundary = false
+
+    while (boundaryFiber) {
+      if (
+        boundaryFiber.type &&
+        boundaryFiber.type.ryunix_type === 'RYUNIX_ERROR_BOUNDARY'
+      ) {
+        foundBoundary = true
+        break
       }
-      errorFiber = errorFiber.parent
+      boundaryFiber = boundaryFiber.parent
     }
 
-    if (!handled && process.env.NODE_ENV !== 'production') {
-      console.error('[Ryunix] Unhandled component error. Consider adding an error boundary.', error)
+    if (foundBoundary) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          '[Ryunix ErrorBoundary] Recovering tree at nearest boundary.',
+        )
+      }
+      // Assign the error state to the boundary so it can render the fallback
+      boundaryFiber.stateError = error
+      // Discard the corrupted children of the crashing fiber to prevent undefined behavior
+      fiber.child = null
+
+      // Rewind the rendering context to the ErrorBoundary fiber
+      // so the work loop immediately starts re-evaluating the boundary branch
+      return boundaryFiber
+    } else {
+      // Uncaught fatal error: stop the work loop entirely
+      console.error(
+        '[Ryunix] Fatal Uncaught Error. No ErrorBoundary was found in the tree to handle this exception:\n',
+        error,
+      )
+      state.nextUnitOfWork = null
+      return null
     }
   }
-
-  const duration = profiler.endMeasure(componentName)
-  if (duration) profiler.recordRender(componentName, duration)
 
   if (fiber.child) {
     return fiber.child
   }
+
   let nextFiber = fiber
   while (nextFiber) {
+    // If we just finished a Host node during hydration, 
+    // the next fiber (sibling) should start at the next DOM sibling.
+    if (state.isHydrating && nextFiber.dom) {
+      state.hydrateCursor = nextValidSibling(nextFiber.dom.nextSibling)
+    }
+
     if (nextFiber.sibling) {
       return nextFiber.sibling
     }
+
     nextFiber = nextFiber.parent
+    // When ascending, we don't need to do anything else,
+    // the loop will handle the parent's sibling or end.
+  }
+}
+booking: []
+
+const workLoop = (deadline) => {
+  const state = getState()
+  let shouldYield = false
+
+  while ((state.nextUnitOfWork || workQueue.length > 0) && !shouldYield) {
+    if (!state.nextUnitOfWork && workQueue.length > 0) {
+      const nextRoot = workQueue.shift()
+      state.wipRoot = nextRoot
+      state.nextUnitOfWork = nextRoot
+      state.deletions = []
+
+      // Restore specific hydration state for this root
+      if (nextRoot.isHydrating !== undefined) {
+        state.isHydrating = nextRoot.isHydrating
+        state.hydrateCursor = nextRoot.hydrateCursor
+      }
+    }
+
+    if (state.nextUnitOfWork) {
+      state.nextUnitOfWork = performUnitOfWork(state.nextUnitOfWork)
+    }
+
+    shouldYield = deadline.timeRemaining() < 1
+  }
+
+  if (!state.nextUnitOfWork && state.wipRoot) {
+    commitRoot()
+  }
+
+  if (state.nextUnitOfWork || workQueue.length > 0) {
+    rIC(workLoop)
+  } else {
+    isWorkLoopScheduled = false
   }
 }
 
+// ... performUnitOfWork stays same ...
+
 const scheduleWork = (root, priority = Priority.NORMAL) => {
   const state = getState()
-  state.nextUnitOfWork = root
-  state.wipRoot = root
-  state.deletions = []
+
+  if (state.wipRoot) {
+    workQueue.push(root)
+  } else {
+    state.nextUnitOfWork = root
+    state.wipRoot = root
+    state.deletions = []
+
+    // Set immediate hydration state
+    if (root.isHydrating !== undefined) {
+      state.isHydrating = root.isHydrating
+      state.hydrateCursor = root.hydrateCursor
+    }
+  }
+
   state.hookIndex = 0
   state.effects = []
 
-  // Start work loop if not already running
   if (!isWorkLoopScheduled) {
     isWorkLoopScheduled = true
-    // Higher priority = faster scheduling
     if (priority <= Priority.USER_BLOCKING) {
       rIC(workLoop)
     } else {
@@ -101,5 +155,7 @@ const scheduleWork = (root, priority = Priority.NORMAL) => {
     }
   }
 }
+
+setScheduleWork(scheduleWork)
 
 export { performUnitOfWork, workLoop, scheduleWork }
