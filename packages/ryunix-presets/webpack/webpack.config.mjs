@@ -294,6 +294,7 @@ const getPlugins = (isServer = false) => [
     'process.env.RYUNIX_SSR': JSON.stringify(
       config.ssr || (config.legacy.ssg?.prerender?.length ?? 0) > 0
     ),
+    'process.env.RYUNIX_DEBUG': JSON.stringify(config.debug),
     'process.env.RYUNIX_IS_SERVER': JSON.stringify(isServer),
   }),
   // Only inject HTML for the client build

@@ -246,7 +246,9 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   let props = element.props || {}
 
   if (typeof type === 'function') {
-    console.log('[SSR Debug] Rendering function:', type.name || 'anonymous', { isIsland: !!type.ryunix_client_id, clientId: type.ryunix_client_id });
+    if (process.env.RYUNIX_DEBUG) {
+      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous', { isIsland: !!type.ryunix_client_id, clientId: type.ryunix_client_id });
+    }
     if (type.ryunix_client_id) {
       const clientId = type.ryunix_client_id
       const replacer = (key, value) => {

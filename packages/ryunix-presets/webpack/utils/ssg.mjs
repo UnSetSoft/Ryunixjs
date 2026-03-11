@@ -6,6 +6,7 @@
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
+import chalk from 'chalk'
 import { randomBytes } from 'crypto'
 
 /**
@@ -601,10 +602,9 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
   if (global.window) delete global.window; // Cleanup
 
   // Log results
-  if (debug) {
-    console.log(`✅ Prerendered ${prerenderRoutes.length} routes:`)
-    prerenderRoutes.forEach((r) => console.log(` - ${r}`))
-  }
+  console.log(`\n${chalk.cyan('○')}  Prerendered ${chalk.bold(prerenderRoutes.length)} routes:`)
+  prerenderRoutes.forEach((r) => console.log(`   ${chalk.green('✔')} ${chalk.gray(r)}`))
+  console.log('')
 
   // ─── Sitemap generation ──────────────────────────────────────────────────
   // Priority: app/sitemap.js (Next.js-style) > ryunix.config.js
@@ -648,7 +648,7 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
           if (baseURL && segments.length > 0) {
             const indexXml = generateSitemapIndex(baseURL, segments.length)
             fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), indexXml)
-            if (debug) console.log(`✅ sitemap.xml (index of ${segments.length} sitemaps)`)
+            if (debug) console.log(`${chalk.green('✔')} Sitemap:  ${chalk.bold('Generated Index')} (${segments.length} sitemaps)`)
           }
         } else {
           // ── Single sitemap mode ─────────────────────────────────────────
@@ -656,7 +656,7 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
           if (Array.isArray(entries) && entries.length > 0) {
             const xml = generateSitemapFromEntries(entries)
             fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), xml)
-            if (debug) console.log(`✅ Sitemap created (${entries.length} URLs)`)
+            if (debug) console.log(`${chalk.green('✔')} Sitemap:  ${chalk.bold('Generated')} (${entries.length} URLs)`)
           } else {
             console.warn('[SSG] sitemap() returned no entries.')
           }
@@ -676,7 +676,7 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
       } else {
         const xml = generateSitemap(routes, baseURL, config.legacy.ssg.sitemap.settings)
         fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), xml)
-        if (debug) console.log('✅ Sitemap created')
+        if (debug) console.log(`${chalk.green('✔')} Sitemap:  ${chalk.bold('Generated (Legacy)')}`)
       }
     } catch (error) {
       console.error('[SSG] ❌ Error generating Sitemap:', error)
@@ -703,7 +703,7 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
         const data = await robotsFn()
         const robotsTxt = generateRobotsTxt(null, data)
         fs.writeFileSync(path.join(buildDir, 'static', 'robots.txt'), robotsTxt)
-        if (debug) console.log('✅ Robots.txt created')
+        if (debug) console.log(`${chalk.green('✔')} Robots:   ${chalk.bold('Generated')}`)
       }
     } catch (e) {
       console.error('[SSG] ❌ Error running app/robots.js:', e.message)
@@ -717,7 +717,7 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
       try {
         const robotsTxt = generateRobotsTxt(baseURL, config.legacy?.ssg?.robots)
         fs.writeFileSync(path.join(buildDir, 'static', 'robots.txt'), robotsTxt)
-        if (debug) console.log('✅ Robots.txt created')
+        if (debug) console.log(`${chalk.green('✔')} Robots:   ${chalk.bold('Generated (Legacy)')}`)
       } catch (error) {
         console.error('[SSG] ❌ Error generating Robots.txt:', error)
       }
