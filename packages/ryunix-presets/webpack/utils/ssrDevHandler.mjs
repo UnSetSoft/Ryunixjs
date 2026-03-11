@@ -77,7 +77,9 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
   }
 
   // Generic mock route for prerenderRoute (to inject metadata)
-  const mockRoute = { path: req.url, meta: {} }
+  const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {};
+  console.log('[Ryunix SSR Dev] Captured metadata:', ssrMetadata);
+  const mockRoute = { path: req.url, meta: ssrMetadata }
 
   try {
     let html = await prerenderRoute(mockRoute, template, config, renderedString)
