@@ -1,67 +1,35 @@
 export interface Settings {
-  static: {
-    favicon: boolean
-    customTemplate: string | false
-    seo: {
-      pageLang: string
-      title: string
-      meta: {
-        description?: string
-        keywords?: string
-        subject?: string
-        copyright?: string
-        language?: string
-        robots?: string
-        revised?: string
-        abstract?: string
-        topic?: string
-        summary?: string
-        classification?: string
-        author?: string
-        designer?: string
-        replyTo?: string
-        owner?: string
-        url?: string
-        identifierURL?: string
-        directory?: string
-        pageName?: string
-        category?: string
-        coverage?: string
-        distribution?: string
-        rating?: string
-        revisitAfter?: string
-        subtitle?: string
-        target?: string
-        handheldFriendly?: string
-        mobileOptimized?: string
-        date?: string
-        searchDate?: string
-        dcTitle?: string
-        resourceLoaderDynamicStyles?: string
-        medium?: string
-        syndicationSource?: string
-        originalSource?: string
-        verifyV1?: string
-        yKey?: string
-        pageKey?: string
-        itemPropName?: string
-        [key: string]: any
-      }
-    }
-  }
+  // Modern / First-Class Configuration
+  ssr?: boolean
+  mdx?: boolean
+  env?: Record<string, any>
+  rootDir?: string
+  buildDir?: string
+  port?: number
+  proxy?: any[] | Record<string, any>
+  favicon?: boolean | string
+  debug?: boolean
 
-  eslint: {
+  // Citizens of the core
+  eslint?: {
     files: string[]
     plugins: Record<string, any>
     rules: Record<string, any>
   }
 
-  webpack: {
-    production: boolean
-    root: string
-    output: {
-      buildDirectory: string
+  server?: {
+    csp: boolean | string
+    cors: {
+      enabled: boolean
+      origin: string
+      methods: string
+      headers: string
+      credentials: boolean
     }
+  }
+
+  webpack?: {
+    production: boolean
     target: string
     resolve: {
       alias: Record<string, any>
@@ -70,8 +38,6 @@ export interface Settings {
     }
     plugins: object[]
     devServer: {
-      port: number
-      proxy: Record<string, any>
       allowedHosts: 'auto' | 'all' | string[]
     }
     externals: object[]
@@ -82,4 +48,33 @@ export interface Settings {
       lazyCompilation: boolean
     }
   }
+
+  // Legacy Configuration (The old way)
+  legacy?: {
+    seo?: {
+      pageLang?: string
+      title?: string
+      meta?: Record<string, any>
+    }
+    template?: string | false
+    ssg?: {
+      sitemap?: {
+        enable: boolean
+        baseURL: string | false
+        settings: {
+          changefreq: string
+          priority: string
+        }
+      }
+    }
+  }
+
+  /**
+   * @deprecated Use the root 'static' or 'legacy' property instead.
+   */
+  static?: any
+  /**
+   * @deprecated Use the root 'ssr', 'mdx', or 'legacy' property instead.
+   */
+  experimental?: any
 }

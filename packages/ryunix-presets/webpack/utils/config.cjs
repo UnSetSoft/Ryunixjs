@@ -104,47 +104,24 @@ const DEFAULT_SSG_SITEMAP_SETTINGS = {
 // ============================================================================
 
 const defaultSettings = {
-  experimental: {
-    mdx: getConfigValue('experimental.mdx', false),
-    ssr: getConfigValue('experimental.ssr', false),
+  // Modern / First-Class Configuration
+  ssr: getConfigValue('ssr', getConfigValue('experimental.ssr', true)),
+  mdx: getConfigValue('mdx', getConfigValue('experimental.mdx', false)),
+  env: getConfigValue('env', getConfigValue('experimental.env', {})),
+  rootDir: getConfigValue('rootDir', getConfigValue('webpack.root', 'src')),
+  buildDir: getConfigValue('buildDir', getConfigValue('webpack.output.buildDirectory', '.ryunix')),
+  port: getConfigValue('port', getConfigValue('webpack.devServer.port', 3000)),
+  proxy: getConfigValue('proxy', getConfigValue('webpack.devServer.proxy', [])),
+  favicon: getConfigValue('favicon', getConfigValue('static.favicon', true)),
+  debug: getConfigValue('debug', false),
 
-    ssg: {
-      sitemap: {
-        enable: getConfigValue('experimental.ssg.sitemap.enable', false),
-        baseURL: getConfigValue('experimental.ssg.sitemap.baseURL', false),
-        settings: mergeDefaults(
-          DEFAULT_SSG_SITEMAP_SETTINGS,
-          getConfigValue('experimental.ssg.sitemap.settings', {}),
-        ),
-      },
-      // TODO: DEPRECATED - Remove in future releases
-      prerender: getConfigValue('experimental.ssg.prerender', []),
-    },
-
-    env: getConfigValue('experimental.env', {}),
-  },
-
-  static: {
-    favicon: getConfigValue('static.favicon', false),
-    customTemplate: getConfigValue('static.customTemplate', false),
-
-    seo: {
-      pageLang: getConfigValue('static.seo.pageLang', 'en'),
-      title: getConfigValue('static.seo.title', 'Ryunix App'),
-      meta: getConfigValue('static.seo.meta', {}),
-    },
-
-    ssg: {}, // TODO: Move experimental.ssg here
-  },
-
+  // Citizens of the core
   eslint: {
     files: getConfigValue('eslint.files', ['**/*.ryx']),
-
     plugins: mergeDefaults(
       { react: reactPlugin },
       getConfigValue('eslint.plugins', {}),
     ),
-
     rules: mergeDefaults(
       DEFAULT_ESLINT_RULES,
       getConfigValue('eslint.rules', {}),
@@ -161,39 +138,25 @@ const defaultSettings = {
       credentials: getConfigValue('server.cors.credentials', false),
     },
   },
+
   webpack: {
-    production: getConfigValue('webpack.production', false),
-    root: getConfigValue('webpack.root', 'src'),
-
-    output: {
-      buildDirectory: getConfigValue(
-        'webpack.output.buildDirectory',
-        '.ryunix',
-      ),
+    get production() {
+      return process.env.RYUNIX_MODE === 'production' || getConfigValue('webpack.production', false)
     },
-
     target: getConfigValue('webpack.target', 'web'),
-
     resolve: {
       alias: getConfigValue('webpack.resolve.alias', {}),
       fallback: getConfigValue('webpack.resolve.fallback', {}),
       extensions: getConfigValue('webpack.resolve.extensions', []),
     },
-
     plugins: getConfigValue('webpack.plugins', []),
-
     devServer: {
-      port: getConfigValue('webpack.server.port', 3000),
-      proxy: getConfigValue('webpack.server.proxy', []),
       allowedHosts: getConfigValue('webpack.server.allowedHosts', 'auto'),
     },
-
     externals: getConfigValue('webpack.externals', [{}]),
-
     module: {
       rules: getConfigValue('webpack.module.rules', []),
     },
-
     experiments: {
       lazyCompilation: getConfigValue(
         'webpack.experiments.lazyCompilation',
@@ -201,6 +164,40 @@ const defaultSettings = {
       ),
     },
   },
+
+  // Legacy Configuration (The old way)
+  legacy: {
+    seo: {
+      pageLang: getConfigValue('static.seo.pageLang', 'en'),
+      title: getConfigValue('static.seo.title', 'Ryunix App'),
+      meta: getConfigValue('static.seo.meta', {}),
+    },
+    template: getConfigValue('static.customTemplate', false),
+    ssg: {
+      sitemap: {
+        enable: getConfigValue('experimental.ssg.sitemap.enable', false),
+        baseURL: getConfigValue('experimental.ssg.sitemap.baseURL', false),
+        settings: mergeDefaults(
+          DEFAULT_SSG_SITEMAP_SETTINGS,
+          getConfigValue('experimental.ssg.sitemap.settings', {}),
+        ),
+        prerender: getConfigValue('experimental.ssg.prerender', []),
+      },
+    },
+  },
 }
+
+// Deprecation warnings for old paths
+warnDeprecated('experimental.ssr', 'Use the root "ssr" option instead.')
+warnDeprecated('experimental.mdx', 'Use the root "mdx" option instead.')
+warnDeprecated('experimental.env', 'Use the root "env" option instead.')
+warnDeprecated('webpack.root', 'Use the root "rootDir" option instead.')
+warnDeprecated('webpack.output.buildDirectory', 'Use the root "buildDir" option instead.')
+warnDeprecated('webpack.devServer.port', 'Use the root "port" option instead.')
+warnDeprecated('webpack.devServer.proxy', 'Use the root "proxy" option instead.')
+warnDeprecated('static.favicon', 'Use the root "favicon" option instead.')
+warnDeprecated('static.seo', 'Static SEO configuration is legacy. Use layouts and metadata instead.')
+warnDeprecated('static.customTemplate', 'Custom templates are legacy. Use root layouts instead.')
+warnDeprecated('experimental.ssg', 'Configuration-based SSG is legacy. Use file-based metadata in the "app" directory.')
 
 module.exports = defaultSettings

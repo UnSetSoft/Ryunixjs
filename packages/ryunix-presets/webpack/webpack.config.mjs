@@ -100,16 +100,16 @@ const resolvePostcssPlugins = () => {
 
 const postcssPlugins = resolvePostcssPlugins()
 
-const hasAppDir = fs.existsSync(resolveApp(dir, 'app')) || fs.existsSync(resolveApp(dir, `${config.webpack.root}/app`));
+const hasAppDir = fs.existsSync(resolveApp(dir, 'app')) || fs.existsSync(resolveApp(dir, `${config.rootDir}/app`));
 const entryPoint = hasAppDir
-  ? resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/main.ryx`)
+  ? resolveApp(dir, `${config.buildDir}/server/app/main.ryx`)
   : './main.ryx';
 
 const sharedWebpackConfig = {
   experiments: {
     lazyCompilation: config.webpack.experiments.lazyCompilation,
   },
-  context: resolveApp(dir, config.webpack.root),
+  context: resolveApp(dir, config.rootDir),
   devtool: config.webpack.production ? false : 'source-map',
   optimization: {
     moduleIds: 'deterministic',
@@ -159,7 +159,7 @@ const sharedWebpackConfig = {
     version: ENV_HASH(getEnviroment()),
     cacheDirectory: resolveApp(
       dir,
-      `${config.webpack.output.buildDirectory}/cache/webpack`,
+      `${config.buildDir}/cache/webpack`,
     ),
     store: 'pack',
     buildDependencies: {
@@ -174,7 +174,7 @@ const sharedWebpackConfig = {
   module: {
     rules: [
       // MDX files support if enabled in config
-      config.experimental.mdx && {
+      config.mdx && {
         test: /\.mdx?$/,
         use: [
           {
@@ -217,7 +217,7 @@ const sharedWebpackConfig = {
               ],
               cacheDirectory: resolveApp(
                 dir,
-                `${config.webpack.output.buildDirectory}/cache/babel-loader`,
+                `${config.buildDir}/cache/babel-loader`,
               ),
               plugins: [
                 [
@@ -277,7 +277,7 @@ const sharedWebpackConfig = {
     ...config.webpack.externals,
   ],
 }
-const isSSR = config.experimental.ssr
+const isSSR = config.ssr
 
 // Plugin factory — called once per compiler so each gets fresh instances.
 // isServer=true omits browser-only plugins (HtmlWebpackPlugin, MiniCssExtractPlugin, CopyPlugin).
@@ -290,23 +290,23 @@ const getPlugins = (isServer = false) => [
     ignoreStub: true,
   }),
   new webpack.DefinePlugin({
-    'ryunix.config.env': JSON.stringify(config.experimental.env),
+    'ryunix.config.env': JSON.stringify(config.env),
     'process.env.RYUNIX_SSR': JSON.stringify(
-      config.experimental.ssr || (config.experimental.ssg?.prerender?.length ?? 0) > 0
+      config.ssr || (config.legacy.ssg?.prerender?.length ?? 0) > 0
     ),
     'process.env.RYUNIX_IS_SERVER': JSON.stringify(isServer),
   }),
   // Only inject HTML for the client build
   !isServer &&
   new HtmlWebpackPlugin({
-    pageLang: config.static.seo.pageLang,
-    title: config.static.seo.title,
-    favicon: config.static.favicon
-      ? join(dir, 'public', 'favicon.png')
+    pageLang: config.legacy.seo.pageLang,
+    title: config.legacy.seo.title,
+    favicon: config.favicon
+      ? (typeof config.favicon === 'string' ? resolveApp(dir, config.favicon) : join(dir, 'public', 'favicon.png'))
       : false,
-    meta: config.static.seo.meta,
-    template: config.static.customTemplate
-      ? join(dir, 'public', 'index.html')
+    meta: config.legacy.seo.meta,
+    template: config.legacy.template
+      ? resolveApp(dir, config.legacy.template)
       : join(__dirname, 'template', 'index.html'),
     info: {
       framework: 'Ryunix',
@@ -333,7 +333,7 @@ const getPlugins = (isServer = false) => [
       `,
   }),
   !isServer &&
-  (config.webpack.production || config.experimental.ssr) &&
+  (config.webpack.production || config.ssr) &&
   new MiniCssExtractPlugin({
     filename: 'css/[name].[contenthash].css',
   }),
@@ -342,7 +342,7 @@ const getPlugins = (isServer = false) => [
     patterns: [
       {
         from: resolveApp(dir, 'public'),
-        to: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
+        to: resolveApp(dir, `${config.buildDir}/static`),
         globOptions: {
           ignore: ['**/template.html', '**/index.html', '**/*.html', '**/favicon.png'],
         },
@@ -362,7 +362,7 @@ const clientConfig = {
   entry: entryPoint,
   target: config.webpack.target, // usually 'web'
   output: {
-    path: resolveApp(dir, `${config.webpack.output.buildDirectory}/static`),
+    path: resolveApp(dir, `${config.buildDir}/static`),
     publicPath: '/',
     chunkFilename: './chunks/[name].[contenthash:8].chunk.js',
     assetModuleFilename: './media/[name].[hash][ext]',
@@ -389,8 +389,8 @@ const clientConfig = {
       'Access-Control-Allow-Headers': '*',
     },
     allowedHosts: config.webpack.devServer.allowedHosts,
-    port: config.webpack.devServer.port,
-    proxy: config.webpack.devServer.proxy,
+    port: config.port,
+    proxy: config.proxy,
     setupMiddlewares: (middlewares, devServer) => {
       if (!devServer) {
         throw new Error('webpack-dev-server is not defined')
@@ -398,7 +398,7 @@ const clientConfig = {
 
       devServer.app.use(async (req, res, next) => {
         try {
-          const apiRootPath = resolveApp(dir, `${config.webpack.output.buildDirectory}/server/api`)
+          const apiRootPath = resolveApp(dir, `${config.buildDir}/server/api`)
           const handled = await handleApiRequest(req, res, apiRootPath)
           if (!handled) {
             next()
@@ -410,7 +410,7 @@ const clientConfig = {
 
       devServer.app.use(async (req, res, next) => {
         try {
-          if (config.experimental.ssr) {
+          if (config.ssr) {
             const handled = await renderDevRoute(req, res, devServer, dir, config)
             if (handled) return
           }
@@ -443,7 +443,7 @@ const clientConfig = {
         test: /\.(s[ac]ss|css)$/i,
         exclude: /node_modules/,
         use: [
-          (config.webpack.production || config.experimental.ssr)
+          (config.webpack.production || config.ssr)
             ? MiniCssExtractPlugin.loader
             : ryunixRequire.resolve('style-loader'),
           ryunixRequire.resolve('css-loader'),
@@ -466,21 +466,23 @@ const clientConfig = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new RyunixRoutesPlugin({
-      routesPath: resolveApp(dir, `${config.webpack.root}/pages/routes.ryx`),
+      routesPath: resolveApp(dir, `${config.rootDir}/pages/routes.ryx`),
       outputPath: resolveApp(
         dir,
-        `${config.webpack.output.buildDirectory}/cache/ssg/routes.json`,
+        `${config.buildDir}/cache/ssg/routes.json`,
       ),
+      debug: config.debug
     }),
     new AppRouterPlugin({
-      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/app-router.js`),
-      ssgOutputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/cache/ssg/routes.json`),
-      debug: true
+      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.rootDir}/app`),
+      outputPath: resolveApp(dir, `${config.buildDir}/server/app/app-router.js`),
+      ssgOutputPath: resolveApp(dir, `${config.buildDir}/cache/ssg/routes.json`),
+      debug: config.debug
     }),
     new ApiRouterPlugin({
-      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.webpack.root}/app`),
-      outputPath: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/api`),
+      appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.rootDir}/app`),
+      outputPath: resolveApp(dir, `${config.buildDir}/server/api`),
+      debug: config.debug
     }),
     // ESLintPlugin - excluding MDX and MD files
     new ESLintPlugin({
@@ -504,9 +506,9 @@ const serverConfig = {
   ...sharedWebpackConfig,
   name: 'server',
   target: 'node', // Compile for Node.js
-  entry: resolveApp(dir, `${config.webpack.output.buildDirectory}/server/app/app-router-server.js`),
+  entry: resolveApp(dir, `${config.buildDir}/server/app/app-router-server.js`),
   output: {
-    path: resolveApp(dir, `${config.webpack.output.buildDirectory}/server`),
+    path: resolveApp(dir, `${config.buildDir}/server`),
     filename: 'app-router-server.bundle.mjs',
     chunkFilename: 'chunks/[name].[fullhash:8].chunk.mjs',
     publicPath: '/',
@@ -557,7 +559,7 @@ const serverConfig = {
 }
 
 // Export dual compilers if SSR is enabled, or in production if SSG prerender is enabled
-const enableServerDualCompiler = config.experimental.ssr || (config.webpack.production && config.experimental.ssg?.prerender?.length > 0);
+const enableServerDualCompiler = config.ssr || (config.webpack.production && config.legacy.ssg?.prerender?.length > 0);
 export default enableServerDualCompiler
   ? [clientConfig, serverConfig]
   : clientConfig;

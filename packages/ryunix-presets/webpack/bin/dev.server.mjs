@@ -46,7 +46,7 @@ const findAvailablePort = async (port) => {
 const StartServer = async (cliSettings) => {
   const cacheDir = resolveApp(
     process.cwd(),
-    `${defaultSettings.webpack.output.buildDirectory}/cache`,
+    `${defaultSettings.buildDir}/cache`,
   )
 
   const mode =

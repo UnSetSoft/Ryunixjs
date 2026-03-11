@@ -59,12 +59,7 @@ const dev = {
   command: 'dev',
   describe: 'Run server for developer mode.',
   handler: async (arg) => {
-    if (defaultSettings.webpack.production) {
-      logger.error(
-        'You need use development mode! change webpack.production to false in ryunix.config.js.',
-      )
-      return
-    }
+    process.env.RYUNIX_MODE = 'development'
     const open = Boolean(arg.browser) || false
     const settings = {
       open,
@@ -78,23 +73,19 @@ const prod = {
   command: 'start',
   describe: 'Run server for production mode. Requiere .ryunix/static',
   handler: async (arg) => {
-    if (!defaultSettings.webpack.production) {
-      logger.error('You need use production mode!')
-      return
-    }
-
+    process.env.RYUNIX_MODE = 'production'
     if (
       !fs.existsSync(
-        join(process.cwd(), config.webpack.output.buildDirectory, 'static'),
+        join(process.cwd(), config.buildDir, 'static'),
       )
     ) {
       logger.error('You need build first!')
       return
     }
 
-    server.listen(config.webpack.devServer.port, () => {
+    server.listen(config.port, () => {
       console.log(
-        `Server running at http://localhost:${config.webpack.devServer.port}/`,
+        `Server running at http://localhost:${config.port}/`,
       )
     })
   },
@@ -104,18 +95,11 @@ const build = {
   command: 'build',
   describe: 'Run builder',
   handler: async (arg) => {
-    if (!defaultSettings.webpack.production) {
-      logger.error(
-        chalk.red(
-          'The compilation cannot complete because you are trying to compile in developer mode. remember update ryunix.config.js.',
-        ),
-      )
-      return
-    }
+    process.env.RYUNIX_MODE = 'production'
 
     // ── Clean build output before each production build ───────────────────
     // Clears static/ and server/ (except server/api/) but keeps cache/ intact.
-    const buildRoot = resolveApp(process.cwd(), defaultSettings.webpack.output.buildDirectory)
+    const buildRoot = resolveApp(process.cwd(), defaultSettings.buildDir)
     const clean = (dir) => {
       if (fs.existsSync(dir)) {
         fs.rmSync(dir, { recursive: true, force: true })
@@ -151,7 +135,7 @@ const build = {
 
       // ── SSG Prerender ──────────────────────────────────────────────────────
       if (defaultSettings.webpack.production) {
-        await Prerender(defaultSettings.webpack.output.buildDirectory)
+        await Prerender(defaultSettings.buildDir)
       }
 
       // ── API Routes log ─────────────────────────────────────────────────────
@@ -204,7 +188,7 @@ const extractHTML = {
           return
         }
         console.log(
-          'File extracted successfully. Now you can enable the template with static.customTemplate inside ryunix.config.js',
+          'File extracted successfully. Now you can enable the template with legacy.template inside ryunix.config.js',
         )
       },
     )

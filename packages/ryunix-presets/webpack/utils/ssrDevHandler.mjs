@@ -16,7 +16,7 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
   if (!clientCompiler) return false
 
   const outputFs = clientCompiler.outputFileSystem
-  const buildDir = config.webpack.output.buildDirectory
+  const buildDir = config.buildDir
   const indexPath = resolveApp(dir, `${buildDir}/static/index.html`)
 
   let template
@@ -78,7 +78,7 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
 
   // Generic mock route for prerenderRoute (to inject metadata)
   const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {};
-  console.log('[Ryunix SSR Dev] Captured metadata:', ssrMetadata);
+  if (config.debug) console.log('[Ryunix SSR Dev] Captured metadata:', ssrMetadata);
   const mockRoute = { path: req.url, meta: ssrMetadata }
 
   try {
@@ -90,7 +90,7 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
       const cssDir = resolveApp(dir, `${buildDir}/static/css`)
       if (outputFs.existsSync(cssDir)) {
         const cssFiles = outputFs.readdirSync(cssDir).filter(f => f.endsWith('.css'))
-        console.log(`[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`);
+        if (config.debug) console.log(`[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`);
         const styleLinks = cssFiles.map(f => `<link rel="stylesheet" href="/css/${f}" />`).join('\n')
 
         if (styleLinks) {
