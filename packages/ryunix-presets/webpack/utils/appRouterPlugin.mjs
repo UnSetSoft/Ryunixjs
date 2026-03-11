@@ -189,7 +189,7 @@ class AppRouterPlugin {
       let rootLayouts = [];
 
       const appDirPath = path.resolve(process.cwd(), this.appDir);
-      const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx')) ? path.join(appDirPath, 'error.ryx') : (fs.existsSync(path.join(appDirPath, 'errors.ryx')) ? path.join(appDirPath, 'errors.ryx') : null);
+      const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx')) ? path.join(appDirPath, 'error.ryx') : null;
 
       let errorsId = null;
       if (errorsPath) {
@@ -397,7 +397,7 @@ const RouteWrapper = ({ layouts, index, props, loading, error }) => {
       setCurrentMeta(combinedMeta);
     };
     runMetadata();
-  }, [props.params, props.query]);
+  }, [props.params, props.query, props.location]);
 
   let content = null;
   const isServerRender = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';

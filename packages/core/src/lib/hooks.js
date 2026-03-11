@@ -539,6 +539,7 @@ const Children = () => {
     params,
     query,
     hash,
+    location,
   })
 }
 
