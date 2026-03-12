@@ -101,11 +101,11 @@ function commitRoot() {
 
   // After hydration is done, reset the flag and cleanup unconsumed nodes
   if (state.isHydrating || state.hydrationFailed) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
       console.log(`[Ryunix Debug] commitRoot - isHydrating: ${state.isHydrating}, hydrationFailed: ${state.hydrationFailed}`);
     }
     if (state.hydrationFailed) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Hydration failed. Clearing container.');
       }
       const container = state.containerRoot || finishedWork.dom
@@ -116,7 +116,7 @@ function commitRoot() {
       // If there is a cursor left, it means these are SSR nodes that weren't matched
       // by any client fiber. We must remove them to avoid duplication.
       let cursor = state.hydrateCursor
-      if (cursor && process.env.NODE_ENV !== 'production') {
+      if (cursor && process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Removing unmatched root siblings.');
       }
       while (cursor) {
@@ -174,7 +174,7 @@ function commitWork(fiber) {
 
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
     if (fiber.dom != null) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Appending PLACEMENT:', fiber.type);
       }
       domParent.appendChild(fiber.dom)
@@ -194,7 +194,7 @@ function commitWork(fiber) {
     const state = getState()
     if (state.hydrationFailed) {
       // If hydration failed globally, treat this as a placement
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Appending HYDRATE (fallback):', fiber.type);
       }
       if (fiber.dom != null) {
@@ -204,7 +204,7 @@ function commitWork(fiber) {
       runNormalEffects(fiber)
     } else {
       // Only attach event listeners and fix props, do not append to domParent
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Hydrating node:', fiber.type);
       }
       if (fiber.dom != null) {

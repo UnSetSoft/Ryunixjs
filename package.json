@@ -31,8 +31,6 @@
     "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish --tag canary",
     "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
-    "run:vite": "pnpm --filter ./test/web/Vite run dev",
-    "run:rspack": "pnpm --filter ./test/web/Rspack run dev",
     "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",
     "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run build",
     "run:web:start": "pnpm --filter ./test/webpack run start"
