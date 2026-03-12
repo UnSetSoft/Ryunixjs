@@ -4,4 +4,6 @@
 npx @unsetsoft/cra <project-name>
 ```
 
-> This cli use: [create-create-app](https://github.com/uetchy/create-create-app).
+```bash
+npx @unsetsoft/cra
+```
