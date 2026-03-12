@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.26-canary.25",
+  "version": "1.0.26-canary.26",
   "author": "Neyunse",
   "type": "module",
   "repository": "https://github.com/UnSetSoft/Ryunixjs",
@@ -10,8 +10,6 @@
     "ryunixjs"
   ],
   "files": [
-    "vite/",
-    "rspack/",
     "webpack/"
   ],
   "peerDependencies": {
@@ -21,8 +19,6 @@
     "registry": "https://registry.npmjs.org"
   },
   "exports": {
-    "./vite": "./vite/index.js",
-    "./rspack": "./rspack/index.js",
     "./webpack": "./webpack/index.js"
   },
   "types": "./webpack/config.d.ts",

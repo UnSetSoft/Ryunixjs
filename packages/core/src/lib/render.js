@@ -114,12 +114,12 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   state.isHydrating = false
   state.hydrationFailed = false
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
     console.log(`[Ryunix Debug] init: RYUNIX_SSR=${process.env.RYUNIX_SSR}, hasChildNodes=${state.containerRoot.hasChildNodes()}`);
   }
 
   if (process.env.RYUNIX_SSR && state.containerRoot.hasChildNodes()) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
       console.log(`[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`);
     }
     const res = hydrate(MainElement, state.containerRoot)
@@ -127,7 +127,7 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
     return res
   }
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
     console.log(`[Ryunix Debug] init: No SSR content or SSR disabled. Starting normal render on #${root}`);
   }
   const res = render(MainElement, state.containerRoot)

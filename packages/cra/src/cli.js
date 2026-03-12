@@ -1,69 +1,146 @@
 #!/usr/bin/env node
 
-const { resolve } = require('path')
-const { create } = require('create-create-app')
-const { hasVscode, InstallVsocodeAddon } = require('./commands')
-const templateRoot = resolve(__dirname, '..', 'templates')
+const { Command } = require('commander')
+const prompts = require('prompts')
+const pc = require('picocolors')
+const path = require('path')
+const { createApp } = require('./create-app')
+const packageJson = require('../package.json')
 
-create('create-cra', {
-  templateRoot,
-  defaultTemplate: 'Webpack',
-  promptForAuthor: false,
-  promptForDescription: false,
-  promptForEmail: false,
-  promptForTemplate: true,
-  promptForLicense: false,
-  extra: {
-    channel: {
-      type: 'list',
-      describe: 'Which Ryunix channel do you want to use?',
-      choices: ['Latest', 'Canary'],
-      prompt: 'if-no-arg',
-    },
-  },
-  after: async ({ answers, template, installNpmPackage }) => {
-    if (template === 'Rspack') {
-      if (answers.channel === 'Latest') {
-        await installNpmPackage('@unsetsoft/ryunixjs@latest')
-      } else if (answers.channel === 'Canary') {
-        await installNpmPackage('@unsetsoft/ryunixjs@canary')
+let projectPath = ''
+
+const program = new Command(packageJson.name)
+  .version(packageJson.version, '-v, --version', 'Output the current version of create-ryunix-app.')
+  .argument('[directory]')
+  .usage('[directory] [options]')
+  .helpOption('-h, --help', 'Display this help message.')
+  .option('--canary', 'Use the Canary channel for Ryunix dependencies.')
+  .option('--latest', 'Use the Latest channel for Ryunix dependencies. (default)')
+  .option('--tailwind', 'Initialize with Tailwind CSS config.')
+  .option('--eslint', 'Initialize with ESLint config.')
+  .option('--vscode', 'Add VS Code settings for Ryunix extension.')
+  .action((name) => {
+    if (name) projectPath = name
+  })
+  .allowUnknownOption()
+  .parse(process.argv)
+
+const opts = program.opts()
+
+async function run() {
+  console.log(`\n${pc.bold(pc.cyan('Welcome to Ryunix!'))} 🚀\n`)
+
+  if (typeof projectPath === 'string') {
+    projectPath = projectPath.trim()
+  }
+
+  if (!projectPath) {
+    const res = await prompts({
+      type: 'text',
+      name: 'path',
+      message: 'What is your project named?',
+      initial: 'my-ryunix-app',
+      validate: (name) => {
+        if (name.trim().length === 0) return 'Project name cannot be empty'
+        return true
+      },
+    }, {
+      onCancel: () => {
+        console.error(pc.red('Exiting.'))
+        process.exit(1)
       }
+    })
 
-      await installNpmPackage(
-        [
-          '@rspack/cli',
-          '@rspack/core',
-          'cross-env',
-          'css-loader',
-          '@unsetsoft/ryunix-presets',
-        ],
-        true,
-      )
-    } else if (template === 'Webpack') {
-      // Ryunix
-
-      if (answers.channel === 'Latest') {
-        await installNpmPackage('@unsetsoft/ryunixjs@latest')
-        await installNpmPackage('@unsetsoft/ryunix-presets@latest', true)
-      } else if (answers.channel === 'Canary') {
-        await installNpmPackage('@unsetsoft/ryunixjs@canary')
-        await installNpmPackage('@unsetsoft/ryunix-presets@canary', true)
-      }
-    } else if (template === 'Vite') {
-      // Ryunix
-      if (answers.channel === 'Latest') {
-        await installNpmPackage('@unsetsoft/ryunixjs@latest')
-      } else if (answers.channel === 'Canary') {
-        await installNpmPackage('@unsetsoft/ryunixjs@canary')
-      }
-
-      await installNpmPackage(
-        ['vite@latest', '@unsetsoft/ryunix-presets'],
-        true,
-      )
-    } else {
-      throw new Error('Missing template')
+    if (typeof res.path === 'string') {
+      projectPath = res.path.trim()
     }
-  },
-  caveat: 'Happy Coding!',
-})
+  }
+
+  if (!projectPath) {
+    console.log(
+      '\\nPlease specify the project directory:\\n' +
+        `  ${pc.cyan(program.name())} ${pc.green('<project-directory>')}\n` +
+        'For example:\n' +
+        `  ${pc.cyan(program.name())} ${pc.green('my-ryunix-app')}\n\n` +
+        `Run ${pc.cyan(`${program.name()} --help`)} to see all options.`
+    )
+    process.exit(1)
+  }
+
+  // Determine channel
+  let channel = 'Latest'
+  if (opts.canary) channel = 'Canary'
+  else if (!opts.latest) {
+    const { channelChoice } = await prompts({
+      type: 'select',
+      name: 'channelChoice',
+      message: 'Which Ryunix channel do you want to use?',
+      choices: [
+        { title: 'Latest', value: 'Latest', description: 'Stable release' },
+        { title: 'Canary', value: 'Canary', description: 'Cutting edge features (unstable)' },
+      ],
+      initial: 0,
+    }, { onCancel: () => process.exit(1) })
+    channel = channelChoice
+  }
+
+  // Tailwind CSS Prompt
+  let tailwind = opts.tailwind || false
+  if (!opts.tailwind && !process.argv.includes('--no-tailwind')) {
+    const { useTailwind } = await prompts({
+      type: 'toggle',
+      name: 'useTailwind',
+      message: `Would you like to use ${pc.blue('Tailwind CSS')}?`,
+      initial: true,
+      active: 'Yes',
+      inactive: 'No',
+    }, { onCancel: () => process.exit(1) })
+    tailwind = Boolean(useTailwind)
+  }
+
+  // ESLint Prompt
+  let eslint = opts.eslint || false
+  if (!opts.eslint && !process.argv.includes('--no-eslint')) {
+    const { useEslint } = await prompts({
+      type: 'toggle',
+      name: 'useEslint',
+      message: `Would you like to use ${pc.blue('ESLint')}?`,
+      initial: true,
+      active: 'Yes',
+      inactive: 'No',
+    }, { onCancel: () => process.exit(1) })
+    eslint = Boolean(useEslint)
+  }
+
+  // VS Code prompt
+  let vscode = opts.vscode || false
+  if (!opts.vscode && !process.argv.includes('--no-vscode')) {
+    const { useVscode } = await prompts({
+      type: 'toggle',
+      name: 'useVscode',
+      message: `Would you like to configure the ${pc.blue('Ryunix VS Code Extension')} workspace?`,
+      initial: true,
+      active: 'Yes',
+      inactive: 'No',
+    }, { onCancel: () => process.exit(1) })
+    vscode = Boolean(useVscode)
+  }
+
+  const appName = path.basename(path.resolve(projectPath))
+
+  try {
+    await createApp({
+      appPath: projectPath,
+      appName,
+      channel,
+      tailwind,
+      eslint,
+      vscode
+    })
+  } catch (error) {
+    console.error(pc.red('\\nUnexpected error occurred:\\n'), error)
+    process.exit(1)
+  }
+}
+
+run()
