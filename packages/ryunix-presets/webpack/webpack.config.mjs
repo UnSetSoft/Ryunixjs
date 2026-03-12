@@ -199,6 +199,7 @@ const sharedWebpackConfig = {
         exclude: /node_modules/,
         use: [
           ryunixRequire.resolve('thread-loader'),
+          resolve(__dirname, 'loaders/ryunix-server-action-loader.mjs'),
           resolve(__dirname, 'loaders/ryunix-rsc-loader.mjs'),
           {
             loader: ryunixRequire.resolve('babel-loader'),
@@ -396,6 +397,36 @@ const clientConfig = {
       if (!devServer) {
         throw new Error('webpack-dev-server is not defined')
       }
+
+      devServer.app.use(async (req, res, next) => {
+        if (req.method === 'POST' && req.url === '/_ryunix/action') {
+          try {
+            let body = '';
+            req.on('data', chunk => { body += chunk; });
+            req.on('end', async () => {
+              try {
+                const { actionId, args } = JSON.parse(body);
+                const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId];
+                if (!action) {
+                  res.writeHead(404, { 'Content-Type': 'application/json' });
+                  return res.end(JSON.stringify({ error: `Server Action ${actionId} not found` }));
+                }
+                const result = await action(...args);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result));
+              } catch (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message }));
+              }
+            });
+            return;
+          } catch (err) {
+            next(err);
+            return;
+          }
+        }
+        next();
+      });
 
       devServer.app.use(async (req, res, next) => {
         try {

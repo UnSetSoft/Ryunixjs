@@ -66,7 +66,14 @@ const dev = {
       open,
     }
 
-    StartDevServer(settings)
+    // add message to say the server is starting with chalk
+    console.log(chalk.cyan('Starting development server, please wait...'))
+    try {
+      await StartDevServer(settings)
+    } catch (error) {
+      logger.error(chalk.red('Error starting development server:'), error)
+      process.exit(1)
+    }
   },
 }
 
