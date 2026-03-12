@@ -2,7 +2,6 @@ node_modules
 yarn.lock
 .ryunix
 package-lock.json
-docs
 _cra
 test
 .yarn
