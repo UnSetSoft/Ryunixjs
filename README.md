@@ -12,6 +12,7 @@
     <img src="https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat-square&label=canary" alt="canary version" />
   </a>
   <img src="https://img.shields.io/npm/l/@unsetsoft/ryunixjs?style=flat-square" alt="license" />
+  <a href="https://deepwiki.com/UnSetSoft/Ryunixjs"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
 <p align="center">
