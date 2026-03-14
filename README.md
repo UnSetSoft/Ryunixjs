@@ -2,7 +2,7 @@
     display: block;
     margin: 0 auto;" />
 
-## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/canary)
+## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/canary) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/UnSetSoft/Ryunixjs)
 
 ### What is RyunixJS?
 
