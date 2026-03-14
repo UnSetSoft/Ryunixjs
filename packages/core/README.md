@@ -1,19 +1,91 @@
-<img src="https://raw.githubusercontent.com/UnSetSoft/Ryunixjs/canary/assets/logo.png"  width="200" height="200" style="
-    display: block;
-    margin: 0 auto;" />
+<p align="center">
+  <img src="https://raw.githubusercontent.com/UnSetSoft/Ryunixjs/canary/assets/logo.png" width="200" height="200" alt="RyunixJS Logo" />
+</p>
 
-## RyunixJS [![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs)[![npm version](https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat)](https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/canary)
+<h1 align="center">@unsetsoft/ryunixjs</h1>
 
-### What is RyunixJS?
+<p align="center">
+  <a href="https://www.npmjs.com/package/@unsetsoft/ryunixjs">
+    <img src="https://img.shields.io/npm/v/@unsetsoft/ryunixjs.svg?style=flat-square" alt="npm version" />
+  </a>
+  <a href="https://www.npmjs.com/package/@unsetsoft/ryunixjs/v/canary">
+    <img src="https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat-square&label=canary" alt="canary version" />
+  </a>
+</p>
 
-Like React, NextJS, Preact, Vite. Ryunix allows you to build static websites from JavaScript in a similar way to the aforementioned frameworks. However, Ryunix is planned to be completely standalone, i.e. without including React internally. This way allowing it to be more manageable and moldable for each developer. The reactivity of Ryunix is similar to Preact, however, it does not pretend to follow any standard of React or any similar Framework, but to allow to generate an SPA in its own way.
+---
 
-### Usage
+## 🧠 What is the Core?
 
-`npx @unsetsoft/cra@latest <my-app>`
+`@unsetsoft/ryunixjs` is the **foundational engine** of the RyunixJS framework. It's a lightweight, high-performance library responsible for:
 
-### Do you want to contribute?
+- **Reconciliation & Fiber Architecture**: Efficiently updating the DOM by comparing Virtual DOM trees.
+- **Hooks System**: Providing the core state and lifecycle management (e.g., `useStore`, `useEffect`).
+- **Concurrent Rendering**: Support for prioritized updates and transitions.
+- **SSR & Hydration**: Server-Side Rendering engines for both Node.js and Edge environments.
 
-You can make any change as long as it does not affect the `canary` branches. Make changes that are important, necessary or to add something new if you see it necessary, include your proposal before in an issue and then create a PR referencing that issue.
+While you can use it standalone for custom integrations, it is typically used via `@unsetsoft/ryunix-presets` and our official CLI.
 
-To be able to work more comfortably you should create a branch with this name `gh/[user]/[branch name]`, all changes should always go to the canary version. Once the changes are applied and no problems are detected, they will become part of the nightly version for further testing and finally the final version will be released. make each change with a simple descriptive message, and remember not to change the version of the mono repo or packages, such changes are made manually when a new update is about to be made.
+## 🚀 Installation
+
+```bash
+npm install @unsetsoft/ryunixjs
+```
+
+## 🛠️ API Reference
+
+### Core Functions
+
+- `createElement(type, props, ...children)`: Creates a Vitual DOM element.
+- `render(element, container)`: Renders a Ryunix element into the DOM.
+- `hydrate(element, container)`: Hydrates server-rendered HTML.
+- `init()`: Initializes the Ryunix state.
+
+### Hooks
+
+| Hook | Description |
+| :--- | :--- |
+| `useStore(initial)` | State management (Ryunix equivalent of `useState`). |
+| `useReducer(reducer, initial)` | Advanced state management with reducers. |
+| `useEffect(cb, deps)` | Side effects management. |
+| `useLayoutEffect(cb, deps)` | Synchronous side effects before browser paint. |
+| `useRef(initial)` | Persistent reference across renders. |
+| `useMemo(cb, deps)` | Memoized values. |
+| `useCallback(cb, deps)` | Memoized functions. |
+| `useContext(id)` | Consumes a context value. |
+| `useId()` | Generates unique, stable IDs for SSR. |
+
+### Specialized Hooks
+
+- `usePersistentStore(key, initial)`: Automatically syncs state with `localStorage`.
+- `useSwitch(initial)`: Optimized toggle state hook.
+- `useDebounce(value, delay)`: Debounces a value update.
+- `useThrottle(value, interval)`: Throttles value updates.
+- `useQuery()` / `useHash()`: Reactive URL parameters and hash.
+
+### Concurrency & Server-Side
+
+- **Prioritized Updates**: Use `useTransition` and `useDeferredValue` to manage non-urgent UI updates.
+- **SSR Engine**: `renderToString` and `renderToReadableStream` for flexible server rendering.
+- **Boundaries**: `ServerBoundary` and `ErrorBoundary` for resilient applications.
+
+## 🏗️ Example Usage
+
+```javascript
+import { render, useStore, createElement } from "@unsetsoft/ryunixjs";
+
+function App() {
+  const [count, setCount] = useStore(0);
+
+  return createElement("div", null,
+    createElement("h1", null, `Count: ${count}`),
+    createElement("button", { onClick: () => setCount(count + 1) }, "Increment")
+  );
+}
+
+render(createElement(App), document.getElementById("root"));
+```
+
+## 📄 License
+
+RyunixJS is [MIT Licensed](file:///e:/proyects/Ryunixjs/LICENSE).
