@@ -1,8 +1,8 @@
 import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, is, getState } from '../utils/index.js'
-import { camelToKebab } from './dom.js'
+import { camelToKebab, validateUri } from './dom.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
 
-const escapeHtml = (unsafe) => {
+export const escapeHtml = (unsafe) => {
   if (typeof unsafe !== 'string') return String(unsafe)
   return unsafe
     .replace(/&/g, '&amp;')
@@ -118,8 +118,8 @@ const renderToStringImpl = (element) => {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
         let attrName = toSvgAttrName(key)
-
-        attributes += ` ${attrName}="${escapeHtml(value)}"`
+        let validatedValue = validateUri(attrName, value)
+        attributes += ` ${attrName}="${escapeHtml(validatedValue)}"`
       }
     }
   })
@@ -302,7 +302,9 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
-        attributes += ` ${toSvgAttrName(key)}="${escapeHtml(value)}"`
+        const attrName = toSvgAttrName(key)
+        const validatedValue = validateUri(attrName, value)
+        attributes += ` ${attrName}="${escapeHtml(validatedValue)}"`
       }
     }
   })
@@ -326,7 +328,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   }
 }
 
-export const renderToReadableStream = (element) => {
+export const renderToReadableStream = (element, options = {}) => {
   const state = getState()
   const encoder = new TextEncoder()
 
@@ -341,7 +343,8 @@ export const renderToReadableStream = (element) => {
 
       try {
         // 0. Inject RC helper script first
-        push(`<script>${RC_SCRIPT}</script>`)
+        const nonceAttr = options.nonce ? ` nonce="${options.nonce}"` : ''
+        push(`<script${nonceAttr}>${RC_SCRIPT}</script>`)
 
         // 1. Render initial tree (with fallbacks)
         await renderToStreamImpl(element, push, suspenseTasks)
@@ -354,7 +357,7 @@ export const renderToReadableStream = (element) => {
           const res = await task
           if (res.success) {
             push(`<template id="P:${res.id}">${res.content}</template>`)
-            push(`<script>$RC("S:${res.id}", "P:${res.id}")</script>`)
+            push(`<script${nonceAttr}>$RC("S:${res.id}", "P:${res.id}")</script>`)
           }
         }
 
@@ -368,7 +371,7 @@ export const renderToReadableStream = (element) => {
   })
 }
 
-export const renderToString = (element) => {
+export const renderToString = (element, options = {}) => {
   const state = getState()
   const wasServerRendering = state.isServerRendering
   state.isServerRendering = true

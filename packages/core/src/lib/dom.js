@@ -132,6 +132,24 @@ const createDom = (fiber) => {
   }
 }
 
+export const validateUri = (name, value) => {
+  if (typeof value !== 'string') return value
+  const attr = name.toLowerCase()
+  if (attr !== 'href' && attr !== 'src' && attr !== 'action' && attr !== 'formaction') {
+    return value
+  }
+
+  const normalized = value.replace(/\s+/g, '').toLowerCase()
+  if (normalized.startsWith('javascript:') || normalized.startsWith('vbscript:')) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`[Ryunix Security] Blocked dangerous ${name} URI: ${value}`)
+    }
+    return 'javascript:void(0)'
+  }
+
+  return value
+}
+
 /**
  * Update DOM element with new props
  * @param {HTMLElement|Text} dom - DOM element
@@ -221,13 +239,15 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
             const isSvgNode = dom instanceof SVGElement
             if (isSvgNode) {
               const attrName = toSvgAttrName(name)
+              const validatedValue = validateUri(attrName, nextProps[name])
               // viewBox is case sensitive, we respect the camelCase for it.
-              dom.setAttribute(attrName, nextProps[name])
+              dom.setAttribute(attrName, validatedValue)
             } else {
-              dom[name] = nextProps[name]
+              const validatedValue = validateUri(name, nextProps[name])
+              dom[name] = validatedValue
               // Best effort: set html attributes if it's not a primitive component property
               if (typeof nextProps[name] !== 'object' && typeof nextProps[name] !== 'function') {
-                dom.setAttribute(name, nextProps[name])
+                dom.setAttribute(name, validatedValue)
               }
             }
           }

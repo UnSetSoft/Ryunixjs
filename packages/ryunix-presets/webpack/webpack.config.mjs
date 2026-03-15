@@ -386,9 +386,10 @@ const clientConfig = {
     },
     liveReload: false,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': '*',
-      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Origin': config.server.cors.origin || '*',
+      'Access-Control-Allow-Methods': config.server.cors.methods || '*',
+      'Access-Control-Allow-Headers': config.server.cors.headers || '*',
+      'Access-Control-Allow-Credentials': String(config.server.cors.credentials || false),
     },
     allowedHosts: config.webpack.devServer.allowedHosts,
     port: config.port,
@@ -405,6 +406,10 @@ const clientConfig = {
             req.on('data', chunk => { body += chunk; });
             req.on('end', async () => {
               try {
+                if (req.headers['x-ryunix-action'] !== 'true') {
+                  res.writeHead(403, { 'Content-Type': 'application/json' });
+                  return res.end(JSON.stringify({ error: 'Forbidden: Missing CSRF header' }));
+                }
                 const { actionId, args } = JSON.parse(body);
                 const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId];
                 if (!action) {

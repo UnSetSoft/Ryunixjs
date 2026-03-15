@@ -214,6 +214,16 @@ ${sitemaps}
 </sitemapindex>`
 }
 
+const escapeHtml = (unsafe) => {
+  if (typeof unsafe !== 'string') return String(unsafe)
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 /**
  * Generate HTML meta tags from metadata object
  *
@@ -265,13 +275,13 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
 
     const isProperty = key.startsWith('og:') || key.startsWith('twitter:')
     const attr = isProperty ? 'property' : 'name'
+    const escapedKey = escapeHtml(key)
 
     if (Array.isArray(value)) {
       const content = value.join(', ')
-      if (content) lines.push(`<meta ${attr}="${key}" content="${content}" />`)
+      if (content) lines.push(`<meta ${attr}="${escapedKey}" content="${escapeHtml(content)}" />`)
     } else if (value) {
-      const escapedValue = String(value).replace(/"/g, '&quot;')
-      lines.push(`<meta ${attr}="${key}" content="${escapedValue}" />`)
+      lines.push(`<meta ${attr}="${escapedKey}" content="${escapeHtml(value)}" />`)
     }
   }
 

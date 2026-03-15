@@ -66,6 +66,16 @@ const hydrate = (element, container) => {
   return root
 }
 
+const sanitizeProps = (props) => {
+  if (!props || typeof props !== 'object' || Array.isArray(props)) return props
+  const sanitized = {}
+  for (const key in props) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
+    sanitized[key] = props[key]
+  }
+  return sanitized
+}
+
 /**
  * The `init` function initializes a rendering process for a main element within a specified container
  * root element.
@@ -98,7 +108,8 @@ const hydrateIslands = (components = {}, hasMainElement = false) => {
       return
     }
     try {
-      const props = JSON.parse(container.getAttribute('data-props') || '{}')
+      const rawProps = JSON.parse(container.getAttribute('data-props') || '{}')
+      const props = sanitizeProps(rawProps)
       hydrate(createElement(Component, props), container)
     } catch (e) {
       console.error(`[Ryunix Islands] Error hydrating island "${id}":`, e)

@@ -4,6 +4,7 @@ export function createActionProxy(actionId) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Ryunix-Action': 'true',
       },
       body: JSON.stringify({ actionId, args }),
     });
