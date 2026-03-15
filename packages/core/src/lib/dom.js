@@ -140,7 +140,11 @@ export const validateUri = (name, value) => {
   }
 
   const normalized = value.replace(/\s+/g, '').toLowerCase()
-  if (normalized.startsWith('javascript:') || normalized.startsWith('vbscript:')) {
+  if (
+    normalized.startsWith('javascript:') ||
+    normalized.startsWith('vbscript:') ||
+    normalized.startsWith('data:')
+  ) {
     if (process.env.NODE_ENV !== 'production') {
       console.warn(`[Ryunix Security] Blocked dangerous ${name} URI: ${value}`)
     }
