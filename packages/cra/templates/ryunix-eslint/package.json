@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "ryunix dev",
     "start": "ryunix start",
-    "build": "ryunix build"
+    "build": "ryunix build",
+    "lint": "ryunix lint",
+    "lint:fix": "ryunix lint --fix"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

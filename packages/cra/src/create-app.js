@@ -79,8 +79,8 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
   // 3. Apply Optional Features
-  if (tailwind) enableTailwind(root)
-  if (eslint) enableEslint(root)
+  // Features are already pre-applied in the specialized templates
+
 
   // 4. Update ryunix.config.js with the selected compiler
   const configPath = path.join(root, 'ryunix.config.js')
