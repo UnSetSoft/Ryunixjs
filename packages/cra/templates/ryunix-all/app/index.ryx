@@ -1,9 +1,13 @@
-import { useStore } from '@unsetsoft/ryunixjs'
 import logo from '../assets/logo.svg'
 
-export default function Index() {
-  const [count, setCount] = useStore(0)
+export const Metatags = {
+  title: "Ryunix App",
+  description: 'A fast, modern, and flexible JavaScript framework for building user interfaces.',
+  viewport: 'width=device-width, initial-scale=1.0',
+  charset: 'UTF-8'
+}
 
+export default function Index() {
   return (
     <main className="main">
       <img src={logo} alt="Ryunix Logo" className="logo" />
