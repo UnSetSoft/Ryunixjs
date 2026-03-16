@@ -9,7 +9,7 @@ const { tryGitInit } = require('./helpers/git')
 const { enableTailwind } = require('./features/tailwind')
 const { enableEslint } = require('./features/eslint')
 
-async function createApp({ appPath, appName, channel, tailwind, eslint, vscode }) {
+async function createApp({ appPath, appName, channel, compiler, tailwind, eslint, vscode }) {
   const root = path.resolve(appPath)
 
   if (fs.existsSync(root)) {
@@ -77,6 +77,19 @@ async function createApp({ appPath, appName, channel, tailwind, eslint, vscode }
   // 3. Apply Optional Features
   if (tailwind) enableTailwind(root)
   if (eslint) enableEslint(root)
+
+  // 4. Update ryunix.config.js with the selected compiler
+  const configPath = path.join(root, 'ryunix.config.js')
+  if (fs.existsSync(configPath)) {
+    let configContent = fs.readFileSync(configPath, 'utf8')
+    // Add compiler to the config object
+    if (configContent.includes('module.exports = {')) {
+      configContent = configContent.replace('module.exports = {', `module.exports = {\n  compiler: '${compiler}',`)
+    } else if (configContent.includes('export default {')) {
+      configContent = configContent.replace('export default {', `export default {\n  compiler: '${compiler}',`)
+    }
+    fs.writeFileSync(configPath, configContent)
+  }
 
   // Create vscode workspace settings if requested
   if (vscode) {

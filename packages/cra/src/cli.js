@@ -19,6 +19,7 @@ const program = new Command(packageJson.name)
   .option('--tailwind', 'Initialize with Tailwind CSS config.')
   .option('--eslint', 'Initialize with ESLint config.')
   .option('--vscode', 'Add VS Code settings for Ryunix extension.')
+  .option('--compiler <type>', 'Choose compiler: swc or babel. (default: swc)')
   .action((name) => {
     if (name) projectPath = name
   })
@@ -84,6 +85,22 @@ async function run() {
     channel = channelChoice
   }
 
+  // Compiler selection
+  let compiler = opts.compiler || 'swc'
+  if (!opts.compiler) {
+    const { compilerChoice } = await prompts({
+      type: 'select',
+      name: 'compilerChoice',
+      message: 'Which compiler do you want to use?',
+      choices: [
+        { title: 'SWC (Fastest)', value: 'swc', description: 'Modern Rust-based compiler (recommended)' },
+        { title: 'Babel', value: 'babel', description: 'Standard JavaScript-based compiler' },
+      ],
+      initial: 0,
+    }, { onCancel: () => process.exit(1) })
+    compiler = compilerChoice
+  }
+
   // Tailwind CSS Prompt
   let tailwind = opts.tailwind || false
   if (!opts.tailwind && !process.argv.includes('--no-tailwind')) {
@@ -133,6 +150,7 @@ async function run() {
       appPath: projectPath,
       appName,
       channel,
+      compiler,
       tailwind,
       eslint,
       vscode

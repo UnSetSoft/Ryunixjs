@@ -68,6 +68,7 @@ const dev = {
 
     // add message to say the server is starting with chalk
     console.log(chalk.cyan('Starting development server, please wait...'))
+    console.log(`${chalk.cyan('○')}  Compiler: ${chalk.bold(config.compiler.toUpperCase())}`)
     try {
       await StartDevServer(settings)
     } catch (error) {
@@ -135,6 +136,7 @@ const build = {
     clean(join(buildRoot, 'server', 'app-router-server.bundle.mjs'))
     // Note: server/api/ is cleaned by ApiRouterPlugin on its own (incremental recompile)
 
+    console.log(`${chalk.cyan('○')}  Compiling using ${chalk.bold(config.compiler.toUpperCase())}...`)
     const buildStart = Date.now()
 
     compiler.run(async (err, stats) => {

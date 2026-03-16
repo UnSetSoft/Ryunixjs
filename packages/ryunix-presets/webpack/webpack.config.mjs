@@ -143,7 +143,8 @@ const sharedWebpackConfig = {
       ? [
         new TerserPlugin({
           parallel: true,
-          terserOptions: {
+          minify: config.compiler === 'swc' ? TerserPlugin.swcMinify : TerserPlugin.terserMinify,
+          terserOptions: config.compiler === 'swc' ? {} : {
             compress: {
               dead_code: true,
               passes: 2,
@@ -198,10 +199,27 @@ const sharedWebpackConfig = {
         test: /\.(js|jsx|ryx)$/,
         exclude: /node_modules/,
         use: [
-          ryunixRequire.resolve('thread-loader'),
+          config.compiler !== 'swc' && ryunixRequire.resolve('thread-loader'),
           resolve(__dirname, 'loaders/ryunix-server-action-loader.mjs'),
           resolve(__dirname, 'loaders/ryunix-rsc-loader.mjs'),
-          {
+          config.compiler === 'swc' ? {
+            loader: ryunixRequire.resolve('swc-loader'),
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'ecmascript',
+                  jsx: true,
+                },
+                transform: {
+                  react: {
+                    pragma: 'Ryunix.createElement',
+                    pragmaFrag: 'Ryunix.Fragment',
+                  },
+                },
+                target: 'es2022',
+              },
+            },
+          } : {
             loader: ryunixRequire.resolve('babel-loader'),
             options: {
               presets: [
@@ -231,7 +249,7 @@ const sharedWebpackConfig = {
               ],
             },
           },
-        ],
+        ].filter(Boolean),
       },
       // Images
       {
