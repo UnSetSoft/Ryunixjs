@@ -122,7 +122,7 @@ async function run() {
       type: 'toggle',
       name: 'useEslint',
       message: `Would you like to use ${pc.blue('ESLint')}?`,
-      initial: true,
+      initial: false,
       active: 'Yes',
       inactive: 'No',
     }, { onCancel: () => process.exit(1) })

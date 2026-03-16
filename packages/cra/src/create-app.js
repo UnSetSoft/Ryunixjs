@@ -83,10 +83,8 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   if (fs.existsSync(configPath)) {
     let configContent = fs.readFileSync(configPath, 'utf8')
     // Add compiler to the config object
-    if (configContent.includes('module.exports = {')) {
-      configContent = configContent.replace('module.exports = {', `module.exports = {\n  compiler: '${compiler}',`)
-    } else if (configContent.includes('export default {')) {
-      configContent = configContent.replace('export default {', `export default {\n  compiler: '${compiler}',`)
+    if (configContent.includes('const RyunixSettings = {')) {
+      configContent = configContent.replace('const RyunixSettings = {', `const RyunixSettings = {\n  compiler: '${compiler}',`)
     }
     fs.writeFileSync(configPath, configContent)
   }
