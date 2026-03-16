@@ -6,8 +6,6 @@ const { isFolderEmpty } = require('./helpers/is-folder-empty')
 const { copyRecursiveSync } = require('./helpers/copy')
 const { install } = require('./helpers/install')
 const { tryGitInit } = require('./helpers/git')
-const { enableTailwind } = require('./features/tailwind')
-const { enableEslint } = require('./features/eslint')
 
 async function createApp({ appPath, appName, channel, compiler, tailwind, eslint, vscode }) {
   const root = path.resolve(appPath)
@@ -24,7 +22,12 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   process.chdir(root)
 
   // 1. Copy Template
-  const templateDir = path.resolve(__dirname, '..', 'templates', 'Webpack')
+  let templateName = 'ryunix-base'
+  if (tailwind && eslint) templateName = 'ryunix-all'
+  else if (tailwind) templateName = 'ryunix-tailwind'
+  else if (eslint) templateName = 'ryunix-eslint'
+
+  const templateDir = path.resolve(__dirname, '..', 'templates', templateName)
   if (!fs.existsSync(templateDir)) {
     console.error(pc.red(`Could not locate the template: ${templateDir}`))
     process.exit(1)
@@ -71,6 +74,7 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
     packageJson.devDependencies['eslint-plugin-react'] = '^7.34.0'
     packageJson.devDependencies['eslint-plugin-react-hooks'] = '^4.6.0'
   }
+
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
