@@ -1,0 +1,26 @@
+import { useStore } from '@unsetsoft/ryunixjs'
+import logo from '../assets/logo.svg'
+
+export default function Index() {
+  const [count, setCount] = useStore(0)
+
+  return (
+    <main className="main">
+      <img src={logo} alt="Ryunix Logo" className="logo" />
+      <h1>Welcome to Ryunix</h1>
+      <p className="subtitle">
+        A fast, modern, and flexible JavaScript framework for building user interfaces.<br />
+        Start editing <code>app/index.ryx</code> to see changes instantly.
+      </p>
+
+      <div className="links">
+        <a href="https://ryunixjs.unsetsoft.com" target="_blank" rel="noopener noreferrer" className="link">
+          Documentation
+        </a>
+        <a href="https://github.com/UnSetSoft/Ryunixjs" target="_blank" rel="noopener noreferrer" className="link">
+          GitHub Repository
+        </a>
+      </div>
+    </main>
+  )
+}
