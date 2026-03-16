@@ -10,19 +10,20 @@ body:
         > Remember use the last version before publish an issue.
 
   - type: textarea
+    id: description
     attributes:
       label: Describe the feature
-      description: A clear and concise description of what you whant to add.
+      description: A clear and concise description of what you want to add.
     validations:
       required: true
 
   - type: dropdown
-    id: ask
+    id: contribute
     attributes:
-      label: Do you whant to do this feature your self sending a PR?
+      label: Would you like to implement this feature yourself by sending a PR?
       multiple: false
       options:
-        - Yes
-        - No
+        - 'Yes'
+        - 'No'
     validations:
       required: true
