@@ -47,3 +47,13 @@ body:
         - Linux
     validations:
       required: true
+  - type: dropdown
+    id: contribute_fix
+    attributes:
+      label: Would you like to fix this bug yourself by sending a PR?
+      multiple: false
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
