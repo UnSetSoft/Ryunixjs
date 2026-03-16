@@ -113,6 +113,7 @@ const defaultSettings = {
   port: getConfigValue('port', getConfigValue('webpack.devServer.port', 3000)),
   proxy: getConfigValue('proxy', getConfigValue('webpack.devServer.proxy', [])),
   favicon: getConfigValue('favicon', getConfigValue('static.favicon', true)),
+  compiler: getConfigValue('compiler', 'swc'), // 'swc' or 'babel'
   debug: getConfigValue('debug', false),
 
   // Citizens of the core
