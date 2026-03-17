@@ -126,7 +126,7 @@ const workLoop = (deadline) => {
 
 // ... performUnitOfWork stays same ...
 
-const scheduleWork = (root, priority = Priority.NORMAL) => {
+const scheduleWork = (root, priority = getCurrentPriority()) => {
   const state = getState()
 
   if (state.wipRoot) {
@@ -149,12 +149,19 @@ const scheduleWork = (root, priority = Priority.NORMAL) => {
   if (!isWorkLoopScheduled) {
     isWorkLoopScheduled = true
     if (priority <= Priority.USER_BLOCKING) {
-      setTimeout(() => rIC(workLoop), 0)
+      // High priority: run as soon as possible in a macro-task
+      // We provide a synthetic deadline that allows some work before yielding
+      setTimeout(
+        () => workLoop({ timeRemaining: () => 10, didTimeout: true }),
+        0,
+      )
     } else {
+      // Low priority: wait for browser idleness
       rIC(workLoop)
     }
   }
 }
+
 
 setScheduleWork(scheduleWork)
 

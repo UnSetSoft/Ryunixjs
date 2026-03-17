@@ -7,6 +7,7 @@ import {
   is,
 } from '../utils/index.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
+import { Priority, runWithPriority } from './priority.js'
 
 /**
  * Convert camelCase to kebab-case for CSS properties
@@ -174,13 +175,19 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2)
       try {
-        dom.removeEventListener(eventType, prevProps[name])
+        const originalHandler = prevProps[name]
+        const wrappedHandler = dom._ryunixHandlers?.get(originalHandler) || originalHandler
+        dom.removeEventListener(eventType, wrappedHandler)
+        if (dom._ryunixHandlers) {
+          dom._ryunixHandlers.delete(originalHandler)
+        }
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.warn('Error removing event listener:', error)
         }
       }
     })
+
 
   // Remove old properties
   Object.keys(prevProps)
@@ -270,7 +277,23 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2)
       try {
-        dom.addEventListener(eventType, nextProps[name])
+        const handler = (e) => {
+          runWithPriority(Priority.IMMEDIATE, () => nextProps[name](e))
+        }
+        // Store the wrapped handler so it can be removed later
+        // Note: For simplicity, we could also just wrap it on the fly, 
+        // but we need the exact reference for removeEventListener.
+        // Actually, the current removeDom logic uses prevProps[name], 
+        // which won't work if we wrap it here and don't store it.
+        // Wait, the current removeEventListener call in dom.js:177 is:
+        // dom.removeEventListener(eventType, prevProps[name])
+        // If we wrap it, we MUST store the wrapper.
+        
+        // Let's use a weakMap or a property on the DOM node to store the wrappers.
+        if (!dom._ryunixHandlers) dom._ryunixHandlers = new Map()
+        dom._ryunixHandlers.set(nextProps[name], handler)
+        
+        dom.addEventListener(eventType, handler)
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.warn('Error adding event listener:', error)
@@ -278,6 +301,7 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
       }
     })
 }
+
 
 /**
  * Remove DOM element safely

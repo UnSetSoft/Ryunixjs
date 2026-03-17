@@ -1,7 +1,7 @@
 import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index.js'
 import { createElement, Fragment } from './createElement.js'
 import { scheduleWork } from './bridge.js'
-import { Priority, scheduleUpdate, runWithPriority } from './priority.js'
+import { Priority, scheduleUpdate, runWithPriority, getCurrentPriority } from './priority.js'
 import { RYUNIX_PORTAL } from './portal.js'
 import { queueUpdate } from './batching.js'
 import { validateHookContext as validateHookCall } from './devtools.js'
@@ -13,16 +13,7 @@ const haveDepsChanged = (oldDeps, newDeps) => {
   return oldDeps.some((dep, i) => !Object.is(dep, newDeps[i]))
 }
 
-/**
- * The `useStore` function in JavaScript is a custom hook that uses a reducer to manage state updates
- * based on actions provided.
- * @param initialState - The `initialState` parameter in the `useStore` function is the initial state
- * of the store that will be used with the `useReducer` hook. It represents the starting state of the
- * store before any actions are dispatched to update it.
- * @returns The `useStore` function is returning the result of calling the `useReducer` hook with the
- * `reducer` function and the `initialState` as arguments.
- */
-const useStore = (initialState) => {
+const useStore = (initialState, priority = getCurrentPriority()) => {
   const state = getState()
   if (state.isServerRendering) {
     return [is.function(initialState) ? initialState() : initialState, () => { }]
@@ -30,24 +21,11 @@ const useStore = (initialState) => {
 
   const reducer = (state, action) =>
     is.function(action) ? action(state) : action
-  return useReducer(reducer, initialState)
+  return useReducer(reducer, initialState, undefined, priority)
 }
 
-/**
- * The `useReducer` function in JavaScript is used to manage state and actions.
- *
- * @param reducer - The `reducer` parameter in the `useReducer` function is a function that specifies
- * how the state should be updated in response to an action. It takes the current state and an action
- * as arguments and returns the new state based on the action.
- * @param initialState - The `initialState` parameter in the `useReducer` function represents the
- * initial state of the reducer. It is the state that will be used when the reducer is first called or
- * when the state needs to be reset. This initial state can be a simple value, an object, an array, or
- * @param init - The `init` parameter in the `useReducer` function is an optional function that can be
- * used to initialize the state. If provided, it will be called with the `initialState` as its argument
- * and the return value will be used as the initial state for the reducer. If `init`
- * @returns An array containing the current state and the dispatch function is being returned.
- */
-const useReducer = (reducer, initialState, init) => {
+
+const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPriority()) => {
   const state = getState()
   if (state.isServerRendering) {
     return [init ? init(initialState) : initialState, () => { }]
@@ -77,7 +55,7 @@ const useReducer = (reducer, initialState, init) => {
     })
   }
 
-  const dispatch = (action) => {
+  const dispatch = (action, priority = defaultPriority) => {
     if (action === undefined) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('dispatch called with undefined action')
@@ -99,13 +77,14 @@ const useReducer = (reducer, initialState, init) => {
     }
     currentState.deletions = []
     currentState.hookIndex = 0
-    queueUpdate(() => scheduleWork(currentState.wipRoot, Priority.IMMEDIATE))
+    queueUpdate(() => scheduleWork(currentState.wipRoot, priority))
   }
 
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
   return [hook.state, dispatch]
 }
+
 
 /**
  * The `useEffect` function in JavaScript is used to manage side effects in functional components by
@@ -662,7 +641,7 @@ const useStorePriority = (initialState) => {
       priority,
     }
 
-    scheduleUpdate(() => baseDispatch(wrappedAction), priority)
+    scheduleUpdate(() => baseDispatch(wrappedAction, priority), priority)
   }
 
   return [state, dispatch]
