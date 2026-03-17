@@ -39,19 +39,19 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "rollup": "^4.59.0",
+    "rollup": "4.59.0",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-commonjs": "29.0.0",
     "@rollup/plugin-terser": "0.4.4",
     "eslint": "9.39.2",
     "@babel/core": "7.28.5",
-    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-env": "7.28.5",
     "jest": "30.2.0",
     "babel-jest": "30.2.0",
-    "jest-environment-jsdom": "^30.2.0"
+    "jest-environment-jsdom": "30.2.0"
   },
   "engines": {
-    "node": "^20 || ^22 || ^24"
+    "node": "20 || ^22 || ^24"
   },
   "keywords": [
     "ryunixjs"
