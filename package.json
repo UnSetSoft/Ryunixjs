@@ -55,7 +55,7 @@
     "commit-and-tag-version": "^12.5.0",
     "turbo": "^2.8.10",
     "typescript": "5.9.3",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.8",
     "postcss-loader": "^7.0.2"
   },
   "packageManager": "pnpm@10.26.0",

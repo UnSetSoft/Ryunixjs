@@ -29,7 +29,7 @@
     "node": "^20 || ^22 || ^24"
   },
   "dependencies": {
-    "@babel/cli": "7.28.3",
+    "@babel/cli": "7.28.6",
     "@babel/core": "7.28.5",
     "@babel/plugin-transform-react-jsx": "7.27.1",
     "@babel/preset-env": "7.28.5",
@@ -59,7 +59,7 @@
     "html-loader": "5.1.0",
     "html-webpack-plugin": "5.6.5",
     "mini-css-extract-plugin": "2.10.1",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.8",
     "postcss-loader": "^8.2.1",
     "rehype-highlight": "7.0.2",
     "remark-frontmatter": "5.0.0",
@@ -67,7 +67,7 @@
     "remark-mdx-frontmatter": "5.2.0",
     "rollup": "4.59.0",
     "sass": "1.97.0",
-    "sass-loader": "16.0.6",
+    "sass-loader": "16.0.7",
     "style-loader": "4.0.0",
     "swc-loader": "0.2.7",
     "terminal-log": "1.0.1",
