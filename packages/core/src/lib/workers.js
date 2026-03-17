@@ -86,7 +86,7 @@ function performUnitOfWork(fiber) {
     // the loop will handle the parent's sibling or end.
   }
 }
-booking: []
+
 
 const workLoop = (deadline) => {
   const state = getState()
@@ -149,9 +149,9 @@ const scheduleWork = (root, priority = Priority.NORMAL) => {
   if (!isWorkLoopScheduled) {
     isWorkLoopScheduled = true
     if (priority <= Priority.USER_BLOCKING) {
-      rIC(workLoop)
-    } else {
       setTimeout(() => rIC(workLoop), 0)
+    } else {
+      rIC(workLoop)
     }
   }
 }

@@ -99,7 +99,7 @@ const useReducer = (reducer, initialState, init) => {
     }
     currentState.deletions = []
     currentState.hookIndex = 0
-    queueUpdate(() => scheduleWork(currentState.wipRoot))
+    queueUpdate(() => scheduleWork(currentState.wipRoot, Priority.IMMEDIATE))
   }
 
   wipFiber.hooks[hookIndex] = hook
