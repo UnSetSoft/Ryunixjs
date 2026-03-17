@@ -29,7 +29,7 @@
     "node": "^20 || ^22 || ^24"
   },
   "dependencies": {
-    "@babel/cli": "7.28.3",
+    "@babel/cli": "7.28.6",
     "@babel/core": "7.28.5",
     "@babel/plugin-transform-react-jsx": "7.27.1",
     "@babel/preset-env": "7.28.5",
