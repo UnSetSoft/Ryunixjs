@@ -67,7 +67,7 @@
     "remark-mdx-frontmatter": "5.2.0",
     "rollup": "4.59.0",
     "sass": "1.97.0",
-    "sass-loader": "16.0.6",
+    "sass-loader": "16.0.7",
     "style-loader": "4.0.0",
     "swc-loader": "0.2.7",
     "terminal-log": "1.0.1",
