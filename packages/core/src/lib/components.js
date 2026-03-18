@@ -16,16 +16,6 @@ const updateFunctionComponent = (fiber) => {
 
   let children = [fiber.type(fiber.props)]
 
-  if (fiber.type.ryunix_client_id) {
-    children = [
-      createElement(
-        'div',
-        { 'data-ryunix-island': fiber.type.ryunix_client_id },
-        ...children,
-      ),
-    ]
-  }
-
   if (fiber.type._contextId && fiber.props.value !== undefined) {
     fiber._contextId = fiber.type._contextId
     fiber._contextValue = fiber.props.value

@@ -193,17 +193,17 @@ function commitWork(fiber) {
   } else if (fiber.effectTag === EFFECT_TAGS.HYDRATE) {
     const state = getState()
     if (state.hydrationFailed) {
-      // If hydration failed globally, treat this as a placement
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Appending HYDRATE (fallback):', fiber.type);
+        console.log('[Ryunix Debug] Hydration fallback PLACEMENT:', fiber.type);
       }
+      // Since container is cleared on fallback, treat as normal placement
+      // No need to check fiber.dom.parentNode !== domParent because the container was cleared.
       if (fiber.dom != null) {
         domParent.appendChild(fiber.dom)
       }
       runLayoutEffects(fiber)
       runNormalEffects(fiber)
     } else {
-      // Only attach event listeners and fix props, do not append to domParent
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Hydrating node:', fiber.type);
       }

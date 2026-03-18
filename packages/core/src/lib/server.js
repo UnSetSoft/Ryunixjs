@@ -76,13 +76,6 @@ const renderToStringImpl = (element) => {
   if (typeof element.type === 'function') {
     const type = element.type
     const props = element.props || {}
-    if (type.ryunix_client_id) {
-      const clientId = type.ryunix_client_id
-      const serializedProps = JSON.stringify(props)
-      const renderedElement = type(props)
-      const content = renderToStringImpl(renderedElement)
-      return `<div data-ryunix-island="${clientId}" data-props='${escapeHtml(serializedProps)}'>${content}</div>`
-    }
     const renderedElement = type(props)
     return renderToStringImpl(renderedElement)
   }
@@ -247,32 +240,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
 
   if (typeof type === 'function') {
     if (process.env.RYUNIX_DEBUG) {
-      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous', { isIsland: !!type.ryunix_client_id, clientId: type.ryunix_client_id });
-    }
-    if (type.ryunix_client_id) {
-      const clientId = type.ryunix_client_id
-      const replacer = (key, value) => {
-        if (value && typeof value === 'object' && value.type && typeof value.type === 'function') {
-          if (value.type.name === 'ServerBoundary' || value.type.ryunix_type === 'RYUNIX_SERVER_BOUNDARY') {
-            return {
-              type: 'div',
-              props: {
-                ...value.props,
-                'data-ryunix-server': value.props.id || 'unknown',
-                style: { display: 'contents' },
-                children: []
-              }
-            }
-          }
-        }
-        return value;
-      }
-      const serializedProps = JSON.stringify(props, replacer)
-      push(`<div data-ryunix-island="${clientId}" data-props='${escapeHtml(serializedProps)}'>`)
-      const renderedElement = await type(props)
-      await renderToStreamImpl(renderedElement, push, suspenseTasks)
-      push(`</div>`)
-      return
+      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous');
     }
     const renderedElement = await type(props)
     await renderToStreamImpl(renderedElement, push, suspenseTasks)
@@ -381,4 +349,20 @@ export const renderToString = (element, options = {}) => {
   } finally {
     state.isServerRendering = wasServerRendering
   }
+}
+
+export const renderToStringAsync = async (element, options = {}) => {
+  const stream = renderToReadableStream(element, options);
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let result = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    result += decoder.decode(value, { stream: true });
+  }
+
+  result += decoder.decode();
+  return result;
 }

@@ -149,12 +149,11 @@ const scheduleWork = (root, priority = getCurrentPriority()) => {
   if (!isWorkLoopScheduled) {
     isWorkLoopScheduled = true
     if (priority <= Priority.USER_BLOCKING) {
-      // High priority: run as soon as possible in a macro-task
+      // High priority: run as soon as possible in a micro-task
       // We provide a synthetic deadline that allows some work before yielding
-      setTimeout(
-        () => workLoop({ timeRemaining: () => 10, didTimeout: true }),
-        0,
-      )
+      Promise.resolve().then(() => {
+        workLoop({ timeRemaining: () => 10, didTimeout: true })
+      })
     } else {
       // Low priority: wait for browser idleness
       rIC(workLoop)

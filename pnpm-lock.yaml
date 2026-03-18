@@ -286,41 +286,6 @@ importers:
         specifier: 18.0.0
         version: 18.0.0
 
-  test/cache-test:
-    dependencies:
-      '@unsetsoft/ryunixjs':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
-      '@tailwindcss/postcss':
-        specifier: ^4.2.1
-        version: 4.2.1
-      '@unsetsoft/cra':
-        specifier: workspace:*
-        version: link:../../packages/cra
-      '@unsetsoft/ryunix-presets':
-        specifier: workspace:*
-        version: link:../../packages/ryunix-presets
-      autoprefixer:
-        specifier: ^10.4.24
-        version: 10.4.27(postcss@8.5.8)
-      postcss:
-        specifier: ^8.5.6
-        version: 8.5.8
-      tailwindcss:
-        specifier: ^4.2.1
-        version: 4.2.1
-
-  test/rpack:
-    dependencies:
-      '@unsetsoft/ryunixjs':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
-      '@unsetsoft/ryunix-presets':
-        specifier: workspace:*
-        version: link:../../packages/ryunix-presets
-
   test/webpack:
     dependencies:
       '@unsetsoft/ryunixjs':

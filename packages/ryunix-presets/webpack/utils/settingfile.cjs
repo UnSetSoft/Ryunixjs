@@ -13,8 +13,8 @@ const configFileExist = () => {
 const getConfig = () => {
   try {
     if (fs.existsSync(defaultConfigFile)) {
-      const { default: config } = require(defaultConfigFile)
-
+      const raw = require(defaultConfigFile)
+      const config = raw.default || raw
       return config
     } else if (fs.existsSync(commonConfigFile)) {
       const config = require(commonConfigFile)

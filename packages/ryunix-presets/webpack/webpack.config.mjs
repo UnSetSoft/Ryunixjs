@@ -178,17 +178,21 @@ const sharedWebpackConfig = {
       config.mdx && {
         test: /\.mdx?$/,
         use: [
+          config.compiler === 'swc' ? {
+            loader: ryunixRequire.resolve('swc-loader'),
+            options: {
+              jsc: { parser: { syntax: 'ecmascript', jsx: true }, transform: { react: { pragma: 'Ryunix.createElement', pragmaFrag: 'Ryunix.Fragment' } }, target: 'es2022' },
+            },
+          } : {
+            loader: ryunixRequire.resolve('babel-loader'),
+            options: { presets: [[ryunixRequire.resolve('@babel/preset-env'), { targets: 'defaults and not IE 11', useBuiltIns: false, modules: false, bugfixes: true }], ryunixRequire.resolve('@babel/preset-react')], plugins: [[ryunixRequire.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'Ryunix.createElement', pragmaFrag: 'Ryunix.Fragment' }]], cacheDirectory: resolveApp(dir, `${config.buildDir}/cache/babel-loader`) },
+          },
           {
             loader: ryunixRequire.resolve('@mdx-js/loader'),
             options: {
               jsxImportSource: '@unsetsoft/ryunixjs',
               providerImportSource: '@unsetsoft/ryunixjs',
-
-              remarkPlugins: [
-                remarkGfm,
-                remarkFrontmatter,
-                [remarkMdxFrontmatter, { name: 'frontmatter' }],
-              ],
+              remarkPlugins: [remarkGfm, remarkFrontmatter, [remarkMdxFrontmatter, { name: 'frontmatter' }]],
               rehypePlugins: [rehypeHighlight],
             },
           },

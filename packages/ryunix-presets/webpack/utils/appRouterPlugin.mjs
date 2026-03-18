@@ -428,7 +428,7 @@ const RouteWrapperClient = ({ layouts, index, props, loading, error }) => {
       setCurrentMeta(combinedMeta);
     };
     runMetadata();
-  }, [props.params, props.query, props.location]);
+  }, [JSON.stringify(props.params), JSON.stringify(props.query), props.location]);
 
   return <RouteWrapperRender layouts={layouts} index={index} props={props} loading={loading} error={error} />;
 };

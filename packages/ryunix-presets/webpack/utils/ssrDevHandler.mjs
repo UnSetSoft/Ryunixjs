@@ -60,14 +60,8 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     global.window = { location: { pathname: req.url } }
     try {
       const element = ryunixCreateElement(AppRouterApp)
-      if (typeof global.Ryunix?.renderToReadableStream === 'function') {
-        const stream = global.Ryunix.renderToReadableStream(element);
-        const reader = stream.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          renderedString += new TextDecoder().decode(value);
-        }
+      if (typeof global.Ryunix?.renderToStringAsync === 'function') {
+        renderedString = await global.Ryunix.renderToStringAsync(element);
       } else {
         renderedString = ryunixRenderToString(element)
       }
