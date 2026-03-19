@@ -1,5 +1,7 @@
 const path = require('path')
 const fs = require('fs')
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
 const pc = require('picocolors')
 const { getPkgManager } = require('./helpers/get-pkg-manager')
 const { isFolderEmpty } = require('./helpers/is-folder-empty')
@@ -57,11 +59,36 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   const isCanary = channel === 'Canary'
   const versionTag = isCanary ? 'canary' : 'latest'
 
+  let ryunixVersion = versionTag
+  let presetsVersion = versionTag
+
+  const pkgManager = getPkgManager()
+
+  let viewCmd = 'npm view'
+  if (pkgManager === 'yarn') {
+    viewCmd = 'yarn info'
+  } else if (pkgManager === 'pnpm') {
+    viewCmd = 'pnpm view'
+  } else if (pkgManager === 'bun') {
+    // bun doesn't natively have a view command that returns just the version easily, fallback to npm view 
+    viewCmd = 'npm view'
+  }
+
+  try {
+    const { stdout: ryunixStdout } = await exec(`${viewCmd} @unsetsoft/ryunixjs@${versionTag} version`)
+    const { stdout: presetsStdout } = await exec(`${viewCmd} @unsetsoft/ryunix-presets@${versionTag} version`)
+    ryunixVersion = '^' + ryunixStdout.trim()
+    presetsVersion = '^' + presetsStdout.trim()
+  } catch (error) {
+    // Fallback to the tag if npm view fails
+    console.warn(pc.yellow(`\nWarning: Could not fetch exact versions for ${versionTag}. Using tag instead.`))
+  }
+
   packageJson.dependencies = packageJson.dependencies || {}
   packageJson.devDependencies = packageJson.devDependencies || {}
 
-  packageJson.dependencies['@unsetsoft/ryunixjs'] = versionTag
-  packageJson.devDependencies['@unsetsoft/ryunix-presets'] = versionTag
+  packageJson.dependencies['@unsetsoft/ryunixjs'] = ryunixVersion
+  packageJson.devDependencies['@unsetsoft/ryunix-presets'] = presetsVersion
 
   if (tailwind) {
     packageJson.devDependencies['tailwindcss'] = '^4.0.0'
@@ -102,7 +129,6 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   }
 
   // 4. Install Dependencies
-  const pkgManager = getPkgManager()
   console.log(`Installing dependencies using ${pkgManager}...`)
   try {
     await install(pkgManager, root)
