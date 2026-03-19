@@ -129,14 +129,7 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   }
 
   // 4. Install Dependencies
-  console.log(`Installing dependencies using ${pkgManager}...`)
-  try {
-    await install(pkgManager, root)
-  } catch (err) {
-    console.error(pc.red(`\nFailed to install dependencies.\n`))
-    console.error(err)
-    process.exit(1)
-  }
+
 
   // 5. Initialize Git
   if (tryGitInit(root)) {
@@ -144,7 +137,7 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   }
 
   // 6. Print Success Message
-  console.log(`\n${pc.green('Success!')} Created ${appName} at ${appPath}`)
+  console.log(`\n${pc.green('Success!')} Created ${appName}`)
   console.log('Inside that directory, you can run several commands:\\n')
   console.log(pc.cyan(`  ${pkgManager} run dev`))
   console.log('    Starts the development server.\\n')
@@ -154,6 +147,7 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
   console.log('    Runs the built app in production mode.\\n')
   console.log('We suggest that you begin by typing:\\n')
   console.log(pc.cyan('  cd'), appName)
+  console.log(pc.cyan(`  ${pkgManager} install`))
   console.log(pc.cyan(`  ${pkgManager} run dev\n`))
 }
 
