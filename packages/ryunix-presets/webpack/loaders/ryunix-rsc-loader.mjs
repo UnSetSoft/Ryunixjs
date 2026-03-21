@@ -55,9 +55,20 @@ export default function (content) {
   const isClientDirective = content.includes('//@client') || content.includes('// @client');
 
   // Get build target from compiler - 'node' for server, 'web' for client
-  // Check this._compiler.target or this.target
-  const compiler = this._compiler;
-  let target = this.target || (compiler && compiler.options && compiler.options.target);
+  // Try multiple ways to determine target
+  let target = this.target;
+  
+  // Try getting from compiler options
+  if (!target && this._compiler && this._compiler.options) {
+    target = this._compiler.options.target;
+  }
+  
+  // Try getting from webpack's global __webpack_require__.r or similar
+  // Or check if we're in a server bundle by looking at the output path
+  if (!target && this._compiler && this._compiler.outputPath) {
+    // Server bundles typically go to server/ directory
+    target = this._compiler.outputPath.includes('/server/') ? 'node' : 'web';
+  }
   
   // Default to 'web' if not found
   if (!target) {
