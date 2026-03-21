@@ -71,16 +71,6 @@ const hydrate = (element, container) => {
   return root
 }
 
-const sanitizeProps = (props) => {
-  if (!props || typeof props !== 'object' || Array.isArray(props)) return props
-  const sanitized = {}
-  for (const key in props) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
-    sanitized[key] = props[key]
-  }
-  return sanitized
-}
-
 const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
   state.containerRoot = document.getElementById(root)

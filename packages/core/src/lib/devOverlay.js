@@ -55,18 +55,57 @@ export function RyunixDevOverlay(propsOrError) {
         const line = stackLines[i];
         if (!line.includes(':')) continue;
 
-        const v8Match = line.match(/\(([^()]+):(\d+):(\d+)\)/) || line.match(/at\s+([^\s:]+):(\d+):(\d+)/);
-        const ryunixMatch = line.match(/([^\s:]+\.(?:ryx|jsx|js|ts|tsx)):(\d+)/);
-        
+        // Deterministic string-based parsing (no regex on uncontrolled data)
         let matchedPath = null;
         let matchedLine = null;
 
-        if (v8Match) {
-          matchedPath = v8Match[1];
-          matchedLine = parseInt(v8Match[2], 10);
-        } else if (ryunixMatch) {
-          matchedPath = ryunixMatch[1];
-          matchedLine = parseInt(ryunixMatch[3], 10);
+        // V8 format: "at fn (file:line:col)" — extract content between parens
+        const parenOpen = line.indexOf('(');
+        const parenClose = line.lastIndexOf(')');
+        if (parenOpen !== -1 && parenClose > parenOpen) {
+          const inner = line.slice(parenOpen + 1, parenClose);
+          const c2 = inner.lastIndexOf(':');
+          const c1 = c2 > 0 ? inner.lastIndexOf(':', c2 - 1) : -1;
+          if (c1 > 0) {
+            const col = inner.slice(c2 + 1);
+            const ln = inner.slice(c1 + 1, c2);
+            if (/^\d+$/.test(ln) && /^\d+$/.test(col)) {
+              matchedPath = inner.slice(0, c1);
+              matchedLine = parseInt(ln, 10);
+            }
+          }
+        }
+
+        // V8 format without parens: "at file:line:col"
+        if (!matchedPath) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('at ')) {
+            const rest = trimmed.slice(3).trim();
+            const c2 = rest.lastIndexOf(':');
+            const c1 = c2 > 0 ? rest.lastIndexOf(':', c2 - 1) : -1;
+            if (c1 > 0) {
+              const col = rest.slice(c2 + 1);
+              const ln = rest.slice(c1 + 1, c2);
+              if (/^\d+$/.test(ln) && /^\d+$/.test(col)) {
+                matchedPath = rest.slice(0, c1);
+                matchedLine = parseInt(ln, 10);
+              }
+            }
+          }
+        }
+
+        // Ryunix format: "file.ryx:line" or "file.jsx:line"
+        if (!matchedPath) {
+          const exts = ['.ryx', '.jsx', '.js', '.ts', '.tsx'];
+          const c1 = line.lastIndexOf(':');
+          if (c1 > 0) {
+            const ln = line.slice(c1 + 1).trim();
+            const filePart = line.slice(0, c1).trim();
+            if (/^\d+$/.test(ln) && exts.some(ext => filePart.endsWith(ext))) {
+              matchedPath = filePart;
+              matchedLine = parseInt(ln, 10);
+            }
+          }
         }
 
         if (matchedPath && matchedLine) {
@@ -202,29 +241,50 @@ export function RyunixDevOverlay(propsOrError) {
               ...stackLines.map((line, i) => {
                 if (i === 0 && (line.startsWith('Error:') || line.startsWith('TypeError:'))) return null;
                 
-                // Flexible stack line parsing for V8, SpiderMonkey, and Ryunix's format
-                const v8Match = line.match(/^\s*at\s+(\S+)\s+\(([^()]+)\)$/) || line.match(/^\s*at\s+(\S.*)$/);
-                const ryunixMatch = line.match(/^\s*(\S+)\s+([^\s:]+\.(?:ryx|jsx|js|ts|tsx):\d+.*)$/);
-                const firefoxMatch = line.match(/^([^@]+)@([^:]+):\d+:\d+$/);
-
+                // Deterministic string-based stack frame parsing (no polynomial regex)
+                const trimmed = line.trim();
                 let fnName = '<anonymous>';
                 let filePath = line;
 
-                if (v8Match) {
-                  fnName = v8Match[2] ? v8Match[1] : (line.includes('(') ? v8Match[1] : '<anonymous>');
-                  filePath = v8Match[2] || v8Match[1];
-                } else if (firefoxMatch) {
-                  fnName = firefoxMatch[1];
-                  filePath = firefoxMatch[2];
-                } else if (ryunixMatch) {
-                  fnName = ryunixMatch[1];
-                  filePath = ryunixMatch[2];
-                } else {
-                  // Fallback for custom formatted lines like `   updateFunctionComponent components.js:17`
-                  const parts = line.trim().split(/\s+/);
+                // V8 format: "at fnName (file:line:col)" or "at file:line:col"
+                if (trimmed.startsWith('at ')) {
+                  const rest = trimmed.slice(3);
+                  const parenOpen = rest.indexOf('(');
+                  const parenClose = rest.lastIndexOf(')');
+                  if (parenOpen !== -1 && parenClose > parenOpen) {
+                    fnName = rest.slice(0, parenOpen).trim() || '<anonymous>';
+                    filePath = rest.slice(parenOpen + 1, parenClose);
+                  } else {
+                    // "at file:line:col" — no function name
+                    if (rest.includes(':')) {
+                      fnName = '<anonymous>';
+                    } else {
+                      fnName = rest;
+                    }
+                    filePath = rest;
+                  }
+                }
+                // Firefox format: "fnName@file:line:col"
+                else if (trimmed.includes('@')) {
+                  const atIdx = trimmed.indexOf('@');
+                  fnName = trimmed.slice(0, atIdx) || '<anonymous>';
+                  filePath = trimmed.slice(atIdx + 1);
+                }
+                // Ryunix format: "fnName file.ext:line"
+                else {
+                  const exts = ['.ryx', '.jsx', '.js', '.ts', '.tsx'];
+                  const parts = trimmed.split(/\s+/);
                   if (parts.length >= 2) {
-                    fnName = parts[0];
-                    filePath = parts.slice(1).join(' ');
+                    const lastPart = parts[parts.length - 1];
+                    const colonIdx = lastPart.indexOf(':');
+                    const fileCandidate = colonIdx > 0 ? lastPart.slice(0, colonIdx) : lastPart;
+                    if (exts.some(ext => fileCandidate.endsWith(ext))) {
+                      fnName = parts.slice(0, -1).join(' ');
+                      filePath = lastPart;
+                    } else {
+                      fnName = parts[0];
+                      filePath = parts.slice(1).join(' ');
+                    }
                   }
                 }
 
