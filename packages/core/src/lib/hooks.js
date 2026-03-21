@@ -14,6 +14,11 @@ const haveDepsChanged = (oldDeps, newDeps) => {
 }
 
 const useStore = (initialState, priority = getCurrentPriority()) => {
+  // SSR safety check - more reliable than state.isServerRendering
+  if (typeof window === 'undefined') {
+    return [is.function(initialState) ? initialState() : initialState, () => { }]
+  }
+
   const state = getState()
   if (state.isServerRendering) {
     return [is.function(initialState) ? initialState() : initialState, () => { }]
@@ -26,6 +31,11 @@ const useStore = (initialState, priority = getCurrentPriority()) => {
 
 
 const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPriority()) => {
+  // SSR safety check - more reliable than state.isServerRendering
+  if (typeof window === 'undefined') {
+    return [init ? init(initialState) : initialState, () => { }]
+  }
+
   const state = getState()
   if (state.isServerRendering) {
     return [init ? init(initialState) : initialState, () => { }]
@@ -97,6 +107,11 @@ const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPri
  * of the values in the `deps` array have changed since the last render. If the `deps` array
  */
 const useEffect = (callback, deps) => {
+  // SSR safety check - more reliable than state.isServerRendering
+  if (typeof window === 'undefined') {
+    return
+  }
+
   const state = getState()
   if (state.isServerRendering) {
     return
@@ -136,6 +151,11 @@ const useEffect = (callback, deps) => {
  * contains the initial value passed to the `useRef` function.
  */
 const useRef = (initialValue) => {
+  // SSR safety check - more reliable than state.isServerRendering
+  if (typeof window === 'undefined') {
+    return { current: initialValue }
+  }
+
   const state = getState()
   if (state.isServerRendering) {
     return { current: initialValue }
@@ -170,6 +190,11 @@ const useRef = (initialValue) => {
  * @returns The `useMemo` function is returning the `value` calculated by the `compute` function.
  */
 const useMemo = (compute, deps) => {
+  // SSR safety check - more reliable than state.isServerRendering
+  if (typeof window === 'undefined') {
+    return compute()
+  }
+
   const state = getState()
   if (state.isServerRendering) {
     return compute()
@@ -775,6 +800,11 @@ const useSwitch = (initialState = false) => {
  * @param {Array} deps - Dependencies array
  */
 const useLayoutEffect = (callback, deps) => {
+  // SSR safety check - more reliable than state.isServerRendering
+  if (typeof window === 'undefined') {
+    return
+  }
+
   const state = getState()
   if (state.isServerRendering) {
     return
