@@ -45,6 +45,7 @@ const reconcileChildren = (wipFiber, elements) => {
         alternate: matchedFiber,
         effectTag: EFFECT_TAGS.UPDATE,
         hooks: matchedFiber.hooks,
+        stateError: matchedFiber.stateError,
         key: element.key,
         index,
       }

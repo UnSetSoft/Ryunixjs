@@ -26,21 +26,8 @@ export default async function ryunixServerActionLoader(source) {
                   actionNames.push(name);
                   const actionId = `${hash}_${name}`;
 
-                  if (!isServer) {
-                    path.replaceWith(
-                      t.exportNamedDeclaration(
-                        t.variableDeclaration("const", [
-                          t.variableDeclarator(
-                            t.identifier(name),
-                            t.callExpression(
-                              t.identifier('__ryunixCreateActionProxy'),
-                              [t.stringLiteral(actionId)]
-                            )
-                          )
-                        ])
-                      )
-                    );
-                  }
+                  // We don't transform the AST for client builds here anymore,
+                  // we just let it collect the actionNames and completely replace the client source string at the end.
                 } else if (t.isVariableDeclaration(declaration)) {
                   let hasAsyncArrow = false;
                   declaration.declarations.forEach(decl => {
@@ -49,13 +36,6 @@ export default async function ryunixServerActionLoader(source) {
                       actionNames.push(name);
                       hasAsyncArrow = true;
                       
-                      if (!isServer) {
-                        const actionId = `${hash}_${name}`;
-                        decl.init = t.callExpression(
-                          t.identifier('__ryunixCreateActionProxy'),
-                          [t.stringLiteral(actionId)]
-                        );
-                      }
                     }
                   });
                 }
@@ -79,9 +59,16 @@ export default async function ryunixServerActionLoader(source) {
       });
     }
 
-    if (!isServer && actionNames.length > 0) {
-      // For client side, import the proxy creator
-      code = `import { createActionProxy as __ryunixCreateActionProxy } from '@unsetsoft/ryunixjs';\n` + code;
+    if (!isServer) {
+      if (actionNames.length > 0) {
+        let clientCode = `import { createActionProxy as __ryunixCreateActionProxy } from '@unsetsoft/ryunixjs';\n`;
+        actionNames.forEach(name => {
+          clientCode += `export const ${name} = __ryunixCreateActionProxy("${hash}_${name}");\n`;
+        });
+        code = clientCode;
+      } else {
+        code = '// This file is server-only';
+      }
     }
 
     callback(null, code);

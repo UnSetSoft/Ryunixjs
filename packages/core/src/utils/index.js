@@ -189,7 +189,12 @@ const getTypeLabel = (type) => {
 
 const nextValidSibling = (node) => {
   let next = node
-  while (next && (next.nodeType === 3 && !next.nodeValue.trim() || next.nodeType === 8)) {
+  while (
+    next &&
+    ((next.nodeType === 3 && !next.nodeValue.trim()) ||
+      next.nodeType === 8 ||
+      (next.nodeType === 1 && next.hasAttribute('data-ryunix-ssr')))
+  ) {
     next = next.nextSibling
   }
   return next

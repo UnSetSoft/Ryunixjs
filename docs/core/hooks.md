@@ -1,61 +1,62 @@
-# Ryunix Hooks System
+# RyunixJS Hooks Internal Engine
 
-Ryunix provides a comprehensive Hooks API, maintaining familiarity while integrating unique features for priority scheduling and routing.
+RyunixJS implements a robust Hooks Engine that couples state and side-effects elegantly into the Fiber tree architecture.
 
-## State Management
+Rather than maintaining a global array of states natively, each functional component holds its own sequential `hooks` array internally stored in its active Fiber instance. During every render, `state.hookIndex` increments dynamically to fetch or initialize the correct hook object. 
 
-### `useStore(initialState)`
-The primary state hook (analogous to React's `useState`). Under the hood, it uses `useReducer`. It returns the current state and a dispatcher function.
+---
 
-### `useReducer(reducer, initialState, init)`
-Manages complex state logic. The dispatcher queues an action, updating the Work-In-Progress fiber, and schedules a render cycle via `scheduleWork`.
+## 1. State Management (`hooks.js`)
 
-### `usePersistentStore(key, initialState)`
-A specialized hook that wraps `useStore` to synchronize state with `window.localStorage`. It automatically handles serialization/deserialization.
+### `useReducer(reducer, initialState, init, defaultPriority)`
+The fundamental building block of all statefulness in RyunixJS. 
+- **Hook Structure**: Initializes an object `{ hookID, type: RYUNIX_STORE, state, queue: [] }`.
+- **Queuing & Dispatching**: When `dispatch(action)` is called, the action is pushed to `hook.queue`. Crucially, it copies `currentState.currentRoot` to `wipRoot` and fires `queueUpdate(() => scheduleWork())` to restart the render loop with the designated `Priority`.
+- **Evaluation**: Upon the next render cycle, any stored actions inside the `queue` array are sequentially fed into the reducer to calculate the new derived state synchronously before execution resumes.
 
-## Side Effects & Lifecycle
+### `useStore(initialState, priority)`
+Conceptually identical to React's `useState`. It is entirely a syntactical wrapper around `useReducer`, employing an inline passthrough reducer: `(state, action) => is.function(action) ? action(state) : action`.
 
-### `useEffect(callback, deps)`
-Runs side-effects after the render phase. Effect callbacks are executed if the dependency array changes.
+---
 
-### `useLayoutEffect(callback, deps)`
-Runs synchronously after DOM mutations but before the browser paints. Essential for making DOM measurements to avoid visual flickering.
+## 2. Side-Effects Pipeline (`effects.js`)
 
-## Performance & Memoization
+Unlike rendering which traverses downwards recursively in an interruptible loop, the execution phase of Side Effects happens directly alongside the DOM commit phase to strictly control UI consistency.
+
+Ryunix evaluates Side-Effects efficiently utilizing reference equality checks on a dependency array `deps`. `haveDepsChanged()` iterates through `prevDeps` and `nextDeps` leveraging `Object.is()` semantics (perfect handling for `-0`, `+0`, and `NaN`).
+
+### 1. `useLayoutEffect(callback, deps)`
+This hook mimics `useEffect`, however:
+- It runs **synchronously** during the `commits.js` phase immediately after DOM trees are surgically updated.
+- It intentionally delays browser paint.
+- It guarantees that developers can invoke expensive layout recalculations (e.g. `Element.getBoundingClientRect()`) without exposing an unstyled frame layout jitter.
+
+### 2. `useEffect(callback, deps)`
+- Marks the hook with `RYUNIX_TYPES.RYUNIX_EFFECT`.
+- Executes **asynchronously** after the browser has completed its painting phase (`runNormalEffects`).
+- Ensures that heavy side-effects (like Network I/O or polling subscriptions) do not block the UI from immediately responding to interactive state changes.
+
+### Cancellation (`cancelEffects` & `cancelEffectsDeep`)
+When a Fiber receives an `EFFECT_TAGS.UPDATE` or `EFFECT_TAGS.DELETION`, RyunixJS explicitly garbage collects stale side-effects:
+1. It validates if the previous `hook.effect` returned a cleanup function (`hook.cancel`).
+2. If available, it executes the cleanup sequentially.
+3. Automatically sets `hook.cancel = null` to aggressively assist the V8 garbage collector and eradicate memory leaks.
+
+---
+
+## 3. Performance Memoization
+
+To prevent redundant tree re-evaluations, Ryunix provides dependency-tracked derivation lockers.
 
 ### `useMemo(compute, deps)`
-Memoizes an expensive computation based on an array of dependencies.
+Calculates the closure block *only* if `haveDepsChanged` returns true. If variables are structurally identical, it skips execution and returns the cached `oldHook.value`, bypassing CPU penalties.
 
 ### `useCallback(callback, deps)`
-Memoizes a function reference to prevent unnecessary child component re-renders.
+An internal syntactic sugar pattern overlaying `useMemo`. Instead of returning a resolved value, it returns evaluating `useMemo(() => callback, deps)`, rigidly binding the function reference identity to prevent recursive cascading re-renders across memoized child tree components.
 
-### `useRef(initialValue)`
-Provides a mutable object that persists across renders (`hook.value.current`). It does not trigger a re-render when mutated.
+---
 
-## Concurrent Mode & Priority
+## 4. Environment Safety & SSR
 
-Ryunix features a localized priority scheduler (`useStorePriority`) implemented over the base `useReducer`.
-
-### `useTransition()`
-Returns a boolean `isPending` state and a `startTransition` function. Allows marking specific state updates as non-urgent (Priority: LOW), keeping the application responsive during heavy renders.
-
-### `useDeferredValue(value)`
-Defers updates to a value by wrapping it in a setTimeout with low priority, preventing UI blocking on fast inputs.
-
-## Context
-
-### `createContext(contextId, defaultValue)`
-Returns a `{ Provider, useContext }` pair. The internal traversal system walks up the fiber tree to find the nearest matching Provider `_contextId`.
-
-## Routing & Navigation
-
-Ryunix core includes built-in SPA router capabilities.
-
-### `useRouter()`
-Returns the router context (`location`, `params`, `query`, `navigate`, etc.).
-
-### `usePathname()` & `useSearchParams()` & `useHash()`
-Utility hooks that extract specific routing information from the environment. `useHash` triggers reactively on `hashchange` events.
-
-### `useMetadata(tags, options)`
-Manages SEO and document tags (Title, Canonical, OpenGraph) dynamically. On the server, it buffers metadata to be injected into the static HTML.
+All standard hooks are completely shielded against Node.js runtime hazards.
+Ryunix enforces an aggressive `if (typeof window === "undefined" || state.isServerRendering)` boundary. When hooks execute on the server, Ryunix surgically aborts the dispatcher linking and gracefully returns a static snapshot of `initialState` or `compute()`, prohibiting unpredictable Node.js memory faults or undefined `window` runtime exceptions.

@@ -1,44 +1,54 @@
-# Ryunix Core Rendering Architecture
+# RyunixJS Rendering Architecture
 
-The `@unsetsoft/ryunixjs` core rendering engine provides a modern, concurrent rendering model with robust support for Server-Side Rendering (SSR) and Island Architecture.
+RyunixJS provides a unified rendering system capable of executing identically on both the Browser (Client-Side Rendering) and Node.js/Edge environments (Server-Side Rendering).
 
-## Client-Side Rendering (CSR)
+This document details the exact mechanisms and entry points responsible for converting Ryunix Elements into physical pixels or raw HTML strings.
+
+---
+
+## 1. Client-Side Rendering (`render.js`)
+
+The entry points for the browser environment handle initializing the application Root.
+
+### `init(MainElement, rootId)`
+The intelligent bootstrap function. `init` automatically detects whether the target DOM container has existing Server-Rendered children. 
+- **SSR Detected**: It gracefully transitions to `hydrate()` to attach event listeners without destroying the existing markup.
+- **Empty Container**: It falls back to standard `render()`.
+- *Note*: Developers can force a full client-render bypassing hydration by passing `process.env.RYUNIX_SSR = 'false'`.
 
 ### `render(element, container)`
-The entry point for rendering a Ryunix virtual DOM tree into a physical DOM container.
-- It clears the container before rendering to prevent duplication.
-- It sets up a `wipRoot` (Work-In-Progress Root) and schedules work using `scheduleWork()`.
+Performs a destructive Client-Side Render (CSR).
+1. Calls `clearContainer(container)` to obliterate any existing inner HTML.
+2. Initializes a synthetic `wipRoot` Fiber mapped to the physical `container` DOM node.
+3. Invokes `scheduleWork(root)` to ignite the `workers.js` concurrent loop.
 
 ### `hydrate(element, container)`
-Used to attach Ryunix event listeners and state to an existing server-rendered HTML tree.
-- Instead of clearing the tree like `render()`, it walks the existing DOM nodes (using `hydrateCursor`).
-- It preserves the SSR HTML, providing a much faster initial load and seamless transition to interactive state.
+Attaches the RyunixJS engine to pre-compiled HTML sent from the server.
+1. Leaves the existing DOM Nodes completely intact.
+2. Computes the logical `nextValidSibling` traversing past text carriage returns or HTML comments.
+3. Sets `state.isHydrating = true` and `state.hydrateCursor` to track position.
+4. Initializes `scheduleWork(root)`.
+5. **Fallback Safety**: If Hydration fails (Mismatched UI), Ryunix's commit phase (`commits.js`) detects the desync (`state.hydrationFailed`), obliterates the container, and forces a native CSR `PLACEMENT` to ensure the application remains strictly usable.
 
-### `init(MainElement, root, components)`
-The smart initialization function. It automatically detects whether the target root container has child nodes.
-- If child nodes exist and `process.env.RYUNIX_SSR` is truthy, it triggers `hydrate()`.
-- If no child nodes exist, it triggers standard `render()`.
-- It also calls `hydrateIslands()` to initialize any isolated interactive components.
+---
 
-## Island Architecture
+## 2. Server-Side Rendering (`server.js`)
 
-Ryunix supports Partial Hydration via "Islands". This means that mostly-static pages can ship minimal JavaScript by only hydrating specific dynamic components.
-
-### `hydrateIslands(components, hasMainElement)`
-Scans the DOM for elements with the `data-ryunix-island` attribute.
-- It looks up the component in the local `components` dictionary or the global `window.__RYUNIX_ISLANDS__` registry.
-- It extracts the encoded properties from the `data-props` attribute.
-- It calls `hydrate()` on that specific isolated container.
-- Note: It avoids hydrating islands that are shielded by a `ServerBoundary` if a main element is already managing hydration.
-
-## Server-Side Rendering (SSR)
+The Server parser works completely synchronously (or asynchronously with Streams), aggressively short-circuiting Hooks logic via globals (`state.isServerRendering = true`) to prevent memory leaks in stateful hooks across varying Node.js threads.
 
 ### `renderToString(element)`
-Synchronously renders a Ryunix virtual DOM tree to a string of HTML.
-- Injects necessary styles and attributes.
-- Escapes specific HTML characters to prevent XSS.
+Used for generic Static Site Generation (SSG).
+Recursively parses the Virtual DOM tree, evaluating component Functions and mapping properties to HTML string blobs.
+- Converts `className` to `class` natively.
+- Evaluates standard HTML5 Void empty tags `<img />` correctly.
+- Safely strips dangerous URI protocols via `validateUri` (e.g., `javascript:` links).
 
 ### `renderToReadableStream(element)`
-Asynchronously renders a Ryunix tree to a Web stream (`ReadableStream`).
-- Excellent for out-of-order streaming and early flushes.
-- Handles `Suspense` natively by buffering background completion tasks and streaming fallback skeleton HTML immediately. Once the background tasks complete, it streams `<template>` tags with a small JavaScript helper (`$RC`) to swap the content into the DOM automatically.
+The flagship streaming implementation featuring automatic `<RYUNIX_SUSPENSE>` unlocking.
+Returns a native `ReadableStream` allowing HTTP servers to stream headers and chunks instantly before the CPU finishes evaluating the complete document.
+
+#### Async Suspense Streaming internally:
+1. Pushes the `<template id="B:uuid">` and fallbacks down the HTTP pipe instantly.
+2. Initiates background asynchronous evaluated tasks (`suspenseTasks`) for lazy routes fetching data.
+3. When the async component finishes, Ryunix pushes the completed HTML enclosed in a `<template>` along with a tiny inline Javascript evaluator script (`$RC("S:uuid", "P:uuid")`).
+4. The client's browser parses the script and securely replaces the fallback loader with the retrieved content progressively.
