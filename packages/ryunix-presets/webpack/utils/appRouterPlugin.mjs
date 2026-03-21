@@ -7,6 +7,7 @@ class AppRouterPlugin {
     this.outputPath = options.outputPath || '.ryunix/server/app/app-router.js';
     this.ssgOutputPath = options.ssgOutputPath || null;
     this.debug = options.debug || false;
+    this._fileCache = new Map(); // path → { mtime, content }
   }
 
   apply(compiler) {
@@ -86,7 +87,17 @@ class AppRouterPlugin {
         let name = base;
 
         const fullPath = path.join(dir, entry.name).replace(/\\/g, '/');
-        const content = fs.readFileSync(fullPath, 'utf8');
+
+        // Only re-read file if mtime changed (skip I/O on HMR rebuilds)
+        const stat = fs.statSync(fullPath);
+        let cached = this._fileCache.get(fullPath);
+        let content;
+        if (cached && cached.mtime >= stat.mtimeMs) {
+          content = cached.content;
+        } else {
+          content = fs.readFileSync(fullPath, 'utf8');
+          this._fileCache.set(fullPath, { mtime: stat.mtimeMs, content });
+        }
 
         // Robust directive detection using regex
         let isServer = base.endsWith('.server') || /^\s*\/\/\s*@server/im.test(content);

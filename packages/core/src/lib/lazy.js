@@ -104,13 +104,12 @@ const Suspense = ({ fallback, children }) => {
     }
   }, [anyPending])
 
-  // Show fallback while any child is pending
   // On server background task, we want to render ACTUAL children to capture them
   if (anyPending && !getState().isSuspenseBackground) {
-    return fallback || null
+    return createElement('div', { style: { display: 'contents' } }, fallback || null)
   }
 
-  return createElement(Fragment, { children })
+  return createElement('div', { style: { display: 'contents' } }, children)
 }
 
 Suspense.type = RYUNIX_TYPES.RYUNIX_SUSPENSE

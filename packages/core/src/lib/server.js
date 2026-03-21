@@ -208,7 +208,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     // In universal mode, Suspense renders children if ready, or fallback if pending.
     // BUT we want to force a background task for the REAL children if we hit a lazy component.
 
-    push(`<!--$?--><template id="B:${id}"></template><div id="S:${id}">`)
+    push(`<!--$?--><template id="B:${id}" data-ryunix-ssr></template><div id="S:${id}">`)
 
     // 1. Start rendering the actual content in the background
     const task = (async () => {

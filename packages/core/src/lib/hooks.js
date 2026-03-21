@@ -85,6 +85,8 @@ const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPri
       props: activeRoot.props,
       alternate: currentState.currentRoot || null,
     }
+    // Signal to commitRoot that new work was scheduled (prevents premature wipRoot clearing)
+    currentState.wipRoot = newRoot
     queueUpdate(() => scheduleWork(newRoot, priority))
   }
 

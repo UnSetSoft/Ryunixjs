@@ -169,7 +169,7 @@ const defaultSettings = {
     experiments: {
       lazyCompilation: getConfigValue(
         'webpack.experiments.lazyCompilation',
-        false,
+        true,
       ),
     },
   },
