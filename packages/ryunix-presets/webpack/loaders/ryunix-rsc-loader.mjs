@@ -25,7 +25,7 @@ try {
 
   if (_ryx_target && typeof _ryx_target === 'function') {
     if (process.env.RYUNIX_DEBUG) {
-      console.log(`[RSC Loader Execution] Tagging ${_ryx_target.name} with ID ${hash}`);
+      console.log("[RSC Loader Execution] Tagging " + _ryx_target.name + " with ID " + hash);
     }
   }
 } catch (e) { }
