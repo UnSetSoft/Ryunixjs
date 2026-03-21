@@ -55,8 +55,8 @@ export function RyunixDevOverlay(propsOrError) {
         const line = stackLines[i];
         if (!line.includes(':')) continue;
 
-        const v8Match = line.match(/\(([^)]+):(\d+):(\d+)\)/) || line.match(/at\s+([a-zA-Z0-9_.-/]+):(\d+):(\d+)/);
-        const ryunixMatch = line.match(/([a-zA-Z0-9_\-./\\]+\.(ryx|jsx|js|ts|tsx)):(\d+)/);
+        const v8Match = line.match(/\(([^()]+):(\d+):(\d+)\)/) || line.match(/at\s+([^\s:]+):(\d+):(\d+)/);
+        const ryunixMatch = line.match(/([^\s:]+\.(?:ryx|jsx|js|ts|tsx)):(\d+)/);
         
         let matchedPath = null;
         let matchedLine = null;
@@ -203,9 +203,9 @@ export function RyunixDevOverlay(propsOrError) {
                 if (i === 0 && (line.startsWith('Error:') || line.startsWith('TypeError:'))) return null;
                 
                 // Flexible stack line parsing for V8, SpiderMonkey, and Ryunix's format
-                const v8Match = line.match(/^\s*at\s+(.+?)\s+\((.+)\)$/) || line.match(/^\s*at\s+(.+)$/);
-                const ryunixMatch = line.match(/^\s*(.+?)\s+([a-zA-Z0-9_\-./\\]+\.(ryx|jsx|js|ts|tsx):\d+.*)$/);
-                const firefoxMatch = line.match(/^(.+?)@(.+?):\d+:\d+$/);
+                const v8Match = line.match(/^\s*at\s+(\S+)\s+\(([^()]+)\)$/) || line.match(/^\s*at\s+(\S.*)$/);
+                const ryunixMatch = line.match(/^\s*(\S+)\s+([^\s:]+\.(?:ryx|jsx|js|ts|tsx):\d+.*)$/);
+                const firefoxMatch = line.match(/^([^@]+)@([^:]+):\d+:\d+$/);
 
                 let fnName = '<anonymous>';
                 let filePath = line;
