@@ -9,3 +9,4 @@ test
 .pnp.cjs
 .turbo
 text.md
+pnpm-lock.yaml
