@@ -84,11 +84,17 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   state.isHydrating = false
   state.hydrationFailed = false
 
+  // Auto-detect SSR based on child nodes - no need to manually set process.env.RYUNIX_SSR
+  const hasChildNodes = state.containerRoot && state.containerRoot.hasChildNodes()
+
   if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-    console.log(`[Ryunix Debug] init: RYUNIX_SSR=${process.env.RYUNIX_SSR}, hasChildNodes=${state.containerRoot.hasChildNodes()}`);
+    console.log(`[Ryunix Debug] init: hasChildNodes=${hasChildNodes}, has SSR content detected.`);
   }
 
-  if (process.env.RYUNIX_SSR && state.containerRoot.hasChildNodes()) {
+  // Auto-detect: if there's existing content, try to hydrate (SSR)
+  // If explicitly disabled via RYUNIX_SSR=false, skip hydration
+  const ssrEnabled = process.env.RYUNIX_SSR !== 'false'
+  if (hasChildNodes && ssrEnabled) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
       console.log(`[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`);
     }

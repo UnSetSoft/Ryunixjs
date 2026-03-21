@@ -1,6 +1,7 @@
 import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, is, getState } from '../utils/index.js'
 import { camelToKebab, validateUri } from './dom.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
+import { resetIdCounter } from './hooks.js'
 
 export const escapeHtml = (unsafe) => {
   if (typeof unsafe !== 'string') return String(unsafe)
@@ -300,6 +301,9 @@ export const renderToReadableStream = (element, options = {}) => {
   const state = getState()
   const encoder = new TextEncoder()
 
+  // Reset idCounter for deterministic useId values
+  resetIdCounter()
+
   return new ReadableStream({
     async start(controller) {
       const wasServerRendering = state.isServerRendering
@@ -344,6 +348,10 @@ export const renderToString = (element, options = {}) => {
   const wasServerRendering = state.isServerRendering
   state.isServerRendering = true
   state.ssrMetadata = {}
+  
+  // Reset idCounter for deterministic useId values
+  resetIdCounter()
+  
   try {
     return renderToStringImpl(element)
   } finally {

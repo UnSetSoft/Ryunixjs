@@ -69,7 +69,19 @@ const { version } = await getPackageVersion()
 
 const ryunixRequire = createRequire(import.meta.url)
 // Using thread-loader as a reference to find where my-app/node_modules/ryunix-presets/node_modules or .pnpm node_modules are located
-const presetsNodeModules = dirname(dirname(ryunixRequire.resolve('thread-loader/package.json')))
+// But with fallback to handle edge cases
+let presetsNodeModules
+try {
+  presetsNodeModules = dirname(dirname(ryunixRequire.resolve('thread-loader/package.json')))
+} catch (e) {
+  // Fallback: try to resolve from the ryunix-presets package itself
+  try {
+    presetsNodeModules = dirname(ryunixRequire.resolve('@unsetsoft/ryunix-presets/package.json'))
+  } catch (e2) {
+    // Last fallback: use the project's node_modules
+    presetsNodeModules = dirname(resolveApp(dir, 'package.json'))
+  }
+}
 
 // A require() rooted at the user project — resolves user-installed packages (e.g. tailwind, postcss plugins)
 const projectRequire = createRequire(resolveApp(dir, 'package.json'))
@@ -120,7 +132,7 @@ const sharedWebpackConfig = {
       maxSize: 244000,
       cacheGroups: {
         framework: {
-          test: /[\\/]node_modules[\\/](@unsetsoft[\\/]ryunixjs)[\\/]/,
+          test: /[\\/]node_modules[\\/](@unsetsoft[\\/]ryunixjs|ryunix)[\\/]/,
           name: 'framework',
           priority: 40,
           enforce: true,
@@ -554,7 +566,7 @@ const clientConfig = {
       failOnWarning: false,
       failOnError: false,
       configType: 'flat',
-      eslintPath: 'eslint/use-at-your-own-risk',
+      // Let ESLint use its default path resolution instead of a risky custom path
       overrideConfig: eslintConfig,
     }),
     ...getPlugins(false),
@@ -612,7 +624,6 @@ const serverConfig = {
   externals: [
     {
       ryunix: '@unsetsoft/ryunixjs',
-      '@unsetsoft/ryunixjs': '@unsetsoft/ryunixjs',
     },
     ...config.webpack.externals,
   ]

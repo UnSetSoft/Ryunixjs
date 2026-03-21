@@ -792,6 +792,14 @@ const useLayoutEffect = (callback, deps) => {
 let idCounter = 0
 
 /**
+ * Reset the idCounter for useId - call this before each SSR renderToString
+ * to ensure deterministic IDs across multiple renders
+ */
+const resetIdCounter = () => {
+  idCounter = 0
+}
+
+/**
  * useId - Generate a deterministic, unique ID that is stable across SSR and hydration.
  * @returns {string} A unique ID string
  */
@@ -884,6 +892,7 @@ export {
   useHash,
   useMetadata,
   useId,
+  resetIdCounter,
   useDebounce,
   useThrottle,
   useStorePriority,

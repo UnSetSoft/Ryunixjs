@@ -1,3 +1,5 @@
+import { rIC } from '../utils/index.js'
+
 /**
  * Priority levels for updates
  */
@@ -8,8 +10,6 @@ const Priority = {
   LOW: 4, // Analytics
   IDLE: 5, // Background tasks
 }
-
-import { rIC } from '../utils/index.js'
 
 let currentPriority = Priority.NORMAL
 let pendingUpdates = []

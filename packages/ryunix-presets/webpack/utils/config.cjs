@@ -1,6 +1,14 @@
 'use strict'
 const { getConfig } = require('./settingfile.cjs')
-const reactPlugin = require('eslint-plugin-react')
+
+// eslint-plugin-react may not be installed - handle gracefully
+let reactPlugin
+try {
+  reactPlugin = require('eslint-plugin-react')
+} catch (e) {
+  console.warn('[Ryunix] eslint-plugin-react not found. Using default ESLint rules.')
+  reactPlugin = null
+}
 
 const userConfig = getConfig()
 
