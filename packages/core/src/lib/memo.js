@@ -5,18 +5,12 @@
  * @returns {Function} Memoized component
  */
 const memo = (Component, arePropsEqual = shallowEqual) => {
-  let prevProps = null
-  let prevResult = null
-
   const MemoizedComponent = (props) => {
-    if (prevProps && arePropsEqual(prevProps, props)) {
-      return prevResult
-    }
-    prevProps = props
-    prevResult = Component(props)
-    return prevResult
+    return Component(props)
   }
-
+  MemoizedComponent._isMemo = true
+  MemoizedComponent._wrappedComponent = Component
+  MemoizedComponent._arePropsEqual = arePropsEqual
   MemoizedComponent.displayName = `Memo(${Component.displayName || Component.name || 'Component'})`
   return MemoizedComponent
 }

@@ -80,14 +80,12 @@ const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPri
 
     if (!activeRoot) return
 
-    currentState.wipRoot = {
+    const newRoot = {
       dom: activeRoot.dom,
       props: activeRoot.props,
       alternate: currentState.currentRoot || null,
     }
-    currentState.deletions = []
-    currentState.hookIndex = 0
-    queueUpdate(() => scheduleWork(currentState.wipRoot, priority))
+    queueUpdate(() => scheduleWork(newRoot, priority))
   }
 
   wipFiber.hooks[hookIndex] = hook

@@ -14,6 +14,21 @@ const updateFunctionComponent = (fiber) => {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
   }
 
+  // Memo bailout: skip re-render if props haven't changed
+  if (fiber.type._isMemo && fiber.alternate) {
+    const { children: _pc, ...prevRest } = fiber.alternate.props || {}
+    const { children: _nc, ...nextRest } = fiber.props || {}
+    if (fiber.type._arePropsEqual(prevRest, nextRest)) {
+      fiber.hooks = fiber.alternate.hooks
+      const oldChild = fiber.alternate.child
+      if (oldChild) {
+        oldChild.parent = fiber
+        fiber.child = oldChild
+      }
+      return
+    }
+  }
+
   let children = [fiber.type(fiber.props)]
 
   if (fiber.type._contextId && fiber.props.value !== undefined) {
