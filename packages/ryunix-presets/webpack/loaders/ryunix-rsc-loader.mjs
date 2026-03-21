@@ -54,8 +54,16 @@ export default function (content) {
   const isServerDirective = content.includes('//@server') || content.includes('// @server');
   const isClientDirective = content.includes('//@client') || content.includes('// @client');
 
-  // Get build target - 'node' for server, 'web' for client
-  const target = this.target || 'web';
+  // Get build target from compiler - 'node' for server, 'web' for client
+  // Check this._compiler.target or this.target
+  const compiler = this._compiler;
+  let target = this.target || (compiler && compiler.options && compiler.options.target);
+  
+  // Default to 'web' if not found
+  if (!target) {
+    target = 'web';
+  }
+  
   const isServerBuild = target === 'node';
   
   // Filter out client/server specific code based on directives
