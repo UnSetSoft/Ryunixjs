@@ -53,9 +53,9 @@ const StartServer = async (cliSettings) => {
   const mode =
     cliSettings.production || defaultSettings.webpack.production ? true : false
 
-  if (!mode) {
-    cleanCacheDir(cacheDir)
-  }
+  // Cache is managed by webpack's cache.version (ENV_HASH).
+  // It auto-invalidates when config or env changes.
+  // Only clean cache explicitly via `ryunix clean` command.
 
   const clientConfig = Array.isArray(webpackConfig) ? webpackConfig.find(c => c.name === 'client') || webpackConfig[0] : webpackConfig
 

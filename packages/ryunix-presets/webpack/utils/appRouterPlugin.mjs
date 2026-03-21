@@ -7,6 +7,7 @@ class AppRouterPlugin {
     this.outputPath = options.outputPath || '.ryunix/server/app/app-router.js';
     this.ssgOutputPath = options.ssgOutputPath || null;
     this.debug = options.debug || false;
+    this._fileCache = new Map();
   }
 
   apply(compiler) {
@@ -31,7 +32,8 @@ class AppRouterPlugin {
 
         if (newestMtime > lastScanTime || !lastRoutes) {
           const routes = this.scanDirectory(appDirPath, '');
-          this.generateRouterFile(routes, path.resolve(process.cwd(), this.outputPath));
+          const isDev = compiler.options.mode !== 'production';
+          this.generateRouterFile(routes, path.resolve(process.cwd(), this.outputPath), isDev);
           lastScanTime = newestMtime;
           lastRoutes = routes;
         }
@@ -86,7 +88,17 @@ class AppRouterPlugin {
         let name = base;
 
         const fullPath = path.join(dir, entry.name).replace(/\\/g, '/');
-        const content = fs.readFileSync(fullPath, 'utf8');
+
+        // Only re-read file if mtime changed (skip I/O on HMR rebuilds)
+        const stat = fs.statSync(fullPath);
+        let cached = this._fileCache.get(fullPath);
+        let content;
+        if (cached && cached.mtime >= stat.mtimeMs) {
+          content = cached.content;
+        } else {
+          content = fs.readFileSync(fullPath, 'utf8');
+          this._fileCache.set(fullPath, { mtime: stat.mtimeMs, content });
+        }
 
         // Robust directive detection using regex
         let isServer = base.endsWith('.server') || /^\s*\/\/\s*@server/im.test(content);
@@ -179,7 +191,7 @@ class AppRouterPlugin {
     return node;
   }
 
-  generateRouterFile(routeNode, outputPath) {
+  generateRouterFile(routeNode, outputPath, isDev = false) {
     const generate = (isServerBuild) => {
       let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`;
       let componentIdCounter = 0;
@@ -216,7 +228,12 @@ class AppRouterPlugin {
             return { id, isServerComponent: true, isAsync, isProxy: true };
           }
 
-          importStatements += `import * as ${id} from '${this.getRelativeImport(compPath, outputPath)}';\n`;
+          const relPath = this.getRelativeImport(compPath, outputPath);
+          if (isDev && !isServerBuild) {
+            importStatements += `const ${id} = { _lazy: true, _load: () => import('${relPath}') };\n`;
+          } else {
+            importStatements += `import * as ${id} from '${relPath}';\n`;
+          }
           return { id, isServerComponent: !!componentObj.serverPath, isAsync };
         };
 
@@ -323,7 +340,22 @@ class AppRouterPlugin {
   assembleFileContent(importStatements, flattenedRoutes) {
     return `/* AUTO-GENERATED APP ROUTER */
 ${importStatements}
-const getOptExport = (mod, key) => mod ? mod[key] : undefined;
+const _cache = new Map();
+const getOptExport = (mod, key) => {
+  if (!mod) return undefined;
+  if (mod._lazy) {
+    if (key === 'default') {
+      if (!_cache.has(mod)) {
+        _cache.set(mod, Ryunix.lazy(mod._load));
+      }
+      return _cache.get(mod);
+    }
+    // Async metadata is not supported synchronously during initial lazy load, 
+    // but the client will fetch it when the chunk resolves
+    return undefined;
+  }
+  return mod[key];
+};
 
 const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
   const [content, setContent] = useStore(null);

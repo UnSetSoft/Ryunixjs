@@ -119,37 +119,41 @@ const entryPoint = hasAppDir
 
 const sharedWebpackConfig = {
   experiments: {
-    lazyCompilation: config.webpack.experiments.lazyCompilation,
+    lazyCompilation: !config.webpack.production && !config.ssr && config.webpack.experiments.lazyCompilation
+      ? { entries: false, imports: true }
+      : false,
   },
   context: resolveApp(dir, config.rootDir),
-  devtool: config.webpack.production ? false : 'source-map',
+  devtool: config.webpack.production ? false : 'eval-source-map',
   optimization: {
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
-    splitChunks: {
-      chunks: 'all',
-      minSize: 20000,
-      maxSize: 244000,
-      cacheGroups: {
-        framework: {
-          test: /[\\/]node_modules[\\/](@unsetsoft[\\/]ryunixjs|ryunix)[\\/]/,
-          name: 'framework',
-          priority: 40,
-          enforce: true,
-        },
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          priority: 20,
-        },
-        common: {
-          name: 'commons',
-          minChunks: 2,
-          priority: 10,
-          reuseExistingChunk: true,
+    splitChunks: config.webpack.production
+      ? {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          cacheGroups: {
+            framework: {
+              test: /[\\/]node_modules[\\/](@unsetsoft[\\/]ryunixjs|ryunix)[\\/]/,
+              name: 'framework',
+              priority: 40,
+              enforce: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: 20,
+            },
+            common: {
+              name: 'commons',
+              minChunks: 2,
+              priority: 10,
+              reuseExistingChunk: true,
+            }
+          },
         }
-      },
-    },
+      : false,
     minimize: config.webpack.production === true,
     minimizer: config.webpack.production
       ? [
@@ -695,8 +699,8 @@ const clientConfig = {
       outputPath: resolveApp(dir, `${config.buildDir}/server/api`),
       debug: config.debug
     }),
-    // ESLintPlugin - excluding MDX and MD files
-    new ESLintPlugin({
+    // ESLint runs only in production builds. In dev, use `ryunix lint` command instead.
+    config.webpack.production && new ESLintPlugin({
       cwd: dir,
       files: ['**/*.ryx', ...config.eslint.files],
       extensions: ['js', 'ryx', 'jsx'],
