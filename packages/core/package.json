@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.2.5-canary.0",
+  "version": "1.2.5-canary.1",
   "license": "MIT",
   "main": "./dist/Ryunix.umd.js",
   "module": "./dist/Ryunix.esm.js",
