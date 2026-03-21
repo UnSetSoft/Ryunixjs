@@ -23,6 +23,22 @@ function performUnitOfWork(fiber) {
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('[Ryunix ErrorBoundary] Caught error during render:', error)
+      
+      try {
+        // Attempt to attach original JSX source map for DevOverlay lookup
+        const src = fiber.props && fiber.props.__source;
+        if (src && error && typeof error === 'object') {
+          error.__ryunix_source = src;
+        }
+        
+        let targetFiber = fiber;
+        while (!error.__ryunix_source && targetFiber) {
+           if (targetFiber.props && targetFiber.props.__source) {
+             error.__ryunix_source = targetFiber.props.__source;
+           }
+           targetFiber = targetFiber.parent;
+        }
+      } catch(e) {}
     }
 
     // Traverse upwards to find nearest ErrorBoundary

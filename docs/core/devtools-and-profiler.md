@@ -1,28 +1,28 @@
-# Ryunix DevTools & Profiling
+# RyunixJS DevTools & Performance Profiler
 
-Ryunix includes zero-cost runtime utilities (`devtools.js` & `profiler.js`) that safely compile out of production builds but provide immense insight during development.
+Ryunix incorporates an internal diagnostics subsystem strictly enabled when `process.env.NODE_ENV !== 'production'`. These files provide developers with immediate CLI runtime warnings and precision performance tracking without downloading external browser extensions.
 
-## Developer Utilities
+---
 
-### Hook Context Validation
-The `validateHookContext()` forces runtime invariants. If a developer attempts to call a Hook (like `useStore`) outside of the render cycle or in a standard JS closure, it explicitly checks if `state.wipFiber` exists, throwing an immediate stack trace before Ryunix enters an undefined state.
+## 1. Developer Tooling (`devtools.js`)
 
-### Deprecation & Warning Logging
-Smart runtime loggers `warning(condition, message)` and `deprecated(oldAPI, newAPI, version)` only trigger when `process.env.NODE_ENV !== 'production'`, keeping the application logic pristine.
+Provides unified generic console interception layers.
+- **`warning(condition, message)` / `error(message)` / `deprecated()`**: Strictly gated wrappers around the native `console` API. They aggressively tree-shake themselves out of the production bundle cleanly returning `undefined`.
+- **`validateHookContext(hookName)`**: Injected into every single hook initialize call (`useStore`, `useEffect`, etc.). It queries `getState().wipFiber`. If a fiber is not actively rendering, it throws an explicit error protecting developers from invoking hooks inside standard asynchronous JS closures globally.
+- **`getComponentName()`**: Evaluates `<Component />` function tags safely returning `anonymous` fallback text to prevent crashes when graphing the Virtual DOM internally.
 
-## Performance Profiler
+---
 
-The singleton `Profiler` class uses the high-resolution `performance.now()` Web API.
+## 2. In-Memory Performance Profiler (`profiler.js`)
 
-### Recording Render Cycles
-In development, component lifecycle metrics are funneled through the Profiler.
-- It buffers the last `100` (`maxSamples`) render records.
-- Extracts standard metrics: Average, Min, Max, and Total render timings.
+Unlike standard Webpack profilers, Ryunix measures component rendering times fundamentally from within the exact `requestIdleCallback` V-DOM thread boundaries.
 
-### Hooks & HOCs
+### `Profiler` Core Runtime
+A global class instance caching the execution durations within a `measures: Map` utilizing the native `performance.now()` API to capture exact microsecond resolutions.
+- Re-renders are stored internally within a fixed `maxSamples = 100` length circular buffer array to prevent memory bloat over prolonged debugging sessions.
+- **`logStats()`**: Fires a compiled report strictly to the Browser console summarizing the `count`, `avg`, `min`/`max` timings, and dynamically calculating the `getSlowestComponents(limit = 10)` to physically narrow down bottlenecked components easily.
 
-- **`useProfiler(componentName)`**: A hook that starts a timer on initialization and ends it when the component function physically returns.
-- **`withProfiler(Component, name)`**: A Higher-Order Component wrap that intercepts props and calculates the full execution time, piping it safely to `recordRender()`.
-
-### Diagnostics
-By accessing the CLI or DevTools bridges to execute `profiler.logStats()`, the compiler neatly groups and calculates the "Top 5 Slowest performing components", enabling developers to quickly isolate bottlenecks caused by deep trees or un-memoized calculations.
+### Component Wrappers
+Ryunix exposes developer-facing integrations to plug specific components into the Profiler pipeline dynamically.
+- **`withProfiler(Component, name)`**: A Higher-Order Component returning a function that inherently calls `profiler.startMeasure(name)` precisely before evaluation and `profiler.endMeasure()` immediately afterward.
+- **`useProfiler(componentName)`**: A declarative Hook. Initiating it maps a timestamp. Returning the inner closure executes the differential calculus safely reporting the delta execution `duration` synchronously back to the `profiler.recordRender` pipeline.

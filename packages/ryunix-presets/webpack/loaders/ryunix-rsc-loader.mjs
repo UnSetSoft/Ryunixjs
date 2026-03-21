@@ -20,15 +20,11 @@ function filterClientServerDirectives(source, target) {
   const clientDirectiveMatch = source.match(/^\s*\/\/\s*@client/m);
   const serverDirectiveMatch = source.match(/^\s*\/\/\s*@server/m);
   
-  // If file is marked @client and we're building for server, return empty
-  if (clientDirectiveMatch && isServerBuild) {
-    return '// This file is client-only';
-  }
+  // (Removed check that used to strip @client component directives)
   
-  // If file is marked @server and we're building for client, return empty
-  if (serverDirectiveMatch && !isServerBuild) {
-    return '// This file is server-only';
-  }
+  // NOTE: We don't strip @server files here anymore!
+  // The ryunix-server-action-loader will handle generating proxies for client builds
+  // and stripping other server code.
   
   // Handle block-level directives with markers like // #__SERVER__ ... // #__END_SERVER__
   // or /* @server ... @server */
@@ -77,15 +73,13 @@ export default function (content) {
   
   const isServerBuild = target === 'node';
 
-  // EARLY RETURN: If building for server and file has @client directive, return empty
-  if (isServerBuild && hasClientDirective) {
-    return '// This file is client-only';
-  }
+  // NOTE: We used to strip @client files on the server build here, 
+  // but this breaks traditional SSR and causes imported server actions 
+  // to be dead-code eliminated from the server bundle.
+  // We now let client components execute on the server to generate initial HTML.
   
-  // EARLY RETURN: If building for client and file has @server directive, return empty  
-  if (!isServerBuild && hasServerDirective) {
-    return '// This file is server-only';
-  }
+  // NOTE: If building for client and file has @server directive, we DO NOT return empty.
+  // The ryunix-server-action-loader will generate the proxies and strip other code.
   
   // If server build and has @server directive, just return content (no hooks processing)
   if (isServerBuild && hasServerDirective) {

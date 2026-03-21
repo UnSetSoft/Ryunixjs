@@ -181,7 +181,7 @@ class AppRouterPlugin {
 
   generateRouterFile(routeNode, outputPath) {
     const generate = (isServerBuild) => {
-      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary } from '@unsetsoft/ryunixjs';\n`;
+      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`;
       let componentIdCounter = 0;
       const getNextId = () => componentIdCounter++;
       const flattenedRoutes = [];
@@ -511,11 +511,22 @@ const RouteWrapperRender = ({ layouts, index, props, loading, error }) => {
 const routes = [${flattenedRoutes.join(',\n')}];
 
 export default function AppRouter() {
-  return (
+  const isDev = process.env.NODE_ENV !== 'production';
+  const content = (
     <Ryunix.RouterProvider routes={routes}>
       <Ryunix.Children />
     </Ryunix.RouterProvider>
   );
+
+  if (isDev) {
+    return (
+      <Ryunix.ErrorBoundary fallback={RyunixDevOverlay}>
+        {content}
+      </Ryunix.ErrorBoundary>
+    );
+  }
+
+  return content;
 }
 `;
   }

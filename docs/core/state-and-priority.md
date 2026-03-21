@@ -1,37 +1,50 @@
-# Ryunix State and Priority Scheduling
+# RyunixJS State & Priority Queue Architecture
 
-Ryunix introduces a smart priority-based scheduling system on top of its state dispatcher, ensuring that critical user interactions do not drop frames while heavy renders execute.
+Ryunix features a customized priority-based batching engine that controls exactly *when* the virtual DOM re-evaluates specific components.
 
-## Priority Levels
+By organizing updates asynchronously, Ryunix guarantees that high-priority user interactions (typing, clicking) interrupt and suspend low-priority work (data fetching, background syncs).
 
-The `Priority` enum (`priority.js`) defines five tiers of urgency:
-- `IMMEDIATE (1)`: User input (typing, clicks, drags).
-- `USER_BLOCKING (2)`: Hover events, fast scrolls.
-- `NORMAL (3)`: Data fetching finishes, generic state updates.
-- `LOW (4)`: Analytics events, prefetching data.
-- `IDLE (5)`: Off-screen background tasks.
+---
 
-## Priority Scheduling
+## 1. Batching (`batching.js`)
 
-### `scheduleUpdate(callback, priority)`
-Pushes a state update and its urgency into the `pendingUpdates` queue. Uses `requestIdleCallback` (rIC) to flush updates when the main thread isn't busy.
+State updates in Ryunix are batched by default to drastically reduce unnecessary render cycles.
 
-### `processPendingUpdates(deadline)`
-Sorts the update queue based on priority (`a.priority - b.priority`). It pulls the highest priority task and executes it. 
+### The Problem
+If a component invokes `setState(1)`, `setState(2)`, and `setState(3)` consecutively within a synchronous block, a naive framework triggers 3 complete Fiber tree traversals.
 
-### `runWithPriority(priority, callback)`
-Temporarily elevates the context priority while executing the callback, then restores the previous priority.
-
-## Hook Implementations
-
-- **`useStorePriority`**: A low-level dispatcher that wraps `useReducer`. It delegates the dispatch queueing to `scheduleUpdate`.
-- **`useTransition`**: Leverages `useStorePriority`. It dispatches the pending state (`isPending = true`) as `IMMEDIATE`, but immediately schedules the actual work (the callback) as `LOW` priority, yielding the main thread.
-- **`useDeferredValue`**: Leverages a 100ms debouncing `setTimeout` alongside `Priority.LOW` to delay re-rendering expensive calculated text/data.
-
-## Update Batching
+### The Solution: `queueUpdate(update)`
+When `dispatch` is called internally by `useStore` or `useReducer`, it does not directly kick off the Work Loop.
+Instead, it inserts the work scheduling closure into `pendingUpdates.push(update)`.
 
 ### `batchUpdates(callback)`
-Found in `batching.js`, this groups multiple synchronous state updates into a single render cycle.
+When Ryunix executes Synthetic Events (e.g. `onClick`), it automatically envelops the handler inside `batchUpdates`.
+1. Flags `isBatching = true`.
+2. Evaluates the handler logic. Any subsequent renders are intercepted and strictly queued.
+3. Once the synchronous execution finishes, it safely unsets the flag and executes `flushUpdates()` traversing the queue as a single consolidated commit.
 
-- When `isBatching` is strictly true, standard `queueUpdate()` calls are intercepted and stalled in a `pendingUpdates` array.
-- Upon completion of the callback, the finally block resolves `flushUpdates()`, mapping through the queued updates and triggering a single `scheduleWork()` tree recalculation.
+---
+
+## 2. Priority Scheduling (`priority.js`)
+
+Not all state updates carry the same urgency.
+
+### Priority Levels
+
+1. **`IMMEDIATE`**: Direct user input that strictly dictates physical interactivity (Keys pressed, mouse tracking).
+2. **`USER_BLOCKING`**: Responsive actions where a user expects instant visual feedback but the browser won't crash if heavily delayed (Scrolling, Hover animations).
+3. **`NORMAL`**: The default fallback. Standard data fetches, route navigations.
+4. **`LOW`**: Background state derivations or analytical tracking processes.
+5. **`IDLE`**: Actions safely pushed off to completely idle browser cycles.
+
+### `scheduleUpdate(callback, priority)`
+Pushes an update wrapper containing a numeric `priority` flag into `pendingUpdates`.
+
+### `processPendingUpdates(deadline)`
+Ryunix utilizes `requestIdleCallback(processPendingUpdates)` (rIC). When the browser signals that it holds an idle CPU frame, Ryunix executes:
+1. `pendingUpdates.sort((a, b) => a.priority - b.priority)`: The arrays are re-ordered dynamically so `IMMEDIATE` and `USER_BLOCKING` jobs jump to the very front of the queue.
+2. The loop consumes updates exactly in priority sequence, terminating aggressively if `deadline.timeRemaining()` indicates the 16ms framing window is exhausted to avoid dropping visual frames.
+
+### `useTransition` and `useDeferredValue`
+These hooks expose the internal priority scheduler to developers.
+Calling state updates wrapped inside a transition explicitly downgrades their execution flag to `Priority.LOW`. This enforces that subsequent rapid typing inputs (`Priority.IMMEDIATE`) repeatedly preempt and cancel the background rendering of heavy lists.

@@ -107,7 +107,7 @@ const renderToStringImpl = (element) => {
       if (value) {
         attributes += ` class="${escapeHtml(value)}"`
       }
-    } else if (!key.startsWith('on')) { // Ignore event listeners
+    } else if (!key.startsWith('on') && key !== '__source' && key !== '__self') {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
@@ -267,7 +267,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       if (value) {
         attributes += ` class="${escapeHtml(value)}"`
       }
-    } else if (!key.startsWith('on')) {
+    } else if (!key.startsWith('on') && key !== '__source' && key !== '__self') {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
@@ -316,7 +316,7 @@ export const renderToReadableStream = (element, options = {}) => {
       try {
         // 0. Inject RC helper script first
         const nonceAttr = options.nonce ? ` nonce="${options.nonce}"` : ''
-        push(`<script${nonceAttr}>${RC_SCRIPT}</script>`)
+        push(`<script${nonceAttr} data-ryunix-ssr>${RC_SCRIPT}</script>`)
 
         // 1. Render initial tree (with fallbacks)
         await renderToStreamImpl(element, push, suspenseTasks)
@@ -328,8 +328,8 @@ export const renderToReadableStream = (element, options = {}) => {
           const task = suspenseTasks.shift()
           const res = await task
           if (res.success) {
-            push(`<template id="P:${res.id}">${res.content}</template>`)
-            push(`<script${nonceAttr}>$RC("S:${res.id}", "P:${res.id}")</script>`)
+            push(`<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`)
+            push(`<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`)
           }
         }
 
