@@ -51,8 +51,8 @@ function filterClientServerDirectives(source, target) {
 }
 
 export default function (content) {
-  const isServerDirective = content.includes('//@server') || content.includes('// @server');
-  const isClientDirective = content.includes('//@client') || content.includes('// @client');
+  const hasServerDirective = content.includes('//@server') || content.includes('// @server');
+  const hasClientDirective = content.includes('//@client') || content.includes('// @client');
 
   // Get build target from compiler - 'node' for server, 'web' for client
   // Try multiple ways to determine target
@@ -76,20 +76,31 @@ export default function (content) {
   }
   
   const isServerBuild = target === 'node';
+
+  // EARLY RETURN: If building for server and file has @client directive, return empty
+  if (isServerBuild && hasClientDirective) {
+    return '// This file is client-only';
+  }
   
-  // Filter out client/server specific code based on directives
-  content = filterClientServerDirectives(content, target);
-
-  // Auto-detection: Use hooks = Client (only for server builds without explicit directives)
-  const hasHooks = /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(content);
-
-  // If file has explicit @server directive, don't inject RSC code even if hooks present
-  if (isServerBuild && isServerDirective) {
+  // EARLY RETURN: If building for client and file has @server directive, return empty  
+  if (!isServerBuild && hasServerDirective) {
+    return '// This file is server-only';
+  }
+  
+  // If server build and has @server directive, just return content (no hooks processing)
+  if (isServerBuild && hasServerDirective) {
     return content;
   }
+  
+  // Filter out client/server specific code based on directives (for block-level directives)
+  content = filterClientServerDirectives(content, target);
 
-  // Add RSC optimization marker for client components (when hooks present on server build)
-  if (!isServerDirective && (isClientDirective || (!isServerBuild && hasHooks))) {
+  // Auto-detection: Use hooks = Client (only for server builds)
+  // Only check for hooks when building for server
+  const hasHooks = isServerBuild && /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(content);
+
+  // Add RSC optimization marker for client components on server build
+  if (isServerBuild && hasHooks) {
     const hash = crypto.createHash('md5').update(this.resourcePath).digest('hex').slice(0, 8);
 
     // Improved injection: handle export default more safely
