@@ -1,6 +1,6 @@
 import { commitRoot } from './commits.js'
 import { updateFunctionComponent, updateHostComponent } from './components.js'
-import { getState, rIC, nextValidSibling, getTypeLabel } from '../utils/index.js'
+import { getState, rIC, nextValidSibling } from '../utils/index.js'
 import { getCurrentPriority, Priority } from './priority.js'
 import { profiler } from './profiler.js'
 import { setScheduleWork } from './bridge.js'
@@ -140,7 +140,7 @@ const workLoop = (deadline) => {
   }
 }
 
-// ... performUnitOfWork stays same ...
+
 
 const scheduleWork = (root, priority = getCurrentPriority()) => {
   const state = getState()

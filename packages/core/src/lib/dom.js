@@ -303,21 +303,6 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
 }
 
 
-/**
- * Remove DOM element safely
- * @param {HTMLElement} dom - DOM element to remove
- */
-const removeDom = (dom) => {
-  try {
-    if (dom && dom.parentNode) {
-      dom.parentNode.removeChild(dom)
-    }
-  } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('Error removing DOM element:', error)
-    }
-  }
-}
 
 /**
  * Clear all children from a DOM element
@@ -335,7 +320,6 @@ export {
   updateDom,
   applyStyles,
   applyClasses,
-  removeDom,
   camelToKebab,
   clearContainer,
 }

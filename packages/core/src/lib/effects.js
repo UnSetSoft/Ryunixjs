@@ -32,17 +32,6 @@ const isNew = (prev, next) => (key) => {
  */
 const isGone = (next) => (key) => !(key in next)
 
-/**
- * Check if dependencies array has changed
- * @param {Array} prevDeps - Previous dependencies
- * @param {Array} nextDeps - Next dependencies
- * @returns {boolean}
- */
-const haveDepsChanged = (prevDeps, nextDeps) => {
-  if (!prevDeps || !nextDeps) return true
-  if (prevDeps.length !== nextDeps.length) return true
-  return prevDeps.some((dep, index) => !Object.is(dep, nextDeps[index]))
-}
 
 /**
  * Cancel effects for a single fiber
@@ -99,105 +88,11 @@ const cancelEffectsDeep = (fiber) => {
   if (fiber.sibling) cancelEffectsDeep(fiber.sibling)
 }
 
-/**
- * Run effects for a fiber
- * @param {Object} fiber - Fiber node
- */
-const runEffects = (fiber) => {
-  if (!fiber?.hooks?.length) return
-
-  for (let i = 0; i < fiber.hooks.length; i++) {
-    const hook = fiber.hooks[i]
-
-    if (hook.type === RYUNIX_TYPES.RYUNIX_EFFECT && is.function(hook.effect)) {
-      // Cancel previous cleanup if exists
-      if (is.function(hook.cancel)) {
-        try {
-          hook.cancel()
-        } catch (error) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.error('Error in effect cleanup:', error)
-          }
-        }
-      }
-
-      // Run new effect
-      try {
-        const cleanup = hook.effect()
-
-        // Store cleanup function if returned
-        if (is.function(cleanup)) {
-          hook.cancel = cleanup
-        } else {
-          hook.cancel = null
-        }
-      } catch (error) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Error in effect:', error)
-        }
-        hook.cancel = null
-      }
-
-      // Clear effect reference after running
-      hook.effect = null
-    }
-  }
-}
-
-let isBatchingEffects = false
-let pendingEffectCallbacks = []
-
-/**
- * Batch multiple effect operations for performance.
- * Effects queued during the batch are flushed together after the callback completes.
- * @param {Function} callback - Callback containing effect operations
- */
-const batchEffects = (callback) => {
-  const wasBatching = isBatchingEffects
-  isBatchingEffects = true
-
-  try {
-    callback()
-  } finally {
-    isBatchingEffects = wasBatching
-
-    if (!isBatchingEffects && pendingEffectCallbacks.length > 0) {
-      const effects = pendingEffectCallbacks
-      pendingEffectCallbacks = []
-      effects.forEach((fn) => {
-        try {
-          fn()
-        } catch (error) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.error('Error in batched effect:', error)
-          }
-        }
-      })
-    }
-  }
-}
-
-/**
- * Queue an effect to be run. If we're inside a batch, it's deferred.
- * @param {Function} fn - Effect function
- */
-const queueEffect = (fn) => {
-  if (isBatchingEffects) {
-    pendingEffectCallbacks.push(fn)
-  } else {
-    fn()
-  }
-}
-
 export {
-  runEffects,
   cancelEffects,
   cancelEffectsDeep,
   isEvent,
   isProperty,
   isNew,
   isGone,
-  haveDepsChanged,
-  batchEffects,
-  queueEffect,
 }

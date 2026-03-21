@@ -1,4 +1,4 @@
-import { createDom, clearContainer } from './dom.js'
+import { createDom } from './dom.js'
 import { reconcileChildren } from './reconciler.js'
 import { getState, RYUNIX_TYPES, EFFECT_TAGS, nextValidSibling } from '../utils/index.js'
 import { createElement } from './createElement.js'
