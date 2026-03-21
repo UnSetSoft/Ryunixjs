@@ -448,8 +448,26 @@ const findRoute = (routes, path) => {
  * `value` prop set to `contextValue`, and wrapping the `children` within a `Fragment`.
  */
 const RouterProvider = ({ routes, children }) => {
+  // SSR: Return server-safe version without hooks
+  if (typeof window === 'undefined') {
+    const location = '/'
+    const currentRouteData = findRoute(routes, location) || {}
+    const contextValue = {
+      location,
+      params: currentRouteData.params || {},
+      query: {},
+      navigate: () => {},
+      route: currentRouteData.route,
+    }
+    return createElement(
+      RouterContext.Provider,
+      { value: contextValue },
+      Fragment({ children }),
+    )
+  }
+
   const [location, setLocation] = useStore(
-    typeof window !== 'undefined' ? window.location.pathname : '/'
+    window.location.pathname
   )
 
   useEffect(() => {
