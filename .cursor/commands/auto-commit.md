@@ -115,7 +115,7 @@ EOF
 3. `git status` para verificar.
 4. Si un **hook** rechaza el commit: corregir y **nuevo** commit; no `--no-verify` salvo petición explícita.
 5. **Sin** `Co-authored-by:` ni firmas de IA (ver `.cursor/rules/git-commits.mdc`).
-6. Si el entorno insertó `Co-authored-by: Cursor` o `Claude` y el commit **no está pusheado**, enmendar sin esa línea.
+6. Si Cursor insertó `Co-authored-by: Cursor` y el commit **no está pusheado**, reescribir con `git commit-tree` (ver `.cursor/rules/git-commits.mdc`); `git commit --amend` **no** quita el trailer en Cursor.
 
 ## Verificación antes de PR
 
