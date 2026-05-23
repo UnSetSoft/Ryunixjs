@@ -63,7 +63,8 @@ concreto.
 | Documento                                                              | Tema                                                                     |
 | :--------------------------------------------------------------------- | :----------------------------------------------------------------------- |
 | [guia-del-repositorio.md](./guias/guia-del-repositorio.md)             | Qué es RyunixJS, estructura, comandos. **Punto de entrada tras clonar.** |
-| [guia-de-pruebas.md](./guias/guia-de-pruebas.md)                       | Tests, lint, `pnpm run:web`, comprobaciones por paquete.                 |
+| [tests-automatizados.md](./guias/tests-automatizados.md)               | Jest en core, `pnpm test`, `pnpm lint`, CRA manual.                      |
+| [app-de-integracion-local.md](./guias/app-de-integracion-local.md)     | App Ryunix en `test/webpack` con `workspace:*` y `pnpm run:web`.         |
 | [pila-tecnologica-y-scripts.md](./guias/pila-tecnologica-y-scripts.md) | Tecnologías y scripts `pnpm` raíz (asistido por IA).                     |
 
 ---
@@ -121,9 +122,10 @@ Scaffolder oficial (`npx @unsetsoft/cra`) y plantillas de proyecto.
 
    y cómo encajan las piezas.
 
-2. [Guía de pruebas](./guias/guia-de-pruebas.md) — tests automatizados,
+2. [Tests automatizados](./guias/tests-automatizados.md) y
+   [app de integración](./guias/app-de-integracion-local.md) — Jest/lint y
 
-   `pnpm run:web` y validación por paquete.
+   validación en navegador con `workspace:*`.
 
 3. [core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) — cómo se
 

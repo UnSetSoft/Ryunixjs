@@ -62,7 +62,8 @@ single package.
 | Document                                                        | Topic                                                                         |
 | :-------------------------------------------------------------- | :---------------------------------------------------------------------------- |
 | [repository-guide.md](./guides/repository-guide.md)             | What RyunixJS is, repo layout, useful commands. **Start here after cloning.** |
-| [testing-guide.md](./guides/testing-guide.md)                   | Tests, lint, `pnpm run:web`, per-package checks.                              |
+| [automated-testing.md](./guides/automated-testing.md)           | Jest in core, `pnpm test`, `pnpm lint`, manual CRA checks.                    |
+| [local-integration-app.md](./guides/local-integration-app.md)   | Ryunix app in `test/webpack` with `workspace:*` and `pnpm run:web`.           |
 | [tech-stack-and-scripts.md](./guides/tech-stack-and-scripts.md) | Technologies and root `pnpm` scripts (AI-assisted).                           |
 
 ---
@@ -120,9 +121,10 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 
    how pieces connect.
 
-2. [Testing guide](./guides/testing-guide.md) — automated tests, `pnpm run:web`,
+2. [Automated testing](./guides/automated-testing.md) and
+   [local integration app](./guides/local-integration-app.md) — Jest/lint and
 
-   and per-package verification.
+   browser validation with `workspace:*`.
 
 3. [core/virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md)
 

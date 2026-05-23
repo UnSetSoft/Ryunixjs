@@ -104,7 +104,7 @@ convention for your branches:
 - **Verification**: Ensure tests and linting pass (`pnpm run test` and
 
   `pnpm run lint`) before submitting. Per-package details:
-  [docs/en/guides/testing-guide.md](docs/en/guides/testing-guide.md).
+  [docs/en/guides/automated-testing.md](docs/en/guides/automated-testing.md).
 
 ## 🚀 Release Flow
 

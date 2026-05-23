@@ -176,7 +176,8 @@ Typical maintainer flow: `pnpm install` → create `test/webpack` once →
 `pnpm build` → **`pnpm run:web`** → rebuild core or restart dev server when
 needed.
 
-See [testing guide](./testing-guide.md) for setup and per-package checks.
+See [automated testing](./automated-testing.md) and
+[local integration app](./local-integration-app.md) for setup and checks.
 
 ### Useful commands
 
@@ -195,7 +196,8 @@ pnpm dev        # Turbo: CRA CLI only today, not a web app
 
 | Topic              | Link                                                                                         |
 | :----------------- | :------------------------------------------------------------------------------------------- |
-| Testing guide      | [testing-guide.md](./testing-guide.md)                                                       |
+| Automated testing  | [automated-testing.md](./automated-testing.md)                                               |
+| Integration app    | [local-integration-app.md](./local-integration-app.md)                                       |
 | Technical overview | [docs/en/overview.md](./overview.md)                                                         |
 | Virtual DOM        | [docs/en/core/virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md)   |
 | Hooks              | [docs/en/core/hooks.md](./core/hooks.md)                                                     |

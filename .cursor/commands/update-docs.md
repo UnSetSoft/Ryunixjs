@@ -26,7 +26,8 @@ Paridad Claude Code: `.claude/commands/update-docs.md` (`/update-docs`).
 Ejemplos:
 
 ```text
-/update-docs docs/es/guias/guia-de-pruebas.md     → actualiza docs/en/guides/testing-guide.md
+/update-docs docs/es/guias/tests-automatizados.md → actualiza docs/en/guides/automated-testing.md
+/update-docs docs/es/guias/app-de-integracion-local.md → actualiza docs/en/guides/local-integration-app.md
 /update-docs docs/en/guides/repository-guide.md    → actualiza docs/es/guias/guia-del-repositorio.md
 /update-docs README.es.md                   → actualiza README.md
 ```
@@ -74,7 +75,8 @@ Al inicio de cada doc bilingüe global, usar **exactamente** este formato:
 | :--- | :--- |
 | `docs/en/overview.md` | `docs/es/resumen.md` |
 | `docs/en/guides/repository-guide.md` | `docs/es/guias/guia-del-repositorio.md` |
-| `docs/en/guides/testing-guide.md` | `docs/es/guias/guia-de-pruebas.md` |
+| `docs/en/guides/automated-testing.md` | `docs/es/guias/tests-automatizados.md` |
+| `docs/en/guides/local-integration-app.md` | `docs/es/guias/app-de-integracion-local.md` |
 | `docs/en/guides/tech-stack-and-scripts.md` | `docs/es/guias/pila-tecnologica-y-scripts.md` |
 
 ### `core/`
@@ -134,7 +136,7 @@ Usar solo en modo 2 o cuando el contenido traducido deba reflejar el código act
 - **No inventar** APIs, carpetas o comandos que no existan en el repo.
 - **No traducir** identificadores de código (`useStore`, `ryunix dev`, rutas de archivos) salvo prosa alrededor.
 - **No documentar** secretos (`.env`, tokens).
-- Mantener nombres de archivo en español bajo `docs/es/` (p. ej. `guia-de-pruebas.md`, no `testing-guide.md` en ES).
+- Mantener nombres de archivo en español bajo `docs/es/` (p. ej. `tests-automatizados.md`, no `automated-testing.md` en ES).
 - Rutas obsoletas a corregir si aparecen: `packages/ryunix` → `packages/core`; Next.js (`page.tsx`, `next dev`) → Ryunix (`.ryx`, `ryunix dev`); `useState` → `useStore` en ejemplos del core.
 
 ## Proceso para el agente
@@ -160,7 +162,7 @@ Usar solo en modo 2 o cuando el contenido traducido deba reflejar el código act
 Si el usuario pide commit, usar `.cursor/commands/auto-commit.md`:
 
 ```text
-docs(guide): sync testing guide EN with guia-de-pruebas ES
+docs(guide): sync automated-testing EN with tests-automatizados ES
 
 docs(es): translate repository guide updates to guia-del-repositorio
 ```
