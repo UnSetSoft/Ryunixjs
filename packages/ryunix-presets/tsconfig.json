@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "node10",
+    "types": ["node"]
+  },
+  "include": [
+    "webpack/**/*.js",
+    "webpack/**/*.mjs",
+    "webpack/**/*.d.ts",
+    "webpack/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

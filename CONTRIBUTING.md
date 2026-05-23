@@ -69,6 +69,7 @@ This project is a monorepo managed with **pnpm** and **Turbo**.
 | `pnpm run dev`            | Run all packages in development mode using Turbo.                           |
 | `pnpm run build`          | Build all packages in the monorepo.                                         |
 | `pnpm run test`           | Run the test suite across all packages.                                     |
+| `pnpm run typecheck`      | Run TypeScript (`tsc --noEmit`) in each package (incremental migration).    |
 | `pnpm run lint`           | Check for code style and linting issues.                                    |
 | `pnpm run lint:md`        | Lint Markdown (`docs/`, root `*.md`, package READMEs).                      |
 | `pnpm run lint:md:fix`    | Auto-fix Markdown (`markdownlint-cli2 --fix` + Prettier).                   |

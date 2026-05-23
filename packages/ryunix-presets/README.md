@@ -52,28 +52,82 @@ npm install @unsetsoft/ryunix-presets
 ## ⚙️ Configuration (`ryunix.config.js`)
 
 RyunixJS projects are configured via a `ryunix.config.js` (or `.cjs`) file at
-the root.
+the project root. The CLI loads it with Node `require()` (see
+`webpack/utils/settingfile.cjs`).
 
-### Core Options
+**TypeScript / editor support:** types ship in `webpack/config.d.ts` (export
+`RyunixUserConfig`). Install `@unsetsoft/ryunix-presets` as a devDependency in
+apps that use a typed config.
 
-| Option     | Type              | Default     | Description                                   |
-| :--------- | :---------------- | :---------- | :-------------------------------------------- |
-| `ssr`      | `boolean`         | `true`      | Enables Server-Side Rendering.                |
-| `mdx`      | `boolean`         | `false`     | Enables native MDX support.                   |
-| `rootDir`  | `string`          | `"src"`     | The directory containing your source code.    |
-| `buildDir` | `string`          | `".ryunix"` | The output directory for builds.              |
-| `port`     | `number`          | `3000`      | Dev server port.                              |
-| `favicon`  | `string\|boolean` | `true`      | Path to favicon or boolean to enable default. |
-| `debug`    | `boolean`         | `false`     | Enable verbose logging for debugging.         |
+```javascript
+/** @type {import('@unsetsoft/ryunix-presets').RyunixUserConfig} */
+export default {
+  ssr: true,
+  port: 3000,
+}
+```
 
-### Server & Security
+### Core options
 
-- **`server.csp`**: `boolean` - Enable Content Security Policy.
-- **`server.cors`**: Configure CORS for the dev server (`enabled`, `origin`,
+| Option       | Type                 | Default     | Description                                      |
+| :----------- | :------------------- | :---------- | :----------------------------------------------- |
+| `ssr`        | `boolean`            | `true`      | Server-side rendering.                           |
+| `mdx`        | `boolean`            | `false`     | MDX loaders and pages.                           |
+| `env`        | `Record<string, …>`  | `{}`        | Values exposed to the client bundle.             |
+| `rootDir`    | `string`             | `"src"`     | Source root when `app/` is not at project root.  |
+| `buildDir`   | `string`             | `".ryunix"` | Build output directory.                          |
+| `port`       | `number`             | `3000`      | Dev server port.                                 |
+| `proxy`      | `array \| object`    | `[]`        | Webpack `devServer.proxy`.                       |
+| `favicon`    | `string \| boolean`  | `true`      | Favicon path or default `public/favicon.png`.    |
+| `compiler`   | `"swc" \| "babel"`   | `"swc"`     | Transpiler for app sources.                      |
+| `debug`      | `boolean`            | `false`     | Verbose Ryunix / webpack logs.                   |
 
-  `methods`, etc.).
+### Server and security
 
-### Advanced Webpack Customization
+| Option                 | Type      | Default | Description                    |
+| :--------------------- | :-------- | :------ | :----------------------------- |
+| `server.csp`           | `boolean` | `false` | Content-Security-Policy.       |
+| `server.cors.enabled`  | `boolean` | `false` | Enable CORS headers.           |
+| `server.cors.origin`   | `string`  | `"*"`   | `Access-Control-Allow-Origin`. |
+| `server.cors.methods`  | `string`  | …       | Allowed HTTP methods.          |
+| `server.cors.headers`  | `string`  | …       | Allowed request headers.       |
+| `server.cors.credentials` | `boolean` | `false` | Allow credentials.          |
+
+### Webpack overrides (`webpack`)
+
+| Key                         | Description                                                |
+| :-------------------------- | :--------------------------------------------------------- |
+| `webpack.production`        | Force production mode (usually `RYUNIX_MODE=production`).  |
+| `webpack.target`            | Webpack `target` (default `"web"`).                        |
+| `webpack.resolve.alias`     | Module aliases.                                            |
+| `webpack.resolve.fallback`  | Node polyfills for the client bundle.                      |
+| `webpack.resolve.extensions`| Extra resolve extensions.                                  |
+| `webpack.plugins`           | Additional Webpack plugins (client compiler).              |
+| `webpack.module.rules`      | Extra module rules (merged with Ryunix defaults).          |
+| `webpack.externals`         | Client externals.                                          |
+| `webpack.experiments.lazyCompilation` | Lazy compilation (default `false`).            |
+| `webpack.devServer.allowedHosts` | Dev server host allowlist (default `"auto"`).       |
+
+### Legacy / SSG (`legacy`)
+
+Used with the pages router and config-driven prerender. Prefer App Router
+metadata when using `app/`.
+
+| Key                              | Description                                   |
+| :------------------------------- | :-------------------------------------------- |
+| `legacy.seo.pageLang`            | HTML `lang` (default `"en"`).                 |
+| `legacy.seo.title`               | Default document title.                       |
+| `legacy.seo.meta`                | Static meta tags (conflicts with dynamic SSG). |
+| `legacy.template`                | Custom HTML template path or `false`.         |
+| `legacy.ssg.sitemap.enable`      | Generate `sitemap.xml` on build.              |
+| `legacy.ssg.sitemap.baseURL`       | Canonical site URL for the sitemap.           |
+| `legacy.ssg.sitemap.settings`      | `changefreq`, `priority` per route.           |
+| `legacy.ssg.sitemap.prerender`   | Route list when no file-based manifest exists. |
+
+Deprecated top-level keys (`experimental.*`, `static.*`, `webpack.root`, etc.)
+still work but log a yellow warning; see `webpack/utils/config.cjs`.
+
+### Advanced Webpack customization
 
 You can extend the underlying Webpack configuration via the `webpack` key:
 

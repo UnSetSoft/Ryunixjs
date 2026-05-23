@@ -11,4 +11,5 @@ test
 .pnp.cjs
 .turbo
 text.md
+MIGRACION-JS-A-TS.md
 pnpm-lock.yaml

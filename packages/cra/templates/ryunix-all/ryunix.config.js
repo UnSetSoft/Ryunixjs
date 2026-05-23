@@ -1,5 +1,4 @@
-/** @type {import('@unsetsoft/ryunix-webpack/config').Setting} */
-
+/** @type {import('@unsetsoft/ryunix-presets').RyunixUserConfig} */
 const RyunixSettings = {}
 
 export default RyunixSettings

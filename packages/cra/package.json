@@ -17,7 +17,8 @@
   "scripts": {
     "dev": "node ./src/cli.js",
     "nightly:release": "npm publish --tag nightly",
-    "release": "npm publish"
+    "release": "npm publish",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "command-exists-promise": "2.0.2",

@@ -7,7 +7,6 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import ESLintPlugin from 'eslint-webpack-plugin'
-import eslintConfig from './eslint.config.mjs'
 import { createRequire } from 'module'
 import {
   getPackageManager,
@@ -27,6 +26,7 @@ import { renderDevRoute } from './utils/ssrDevHandler.mjs'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import { remarkGithubAlerts } from './plugins/remark-github-alerts.mjs'
 import rehypeHighlight from 'rehype-highlight'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -204,7 +204,12 @@ const sharedWebpackConfig = {
             options: {
               jsxImportSource: '@unsetsoft/ryunixjs',
               providerImportSource: '@unsetsoft/ryunixjs',
-              remarkPlugins: [remarkGfm, remarkFrontmatter, [remarkMdxFrontmatter, { name: 'frontmatter' }]],
+              remarkPlugins: [
+                remarkGfm,
+                remarkGithubAlerts,
+                remarkFrontmatter,
+                [remarkMdxFrontmatter, { name: 'frontmatter' }],
+              ],
               rehypePlugins: [rehypeHighlight],
             },
           },
@@ -706,8 +711,8 @@ const clientConfig = {
       failOnWarning: false,
       failOnError: false,
       configType: 'flat',
-      // Let ESLint use its default path resolution instead of a risky custom path
-      overrideConfig: eslintConfig,
+      // ESLint 9 flat config requires a config file on disk; overrideConfig alone is not enough.
+      overrideConfigFile: join(__dirname, 'eslint.config.mjs'),
     }),
     ...getPlugins(false),
   ].filter(Boolean),

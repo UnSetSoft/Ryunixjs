@@ -12,6 +12,7 @@ Instead, it exposes an explicit validation gateway controlled via
   - [Table of contents](#table-of-contents)
   - [1. Discovery (`settingfile.cjs`)](#1-discovery-settingfilecjs)
   - [2. Extraction Pipeline (`config.cjs`)](#2-extraction-pipeline-configcjs)
+  - [3. Public types (`config.d.ts`)](#3-public-types-configdts)
 
 ---
 
@@ -83,3 +84,25 @@ internally:
 
    legacy values directly into the modernized shape implicitly behind the
    scenes.
+
+---
+
+## 3. Public types (`config.d.ts`)
+
+For editor autocomplete without migrating the toolchain to TypeScript, the
+package publishes `packages/ryunix-presets/webpack/config.d.ts` (main export:
+`RyunixUserConfig`).
+
+In an app's `ryunix.config.js`:
+
+```javascript
+/** @type {import('@unsetsoft/ryunix-presets').RyunixUserConfig} */
+export default {
+  ssr: true,
+  compiler: 'swc',
+}
+```
+
+Option tables, defaults, and deprecated keys:
+[`packages/ryunix-presets/README.md`](../../packages/ryunix-presets/README.md#configuration-ryunixconfigjs).
+Runtime source of truth remains `webpack/utils/config.cjs`.

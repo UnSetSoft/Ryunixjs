@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "node10",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.js"],
+  "exclude": ["node_modules", "templates"]
+}

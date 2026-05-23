@@ -22,6 +22,7 @@
     "format": "prettier -w .",
     "format:check": "prettier -c .",
     "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rimraf node_modules",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
@@ -59,6 +60,7 @@
     "prettier": "3.7.4",
     "rimraf": "6.1.2",
     "turbo": "2.8.17",
+    "@types/node": "22.19.3",
     "typescript": "5.9.3"
   },
   "packageManager": "pnpm@10.26.0",
