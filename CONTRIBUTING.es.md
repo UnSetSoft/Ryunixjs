@@ -70,7 +70,7 @@ Este proyecto es un monorepo gestionado con **pnpm** y **Turbo**.
 | `pnpm run test`           | Ejecuta la suite de tests.                                     |
 | `pnpm run lint`           | Comprueba estilo y lint.                                       |
 | `pnpm run lint:md`        | Lint de Markdown (docs, raíz, READMEs).                        |
-| `pnpm run lint:md:fix`    | Corrige Markdown (script + Prettier).                          |
+| `pnpm run lint:md:fix`    | Corrige Markdown (`markdownlint-cli2 --fix` + Prettier).       |
 | `pnpm run lint:fix`       | Corrige lint y formato automáticamente.                        |
 | `pnpm run format`         | Formatea con Prettier.                                         |
 | `pnpm run clean`          | Limpia artefactos de build y `node_modules`.                   |

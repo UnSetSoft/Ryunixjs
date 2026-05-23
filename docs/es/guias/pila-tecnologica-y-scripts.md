@@ -146,7 +146,7 @@ Los comandos se ejecutan desde la **raíz del repositorio** salvo indicación.
 | `pnpm run format`       | Prettier en modo escritura                                              |
 | `pnpm run format:check` | Solo comprobación Prettier                                              |
 | `pnpm run lint:md`      | Markdownlint en `docs/`, `*.md` raíz, `packages/*/README.md`            |
-| `pnpm run lint:md:fix`  | Script de corrección Markdown + Prettier                                |
+| `pnpm run lint:md:fix`  | `markdownlint-cli2 --fix` + Prettier en Markdown                        |
 | `pnpm run clean`        | Turbo `clean` + borrar `node_modules` de la raíz                        |
 
 ### App de integración local (framework en el navegador)
