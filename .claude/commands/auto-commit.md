@@ -68,7 +68,7 @@ Optional body in English explaining why.
 | `ci`, `turbo` | CI / orquestación |
 
 - **Inglés obligatorio** en el commit (simple y descriptivo); respuesta al usuario en **español** salvo otro idioma.
-- **Sin** `Co-authored-by:` de IA; enmendar si el entorno lo insertó (commit no pusheado).
+- **Sin** `Co-authored-by:` de IA; si Cursor lo insertó (commit no pusheado), reescribir con `git commit-tree` (`.claude/rules/git-commits.md`); `git commit --amend` no basta.
 
 ## Commit
 
