@@ -99,7 +99,7 @@ Usa esta convención de nombres:
 - **Verificación**: Asegúrate de que pasen tests y lint (`pnpm run test` y
 
   `pnpm run lint`) antes de enviar. Guía detallada por paquete:
-  [docs/es/guias/guia-de-pruebas.md](docs/es/guias/guia-de-pruebas.md).
+  [docs/es/guias/tests-automatizados.md](docs/es/guias/tests-automatizados.md).
 
 ## 🚀 Flujo de release
 

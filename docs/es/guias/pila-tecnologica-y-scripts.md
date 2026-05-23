@@ -37,7 +37,7 @@ Referencia de **tecnologías usadas en el monorepo RyunixJS** y de los **scripts
 
 Para onboarding y estructura de carpetas, ver
 [guia-del-repositorio.md](./guia-del-repositorio.md). Para tests y
-`pnpm run:web`, ver [guia-de-pruebas.md](./guia-de-pruebas.md).
+`pnpm run:web`, ver [app-de-integracion-local.md](./app-de-integracion-local.md).
 
 ---
 
@@ -196,9 +196,10 @@ definir el script para que Turbo lo ejecute.
 
 ## Documentación relacionada
 
-| Tema                             | Documento                                            |
-| :------------------------------- | :--------------------------------------------------- |
-| Onboarding del monorepo          | [guia-del-repositorio.md](./guia-del-repositorio.md) |
-| Tests y `run:web`                | [guia-de-pruebas.md](./guia-de-pruebas.md)           |
-| Índice de docs                   | [resumen.md](../resumen.md)                          |
-| Contribución / comprobaciones PR | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)       |
+| Tema                             | Documento                                                          |
+| :------------------------------- | :----------------------------------------------------------------- |
+| Onboarding del monorepo          | [guia-del-repositorio.md](./guia-del-repositorio.md)               |
+| Tests automatizados              | [tests-automatizados.md](./tests-automatizados.md)                 |
+| App integración (`run:web`)      | [app-de-integracion-local.md](./app-de-integracion-local.md)       |
+| Índice de docs                   | [resumen.md](../resumen.md)                                        |
+| Contribución / comprobaciones PR | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)                     |

@@ -31,7 +31,8 @@ Paridad Cursor: `.cursor/commands/update-docs.md`.
 Ejemplos:
 
 ```text
-/update-docs docs/es/guias/guia-de-pruebas.md     → actualiza docs/en/guides/testing-guide.md
+/update-docs docs/es/guias/tests-automatizados.md → actualiza docs/en/guides/automated-testing.md
+/update-docs docs/es/guias/app-de-integracion-local.md → actualiza docs/en/guides/local-integration-app.md
 /update-docs docs/en/guides/repository-guide.md    → actualiza docs/es/guias/guia-del-repositorio.md
 /update-docs README.es.md                   → actualiza README.md
 ```
@@ -75,7 +76,8 @@ Eliminar formas incongruentes: `Spanish version:`, `Equivalente en inglés:`, ta
 | :--- | :--- |
 | `docs/en/overview.md` | `docs/es/resumen.md` |
 | `docs/en/guides/repository-guide.md` | `docs/es/guias/guia-del-repositorio.md` |
-| `docs/en/guides/testing-guide.md` | `docs/es/guias/guia-de-pruebas.md` |
+| `docs/en/guides/automated-testing.md` | `docs/es/guias/tests-automatizados.md` |
+| `docs/en/guides/local-integration-app.md` | `docs/es/guias/app-de-integracion-local.md` |
 | `docs/en/guides/tech-stack-and-scripts.md` | `docs/es/guias/pila-tecnologica-y-scripts.md` |
 
 ### `core/`
@@ -147,7 +149,7 @@ Eliminar formas incongruentes: `Spanish version:`, `Equivalente en inglés:`, ta
 ## Commits
 
 ```text
-docs(guide): sync testing guide EN with guia-de-pruebas ES
+docs(guide): sync automated-testing EN with tests-automatizados ES
 ```
 
 Si el usuario pide commit: `/auto-commit`.

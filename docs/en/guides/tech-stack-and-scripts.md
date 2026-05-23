@@ -38,7 +38,7 @@ under `docs/en/core/`, `docs/en/ryunix-presets/`, or `docs/en/cra/`.
 
 For onboarding and folder layout, see
 [repository-guide.md](./repository-guide.md). For how to run tests and
-`pnpm run:web`, see [testing-guide.md](./testing-guide.md).
+`pnpm run:web`, see [local-integration-app.md](./local-integration-app.md).
 
 ---
 
@@ -196,9 +196,10 @@ exist for Turbo to run them.
 
 ## Related documentation
 
-| Topic                    | Document                                     |
-| :----------------------- | :------------------------------------------- |
-| Monorepo onboarding      | [repository-guide.md](./repository-guide.md) |
-| Tests and `run:web`      | [testing-guide.md](./testing-guide.md)       |
-| Doc index                | [overview.md](../overview.md)                |
-| Contributing / PR checks | [CONTRIBUTING.md](../../CONTRIBUTING.md)     |
+| Topic                         | Document                                               |
+| :---------------------------- | :----------------------------------------------------- |
+| Monorepo onboarding           | [repository-guide.md](./repository-guide.md)           |
+| Automated tests               | [automated-testing.md](./automated-testing.md)         |
+| Integration app (`run:web`)   | [local-integration-app.md](./local-integration-app.md) |
+| Doc index                     | [overview.md](../overview.md)                          |
+| Contributing / PR checks      | [CONTRIBUTING.md](../../CONTRIBUTING.md)               |

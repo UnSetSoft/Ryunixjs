@@ -343,7 +343,7 @@ navegador**.
 ```text
 
 1. pnpm install
-2. Crear app local en test/webpack (una vez; ver guía de pruebas)
+2. Crear app local en test/webpack (una vez; ver app de integración)
 3. pnpm build
 4. pnpm run:web          ← aquí desarrollas como en una app normal
 5. Si tocas packages/core → pnpm --filter @unsetsoft/ryunixjs build → refrescar navegador
@@ -356,7 +356,8 @@ máquina). Los scripts `run:web`, `run:web:build` y `run:web:start` son atajos
 desde la raíz hacia esa app.
 
 Detalle por paquete (tests, CRA, DevTools):
-[guía de pruebas](./guia-de-pruebas.md).
+[tests automatizados](./tests-automatizados.md),
+[app de integración](./app-de-integracion-local.md).
 
 ---
 
@@ -377,7 +378,8 @@ pnpm dev          # Turbo: hoy solo lanza el CLI de CRA, no una web
 
 | Tema                         | Enlace                                                                                 |
 | :--------------------------- | :------------------------------------------------------------------------------------- |
-| Guía de pruebas              | [guia-de-pruebas.md](./guia-de-pruebas.md)                                             |
+| Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                     |
+| App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                           |
 | Resumen técnico              | [docs/es/resumen.md](./resumen.md)                                                     |
 | Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md)               |
 | Hooks                        | [docs/es/core/hooks.md](./core/hooks.md)                                               |
