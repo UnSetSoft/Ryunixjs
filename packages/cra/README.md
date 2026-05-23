@@ -1,5 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 MD013 -->
 
+> **Language / Idioma:** [English](./README.md) · [Español](./README.es.md)
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/UnSetSoft/Ryunixjs/canary/assets/logo.png" width="200" height="200" alt="RyunixJS Logo" />
 </p>
@@ -77,4 +79,4 @@ Every project scaffolded with `cra` comes pre-configured with:
 
 ## 📄 License
 
-RyunixJS is [MIT Licensed](file:///e:/proyects/Ryunixjs/LICENSE).
+RyunixJS is [MIT Licensed](../../LICENSE).
