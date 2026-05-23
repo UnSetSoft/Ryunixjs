@@ -1,3 +1,5 @@
+> **Language / Idioma:** [English](./CONTRIBUTING.md) · [Español](./CONTRIBUTING.es.md)
+
 # Contributing to RyunixJS
 
 Thank you for your interest in contributing to RyunixJS! We are excited to see the community grow and appreciate any help in making RyunixJS the best standalone framework it can be.

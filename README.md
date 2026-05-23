@@ -1,3 +1,5 @@
+> **Language / Idioma:** [English](./README.md) · [Español](./README.es.md)
+
 <p align="center">
   <img src="./assets/logo.png" width="200" height="200" alt="RyunixJS Logo" />
 </p>
@@ -42,12 +44,12 @@ Whether you're building a simple static site or a complex Single Page Applicatio
 
 RyunixJS is managed as a monorepo containing several specialized packages:
 
-| Package | Description |
-| :--- | :--- |
-| [`@unsetsoft/ryunixjs`](./packages/core) | The core library containing the reconciler, hooks, and DOM utilities. |
-| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets) | Unified tooling and Webpack configurations for different environments. |
-| [`@unsetsoft/cra`](./packages/cra) | The Official CLI to scaffold new Ryunix projects effortlessly. |
-| [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for debugging and inspecting component trees. |
+| Package                                                    | Description                                                            |
+| :--------------------------------------------------------- | :--------------------------------------------------------------------- |
+| [`@unsetsoft/ryunixjs`](./packages/core)                   | The core library containing the reconciler, hooks, and DOM utilities.  |
+| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Unified tooling and Webpack configurations for different environments. |
+| [`@unsetsoft/cra`](./packages/cra)                         | The Official CLI to scaffold new Ryunix projects effortlessly.         |
+| [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for debugging and inspecting component trees.        |
 
 ## 🛠️ Getting Started
 
@@ -64,6 +66,15 @@ cd my-ryunix-app
 npm run dev
 ```
 
+## 📚 Documentation
+
+For maintainers and contributors exploring the monorepo:
+
+- **[Internal technical overview](./docs/en/overview.md)** — architecture of `core`, `ryunix-presets`, and `cra` (Virtual DOM, hooks, CLI, routing, SSG, and more).
+- **[Repository guide](./docs/en/repository-guide.md)** — what RyunixJS is, comparison with Next.js, and root folder layout.
+
+Spanish: [resumen](./docs/es/resumen.md) · [guía del repositorio](./docs/es/guia-del-repositorio.md).
+
 ## 🤝 Contributing
 
 We love contributions! If you have ideas, bug reports, or want to add a new feature, please follow these steps:
@@ -75,7 +86,11 @@ We love contributions! If you have ideas, bug reports, or want to add a new feat
 3. **Commit Messages**: Keep them simple and descriptive.
 4. **Version Management**: Do **not** manually change package versions; this is handled during the release process.
 
-Check out our [Contributing Guide](./CONTRIBUTING.md) (if available) for more details.
+Check out our [Contributing Guide](./CONTRIBUTING.md) for more details.
+
+## 🔒 Security
+
+If you discover a security vulnerability, do **not** open a public issue. See our [Security Policy](./SECURITY.md) for supported versions and how to report responsibly.
 
 ## 📄 License
 

@@ -1,3 +1,5 @@
+> **Language / Idioma:** [English](./SECURITY.md) · [Español](./SECURITY.es.md)
+
 # Security Policy
 
 ## Supported Versions

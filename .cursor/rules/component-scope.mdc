@@ -1,0 +1,58 @@
+---
+description: Ubicar código según paquete del monorepo o alcance de una app Ryunix (.ryx)
+alwaysApply: true
+---
+
+# Alcance de código en RyunixJS
+
+Este repositorio es un **monorepo del framework**, no una app de usuario. Coloca cada cambio en el **paquete y carpeta correctos**; no mezclar runtime, tooling y plantillas.
+
+## Monorepo — árbol de decisión
+
+1. **¿Motor de UI (VDOM, hooks, reconciler, render)?** → `packages/core/src/lib/` o `packages/core/jsx/`.
+2. **¿Webpack, CLI `ryunix`, routing compile-time, SSG, API server?** → `packages/ryunix-presets/webpack/`.
+3. **¿Scaffolding, plantillas `create-app`, helpers del CLI?** → `packages/cra/src/` o `packages/cra/templates/`.
+4. **¿Extensión de navegador DevTools?** → `packages/ryunix-devtools/`.
+5. **¿Documentación de arquitectura o guías?** → `docs/` (`docs/en/`, `docs/es/`, `docs/core/`, `docs/repository-guide.md`, `docs/es/guia-del-repositorio.md`).
+6. **¿Scripts globales del workspace, Turbo, ESLint raíz?** → raíz (`package.json`, `turbo.json`, `eslint.config.mjs`).
+7. **¿App de prueba local del mantenedor?** → `test/` (gitignored; no publicar como paquete).
+
+## Mapa de paquetes
+
+| Qué es | Dónde |
+| :--- | :--- |
+| Reconciler, fibers, hooks, SSR core | `packages/core/src/lib/` |
+| Tests del core | `packages/core/src/tests/` |
+| JSX runtime | `packages/core/jsx/` |
+| Build, `ryunix dev/build/start` | `packages/ryunix-presets/webpack/` |
+| Plantillas oficiales (`ryunix-base`, etc.) | `packages/cra/templates/` |
+| Docs internas | `docs/` |
+| README público del proyecto | `README.md` (raíz) |
+
+## Reglas para el agente (monorepo)
+
+- **Prohibido** meter lógica de Webpack o routing en `packages/core` salvo APIs que el core exporte al servidor.
+- **Prohibido** duplicar hooks o reconciler en `ryunix-presets`; consumir `@unsetsoft/ryunixjs`.
+- Cambios en plantillas CRA deben reflejar la **estructura real** que genera `npx @unsetsoft/cra` (`.ryx`, `ryunix.config.js`).
+- Si un fix afecta varios paquetes, commits separados o formato lista (ver `.cursor/commands/auto-commit.md`).
+
+## Apps Ryunix (plantillas o proyectos generados)
+
+Estructura típica (ver `packages/cra/templates/ryunix-base/`):
+
+| Alcance | Ubicación |
+| :--- | :--- |
+| Página / ruta | `app/index.ryx`, `app/<ruta>/index.ryx` |
+| Layout global | `app/layout.ryx` |
+| Errores | `app/errors.ryx` |
+| API | `app/api/<nombre>/router.js` |
+| Estilos globales | `styles/` |
+| Assets estáticos | `assets/` |
+| Config del framework | `ryunix.config.js` (raíz de la app) |
+
+- **Prohibido** en apps: carpetas `src/features/` o convenciones de Next.js (`page.tsx`, `next.config.ts`) salvo que el usuario lo pida explícitamente.
+- Componentes usados solo en una ruta: colocalizar junto a esa ruta o en un subfolder de `app/`; subir a carpeta compartida solo con **segundo consumidor**.
+
+## Antes de crear un archivo nuevo
+
+Preguntarse: **¿es runtime, tooling, plantilla, docs o app de prueba?** Eso define el paquete. Si la duda es entre `core` y `presets`, el criterio es: ¿se ejecuta en el navegador como parte del framework de UI, o solo en Node/Webpack en build/dev?
