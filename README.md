@@ -16,6 +16,9 @@
     <img src="https://img.shields.io/npm/v/@unsetsoft/ryunixjs/canary.svg?style=flat-square&label=canary" alt="canary version" />
   </a>
   <img src="https://img.shields.io/npm/l/@unsetsoft/ryunixjs?style=flat-square" alt="license" />
+  <a href="https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/unsetsoft.ryunixjs?style=flat-square&label=VS%20Code" alt="VS Code extension" />
+  </a>
   <a href="https://deepwiki.com/UnSetSoft/Ryunixjs"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
@@ -71,6 +74,10 @@ to do it efficiently.
 
   applications.
 
+- **💻 VS Code Extension**: Syntax highlighting and editor support for `.ryx`
+
+  files. [Install from the Marketplace](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs).
+
 ## 📦 Packages
 
 RyunixJS is managed as a monorepo containing several specialized packages:
@@ -81,6 +88,7 @@ RyunixJS is managed as a monorepo containing several specialized packages:
 | [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Unified tooling and Webpack configurations for different environments. |
 | [`@unsetsoft/cra`](./packages/cra)                         | The Official CLI to scaffold new Ryunix projects effortlessly.         |
 | [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for debugging and inspecting component trees.        |
+| [Ryunix VS Code Extension](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs) | Syntax highlighting and editor support for `.ryx` files.             |
 
 ## 🛠️ Getting Started
 
@@ -96,6 +104,9 @@ Navigate to your app and start the development server:
 cd my-ryunix-app
 npm run dev
 ```
+
+Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs)
+for `.ryx` syntax highlighting (optional; the CRA can add workspace recommendations with `--vscode`).
 
 ## 📚 Documentation
 
