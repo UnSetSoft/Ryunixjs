@@ -1,36 +1,38 @@
 <!-- markdownlint-disable MD033 MD041 MD013 -->
 
+> **Language / Idioma:** [English](./README.md) · [Español](./README.es.md)
+
 # Ryunix DevTools Extension
 
-Extensión de Chrome para depurar aplicaciones Ryunix.
+Chrome extension for debugging Ryunix applications.
 
-## Instalación
+## Installation
 
-1. Abre Chrome y ve a `chrome://extensions/`
-2. Activa "Modo de desarrollador"
-3. Click en "Cargar extensión sin empaquetar"
-4. Selecciona la carpeta `packages/ryunix-devtools`
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select the `packages/ryunix-devtools` folder
 
-## Uso
+## Usage
 
-1. Abre DevTools (F12)
-2. Busca la pestaña "Ryunix"
-3. La extensión detectará automáticamente aplicaciones Ryunix
+1. Open DevTools (F12)
+2. Open the **Ryunix** panel
+3. The extension automatically detects Ryunix applications
 
-## Características
+## Features
 
-- Árbol de componentes en tiempo real
-- Inspección de props
-- Contador de hooks
-- Detección automática
+- Real-time component tree
+- Props inspection
+- Hook counter
+- Automatic detection
 
-## Desarrollo
+## Development
 
 ```bash
-npm run build  # Crea devtools.zip
+npm run build  # Creates devtools.zip
 ```
 
-## Compatibilidad
+## Compatibility
 
 - Chrome 88+
 - Edge 88+
