@@ -92,6 +92,12 @@ Consulta la [guía de contribución](./CONTRIBUTING.es.md) para más detalles.
 
 Si descubres una vulnerabilidad de seguridad, **no** abras un issue público. Consulta la [política de seguridad](./SECURITY.es.md) para ver las versiones soportadas y cómo reportarla de forma responsable.
 
+## 👑 Contribuidores
+
+<a href="https://github.com/UnSetSoft/Ryunixjs/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=UnSetSoft/Ryunixjs" alt="Contribuidores" />
+</a>
+
 ## 📄 Licencia
 
 RyunixJS está bajo [licencia MIT](./LICENSE).
