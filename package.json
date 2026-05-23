@@ -17,7 +17,7 @@
     "build": "turbo run build",
     "lint": "eslint . --max-warnings=0 --config eslint.config.mjs && turbo run lint && pnpm run lint:md",
     "lint:md": "markdownlint-cli2",
-    "lint:md:fix": "node scripts/fix-markdownlint-docs.mjs && prettier -w \"docs/**/*.md\" \"*.md\" \"packages/*/README.md\" --prose-wrap always --print-width 80",
+    "lint:md:fix": "markdownlint-cli2 --fix && prettier -w \"docs/**/*.md\" \"*.md\" \"packages/*/README.md\" --prose-wrap always --print-width 80",
     "lint:fix": "pnpm run format && eslint . --fix --max-warnings=0 --config eslint.config.mjs && turbo run lint -- --fix",
     "format": "prettier -w .",
     "format:check": "prettier -c .",

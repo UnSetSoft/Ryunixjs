@@ -146,7 +146,7 @@ Commands are run from the **repository root** unless noted.
 | `pnpm run format`       | Prettier write on the repo                                             |
 | `pnpm run format:check` | Prettier check only                                                    |
 | `pnpm run lint:md`      | Markdownlint on `docs/`, root `*.md`, `packages/*/README.md`           |
-| `pnpm run lint:md:fix`  | Markdown fix script + Prettier on Markdown                             |
+| `pnpm run lint:md:fix`  | `markdownlint-cli2 --fix` + Prettier on Markdown                         |
 | `pnpm run clean`        | Turbo `clean` + remove root `node_modules`                             |
 
 ### Local integration app (framework in the browser)

@@ -71,7 +71,7 @@ This project is a monorepo managed with **pnpm** and **Turbo**.
 | `pnpm run test`           | Run the test suite across all packages.                                     |
 | `pnpm run lint`           | Check for code style and linting issues.                                    |
 | `pnpm run lint:md`        | Lint Markdown (`docs/`, root `*.md`, package READMEs).                      |
-| `pnpm run lint:md:fix`    | Auto-fix Markdown layout (script + Prettier).                               |
+| `pnpm run lint:md:fix`    | Auto-fix Markdown (`markdownlint-cli2 --fix` + Prettier).                   |
 | `pnpm run lint:fix`       | Automatically fix linting and formatting issues.                            |
 | `pnpm run format`         | Format all files using Prettier.                                            |
 | `pnpm run clean`          | Clean build artifacts and remove `node_modules`.                            |
