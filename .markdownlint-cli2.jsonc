@@ -1,0 +1,11 @@
+{
+  // Rules: .markdownlint.json
+  "config": ".markdownlint.json",
+  "globs": ["docs/**/*.md", "*.md", "packages/*/README.md"],
+  "ignores": [
+    "node_modules",
+    "**/node_modules/**",
+    ".claude/**",
+    ".cursor/**"
+  ]
+}

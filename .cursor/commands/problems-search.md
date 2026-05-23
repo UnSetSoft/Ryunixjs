@@ -62,7 +62,7 @@ Considerar impacto en **publicación npm**, **CI**, **build de paquetes**, **app
 ### 5. Documentación (P2–P3)
 
 - `README.md` raíz vs paquetes reales.
-- `docs/` (`docs/repository-guide.md`, `docs/es/guia-del-repositorio.md`, `docs/en/`) vs estructura actual.
+- `docs/` (`docs/en/overview.md`, `docs/en/guides/`, `docs/es/guias/`, `docs/es/resumen.md`) vs estructura actual.
 - Enlaces rotos entre guías ES/EN.
 - `.cursor/` y `.claude/` alineados con el monorepo (no referencias a Next.js u otros proyectos).
 

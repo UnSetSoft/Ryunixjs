@@ -83,7 +83,7 @@ BREAKING CHANGE: only if consumers must migrate.
 | `cra` | `packages/cra` |
 | `devtools` | `packages/ryunix-devtools` |
 | `readme` | `README.md` raíz |
-| `guide` | `docs/repository-guide.md`, `docs/es/guia-del-repositorio.md` |
+| `guide` | `docs/en/guides/`, `docs/es/guias/` |
 | `docs` | Otros archivos en `docs/` |
 | `cursor` | `.cursor/` |
 | `claude` | `.claude/`, `CLAUDE.md` |

@@ -61,7 +61,7 @@ Optional body in English explaining why.
 | `cra` | `packages/cra` |
 | `devtools` | `packages/ryunix-devtools` |
 | `readme` | `README.md` raíz |
-| `guide` | `docs/repository-guide.md`, `docs/es/guia-del-repositorio.md` |
+| `guide` | `docs/en/guides/`, `docs/es/guias/` |
 | `docs` | resto de `docs/` |
 | `cursor` | `.cursor/` |
 | `claude` | `.claude/`, `CLAUDE.md` |
