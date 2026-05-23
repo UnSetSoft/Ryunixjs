@@ -43,7 +43,7 @@ Impacto: publicación npm, CI, build de paquetes, plantillas CRA, runtime.
 2. **`packages/core`** — reconciler, hooks, exports, tests.
 3. **`packages/ryunix-presets`** — CLI `webpack/bin/`, plugins, loaders, config dual.
 4. **`packages/cra`** — plantillas `.ryx`, `ryunix.config.js`.
-5. **Documentación** — `README.md`, `docs/repository-guide.md`, `docs/es/guia-del-repositorio.md`, `docs/en/`, paridad `.cursor/` ↔ `.claude/`.
+5. **Documentación** — `README.md`, `docs/en/guides/`, `docs/es/guias/`, `docs/en/overview.md`, paridad `.cursor/` ↔ `.claude/`.
 6. **Calidad** — ESLint, versiones manuales en `package.json`, rutas obsoletas en `.vscode/tasks.json`.
 7. **DevTools / test/** — P3.
 

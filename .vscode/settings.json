@@ -1,3 +1,11 @@
 {
-  "githubPullRequests.ignoredPullRequestBranches": ["dev"]
+  "githubPullRequests.ignoredPullRequestBranches": ["dev"],
+  "markdownlint.configFile": ".markdownlint.json",
+  "markdownlint.run": "onSave",
+  "markdownlint.lintWorkspaceGlobs": [
+    "**/*.md",
+    "!**/node_modules/**",
+    "!.claude/**",
+    "!.cursor/**"
+  ]
 }

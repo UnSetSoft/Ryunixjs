@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 MD041 MD013 -->
+
 # Ryunix DevTools Extension
 
 Extensión de Chrome para depurar aplicaciones Ryunix.

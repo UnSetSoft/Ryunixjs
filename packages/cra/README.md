@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 MD041 MD013 -->
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/UnSetSoft/Ryunixjs/canary/assets/logo.png" width="200" height="200" alt="RyunixJS Logo" />
 </p>
@@ -10,11 +12,13 @@
   </a>
 </p>
 
----
+## <!-- markdownlint-enable MD013 -->
 
 ## 🚀 Create Ryunix App
 
-The official scaffolder for RyunixJS applications. Create modern, high-performance web applications with a guided interactive experience and optimized default configurations.
+The official scaffolder for RyunixJS applications. Create modern,
+high-performance web applications with a guided interactive experience and
+optimized default configurations.
 
 ## 🛠️ Usage
 
@@ -34,29 +38,38 @@ npx @unsetsoft/cra@latest my-ryunix-app
 
 The CLI will guide you through several choices to customize your project:
 
-1.  **Project Name**: The directory name for your new application.
-2.  **Release Channel**: Choose between **Latest** (stable) or **Canary** (cutting edge/experimental features).
-3.  **Tailwind CSS**: Optional automatic initialization and configuration of Tailwind CSS.
-4.  **ESLint**: Pre-configured linting rules optimized for Ryunix development.
-5.  **VS Code Integration**: Automatic configuration for the Ryunix VS Code Extension workspace settings.
+1. **Project Name**: The directory name for your new application.
+2. **Release Channel**: Choose between **Latest** (stable) or **Canary**
+
+   (cutting edge/experimental features).
+
+3. **Tailwind CSS**: Optional automatic initialization and configuration of
+
+   Tailwind CSS.
+
+4. **ESLint**: Pre-configured linting rules optimized for Ryunix development.
+5. **VS Code Integration**: Automatic configuration for the Ryunix VS Code
+
+   Extension workspace settings.
 
 ## 🚩 Command Line Flags
 
 For more control, you can use the following flags:
 
-| Flag | Description |
-| :--- | :--- |
-| `-v, --version` | Output the current version of the CLI. |
-| `-h, --help` | Display the help message. |
-| `--canary` | Use the Canary channel for Ryunix dependencies. |
-| `--latest` | Use the Latest channel for Ryunix dependencies (default). |
-| `--tailwind` | Initialize with Tailwind CSS configuration. |
-| `--eslint` | Initialize with ESLint configuration. |
-| `--vscode` | Add VS Code settings for Ryunix extension. |
+| Flag            | Description                                               |
+| :-------------- | :-------------------------------------------------------- |
+| `-v, --version` | Output the current version of the CLI.                    |
+| `-h, --help`    | Display the help message.                                 |
+| `--canary`      | Use the Canary channel for Ryunix dependencies.           |
+| `--latest`      | Use the Latest channel for Ryunix dependencies (default). |
+| `--tailwind`    | Initialize with Tailwind CSS configuration.               |
+| `--eslint`      | Initialize with ESLint configuration.                     |
+| `--vscode`      | Add VS Code settings for Ryunix extension.                |
 
 ## 🏗️ What's Inside?
 
 Every project scaffolded with `cra` comes pre-configured with:
+
 - **Optimization**: Webpack-based build system with optimized bundles.
 - **SSR Ready**: Foundations for Server-Side Rendering.
 - **Modular Structure**: Clean directory layout (`app/`, `src/`, `public/`).

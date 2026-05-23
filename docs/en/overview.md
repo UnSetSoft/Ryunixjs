@@ -1,83 +1,104 @@
 # RyunixJS Internal Documentation
 
-Welcome to the internal documentation for **RyunixJS**. These documents are for maintainers, core contributors, and developers who want to understand how the framework is built.
+> **Language / Idioma:** [English](./overview.md) · [Español](../es/resumen.md)
+
+Welcome to the internal documentation for **RyunixJS**. These documents are for
+maintainers, core contributors, and developers who want to understand how the
+framework is built.
 
 **You are here:** `docs/en/overview.md` — the English documentation index.
 
 ---
 
+## Table of contents
+
+- [RyunixJS Internal Documentation](#ryunixjs-internal-documentation)
+  - [Table of contents](#table-of-contents)
+  - [How this folder is organized](#how-this-folder-is-organized)
+  - [`guides/` — Monorepo guides](#guides--monorepo-guides)
+  - [`core/` — `packages/core`](#core--packagescore)
+  - [`ryunix-presets/` — `packages/ryunix-presets`](#ryunix-presets--packagesryunix-presets)
+  - [`cra/` — `packages/cra`](#cra--packagescra)
+  - [Suggested reading order](#suggested-reading-order)
+  - [Other languages](#other-languages)
+
+---
+
 ## How this folder is organized
 
-All internal docs live under `docs/`, split by language. Each language mirrors the same layout and maps to packages in `packages/`.
+All internal docs live under `docs/`, split by language. Each language mirrors
+the same layout and maps to packages in `packages/`.
 
 ```text
 docs/
 ├── en/                              ← English (this folder)
 │   ├── overview.md                  ← Index (this file)
-│   ├── repository-guide.md          ← Monorepo onboarding (start here if you just cloned)
+│   ├── guides/                      ← Monorepo-wide guides (not tied to one package)
 │   ├── core/                        ← packages/core — runtime engine
 │   ├── ryunix-presets/              ← packages/ryunix-presets — CLI & Webpack
 │   └── cra/                         ← packages/cra — project scaffolding
 └── es/                              ← Spanish (same structure)
-    ├── overview.md
-    ├── guia-del-repositorio.md      ← Spanish filenames in docs/es/
-    ├── resumen.md
+    ├── resumen.md                   ← Index (Spanish)
+    ├── guias/                       ← Guías del monorepo (nombres en español)
     ├── core/                        ← e.g. vdom-y-reconciliacion.md
     ├── ryunix-presets/
     └── cra/
 ```
 
-| Path (from `docs/en/`) | Package in repo | What you will find |
-| :--- | :--- | :--- |
-| [`./repository-guide.md`](./repository-guide.md) | *(monorepo root)* | What RyunixJS is, comparison with Next.js, root files, useful commands. **Best entry point after cloning.** |
-| [`./core/`](./core/) | `packages/core` | Reconciler, hooks, rendering, SSR, components. |
-| [`./ryunix-presets/`](./ryunix-presets/) | `packages/ryunix-presets` | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders. |
-| [`./cra/`](./cra/) | `packages/cra` | `create-ryunix-app` CLI and project templates. |
-
-Spanish version of this index: [docs/es/resumen.md](../es/resumen.md) (Spanish filenames under `docs/es/`).
+| Path (from `docs/en/`)                   | Package in repo           | What you will find                                                   |
+| :--------------------------------------- | :------------------------ | :------------------------------------------------------------------- |
+| [`./guides/`](./guides/)                 | _(monorepo root)_         | Onboarding, testing, tech stack and root scripts (see guides below). |
+| [`./core/`](./core/)                     | `packages/core`           | Reconciler, hooks, rendering, SSR, components.                       |
+| [`./ryunix-presets/`](./ryunix-presets/) | `packages/ryunix-presets` | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
+| [`./cra/`](./cra/)                       | `packages/cra`            | `create-ryunix-app` CLI and project templates.                       |
 
 ---
 
-## `repository-guide.md` — Monorepo guide
+## `guides/` — Monorepo guides
 
-Single document at the root of `docs/en/`. Not tied to one package; it explains the **whole repository** for someone opening the monorepo for the first time.
+Documents under `docs/en/guides/` describe the **whole repository**, not a
+single package.
 
-- [Repository guide](./repository-guide.md)
-
-Spanish equivalent: [Guía del repositorio](../es/guia-del-repositorio.md).
+| Document                                                        | Topic                                                                         |
+| :-------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| [repository-guide.md](./guides/repository-guide.md)             | What RyunixJS is, repo layout, useful commands. **Start here after cloning.** |
+| [testing-guide.md](./guides/testing-guide.md)                   | Tests, lint, `pnpm run:web`, per-package checks.                              |
+| [tech-stack-and-scripts.md](./guides/tech-stack-and-scripts.md) | Technologies and root `pnpm` scripts (AI-assisted).                           |
 
 ---
 
 ## `core/` — `packages/core`
 
-Runtime engine: Virtual DOM, Fiber reconciler, hooks, client/server rendering, and built-in components.
+Runtime engine: Virtual DOM, Fiber reconciler, hooks, client/server rendering,
+and built-in components.
 
-| Document | Topic |
-| :--- | :--- |
-| [virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md) | `createElement`, work loop, reconciler, DOM commit |
-| [hooks.md](./core/hooks.md) | `useStore`, `useEffect`, memoization, SSR hook behavior |
-| [rendering.md](./core/rendering.md) | `render`, `hydrate`, `renderToString`, streaming |
-| [state-and-priority.md](./core/state-and-priority.md) | Batching, priority queue, `useTransition` |
-| [advanced-components.md](./core/advanced-components.md) | `lazy`, `Suspense`, `memo`, portals, `forwardRef` |
-| [components.md](./core/components.md) | Built-in components overview |
-| [server-features.md](./core/server-features.md) | Server Actions, `ServerBoundary`, `bridge.js` |
-| [error-boundary.md](./core/error-boundary.md) | Error boundaries and dev overlay |
-| [devtools-and-profiler.md](./core/devtools-and-profiler.md) | Dev warnings and in-memory profiler |
+| Document                                                                      | Topic                                                   |
+| :---------------------------------------------------------------------------- | :------------------------------------------------------ |
+| [virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md) | `createElement`, work loop, reconciler, DOM commit      |
+| [hooks.md](./core/hooks.md)                                                   | `useStore`, `useEffect`, memoization, SSR hook behavior |
+| [rendering.md](./core/rendering.md)                                           | `render`, `hydrate`, `renderToString`, streaming        |
+| [state-and-priority.md](./core/state-and-priority.md)                         | Batching, priority queue, `useTransition`               |
+| [advanced-components.md](./core/advanced-components.md)                       | `lazy`, `Suspense`, `memo`, portals, `forwardRef`       |
+| [components.md](./core/components.md)                                         | Built-in components overview                            |
+| [server-features.md](./core/server-features.md)                               | Server Actions, `ServerBoundary`, `bridge.js`           |
+| [error-boundary.md](./core/error-boundary.md)                                 | Error boundaries and dev overlay                        |
+| [devtools-and-profiler.md](./core/devtools-and-profiler.md)                   | Dev warnings and in-memory profiler                     |
 
 ---
 
 ## `ryunix-presets/` — `packages/ryunix-presets`
 
-Build tooling: `ryunix` CLI, dual Webpack (client + server), file-based routing, SSG, and API compilation.
+Build tooling: `ryunix` CLI, dual Webpack (client + server), file-based routing,
+SSG, and API compilation.
 
-| Document | Topic |
-| :--- | :--- |
+| Document                                                              | Topic                                              |
+| :-------------------------------------------------------------------- | :------------------------------------------------- |
 | [cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md) | `ryunix dev`, `build`, `start`, dev & prod servers |
-| [configuration-loading.md](./ryunix-presets/configuration-loading.md) | `ryunix.config.js` discovery and normalization |
-| [routing-and-ssg.md](./ryunix-presets/routing-and-ssg.md) | `AppRouterPlugin`, SSG, dev SSR handler |
-| [api-router.md](./ryunix-presets/api-router.md) | API routes, SWC compile, hot reload |
-| [webpack-loaders.md](./ryunix-presets/webpack-loaders.md) | RSC loader, Server Actions loader |
-| [file-based-errors.md](./ryunix-presets/file-based-errors.md) | `error.ryx`, global dev overlay |
+| [configuration-loading.md](./ryunix-presets/configuration-loading.md) | `ryunix.config.js` discovery and normalization     |
+| [routing-and-ssg.md](./ryunix-presets/routing-and-ssg.md)             | `AppRouterPlugin`, SSG, dev SSR handler            |
+| [api-router.md](./ryunix-presets/api-router.md)                       | API routes, SWC compile, hot reload                |
+| [webpack-loaders.md](./ryunix-presets/webpack-loaders.md)             | RSC loader, Server Actions loader                  |
+| [file-based-errors.md](./ryunix-presets/file-based-errors.md)         | `error.ryx`, global dev overlay                    |
 
 ---
 
@@ -85,27 +106,42 @@ Build tooling: `ryunix` CLI, dual Webpack (client + server), file-based routing,
 
 Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 
-| Document | Topic |
-| :--- | :--- |
-| [cli-and-helpers.md](./cra/cli-and-helpers.md) | Interactive CLI, `create-app.js`, npm version resolution |
-| [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism |
+| Document                                               | Topic                                                    |
+| :----------------------------------------------------- | :------------------------------------------------------- |
+| [cli-and-helpers.md](./cra/cli-and-helpers.md)         | Interactive CLI, `create-app.js`, npm version resolution |
+| [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism         |
 
 ---
 
 ## Suggested reading order
 
-1. [Repository guide](./repository-guide.md) — context for the monorepo and how pieces connect.
-2. [core/virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md) — how UI updates work.
-3. [ryunix-presets/cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md) — how apps are built and served.
-4. Deep-dive into any `core/` or `ryunix-presets/` doc as needed.
+1. [Repository guide](./guides/repository-guide.md) — context for the monorepo
+   and
+
+   how pieces connect.
+
+2. [Testing guide](./guides/testing-guide.md) — automated tests, `pnpm run:web`,
+
+   and per-package verification.
+
+3. [core/virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md)
+
+   — how UI updates work.
+
+4. [ryunix-presets/cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md)
+
+   — how apps are built and served.
+
+5. Deep-dive into any `core/` or `ryunix-presets/` doc as needed.
 
 ---
 
 ## Other languages
 
-| Language | Index | Monorepo guide |
-| :--- | :--- | :--- |
-| English | [docs/en/overview.md](./overview.md) | [repository-guide.md](./repository-guide.md) |
-| Español | [docs/es/resumen.md](../es/resumen.md) | [guia-del-repositorio.md](../es/guia-del-repositorio.md) |
+| Language | Index                                  | Monorepo guide                                                 |
+| :------- | :------------------------------------- | :------------------------------------------------------------- |
+| English  | [docs/en/overview.md](./overview.md)   | [repository-guide.md](./guides/repository-guide.md)            |
+| Español  | [docs/es/resumen.md](../es/resumen.md) | [guia-del-repositorio.md](../es/guias/guia-del-repositorio.md) |
 
-Public README: [README.md](../../README.md) · [README.es.md](../../README.es.md).
+Public README: [README.md](../../README.md) ·
+[README.es.md](../../README.es.md).

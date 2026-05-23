@@ -13,7 +13,7 @@ Este repositorio es un **monorepo del framework**, no una app de usuario. Coloca
 2. **¿Webpack, CLI `ryunix`, routing compile-time, SSG, API server?** → `packages/ryunix-presets/webpack/`.
 3. **¿Scaffolding, plantillas `create-app`, helpers del CLI?** → `packages/cra/src/` o `packages/cra/templates/`.
 4. **¿Extensión de navegador DevTools?** → `packages/ryunix-devtools/`.
-5. **¿Documentación de arquitectura o guías?** → `docs/` (`docs/en/`, `docs/es/`, `docs/core/`, `docs/repository-guide.md`, `docs/es/guia-del-repositorio.md`).
+5. **¿Documentación de arquitectura o guías?** → `docs/` (`docs/en/overview.md`, `docs/es/resumen.md`, `docs/en/guides/`, `docs/es/guias/`, `docs/*/core/`, etc.).
 6. **¿Scripts globales del workspace, Turbo, ESLint raíz?** → raíz (`package.json`, `turbo.json`, `eslint.config.mjs`).
 7. **¿App de prueba local del mantenedor?** → `test/` (gitignored; no publicar como paquete).
 

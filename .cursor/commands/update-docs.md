@@ -1,141 +1,175 @@
 # Actualizar documentación (RyunixJS)
 
-Usar cuando el usuario pida **actualizar la documentación**, **sincronizar README**, **revisar docs** o invoque este comando. El objetivo es que la documentación refleje el **código real** del monorepo.
+Comando para **traducir y mantener paridad** entre documentación en español e inglés. Uso principal: **sincronizar la versión EN a partir de ES** (o la inversa si el archivo fuente indicado está en inglés).
+
+Paridad Claude Code: `.claude/commands/update-docs.md` (`/update-docs`).
 
 ## Cuándo ejecutar
 
-- El usuario invoca este comando o pide explícitamente actualizar documentación.
-- Tras cambios en arquitectura, paquetes, CLI `ryunix`, plantillas CRA, hooks públicos o scripts raíz.
+- El usuario invoca **`/update-docs`** o pide traducir / sincronizar docs.
+- Tras editar un doc en un idioma y falta la contraparte en el otro.
 - **No** editar docs si el usuario no lo pidió (salvo que este comando sea la petición).
 
-## Fuentes de verdad (revisar siempre antes de escribir)
+## Modos de operación
 
-Explorar el repo; **no** confiar solo en textos desactualizados.
+### 1. Traducción (modo por defecto)
+
+**Sin argumento:** traducir o sincronizar los pares bilingües globales pendientes, empezando por ES → EN si hay desfase.
+
+**Con archivo concreto** (ruta relativa al repo):
+
+1. Identificar el par EN ↔ ES del archivo indicado.
+2. Tratar el archivo pasado como **fuente**; actualizar su **contraparte** en el otro idioma.
+3. Si la contraparte no existe, crearla en la ruta del mapa (abajo).
+4. Si el archivo indicado ya está en el idioma destino, usar el par como referencia y sincronizar el otro lado.
+
+Ejemplos:
+
+```text
+/update-docs docs/es/guias/guia-de-pruebas.md     → actualiza docs/en/guides/testing-guide.md
+/update-docs docs/en/guides/repository-guide.md    → actualiza docs/es/guias/guia-del-repositorio.md
+/update-docs README.es.md                   → actualiza README.md
+```
+
+**Dirección habitual:** `docs/es/*` → `docs/en/*`. Si el usuario pasa un archivo EN, la dirección es EN → ES.
+
+### 2. Sincronización con el repo (solo si el usuario lo pide)
+
+Activar cuando el usuario indique explícitamente que un doc es **generado por IA**, lleva **fecha de última actualización**, o pide **revisar contra el código** (no solo traducir).
+
+En ese modo:
+
+1. Inspeccionar el código y config real (tabla «Fuentes de verdad»).
+2. Corregir el archivo fuente si está desactualizado respecto al repo.
+3. Traducir o sincronizar la contraparte bilingüe.
+4. Actualizar la fecha de última revisión al final del archivo **solo si el doc ya usa ese pie**; no añadir el pie en docs que no lo tengan salvo petición explícita.
+
+**Prioridad:** traducción fiel del contenido acordado. La revisión contra código es un paso extra, no sustituye la traducción del par.
+
+## Selector de idioma (obligatorio en docs globales)
+
+Al inicio de cada doc bilingüe global, usar **exactamente** este formato:
+
+```markdown
+> **Language / Idioma:** [English](./ruta-en.md) · [Español](./ruta-es.md)
+```
+
+- Siempre `Language / Idioma` (inglés primero en la etiqueta).
+- Enlaces: English · Español.
+- Eliminar formas incongruentes: `Spanish version:`, `Equivalente en inglés:`, tablas «Other languages», `Idioma / Language` invertido, etc.
+
+## Mapa de pares EN ↔ ES
+
+### Raíz del repositorio
+
+| English | Español |
+| :--- | :--- |
+| `README.md` | `README.es.md` |
+| `CONTRIBUTING.md` | `CONTRIBUTING.es.md` |
+| `SECURITY.md` | `SECURITY.es.md` |
+
+### Docs globales (`docs/`)
+
+| English | Español |
+| :--- | :--- |
+| `docs/en/overview.md` | `docs/es/resumen.md` |
+| `docs/en/guides/repository-guide.md` | `docs/es/guias/guia-del-repositorio.md` |
+| `docs/en/guides/testing-guide.md` | `docs/es/guias/guia-de-pruebas.md` |
+| `docs/en/guides/tech-stack-and-scripts.md` | `docs/es/guias/pila-tecnologica-y-scripts.md` |
+
+### `core/`
+
+| English | Español |
+| :--- | :--- |
+| `docs/en/core/virtual-dom-and-reconciliation.md` | `docs/es/core/vdom-y-reconciliacion.md` |
+| `docs/en/core/hooks.md` | `docs/es/core/hooks.md` |
+| `docs/en/core/rendering.md` | `docs/es/core/renderizado.md` |
+| `docs/en/core/state-and-priority.md` | `docs/es/core/estado-y-prioridad.md` |
+| `docs/en/core/advanced-components.md` | `docs/es/core/componentes-avanzados.md` |
+| `docs/en/core/components.md` | `docs/es/core/componentes.md` |
+| `docs/en/core/server-features.md` | `docs/es/core/funciones-servidor.md` |
+| `docs/en/core/error-boundary.md` | `docs/es/core/limites-de-error.md` |
+| `docs/en/core/devtools-and-profiler.md` | `docs/es/core/devtools-y-profiler.md` |
+
+### `ryunix-presets/`
+
+| English | Español |
+| :--- | :--- |
+| `docs/en/ryunix-presets/cli-and-bootstrapping.md` | `docs/es/ryunix-presets/cli-y-arranque.md` |
+| `docs/en/ryunix-presets/configuration-loading.md` | `docs/es/ryunix-presets/carga-de-configuracion.md` |
+| `docs/en/ryunix-presets/routing-and-ssg.md` | `docs/es/ryunix-presets/enrutamiento-y-ssg.md` |
+| `docs/en/ryunix-presets/api-router.md` | `docs/es/ryunix-presets/enrutador-api.md` |
+| `docs/en/ryunix-presets/webpack-loaders.md` | `docs/es/ryunix-presets/loaders-webpack.md` |
+| `docs/en/ryunix-presets/file-based-errors.md` | `docs/es/ryunix-presets/errores-por-archivo.md` |
+
+### `cra/`
+
+| English | Español |
+| :--- | :--- |
+| `docs/en/cra/cli-and-helpers.md` | `docs/es/cra/cli-y-ayudantes.md` |
+| `docs/en/cra/template-generation.md` | `docs/es/cra/generacion-de-plantillas.md` |
+
+Tras crear un doc nuevo en un idioma, añadir la fila al mapa en **este comando** y actualizar `docs/en/overview.md` / `docs/es/resumen.md`.
+
+## Fuentes de verdad (modo sincronización con repo)
+
+Usar solo en modo 2 o cuando el contenido traducido deba reflejar el código actual.
 
 | Área | Dónde mirar |
 | :--- | :--- |
 | Runtime (hooks, render, SSR) | `packages/core/src/lib/`, `packages/core/package.json` |
 | API pública del core | `packages/core/src/lib/index.js`, `packages/core/README.md` |
 | Tooling y CLI | `packages/ryunix-presets/webpack/bin/`, `packages/ryunix-presets/package.json` |
-| Routing / SSG / API | `packages/ryunix-presets/webpack/utils/`, `docs/ryunix-presets/` |
-| Plantillas de apps | `packages/cra/templates/ryunix-base/` (y variantes) |
-| Scaffolding CRA | `packages/cra/src/`, `docs/cra/` |
+| Routing / SSG / API | `packages/ryunix-presets/webpack/utils/` |
+| Plantillas de apps | `packages/cra/templates/ryunix-base/` |
+| Scaffolding CRA | `packages/cra/src/` |
 | DevTools | `packages/ryunix-devtools/` |
 | Scripts del monorepo | `package.json` raíz, `turbo.json`, `pnpm-workspace.yaml` |
 | Contribución | `CONTRIBUTING.md`, `README.md` |
-| Agentes (Cursor / Claude) | `.cursor/`, `.claude/`, `CLAUDE.md` |
 
-## Archivos de documentación a mantener
+## Reglas de traducción y redacción
 
-| Archivo | Rol |
-| :--- | :--- |
-| `README.md` (raíz) | Presentación pública: qué es Ryunix, paquetes, inicio rápido con CRA |
-| `docs/README.md` | Índice de documentación interna |
-| `docs/repository-guide.md` | Guía EN del monorepo |
-| `docs/es/guia-del-repositorio.md` | Guía ES del monorepo |
-| `docs/es/resumen.md` | Índice docs en español |
-| `docs/core/*.md`, `docs/en/core/*.md` | Runtime |
-| `docs/ryunix-presets/*.md`, `docs/en/ryunix-presets/*.md` | Tooling |
-| `docs/cra/*.md`, `docs/en/cra/*.md` | CRA y plantillas |
-| `packages/core/README.md` | API del paquete publicado |
-| `packages/*/README.md` | Readmes por paquete si existen |
-| `CONTRIBUTING.md` | Setup, ramas, commits, releases |
-| `.cursor/commands/auto-commit.md` | Convenciones de commit (no duplicar largo en README) |
-
-**No** asumir `README.EN.md` en la raíz: este monorepo usa `README.md` + docs bilingües bajo `docs/` cuando aplique.
-
-## Descripción actual del producto (baseline)
-
-**RyunixJS** — framework de UI **standalone** (sin React embebido), monorepo con:
-
-- `@unsetsoft/ryunixjs` (`packages/core`) — reconciler, hooks, SSR.
-- `@unsetsoft/ryunix-presets` — CLI `ryunix`, Webpack dual, SSG, APIs.
-- `@unsetsoft/cra` — `npx @unsetsoft/cra@latest`.
-- `@unsetsoft/ryunix-devtools` — extensión de navegador.
-
-**Apps generadas** (plantilla base): `app/*.ryx`, `app/layout.ryx`, `app/errors.ryx`, `app/api/**/router.js`, `ryunix.config.js`, scripts `ryunix dev|build|start`.
-
-**Stack del monorepo:** pnpm workspaces, Turbo, ESLint 9, Prettier, Jest (core).
-
-## Estructura de referencia (monorepo)
-
-```
-/
-├── package.json          # scripts turbo, release, lint
-├── pnpm-workspace.yaml
-├── turbo.json
-├── packages/
-│   ├── core/             # @unsetsoft/ryunixjs
-│   ├── ryunix-presets/   # CLI ryunix + webpack
-│   ├── cra/              # create-ryunix-app + templates/
-│   └── ryunix-devtools/
-├── docs/                 # documentación interna
-├── assets/               # logo README
-└── .github/              # CI, templates
-```
-
-**Rutas obsoletas a corregir si aparecen en docs:**
-
-- `packages/ryunix` → `packages/core`
-- `src/app/page.tsx` / Next.js App Router → `app/*.ryx` en apps Ryunix
-- `useState` de React → `useStore` de Ryunix en ejemplos del core
-- `next dev` / `next build` → `ryunix dev` / `ryunix build` en apps
-
-## Secciones recomendadas al actualizar README raíz
-
-1. Qué es RyunixJS y paquetes npm
-2. Inicio rápido (`npx @unsetsoft/cra@latest`)
-3. Características (SSR, SSG, hooks, zero deps en core)
-4. Tabla de paquetes del monorepo
-5. Desarrollo del monorepo (`pnpm install`, `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`)
-6. Enlace a `CONTRIBUTING.md`, `docs/repository-guide.md` y `docs/es/guia-del-repositorio.md`
-7. Licencia
-
-## Scripts a documentar (monorepo raíz)
-
-| Comando | Descripción |
-| :--- | :--- |
-| `pnpm install` | Instalar workspaces |
-| `pnpm run dev` | Desarrollo vía Turbo |
-| `pnpm run build` | Build de paquetes |
-| `pnpm run test` | Tests |
-| `pnpm run lint` / `lint:fix` | ESLint + lint por paquete |
-| `pnpm run format` / `format:check` | Prettier |
-| `pnpm run clean` | Limpiar artefactos |
-| `pnpm run run:web` | App de prueba webpack (requiere `test/` local) |
-| `pnpm run release:canary` / `release:stable` | Release (mantenedores) |
-
-## Reglas de redacción
-
-- Prosa clara; tablas para paquetes y scripts.
-- **No inventar** APIs o carpetas que no existan.
+- **Tono documental:** impersonal, factual; no dirigirse al lector («cuando un mantenedor dice…», «tu app», «usa…»).
+- **Paridad estructural:** mismos encabezados, tablas, bloques de código y enlaces relativos adaptados al idioma destino.
+- **No inventar** APIs, carpetas o comandos que no existan en el repo.
+- **No traducir** identificadores de código (`useStore`, `ryunix dev`, rutas de archivos) salvo prosa alrededor.
 - **No documentar** secretos (`.env`, tokens).
-- Guías ES/EN en `docs/`: misma estructura; enlaces cruzados al inicio del archivo.
-- Si solo pidieron «revisar», listar desfases sin editar; si pidieron «actualizar», aplicar cambios.
+- Mantener nombres de archivo en español bajo `docs/es/` (p. ej. `guia-de-pruebas.md`, no `testing-guide.md` en ES).
+- Rutas obsoletas a corregir si aparecen: `packages/ryunix` → `packages/core`; Next.js (`page.tsx`, `next dev`) → Ryunix (`.ryx`, `ryunix dev`); `useState` → `useStore` en ejemplos del core.
 
 ## Proceso para el agente
 
-1. Inspeccionar `packages/*`, scripts raíz y plantillas CRA.
-2. Comparar `README.md`, `docs/` y readmes de paquetes con el código.
-3. Actualizar par bilingüe `docs/repository-guide.md` ↔ `docs/es/guia-del-repositorio.md`.
-4. Actualizar `docs/en/overview.md` y `docs/es/resumen.md` si hay documentos nuevos (mantener nombres en español bajo `docs/es/`).
-5. Mantener paridad `.cursor/` ↔ `.claude/` si cambian convenciones de agente.
-6. No modificar `auto-commit.md` salvo cambio explícito de convenciones de commit.
+### Traducción (modo 1)
+
+1. Resolver el par EN ↔ ES (mapa o argumento del usuario).
+2. Leer el archivo **fuente** completo.
+3. Traducir / sincronizar la **contraparte** preservando estructura y enlaces.
+4. Añadir o corregir el selector `Language / Idioma` en ambos archivos del par.
+5. Si el doc nuevo es global, enlazarlo desde `docs/en/overview.md` y `docs/es/resumen.md`.
+6. No modificar código en `packages/` salvo petición explícita.
+
+### Sincronización con repo (modo 2)
+
+1. Pasos 1–4 del modo traducción.
+2. Contrastar afirmaciones técnicas con «Fuentes de verdad».
+3. Corregir desfases en fuente y contraparte.
+4. Actualizar índices si cambió la lista de documentos.
 
 ## Commits de documentación
 
 Si el usuario pide commit, usar `.cursor/commands/auto-commit.md`:
 
 ```text
-docs(guide): sync monorepo structure with packages and scripts
+docs(guide): sync testing guide EN with guia-de-pruebas ES
 
-docs(readme): update getting started and package table
+docs(es): translate repository guide updates to guia-del-repositorio
 ```
 
 Scopes útiles: `readme`, `guide`, `core`, `presets`, `cra`, `cursor`, `claude`, `ci`.
 
 ## Resumen para el agente
 
-- Este repo es el **framework**, no una app Next.js.
-- El código manda; README y `docs/` se adaptan.
-- Mantener coherencia con `.cursor/rules/component-scope.mdc` y `CONTRIBUTING.md`.
+- **Uso normal:** traducir el par bilingüe; fuente habitual ES → EN.
+- **Con archivo:** el argumento es la fuente; actualizar la contraparte del mapa.
+- **Con «IA / fecha / revisar repo»:** traducir y además validar contra el código.
+- Mantener selector `Language / Idioma` y tono documental en toda doc global.
