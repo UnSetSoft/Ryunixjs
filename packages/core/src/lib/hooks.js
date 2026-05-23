@@ -464,6 +464,14 @@ const findRoute = (routes, path) => {
   return notFound
 }
 
+const getSsrPathname = () => {
+  const pathname = globalThis?.window?.location?.pathname
+  if (typeof pathname === 'string' && pathname) {
+    return pathname.split('?')[0].split('#')[0]
+  }
+  return '/'
+}
+
 /**
  * The `RouterProvider` component manages routing in a Ryunix application by updating the location based
  * on window events and providing context for the current route.
@@ -473,7 +481,7 @@ const findRoute = (routes, path) => {
 const RouterProvider = ({ routes, children }) => {
   // SSR: Return server-safe version without hooks
   if (typeof window === 'undefined') {
-    const location = '/'
+    const location = getSsrPathname()
     const currentRouteData = findRoute(routes, location) || {}
     const contextValue = {
       location,
