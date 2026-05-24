@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node10",
+    "noEmit": false,
+    "outDir": "webpack/.ts-out",
+    "rootDir": "webpack",
+    "declaration": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "types": ["node"]
+  },
+  "include": ["webpack/index.ts", "webpack/eslint.config.ts"]
+}

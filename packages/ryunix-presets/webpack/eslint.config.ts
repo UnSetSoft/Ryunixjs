@@ -15,7 +15,7 @@ import { defineConfig } from 'eslint/config'
  */
 const eslintConfig = defineConfig([
   {
-    files: ['**/*.ryx', ...config?.eslint?.files],
+    files: ['**/*.ryx', ...(config?.eslint?.files ?? [])],
 
     ignores: ['**/*.mdx', '**/*.md', '**/node_modules/**'],
 
@@ -35,8 +35,8 @@ const eslintConfig = defineConfig([
         fragment: 'Ryunix.Fragment',
       },
     },
-    plugins: config?.eslint?.plugins,
-    rules: config?.eslint?.rules,
+    plugins: config?.eslint?.plugins as never,
+    rules: config?.eslint?.rules as never,
   },
 ])
 

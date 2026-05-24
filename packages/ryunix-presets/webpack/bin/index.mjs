@@ -14,7 +14,7 @@ import {
   resolveApp,
 } from '../utils/index.mjs'
 import { ESLint } from 'eslint'
-import eslintConfig from '../eslint.config.mjs'
+import eslintConfig from '../eslint.config.js'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'

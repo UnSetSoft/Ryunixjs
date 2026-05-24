@@ -8,5 +8,6 @@
     "module": "ESNext",
     "target": "ES2022"
   },
-  "include": ["webpack/plugins/remark-github-alerts.ts"]
+  "include": ["webpack/plugins/remark-github-alerts.ts"],
+  "exclude": ["node_modules", "webpack/**/*.js", "webpack/**/*.mjs"]
 }

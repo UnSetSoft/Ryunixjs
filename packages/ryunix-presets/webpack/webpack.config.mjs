@@ -712,7 +712,7 @@ const clientConfig = {
       failOnError: false,
       configType: 'flat',
       // ESLint 9 flat config requires a config file on disk; overrideConfig alone is not enough.
-      overrideConfigFile: join(__dirname, 'eslint.config.mjs'),
+      overrideConfigFile: join(__dirname, 'eslint.config.js'),
     }),
     ...getPlugins(false),
   ].filter(Boolean),
