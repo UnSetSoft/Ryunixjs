@@ -4,8 +4,8 @@
 > [Español](../../es/guias/typescript-en-el-monorepo.md)
 
 Reference for **how TypeScript is set up in this repository**: shared config,
-scripts, published types for npm consumers, and the incremental migration of
-maintainer source code. It complements package READMEs and
+scripts, published types for npm consumers, and maintainer source in TypeScript.
+It complements package READMEs and
 [tech-stack-and-scripts.md](./tech-stack-and-scripts.md).
 
 **Last reviewed:** 2026-05-24
@@ -19,6 +19,7 @@ maintainer source code. It complements package READMEs and
   - [Scope](#scope)
   - [Two goals](#two-goals)
   - [Migration phases (maintainers)](#migration-phases-maintainers)
+  - [What remains in JavaScript](#what-remains-in-javascript)
   - [Shared infrastructure (root)](#shared-infrastructure-root)
   - [Per-package layout](#per-package-layout)
   - [Scripts](#scripts)
@@ -32,13 +33,13 @@ maintainer source code. It complements package READMEs and
 
 | In scope | Out of scope |
 | :------- | :----------- |
-| `tsconfig` files, `typecheck`, emit scripts in `packages/` | Rewriting the entire core in `.ts` (ongoing, phased) |
-| Published `.d.ts` for `@unsetsoft/*` | Full API reference of every hook (see `packages/core` README) |
-| `checkJs` + JSDoc in `packages/core` | TypeScript config inside user apps beyond pointers |
+| `tsconfig` files, `typecheck`, emit scripts in `packages/` | Full API reference of every hook (see `packages/core` README) |
+| Published `.d.ts` for `@unsetsoft/*` | TypeScript config inside user apps beyond pointers |
+| Runtime, CLI, presets, and DevTools source in `.ts` | CRA templates and generated apps (stay JS / `.ryx`) |
 
 Runtime bundles shipped to npm remain **JavaScript** (Rollup/Webpack). TypeScript
-is used for **static checking**, **editor support**, and **gradual source
-migration**.
+is used for **static checking**, **editor support**, and **authoring maintainer
+source** in monorepo packages.
 
 ---
 
@@ -47,30 +48,44 @@ migration**.
 | Goal | Audience | What it means in this repo |
 | :--- | :------- | :------------------------- |
 | **A. Types for consumers** | Apps using TS, typed `ryunix.config.js`, imports from `@unsetsoft/*` | Hand-written `.d.ts`, `"types"` in `package.json`, JSDoc in public APIs |
-| **B. Source in TypeScript** | Monorepo maintainers | `.ts` files, `tsc` emit where needed, Rollup TS plugin for core modules |
+| **B. Source in TypeScript** | Monorepo maintainers | `.ts` files, `tsc` emit where needed, Rollup over emitted JS (core) |
 
-Goal **A** is largely done for presets and core. Goal **B** is **incremental**
-(one module or folder at a time).
+Both goals are **complete** across the four published packages (`core`, `presets`,
+`cra`, `devtools`). Remaining `.js` is intentional (JSX runtime, tests, legacy
+`.cjs`, or user-facing templates).
 
 ---
 
 ## Migration phases (maintainers)
 
-Internal plan (phases 0–7). Status as of 2026-05:
+Internal plan (phases 0–7). Status as of 2026-05-24:
 
 | Phase | Name | Status | Deliverable |
 | :---: | :--- | :----- | :------------ |
 | **0** | Shared infra | Done | `tsconfig.base.json`, per-package `tsconfig.json`, `pnpm run typecheck`, CI |
 | **1** | Presets consumer types | Done | `webpack/config.d.ts`, `RyunixUserConfig`, CRA template JSDoc |
 | **2** | Core consumer types | Done | `types/index.d.ts`, JSX runtime `.d.ts`, `"types"` on `@unsetsoft/ryunixjs` |
-| **3** | `checkJs` + JSDoc (core) | Done (1st pass) | `tsconfig.checkjs.json` over `src/utils/**` + `src/lib/**`, `internal.d.ts` |
-| **4** | CRA source TS | Started | `get-pkg-manager.ts` + `build:helpers` |
-| **5** | DevTools source TS | Started | `background.ts` + `build:background` |
-| **6** | Presets source TS | Started | `remark-github-alerts.ts` + `build:plugins` |
-| **7** | Core source TS | Started | `batching.ts` via `@rollup/plugin-typescript` in Rollup |
+| **3** | `checkJs` + JSDoc (core) | Done | `tsconfig.checkjs.json` over `jsx/**/*.js` (JSX runtime) |
+| **4** | CRA source TS | Done | All of `src/` in `.ts`; `build` emits `.js` under `src/` |
+| **5** | DevTools source TS | Done | All extension scripts in `.ts`; `build` emits `.js` |
+| **6** | Presets source TS | Done | All of `webpack/**/*.ts`; `build` emits `.js` next to source |
+| **7** | Core source TS | Done | `src/lib/**`, `src/utils/**`, `src/main.ts`; `build:lib-ts` emits `.js` under `src/` |
 
-**Order for more `.ts` in core:** utilities and public API → hooks → components →
-reconciler / work loop (highest risk last).
+---
+
+## What remains in JavaScript
+
+| Location | Reason |
+| :------- | :----- |
+| `packages/core/jsx/**/*.js` | Published JSX runtime; optional check via `typecheck:checkjs` |
+| `packages/core/src/tests/**` | Jest tests in JS |
+| `packages/ryunix-presets/webpack/*.cjs` | Legacy CommonJS config (`config.cjs`, `settingfile.cjs`, `envExist.cjs`) |
+| `packages/ryunix-presets/webpack/plugins/remark-github-alerts.test.mjs` | Node test for the remark plugin |
+| `packages/cra/templates/**` | Scaffolding for end-user apps |
+| Root `eslint.config.mjs` | Workspace ESLint config |
+
+`.js` files emitted by `tsc` in `core`, `presets`, `cra`, and `devtools` **are
+committed**; Node and Webpack consume them directly.
 
 ---
 
@@ -81,7 +96,7 @@ reconciler / work loop (highest risk last).
 Base compiler options for all packages:
 
 - `allowJs: true`, `checkJs: false` (strict checking enabled per package or via
-  `tsconfig.checkjs.json`)
+  dedicated configs such as `tsconfig.checkjs.json`)
 - `noEmit: true` at base level (packages override when emitting JS)
 - `strict: false` globally — tightened incrementally, not repo-wide on day one
 
@@ -119,27 +134,30 @@ Each package has its own `tsconfig.json` extending this file.
 See also [packages/core/README.md](../../packages/core/README.md) (TypeScript
 section).
 
-**Maintainer checking (goal B)**
+**Maintainer source (goal B)**
 
 | File | Role |
 | :--- | :--- |
-| `tsconfig.json` | Includes `src/**/*.js`, `src/**/*.ts`, `jsx/`, `types/` |
-| `tsconfig.checkjs.json` | `checkJs: true`, `noImplicitAny: true` on `src/utils/**` and `src/lib/**` |
+| `src/lib/**/*.ts` | Full runtime (hooks, reconciler, DOM, SSR, …) |
+| `src/utils/**/*.ts`, `src/main.ts` | Utilities and Rollup entry |
 | `src/types/internal.d.ts` | Internal fiber/hook/DOM types (not published) |
-| `src/lib/batching.ts` | First runtime module in TypeScript |
-| `rollup.config.js` | `@rollup/plugin-typescript` transpiles `src/**/*.ts` into bundles |
+| `tsconfig.json` | Typecheck: `src/**/*.ts`, `jsx/**/*.js`, `types/` |
+| `tsconfig.emit.json` | Emits `.js` under `src/` (same folder as `.ts` source) |
+| `tsconfig.checkjs.json` | Optional JSX runtime check (`jsx/**/*.js`) |
+| `rollup.config.js` | Bundles from `src/main.js` (emitted) into `dist/` |
 
 **Scripts**
 
 | Script | Command |
 | :----- | :------ |
-| `typecheck` | `tsc --noEmit -p tsconfig.json` **and** `tsconfig.checkjs.json` |
-| `typecheck:checkjs` | JSDoc/`checkJs` pass only |
-| `build` | Rollup (JS + TS sources) |
+| `typecheck` | `tsc --noEmit -p tsconfig.json` |
+| `typecheck:checkjs` | `tsc --noEmit -p tsconfig.checkjs.json` (JSX runtime only) |
+| `build:lib-ts` | `tsc -p tsconfig.emit.json` — regenerates `.js` under `src/` |
+| `build` | Rollup → artifacts in `dist/` |
+| `prepublishOnly` | `build:lib-ts` + `build` |
 
-**Build note:** Most of `packages/core` is still `.js`. Rollup resolves
-`import './batching.js'` to `batching.ts` via the TS plugin and `.ts` in resolve
-extensions.
+After editing any `.ts` under `src/lib/`, `src/utils/`, or `src/main.ts`, run
+`build:lib-ts` before testing Rollup or the local integration app.
 
 ---
 
@@ -160,67 +178,66 @@ and package README.
 
 | File | Role |
 | :--- | :--- |
-| `webpack/plugins/remark-github-alerts.ts` | Source for MDX GitHub alerts plugin |
-| `webpack/plugins/remark-github-alerts.js` | Emitted ESM (committed; regenerate with `build:plugins`) |
-| `tsconfig.plugins.json` | Emit config for the plugin |
+| `webpack/**/*.ts` | Webpack config, CLI (`bin/`), loaders, plugins, utils |
+| `webpack/types/presets-shims.d.ts` | Stubs for untyped modules |
+| `webpack/utils/config.cjs.d.ts` | Types for legacy CJS config |
+| `tsconfig.emit.json` | Emits ESM `.js` under `webpack/` (same path as source) |
 
-**Scripts**
-
-| Script | Command |
-| :----- | :------ |
-| `typecheck` | `tsc --noEmit -p tsconfig.json` (includes `webpack/**/*.ts`, `.d.ts`, `.js`, `.mjs`) |
-| `build:plugins` | `tsc -p tsconfig.plugins.json` |
-| `test` | Node test runner for remark plugin |
-
-Webpack imports `./plugins/remark-github-alerts.js` (not `.mjs`).
-
----
-
-### `@unsetsoft/cra` (`packages/cra`)
-
-**Maintainer source (goal B — started)**
-
-| File | Role |
-| :--- | :--- |
-| `src/helpers/get-pkg-manager.ts` | Typed helper for detecting npm/yarn/pnpm/bun |
-| `src/helpers/get-pkg-manager.js` | CommonJS emit for `require()` from `create-app.js` |
-| `tsconfig.emit.json` | Emits helper JS into `src/helpers/` |
-
-Most of CRA remains `.js` (Commander CLI, templates are unchanged).
-
-**Scripts**
-
-| Script | Command |
-| :----- | :------ |
-| `typecheck` | `tsc --noEmit -p tsconfig.json` (includes `src/**/*.ts`) |
-| `build:helpers` | `tsc -p tsconfig.emit.json` |
-
-Run `build:helpers` after editing `get-pkg-manager.ts` so Node loads fresh JS.
-
----
-
-### `@unsetsoft/ryunix-devtools` (`packages/ryunix-devtools`)
-
-**Maintainer source (goal B — started)**
-
-| File | Role |
-| :--- | :--- |
-| `background.ts` | Service worker source |
-| `background.js` | Emitted script referenced by `manifest.json` |
-| `chrome.d.ts` | Minimal Chrome extension API stubs (no `@types/chrome` dep) |
-| `tsconfig.emit.json` | Emits `background.js` |
-
-Other extension scripts (`panel.js`, `hook.js`, …) are still JavaScript.
+Source imports use the **`.js`** extension (ESM resolution to emitted artifacts).
+The published binary is `webpack/bin/index.js`.
 
 **Scripts**
 
 | Script | Command |
 | :----- | :------ |
 | `typecheck` | `tsc --noEmit -p tsconfig.json` |
-| `build:background` | `tsc -p tsconfig.emit.json` |
+| `build` | `tsc -p tsconfig.emit.json` |
+| `test` | Remark plugin tests (`remark-github-alerts.test.mjs`) |
+| `prepublishOnly` | `build` |
 
-Run `build:background` before loading the unpacked extension after editing
-`background.ts`.
+---
+
+### `@unsetsoft/cra` (`packages/cra`)
+
+**Maintainer source (goal B — done)**
+
+| Aspect | Detail |
+| :----- | :----- |
+| Source | `src/**/*.ts` (`cli.ts`, `create-app.ts`, `helpers/*`) |
+| Emit | `tsconfig.emit.json` → CommonJS `.js` under `src/` (including `cli.js` for `bin`) |
+| Templates | `templates/` stay JS / `.ryx` (generated apps, not the CRA package) |
+
+**Scripts**
+
+| Script | Command |
+| :----- | :------ |
+| `typecheck` | `tsc --noEmit -p tsconfig.json` |
+| `build` | `tsc -p tsconfig.emit.json` |
+
+Package docs: [docs/en/cra/package-overview.md](../cra/package-overview.md).
+Run `build` after editing any `.ts` under `src/` before testing `node src/cli.js`.
+
+---
+
+### `@unsetsoft/ryunix-devtools` (`packages/ryunix-devtools`)
+
+**Maintainer source (goal B — done)**
+
+| File | Role |
+| :--- | :--- |
+| `background.ts`, `content-script.ts`, `devtools.ts`, `hook.ts`, `panel.ts` | Extension sources |
+| Emitted `*.js` | Referenced by `manifest.json` and extension flow |
+| `chrome.d.ts`, `window.d.ts` | Minimal stubs (no `@types/chrome` dependency) |
+| `tsconfig.emit.json` | Emits all script `.js` at package root |
+
+**Scripts**
+
+| Script | Command |
+| :----- | :------ |
+| `typecheck` | `tsc --noEmit -p tsconfig.json` |
+| `build` | `tsc -p tsconfig.emit.json` |
+
+Run `build` before reloading the unpacked extension in Chrome.
 
 ---
 
@@ -230,23 +247,25 @@ Run `build:background` before loading the unpacked extension after editing
 
 ```bash
 pnpm run typecheck          # all packages (Turbo)
-pnpm --filter @unsetsoft/ryunixjs run typecheck:checkjs   # core JSDoc only
-pnpm --filter @unsetsoft/cra run build:helpers            # after editing get-pkg-manager.ts
-pnpm --filter @unsetsoft/ryunix-devtools run build:background
-pnpm --filter @unsetsoft/ryunix-presets run build:plugins
+pnpm --filter @unsetsoft/ryunixjs run typecheck:checkjs   # JSX runtime only
+pnpm --filter @unsetsoft/cra run build
+pnpm --filter @unsetsoft/ryunix-devtools run build
+pnpm --filter @unsetsoft/ryunix-presets run build
+pnpm --filter @unsetsoft/ryunixjs run build:lib-ts        # after editing runtime .ts
 ```
 
 ### Typical maintainer workflow
 
 ```text
 1. pnpm install
-2. Edit code (JS with JSDoc and/or .ts)
+2. Edit code (.ts in packages; jsx/**/*.js in core when needed)
 3. pnpm run typecheck                    ← required before PR
 4. If you changed emitted .ts sources:
-   - cra:      pnpm --filter @unsetsoft/cra run build:helpers
-   - devtools: pnpm --filter @unsetsoft/ryunix-devtools run build:background
-   - presets:  pnpm --filter @unsetsoft/ryunix-presets run build:plugins
-5. If you changed packages/core (especially .ts or public API):
+   - core:     pnpm --filter @unsetsoft/ryunixjs run build:lib-ts
+   - cra:      pnpm --filter @unsetsoft/cra run build
+   - devtools: pnpm --filter @unsetsoft/ryunix-devtools run build
+   - presets:  pnpm --filter @unsetsoft/ryunix-presets run build
+5. If you changed packages/core and need dist/ or publish:
    pnpm --filter @unsetsoft/ryunixjs run build
 6. pnpm run test && pnpm run lint
 ```
@@ -269,8 +288,8 @@ When adding **new `.ts` files**:
 1. Include them in the package `tsconfig.json` (or an emit config).
 2. Add or extend `typecheck` if the package did not compile them before.
 3. For runtime `.js` consumed by Node or Webpack without bundling, provide an
-   **emit script** (CRA, DevTools, presets plugin pattern) or wire **Rollup**
-   (core pattern).
+   **emit script** (CRA, DevTools, presets pattern) or **emit + Rollup** (core
+   pattern).
 
 ---
 

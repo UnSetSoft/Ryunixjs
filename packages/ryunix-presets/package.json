@@ -30,11 +30,11 @@
   },
   "types": "./webpack/config.d.ts",
   "bin": {
-    "ryunix": "./webpack/bin/index.mjs"
+    "ryunix": "./webpack/bin/index.js"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "tsc -p tsconfig.plugins.json && tsc -p tsconfig.webpack-entry.json && node scripts/copy-webpack-entry.mjs",
+    "build": "tsc -p tsconfig.emit.json",
     "prepublishOnly": "npm run build",
     "test": "node --test webpack/plugins/remark-github-alerts.test.mjs"
   },

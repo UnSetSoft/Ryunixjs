@@ -11,7 +11,7 @@ developer overlay exclusively via declarative convention logic.
 - [Ryunix Presets: File-Based Error Interception](#ryunix-presets-file-based-error-interception)
   - [Table of contents](#table-of-contents)
   - [1. App Router Error Catching (`error.ryx`)](#1-app-router-error-catching-errorryx)
-  - [2. Global Development Injection (`webpack.config.mjs`)](#2-global-development-injection-webpackconfigmjs)
+  - [2. Global Development Injection (`webpack.config.js`)](#2-global-development-injection-webpackconfigjs)
 
 ---
 
@@ -21,7 +21,7 @@ During the automated directory traversal scanning inside the
 `.ryunix/server/app/app-router.js` transpilation cycle, Ryunix intrinsically
 looks for isolated `error.ryx` nodes universally.
 
-`AppRouterPlugin.mjs` identifies specific export bindings (e.g.
+`AppRouterPlugin.js` identifies specific export bindings (e.g.
 `export default function Error()`) directly injecting it globally across the
 nearest `isServerComponent` topology segment.
 
@@ -44,7 +44,7 @@ nearest `isServerComponent` topology segment.
 
 ---
 
-## 2. Global Development Injection (`webpack.config.mjs`)
+## 2. Global Development Injection (`webpack.config.js`)
 
 Ryunix completely overrides string-based generic Webpack WebSockets injecting
 its own strongly typed dual-compiler extraction overlays physically interacting

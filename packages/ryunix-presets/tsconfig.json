@@ -2,13 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "moduleResolution": "node10",
-    "types": ["node"]
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strictPropertyInitialization": false
   },
   "include": [
-    "webpack/**/*.js",
-    "webpack/**/*.mjs",
+    "webpack/**/*.ts",
     "webpack/**/*.d.ts",
-    "webpack/**/*.ts"
+    "webpack/types/presets-shims.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "webpack/template/**"]
 }

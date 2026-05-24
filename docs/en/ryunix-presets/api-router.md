@@ -10,12 +10,12 @@ specifically for backend contexts.
 
 - [Ryunix Presets: API Routing Infrastructure](#ryunix-presets-api-routing-infrastructure)
   - [Table of contents](#table-of-contents)
-  - [1. Out-of-Band Compilation (`ApiRouterPlugin.mjs`)](#1-out-of-band-compilation-apirouterpluginmjs)
-  - [2. Request Handling Pipeline (`apiHandler.mjs`)](#2-request-handling-pipeline-apihandlermjs)
+  - [1. Out-of-Band Compilation (`ApiRouterPlugin.js`)](#1-out-of-band-compilation-apirouterpluginjs)
+  - [2. Request Handling Pipeline (`apiHandler.js`)](#2-request-handling-pipeline-apihandlerjs)
 
 ---
 
-## 1. Out-of-Band Compilation (`ApiRouterPlugin.mjs`)
+## 1. Out-of-Band Compilation (`ApiRouterPlugin.js`)
 
 Because API routes do not require complex CSS loaders or CSS parsing strings,
 sending them through the massive Webpack loaders is wasteful.
@@ -36,10 +36,10 @@ sending them through the massive Webpack loaders is wasteful.
 
 ---
 
-## 2. Request Handling Pipeline (`apiHandler.mjs`)
+## 2. Request Handling Pipeline (`apiHandler.js`)
 
 On every single HTTP request hitting `/api/`, the production Web Server
-(`prod.server.mjs`) delegates routing string matches internally inside the node
+(`prod.server.js`) delegates routing string matches internally inside the node
 environment.
 
 ### Dynamic Resolution (`matchRoute`)

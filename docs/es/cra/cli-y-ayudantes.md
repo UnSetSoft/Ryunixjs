@@ -1,67 +1,128 @@
-# Create Ryunix App: CLI y helpers
+# Create Ryunix App: CLI y ayudantes
 
-El paquete `@unsetsoft/create-ryunix-app` funciona como la puerta de entrada
-principal de scaffolding.
+> **Language / Idioma:** [English](../../en/cra/cli-and-helpers.md) ·
+> [Español](./cli-y-ayudantes.md)
+
+Entrada del paquete `@unsetsoft/cra`: argumentos, prompts interactivos y
+módulos en `packages/cra/src/`. Visión general del paquete:
+[resumen-del-paquete.md](./resumen-del-paquete.md).
 
 ---
 
 ## Índice
 
-- [Create Ryunix App: CLI y helpers](#create-ryunix-app-cli-y-helpers)
+- [Create Ryunix App: CLI y ayudantes](#create-ryunix-app-cli-y-ayudantes)
   - [Índice](#índice)
-  - [1. Argumentos CLI y prompts (`cli.js`)](#1-argumentos-cli-y-prompts-clijs)
-  - [2. Motor de ejecución central (`create-app.js`)](#2-motor-de-ejecución-central-create-appjs)
-  - [3. Ejecuciones de terminal (`commands.js`)](#3-ejecuciones-de-terminal-commandsjs)
+  - [Entrada: `cli.ts`](#entrada-clits)
+  - [Motor: `create-app.ts`](#motor-create-appts)
+  - [Ayudantes (`src/helpers/`)](#ayudantes-srchelpers)
+  - [Probar el CLI en el monorepo](#probar-el-cli-en-el-monorepo)
 
 ---
 
-## 1. Argumentos CLI y prompts (`cli.js`)
+## Entrada: `cli.ts`
 
-Construido enteramente sobre las bibliotecas interactivas de terminal Node
-`commander` y `prompts`.
+Archivo publicado como `src/cli.js` (emitido por TypeScript). Usa **Commander**
+para flags y **prompts** cuando faltan opciones.
 
-- Intercepta argumentos implícitos de shell (`--tailwind`, `--canary`,
+### Argumento posicional
 
-  `--compiler=swc`).
+| Argumento | Descripción |
+| :-------- | :------------ |
+| `[directory]` | Nombre o ruta de la carpeta del proyecto. Si se omite, se pregunta en consola. |
 
-- Si se omiten, recurre con elegancia a elecciones interactivas de terminal
+### Flags
 
-  consultando al desarrollador con seguridad y evitando fallos de instalación.
+| Flag | Efecto |
+| :--- | :----- |
+| `-v, --version` | Versión del paquete CRA |
+| `-h, --help` | Ayuda |
+| `--canary` | Canal Canary para dependencias Ryunix |
+| `--latest` | Canal Latest (por defecto si no hay prompt de canal) |
+| `--tailwind` | Plantilla con Tailwind |
+| `--eslint` | Plantilla con ESLint |
+| `--vscode` | Crea `.vscode/extensions.json` con la extensión Ryunix |
+| `--compiler <swc\|babel>` | Compilador en `ryunix.config.js` (por defecto `swc`) |
 
-- Captura la estructura exacta de nomenclatura del directorio objetivo del
+Si no pasas `--canary` ni `--latest`, el CLI pregunta el canal. Igual para
+Tailwind, ESLint y VS Code salvo que uses los flags anteriores.
 
-  proyecto.
+Al final llama a `createApp()` con `appPath`, `appName` (basename del directorio),
+`channel`, `compiler`, `tailwind`, `eslint` y `vscode`.
 
-## 2. Motor de ejecución central (`create-app.js`)
+---
 
-La función `createApp` orquesta los despliegues físicos de carpetas.
+## Motor: `create-app.ts`
 
-- **Resolvedores de dependencias**: En lugar de codificar versiones estáticas de
+Función exportada `createApp(options: CreateAppOptions)`.
 
-  forma nativa (que envejecen), ejecuta consultas shell dinámicas (`npm view`,
-  `yarn info`) inspeccionando el registro NPM explícitamente extrayendo la
-  versión semántica estricta más reciente que representa las etiquetas
-  `--latest` o `--canary` elegidas tanto para `@unsetsoft/ryunixjs` como para
-  `@unsetsoft/ryunix-presets`.
+### Pasos
 
-- **Enrutamiento objetivo**: Determina exactamente cuál de las 4 `templates`
+1. **Resolver ruta** — `path.resolve(appPath)`; crear carpeta si no existe.
+2. **Validar vacío** — `isFolderEmpty()`; si hay archivos conflictivos, sale con
+   código 1.
+3. **Elegir plantilla** — Ver tabla en
+   [generacion-de-plantillas.md](./generacion-de-plantillas.md).
+4. **Copiar** — `copyRecursiveSync(templateDir, root)`.
+5. **Renombrar `gitignore`** — El archivo de plantilla `gitignore` pasa a
+   `.gitignore` (limitación de `npm publish` con dotfiles).
+6. **`package.json`** — Asigna `name`, `version`, `private`; consulta el registro
+   (`npm view`, `yarn info` o `pnpm view` según el gestor detectado) para
+   `@unsetsoft/ryunixjs` y `@unsetsoft/ryunix-presets` en el tag `latest` o
+   `canary`; añade devDeps de Tailwind o ESLint si aplica.
+7. **`ryunix.config.js`** — Si el template contiene `const RyunixSettings = {`,
+   inserta `compiler: 'swc'|'babel'` dentro del objeto.
+8. **VS Code** — Si `vscode`, escribe `.vscode/extensions.json` con
+   `unsetsoft.ryunixjs`.
+9. **Git** — `tryGitInit(root)` opcional (rama `main`, commit inicial).
+10. **Mensaje final** — Indica `cd`, `install` y `run dev` (no ejecuta install).
 
-  nativas copiar físicamente (`ryunix-base`, `ryunix-eslint`, `ryunix-tailwind`
-  o `ryunix-all`) aprovechando `copyRecursiveSync`.
+### Resolución de versiones
 
-- **Modificaciones de configuración**: Muta estáticamente el `package.json`
+```text
+npm view @unsetsoft/ryunixjs@<latest|canary> version
+npm view @unsetsoft/ryunix-presets@<latest|canary> version
+```
 
-  generado cambiando el `name` genérico al nombre de carpeta explícito del
-  desarrollador. Si se modificó `--compiler`, inyecta sustituciones de cadena
-  físicamente directamente en `ryunix.config.js`.
+Si falla la consulta, se usa el tag literal (`latest` / `canary`) y se muestra
+un aviso. Las versiones resueltas se escriben con prefijo `^` en
+`dependencies` / `devDependencies`.
 
-- **Automatización VSCode**: Opcionalmente escribe `.vscode/extensions.json`
+### Tipos exportados
 
-  forzando al Editor a recomendar el addon de resaltado de sintaxis físico
-  `unsetsoft.ryunixjs` de forma nativa.
+- `RyunixChannel`: `'Latest' | 'Canary'`
+- `RyunixCompiler`: `'swc' | 'babel'`
+- `CreateAppOptions`: parámetros de `createApp`
 
-## 3. Ejecuciones de terminal (`commands.js`)
+---
 
-Aloja shells de ejecución a nivel de SO en bruto comprobando si existen
-configuraciones binarias (p. ej. `code` ejecutando instalaciones nativas de
-extensiones VS Code fuera de banda de forma nativa).
+## Ayudantes (`src/helpers/`)
+
+| Módulo | Función | Uso |
+| :----- | :------ | :-- |
+| `copy.ts` | `copyRecursiveSync(src, dest)` | Copia árbol de plantilla; omite `node_modules`, `dist`, `.ryunix` |
+| `get-pkg-manager.ts` | `getPkgManager()` | Lee `npm_config_user_agent` → `npm` \| `yarn` \| `pnpm` \| `bun` |
+| `is-folder-empty.ts` | `isFolderEmpty(root, name)` | Permite solo archivos “seguros” (`.git`, `LICENSE`, etc.) |
+| `git.ts` | `tryGitInit(root)` | `git init`, rama `main`, `add -A`, commit inicial; revierte si falla |
+| `install.ts` | `install(pm, cwd)` | Ejecuta `install` con flags silenciosos; **no** lo llama `create-app` hoy |
+
+---
+
+## Probar el CLI en el monorepo
+
+Desde la raíz del monorepo (tras `pnpm --filter @unsetsoft/cra build` si
+cambiaste `.ts`):
+
+```bash
+node packages/cra/src/cli.js ../_cra/mi-prueba --latest --tailwind
+```
+
+Ver también [tests automatizados](../guias/tests-automatizados.md) y
+[app de integración local](../guias/app-de-integracion-local.md).
+
+Mantenimiento TypeScript:
+
+```bash
+pnpm --filter @unsetsoft/cra typecheck
+pnpm --filter @unsetsoft/cra build
+```

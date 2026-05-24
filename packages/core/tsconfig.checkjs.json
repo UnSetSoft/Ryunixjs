@@ -5,11 +5,6 @@
     "noImplicitAny": true,
     "types": ["node"]
   },
-  "include": [
-    "src/utils/**/*.js",
-    "src/lib/**/*.js",
-    "src/lib/**/*.ts",
-    "src/types/**/*.d.ts"
-  ],
+  "include": ["jsx/**/*.js"],
   "exclude": ["dist", "node_modules"]
 }

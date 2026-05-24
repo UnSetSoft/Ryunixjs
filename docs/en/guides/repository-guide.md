@@ -197,6 +197,7 @@ pnpm dev        # Turbo: CRA CLI only today, not a web app
 | Topic              | Link                                                                                         |
 | :----------------- | :------------------------------------------------------------------------------------------- |
 | Automated testing  | [automated-testing.md](./automated-testing.md)                                               |
+| TypeScript         | [typescript-in-the-monorepo.md](./typescript-in-the-monorepo.md)                             |
 | Integration app    | [local-integration-app.md](./local-integration-app.md)                                       |
 | Technical overview | [docs/en/overview.md](./overview.md)                                                         |
 | Virtual DOM        | [docs/en/core/virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md)   |

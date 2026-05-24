@@ -6,19 +6,22 @@ that completely abstracts away standard Webpack boilerplate wiring.
 It is physically mapped to the generic `ryunix` bash command via the
 `package.json` `"bin"` directory export.
 
+Toolchain files are authored in **TypeScript** (`.ts`); Node runs the **emitted
+`.js`** artifacts after `pnpm --filter @unsetsoft/ryunix-presets build`.
+
 ---
 
 ## Table of contents
 
 - [Ryunix Presets: CLI & Bootstrapping Architecture](#ryunix-presets-cli--bootstrapping-architecture)
   - [Table of contents](#table-of-contents)
-  - [1. Top-Level CLI Routing (`bin/index.mjs`)](#1-top-level-cli-routing-binindexmjs)
-  - [2. Development Engine (`bin/dev.server.mjs`)](#2-development-engine-bindevservermjs)
-  - [3. Native Production Web Server (`bin/prod.server.mjs`)](#3-native-production-web-server-binprodservermjs)
+  - [1. Top-Level CLI Routing (`bin/index.js`)](#1-top-level-cli-routing-binindexjs)
+  - [2. Development Engine (`bin/dev.server.js`)](#2-development-engine-bindevserverjs)
+  - [3. Native Production Web Server (`bin/prod.server.js`)](#3-native-production-web-server-binprodserverjs)
 
 ---
 
-## 1. Top-Level CLI Routing (`bin/index.mjs`)
+## 1. Top-Level CLI Routing (`bin/index.js`)
 
 Ryunix utilizes `yargs` to parse command-line arguments securely. It exposes
 five native execution commands:
@@ -31,11 +34,11 @@ five native execution commands:
 2. **`dev`**: Mutates the active environment variable
 
    `process.env.RYUNIX_MODE = 'development'` and defers execution to
-   `dev.server.mjs`.
+   `dev.server.js`.
 
 3. **`start`**: Mutates `process.env.RYUNIX_MODE = 'production'` and directly
 
-   provisions the internal node application `prod.server.mjs`. Validates the
+   provisions the internal node application `prod.server.js`. Validates the
    `build/static` directory to guarantee a compiled target exists.
 
 4. **`build`**: Aggressively obliterates stale `.ryunix/static` and
@@ -51,7 +54,7 @@ five native execution commands:
 
 ---
 
-## 2. Development Engine (`bin/dev.server.mjs`)
+## 2. Development Engine (`bin/dev.server.js`)
 
 When developers invoke `npx ryunix dev`, this runtime spins up the hot-reloading
 architecture.
@@ -63,8 +66,8 @@ architecture.
 - **Strict Array Matching**: Since RyunixJS runs a Dual-Compiler architecture
 
   (generating Client-bundles and Server-bundles concurrently), the
-  `dev.server.mjs` script smartly scans the exported arrays in
-  `webpack.config.mjs`, extracts the configuration strictly tagged with
+  `dev.server.js` script smartly scans the exported arrays in
+  `webpack.config.js`, extracts the configuration strictly tagged with
   `name === 'client'`, and bridges it exclusively to the `WebpackDevServer()`.
 
 - **Intelligent Port Binding**: Interrogates the operating system explicitly
@@ -75,7 +78,7 @@ architecture.
 
 ---
 
-## 3. Native Production Web Server (`bin/prod.server.mjs`)
+## 3. Native Production Web Server (`bin/prod.server.js`)
 
 Unlike traditional frameworks dictating external dependency binaries (e.g.
 `serve`) to preview builds, Ryunix ships a fiercely optimized `<http>`
@@ -107,5 +110,5 @@ specific folder topology.
   matches the static `/_ryunix/action` payload signature or explicitly targets
   an isolated file inside the `server/api` compile directory, it abandons the
   static file distribution loops natively traversing instead strictly to the
-  `.mjs` server-side endpoints executing safely bypassing the standard Single
+  `.js` server-side endpoints executing safely bypassing the standard Single
   Page Application layout fallback loop implicitly.

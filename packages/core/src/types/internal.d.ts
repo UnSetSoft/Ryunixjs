@@ -40,10 +40,12 @@ export interface RyunixHook {
   queue?: unknown[]
   cancel?: (() => void) | null
   deps?: unknown[]
-  effect?: () => void | (() => void)
+  effect?: (() => void | (() => void)) | null
   ref?: { current: unknown }
   memoizedValue?: unknown
   callback?: (...args: never[]) => unknown
+  value?: unknown
+  isLayout?: boolean
 }
 
 export interface RyunixFiber {
@@ -118,8 +120,31 @@ export type ScheduleWorkFn = (
   priority?: number,
 ) => void
 
+export interface IdleDeadline {
+  timeRemaining: () => number
+  didTimeout?: boolean
+}
+
+export interface RyunixRenderState {
+  containerRoot: Element | DocumentFragment | null
+  nextUnitOfWork?: RyunixFiber | RyunixRootFiber | null
+  currentRoot?: RyunixRootFiber | null
+  wipRoot?: RyunixRootFiber | null
+  deletions: RyunixFiber[]
+  wipFiber?: RyunixFiber | null
+  hookIndex: number
+  effects: unknown[]
+  isServerRendering?: boolean
+  isHydrating?: boolean
+  hydrateCursor?: ChildNode | null
+  ssrMetadata?: Record<string, unknown>
+  ssrContexts?: Record<string | symbol, unknown>
+  isSuspenseBackground?: boolean
+  hydrationFailed?: boolean
+}
+
 export interface RyunixDomElement extends HTMLElement {
-  _ryunixHandlers?: Record<string, EventListener>
+  _ryunixHandlers?: Map<unknown, EventListener>
 }
 
 declare global {

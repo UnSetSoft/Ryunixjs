@@ -10,12 +10,12 @@ rendimiento específicamente para contextos backend.
 
 - [Ryunix Presets: Infraestructura de API routing](#ryunix-presets-infraestructura-de-api-routing)
   - [Índice](#índice)
-  - [1. Compilación fuera de banda (`ApiRouterPlugin.mjs`)](#1-compilación-fuera-de-banda-apirouterpluginmjs)
-  - [2. Pipeline de manejo de peticiones (`apiHandler.mjs`)](#2-pipeline-de-manejo-de-peticiones-apihandlermjs)
+  - [1. Compilación fuera de banda (`ApiRouterPlugin.js`)](#1-compilación-fuera-de-banda-apirouterpluginjs)
+  - [2. Pipeline de manejo de peticiones (`apiHandler.js`)](#2-pipeline-de-manejo-de-peticiones-apihandlerjs)
 
 ---
 
-## 1. Compilación fuera de banda (`ApiRouterPlugin.mjs`)
+## 1. Compilación fuera de banda (`ApiRouterPlugin.js`)
 
 Como las rutas API no requieren loaders CSS complejos ni parseo de cadenas CSS,
 enviarlas por los loaders masivos de Webpack es un desperdicio.
@@ -37,10 +37,10 @@ enviarlas por los loaders masivos de Webpack es un desperdicio.
 
 ---
 
-## 2. Pipeline de manejo de peticiones (`apiHandler.mjs`)
+## 2. Pipeline de manejo de peticiones (`apiHandler.js`)
 
 En cada petición HTTP que golpea `/api/`, el servidor web de producción
-(`prod.server.mjs`) delega coincidencias de cadenas de routing internamente
+(`prod.server.js`) delega coincidencias de cadenas de routing internamente
 dentro del entorno node.
 
 ### Resolución dinámica (`matchRoute`)

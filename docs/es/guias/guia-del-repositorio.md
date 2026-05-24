@@ -379,13 +379,17 @@ pnpm dev          # Turbo: hoy solo lanza el CLI de CRA, no una web
 | Tema                         | Enlace                                                                                 |
 | :--------------------------- | :------------------------------------------------------------------------------------- |
 | Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                     |
+| TypeScript en el monorepo    | [typescript-en-el-monorepo.md](./typescript-en-el-monorepo.md)                         |
 | App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                           |
 | Resumen técnico              | [docs/es/resumen.md](./resumen.md)                                                     |
+| Paquete core (visión)        | [docs/es/core/resumen-del-paquete.md](./core/resumen-del-paquete.md)                   |
+| Paquete presets (visión)     | [docs/es/ryunix-presets/resumen-del-paquete.md](./ryunix-presets/resumen-del-paquete.md) |
 | Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md)               |
 | Hooks                        | [docs/es/core/hooks.md](./core/hooks.md)                                               |
 | CLI y presets                | [docs/es/ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md)         |
 | Enrutamiento y SSG           | [docs/es/ryunix-presets/enrutamiento-y-ssg.md](./ryunix-presets/enrutamiento-y-ssg.md) |
-| CRA y plantillas             | [docs/es/cra/cli-y-ayudantes.md](./cra/cli-y-ayudantes.md)                             |
+| CRA y plantillas             | [docs/es/cra/resumen-del-paquete.md](./cra/resumen-del-paquete.md)                      |
+| DevTools (extensión)         | [docs/es/ryunix-devtools/resumen-del-paquete.md](./ryunix-devtools/resumen-del-paquete.md) |
 | README público               | [README.es.md](../../README.es.md)                                                     |
 
 ---

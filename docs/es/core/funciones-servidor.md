@@ -22,7 +22,7 @@ Ryunix permite que funciones ejecutadas en el servidor se disparen sin problemas
 desde el navegador cliente sin escribir manualmente envoltorios HTTP `fetch`.
 
 Esto depende fundamentalmente de transformaciones de compilación (p. ej.
-`ryunix-server-action-loader.mjs`) que eliminan físicamente el payload de lógica
+`ryunix-server-action-loader.js`) que eliminan físicamente el payload de lógica
 del lado servidor del bundle y lo sustituyen por un proxy cliente.
 
 ### `createActionProxy(actionId)`

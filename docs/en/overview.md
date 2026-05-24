@@ -19,6 +19,7 @@ framework is built.
   - [`core/` — `packages/core`](#core--packagescore)
   - [`ryunix-presets/` — `packages/ryunix-presets`](#ryunix-presets--packagesryunix-presets)
   - [`cra/` — `packages/cra`](#cra--packagescra)
+  - [`ryunix-devtools/` — `packages/ryunix-devtools`](#ryunix-devtools--packagesryunix-devtools)
   - [Suggested reading order](#suggested-reading-order)
   - [Other languages](#other-languages)
 
@@ -36,13 +37,15 @@ docs/
 │   ├── guides/                      ← Monorepo-wide guides (not tied to one package)
 │   ├── core/                        ← packages/core — runtime engine
 │   ├── ryunix-presets/              ← packages/ryunix-presets — CLI & Webpack
-│   └── cra/                         ← packages/cra — project scaffolding
+│   ├── cra/                         ← packages/cra — project scaffolding
+│   └── ryunix-devtools/             ← packages/ryunix-devtools — Chrome extension
 └── es/                              ← Spanish (same structure)
     ├── resumen.md                   ← Index (Spanish)
     ├── guias/                       ← Guías del monorepo (nombres en español)
     ├── core/                        ← e.g. vdom-y-reconciliacion.md
     ├── ryunix-presets/
-    └── cra/
+    ├── cra/
+    └── ryunix-devtools/
 ```
 
 | Path (from `docs/en/`)                   | Package in repo           | What you will find                                                   |
@@ -50,7 +53,8 @@ docs/
 | [`./guides/`](./guides/)                 | _(monorepo root)_         | Onboarding, testing, tech stack and root scripts (see guides below). |
 | [`./core/`](./core/)                     | `packages/core`           | Reconciler, hooks, rendering, SSR, components.                       |
 | [`./ryunix-presets/`](./ryunix-presets/) | `packages/ryunix-presets` | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
-| [`./cra/`](./cra/)                       | `packages/cra`            | `create-ryunix-app` CLI and project templates.                       |
+| [`./cra/`](./cra/)                       | `packages/cra`            | `@unsetsoft/cra` CLI and project templates.                          |
+| [`./ryunix-devtools/`](./ryunix-devtools/) | `packages/ryunix-devtools` | Chrome extension for debugging Ryunix apps.                        |
 
 ---
 
@@ -65,6 +69,7 @@ single package.
 | [automated-testing.md](./guides/automated-testing.md)           | Jest in core, `pnpm test`, `pnpm lint`, manual CRA checks.                    |
 | [local-integration-app.md](./guides/local-integration-app.md)   | Ryunix app in `test/webpack` with `workspace:*` and `pnpm run:web`.           |
 | [tech-stack-and-scripts.md](./guides/tech-stack-and-scripts.md) | Technologies and root `pnpm` scripts (AI-assisted).                           |
+| [typescript-in-the-monorepo.md](./guides/typescript-in-the-monorepo.md) | TypeScript: `tsconfig`, `typecheck`, emit, and source migration status.       |
 
 ---
 
@@ -75,6 +80,7 @@ and built-in components.
 
 | Document                                                                      | Topic                                                   |
 | :---------------------------------------------------------------------------- | :------------------------------------------------------ |
+| [package-overview.md](./core/package-overview.md)                             | Role, `packages/core/` layout, Rollup build, TS         |
 | [virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md) | `createElement`, work loop, reconciler, DOM commit      |
 | [hooks.md](./core/hooks.md)                                                   | `useStore`, `useEffect`, memoization, SSR hook behavior |
 | [rendering.md](./core/rendering.md)                                           | `render`, `hydrate`, `renderToString`, streaming        |
@@ -94,6 +100,7 @@ SSG, and API compilation.
 
 | Document                                                              | Topic                                              |
 | :-------------------------------------------------------------------- | :------------------------------------------------- |
+| [package-overview.md](./ryunix-presets/package-overview.md)         | Role, `webpack/`, `ryunix` CLI, `RyunixUserConfig` |
 | [cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md) | `ryunix dev`, `build`, `start`, dev & prod servers |
 | [configuration-loading.md](./ryunix-presets/configuration-loading.md) | `ryunix.config.js` discovery and normalization     |
 | [routing-and-ssg.md](./ryunix-presets/routing-and-ssg.md)             | `AppRouterPlugin`, SSG, dev SSR handler            |
@@ -109,8 +116,19 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 
 | Document                                               | Topic                                                    |
 | :----------------------------------------------------- | :------------------------------------------------------- |
-| [cli-and-helpers.md](./cra/cli-and-helpers.md)         | Interactive CLI, `create-app.js`, npm version resolution |
-| [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism         |
+| [package-overview.md](./cra/package-overview.md)       | Monorepo role, `packages/cra/` layout, TS → JS flow      |
+| [cli-and-helpers.md](./cra/cli-and-helpers.md)         | `cli.ts`, `create-app.ts`, helpers, CLI flags            |
+| [template-generation.md](./cra/template-generation.md) | `ryunix-base`, Tailwind/ESLint variants, copy and layout |
+
+---
+
+## `ryunix-devtools/` — `packages/ryunix-devtools`
+
+Browser extension (Manifest V3) to inspect Ryunix apps in Chrome or Edge.
+
+| Document                                                         | Topic                                      |
+| :--------------------------------------------------------------- | :----------------------------------------- |
+| [package-overview.md](./ryunix-devtools/package-overview.md)   | Layout, scripts, content-script/hook flow  |
 
 ---
 

@@ -83,7 +83,7 @@ The framework shipped to npm does not bundle React or Preact.
 | Library build (core only)      | **Rollup 4**                                                                                   |
 | MDX / markdown                 | `@mdx-js/loader`, `@mdx-js/rollup`, **remark** / **rehype** plugins                            |
 | Styles                         | **PostCSS**, **Sass**, `css-loader`, `mini-css-extract-plugin`, `css-minimizer-webpack-plugin` |
-| CLI                            | `yargs`, `chalk`, `boxen`; binary `ryunix` → `webpack/bin/index.mjs`                           |
+| CLI                            | `yargs`, `chalk`, `boxen`; binary `ryunix` → `webpack/bin/index.js` (source `.ts`)             |
 | Lint in toolchain              | ESLint 9, `eslint-webpack-plugin`, `eslint-plugin-mdx`                                         |
 
 Apps created with CRA templates consume `@unsetsoft/ryunix-presets` and
@@ -141,6 +141,7 @@ Commands are run from the **repository root** unless noted.
 | `pnpm run dev`          | Turbo: run `dev` in packages that define it (e.g. CRA interactive CLI) |
 | `pnpm run build`        | Turbo: build packages (`dependsOn: ^build`)                            |
 | `pnpm run test`         | Turbo: run tests (after build)                                         |
+| `pnpm run typecheck`    | Turbo: `tsc --noEmit` per package (see [TypeScript guide](./typescript-in-the-monorepo.md)) |
 | `pnpm run lint`         | ESLint on repo + Turbo `lint` + `lint:md`                              |
 | `pnpm run lint:fix`     | Prettier, ESLint `--fix`, Turbo lint fix                               |
 | `pnpm run format`       | Prettier write on the repo                                             |
