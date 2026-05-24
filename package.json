@@ -34,6 +34,7 @@
     "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish --tag canary",
     "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
+    "setup:web": "node setup-test-webpack.mjs",
     "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",
     "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run build",
     "run:web:start": "pnpm --filter ./test/webpack run start"
