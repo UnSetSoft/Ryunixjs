@@ -4,19 +4,26 @@ import { rIC } from '../utils/index.js'
  * Priority levels for updates
  */
 const Priority = {
-  IMMEDIATE: 1, // User input (clicks, typing)
-  USER_BLOCKING: 2, // Hover, scroll
-  NORMAL: 3, // Data fetching
-  LOW: 4, // Analytics
-  IDLE: 5, // Background tasks
+  IMMEDIATE: 1,
+  USER_BLOCKING: 2,
+  NORMAL: 3,
+  LOW: 4,
+  IDLE: 5,
 }
 
+/** @type {number} */
 let currentPriority = Priority.NORMAL
+
+/** @type {Array<{ callback: () => void; priority: number; timestamp: number }>} */
 let pendingUpdates = []
+
+/** @type {boolean} */
 let isScheduling = false
 
 /**
- * Schedule update with priority
+ * Schedule update with priority.
+ * @param {() => void} callback
+ * @param {number} [priority]
  */
 const scheduleUpdate = (callback, priority = Priority.NORMAL) => {
   pendingUpdates.push({ callback, priority, timestamp: Date.now() })
@@ -28,13 +35,14 @@ const scheduleUpdate = (callback, priority = Priority.NORMAL) => {
 }
 
 /**
- * Process updates by priority
+ * @param {{ timeRemaining: () => number }} deadline
  */
 const processPendingUpdates = (deadline) => {
   pendingUpdates.sort((a, b) => a.priority - b.priority)
 
   while (pendingUpdates.length > 0 && deadline.timeRemaining() > 1) {
     const update = pendingUpdates.shift()
+    if (!update) break
     currentPriority = update.priority
     update.callback()
   }
@@ -48,7 +56,10 @@ const processPendingUpdates = (deadline) => {
 }
 
 /**
- * Run callback with specific priority
+ * @param {number} priority
+ * @param {() => T} callback
+ * @returns {T}
+ * @template T
  */
 const runWithPriority = (priority, callback) => {
   const previousPriority = currentPriority
@@ -61,18 +72,18 @@ const runWithPriority = (priority, callback) => {
   }
 }
 
-/**
- * Get current priority
- */
+/** @returns {number} */
 const getCurrentPriority = () => currentPriority
 
 /**
- * Wrap setState with priority
+ * @param {(action: unknown, priority?: number) => void} dispatch
  */
 const createPriorityDispatch = (dispatch) => {
-  return (action, priority = currentPriority) => {
+  /** @param {unknown} action @param {number} [priority] */
+  const wrapped = (action, priority = currentPriority) => {
     scheduleUpdate(() => dispatch(action), priority)
   }
+  return wrapped
 }
 
 export {

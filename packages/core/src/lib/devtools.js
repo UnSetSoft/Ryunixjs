@@ -1,16 +1,28 @@
 import { getState } from '../utils/index.js'
 
 /**
+ * @typedef {import('../types/internal.js').RyunixComponent} RyunixComponent
+ * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
+ */
+
+/**
  * Development warnings
  */
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+/**
+ * @param {boolean} condition
+ * @param {string} message
+ */
 const warning = (condition, message) => {
   if (!isDevelopment) return
   if (condition) return
   console.warn(`[Ryunix Warning] ${message}`)
 }
 
+/**
+ * @param {string} message
+ */
 const error = (message) => {
   if (!isDevelopment) return
   console.error(`[Ryunix Error] ${message}`)
@@ -18,6 +30,8 @@ const error = (message) => {
 
 /**
  * Component name detection
+ * @param {RyunixComponent | null | undefined} component
+ * @returns {string}
  */
 const getComponentName = (component) => {
   if (!component) return 'Unknown'
@@ -35,8 +49,9 @@ const validateHookContext = (hookName = 'A hook') => {
         'Make sure you are calling hooks at the top level of your component.',
     )
   }
-  if (!Array.isArray(state.wipFiber.hooks)) {
-    state.wipFiber.hooks = []
+  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  if (!Array.isArray(wipFiber.hooks)) {
+    wipFiber.hooks = []
   }
 }
 
@@ -46,11 +61,16 @@ const validateHookContext = (hookName = 'A hook') => {
 const perfTracker = {
   marks: new Map(),
 
+  /** @param {string} name */
   mark(name) {
     if (!isDevelopment) return
     this.marks.set(name, Date.now())
   },
 
+  /**
+   * @param {string} name
+   * @param {string} startMark
+   */
   measure(name, startMark) {
     if (!isDevelopment) return
     const start = this.marks.get(startMark)
@@ -67,6 +87,11 @@ const perfTracker = {
 
 /**
  * Deprecation warnings
+ */
+/**
+ * @param {string} oldAPI
+ * @param {string} newAPI
+ * @param {string} version
  */
 const deprecated = (oldAPI, newAPI, version) => {
   if (!isDevelopment) return

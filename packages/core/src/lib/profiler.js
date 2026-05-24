@@ -3,21 +3,34 @@ const perfNow = () =>
   typeof performance !== 'undefined' ? performance.now() : Date.now()
 
 /**
+ * @typedef {{ component: string, duration: number, timestamp: number }} RenderSample
+ * @typedef {import('../types/internal.js').RyunixComponent} RyunixComponent
+ */
+
+/**
  * Performance profiler for Ryunix
  */
 class Profiler {
   constructor() {
     this.enabled = process.env.NODE_ENV !== 'production'
     this.measures = new Map()
+    /** @type {RenderSample[]} */
     this.renderTimes = []
     this.maxSamples = 100
   }
 
+  /**
+   * @param {string} name
+   */
   startMeasure(name) {
     if (!this.enabled) return
     this.measures.set(name, perfNow())
   }
 
+  /**
+   * @param {string} name
+   * @returns {number | undefined}
+   */
   endMeasure(name) {
     if (!this.enabled) return
     const start = this.measures.get(name)
@@ -29,6 +42,10 @@ class Profiler {
     return duration
   }
 
+  /**
+   * @param {string} componentName
+   * @param {number} duration
+   */
   recordRender(componentName, duration) {
     if (!this.enabled) return
 
@@ -124,6 +141,8 @@ const profiler = new Profiler()
 
 /**
  * Hook to profile component render
+ * @param {string} componentName
+ * @returns {() => void}
  */
 const useProfiler = (componentName) => {
   const startTime = perfNow()
@@ -136,15 +155,24 @@ const useProfiler = (componentName) => {
 
 /**
  * HOC to profile component
+ * @param {RyunixComponent} Component
+ * @param {string} name
+ * @returns {RyunixComponent}
  */
 const withProfiler = (Component, name) => {
-  return (props) => {
+  /** @param {Record<string, unknown>} props */
+  const Profiled = (props) => {
     profiler.startMeasure(name)
-    const result = Component(props)
+    const result = /** @type {import('./createElement.js').RyunixNode} */ (
+      /** @type {(props: Record<string, unknown>) => import('./createElement.js').RyunixNode} */ (
+        Component
+      )(props)
+    )
     const duration = profiler.endMeasure(name)
     if (duration) profiler.recordRender(name, duration)
     return result
   }
+  return /** @type {RyunixComponent} */ (Profiled)
 }
 
 export { profiler, useProfiler, withProfiler }

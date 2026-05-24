@@ -2,6 +2,8 @@ import { EFFECT_TAGS, getState } from '../utils/index.js'
 
 /**
  * Reconcile children with key optimization
+ * @param {import('../types/internal.js').RyunixFiber} wipFiber
+ * @param {import('../types/internal.js').RyunixNode[]} elements
  */
 const reconcileChildren = (wipFiber, elements) => {
   const state = getState()
@@ -23,7 +25,9 @@ const reconcileChildren = (wipFiber, elements) => {
 
   // Process new elements
   while (index < elements.length) {
-    const element = elements[index]
+    const element = /** @type {import('./createElement.js').RyunixElement & { key?: string | number }} */ (
+      elements[index]
+    )
     if (!element) {
       index++
       continue
@@ -32,6 +36,7 @@ const reconcileChildren = (wipFiber, elements) => {
     const key = element.key ?? `__index_${index}__`
     const matchedFiber = oldFiberMap.get(key)
 
+    /** @type {import('../types/internal.js').RyunixFiber} */
     let newFiber
     const sameType = matchedFiber && element.type === matchedFiber.type
 
@@ -76,7 +81,8 @@ const reconcileChildren = (wipFiber, elements) => {
       wipFiber.child = newFiber
       isFirstChild = false
     } else if (newFiber) {
-      prevSibling.sibling = newFiber
+      /** @type {import('../types/internal.js').RyunixFiber} */ (prevSibling).sibling =
+        newFiber
     }
 
     prevSibling = newFiber

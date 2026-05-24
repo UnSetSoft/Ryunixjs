@@ -5,10 +5,20 @@ import { getCurrentPriority, Priority } from './priority.js'
 import { profiler } from './profiler.js'
 import { setScheduleWork } from './bridge.js'
 
+/**
+ * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ */
+
+/** @type {RyunixRootFiber[]} */
 let workQueue = []
+/** @type {boolean} */
 let isWorkLoopScheduled = false
 
-
+/**
+ * @param {RyunixFiber} fiber
+ * @returns {RyunixFiber | null}
+ */
 function performUnitOfWork(fiber) {
   const state = getState()
   const isFunctionComponent =
@@ -48,7 +58,8 @@ function performUnitOfWork(fiber) {
     while (boundaryFiber) {
       if (
         boundaryFiber.type &&
-        boundaryFiber.type.ryunix_type === 'RYUNIX_ERROR_BOUNDARY'
+        /** @type {{ ryunix_type?: string }} */ (boundaryFiber.type).ryunix_type ===
+          'RYUNIX_ERROR_BOUNDARY'
       ) {
         foundBoundary = true
         break
@@ -104,6 +115,9 @@ function performUnitOfWork(fiber) {
 }
 
 
+/**
+ * @param {{ timeRemaining: () => number, didTimeout?: boolean }} deadline
+ */
 const workLoop = (deadline) => {
   const state = getState()
   let shouldYield = false
@@ -142,6 +156,10 @@ const workLoop = (deadline) => {
 
 
 
+/**
+ * @param {RyunixRootFiber} root
+ * @param {number} [priority]
+ */
 const scheduleWork = (root, priority = getCurrentPriority()) => {
   const state = getState()
 

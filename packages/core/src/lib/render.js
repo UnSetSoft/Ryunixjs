@@ -4,43 +4,51 @@ import { scheduleWork } from './workers.js'
 import { createElement } from './createElement.js'
 
 /**
+ * @typedef {import('./createElement.js').RyunixNode} RyunixNode
+ * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ * @typedef {import('../types/internal.js').RyunixComponent} RyunixComponent
+ */
+
+/**
  * The `render` function in JavaScript updates the DOM with a new element and schedules work to be done
  * on the element.
- * @param element - The `element` parameter in the `render` function is the element that you want to
- * render in the specified container. It could be a DOM element, a component, or any other valid
- * element that you want to display on the screen.
- * @param container - The `container` parameter in the `render` function is the DOM element where the
- * `element` will be rendered. It is the target container where the element will be appended as a
- * child.
- * @returns The `render` function is returning the `state.wipRoot` object.
+ * @param {RyunixNode} element
+ * @param {Element | DocumentFragment} container
+ * @returns {RyunixRootFiber}
  */
 const render = (element, container) => {
   const state = getState()
 
   // Clear container before CSR render to avoid duplication
-  clearContainer(container)
+  clearContainer(/** @type {HTMLElement} */ (container))
 
+  /** @type {RyunixRootFiber} */
   const root = {
     dom: container,
     props: {
-      children: [element],
+      children: [/** @type {import('../types/internal.js').RyunixNode} */ (element)],
     },
     alternate: state.currentRoot,
     isHydrating: false,
-    hydrateCursor: null,
+    hydrateCursor: /** @type {ChildNode | null} */ (null),
   }
 
   scheduleWork(root)
   return root
 }
 
+/**
+ * @param {ChildNode | null} node
+ * @returns {ChildNode | null}
+ */
 const nextValidSibling = (node) => {
   let next = node
   while (
     next &&
     ((next.nodeType === 3 && !next.nodeValue.trim()) ||
       next.nodeType === 8 ||
-      (next.nodeType === 1 && next.hasAttribute('data-ryunix-ssr')))
+      (next.nodeType === 1 &&
+        /** @type {Element} */ (next).hasAttribute('data-ryunix-ssr')))
   ) {
     next = next.nextSibling
   }
@@ -51,16 +59,20 @@ const nextValidSibling = (node) => {
  * The `hydrate` function attaches Ryunix to an existing server-rendered DOM tree.
  * Instead of clearing and re-rendering, it walks the existing DOM nodes and
  * attaches event listeners and reconciles state, preserving SSR HTML.
+ * @param {RyunixNode} element
+ * @param {Element | DocumentFragment} container
+ * @returns {RyunixRootFiber}
  */
 const hydrate = (element, container) => {
   const state = getState()
 
   state.containerRoot = container
 
+  /** @type {RyunixRootFiber} */
   const root = {
     dom: container,
     props: {
-      children: [element],
+      children: [/** @type {import('../types/internal.js').RyunixNode} */ (element)],
     },
     alternate: state.currentRoot,
     isHydrating: true,
@@ -71,6 +83,12 @@ const hydrate = (element, container) => {
   return root
 }
 
+/**
+ * @param {RyunixNode} MainElement
+ * @param {string} [root]
+ * @param {Record<string, unknown>} [components]
+ * @returns {RyunixRootFiber | undefined}
+ */
 const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
@@ -104,9 +122,17 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   return res
 }
 
+/**
+ * @param {RyunixComponent} component
+ * @param {Record<string, unknown>} props
+ * @param {(error: unknown) => void} [onError]
+ * @returns {RyunixNode}
+ */
 const safeRender = (component, props, onError) => {
   try {
-    return component(props)
+    return /** @type {RyunixNode} */ (
+      /** @type {(props: Record<string, unknown>) => RyunixNode} */ (component)(props)
+    )
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Component error:', error)

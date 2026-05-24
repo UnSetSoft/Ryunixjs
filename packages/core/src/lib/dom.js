@@ -10,6 +10,11 @@ import { toSvgAttrName } from '../utils/svgAttributes.js'
 import { Priority, runWithPriority } from './priority.js'
 
 /**
+ * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../types/internal.js').RyunixDomElement} RyunixDomElement
+ */
+
+/**
  * Convert camelCase to kebab-case for CSS properties
  * @param {string} camelCase - CamelCase string
  * @returns {string} Kebab-case string
@@ -80,8 +85,8 @@ const applyClasses = (dom, prevClasses, nextClasses) => {
 
 /**
  * Create a DOM element from fiber
- * @param {Object} fiber - Fiber node
- * @returns {HTMLElement|Text|null}
+ * @param {RyunixFiber} fiber - Fiber node
+ * @returns {HTMLElement | SVGElement | Text | null}
  */
 const createDom = (fiber) => {
   // Fragments and Context Providers don't create real DOM nodes
@@ -99,6 +104,7 @@ const createDom = (fiber) => {
     if (fiber.type === RYUNIX_TYPES.TEXT_ELEMENT) {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
+      const hostType = /** @type {string} */ (fiber.type)
       const isSvg = [
         'svg', 'path', 'g', 'circle', 'polygon', 'rect', 'line', 'polyline',
         'ellipse', 'text', 'tspan', 'defs', 'use', 'symbol', 'mask',
@@ -106,12 +112,12 @@ const createDom = (fiber) => {
         'feGaussianBlur', 'feOffset', 'feMerge', 'feMergeNode', 'feBlend',
         'feColorMatrix', 'feComposite', 'foreignObject', 'image', 'marker',
         'pattern', 'textPath',
-      ].includes(fiber.type)
+      ].includes(hostType)
 
       if (isSvg) {
-        dom = document.createElementNS('http://www.w3.org/2000/svg', fiber.type)
+        dom = document.createElementNS('http://www.w3.org/2000/svg', hostType)
       } else {
-        dom = document.createElement(fiber.type)
+        dom = document.createElement(hostType)
       }
     } else {
       if (process.env.NODE_ENV !== 'production') {
@@ -123,7 +129,11 @@ const createDom = (fiber) => {
       return null
     }
 
-    updateDom(dom, {}, fiber.props)
+    updateDom(
+      /** @type {HTMLElement | Text} */ (/** @type {HTMLElement | SVGElement | Text} */ (dom)),
+      {},
+      fiber.props,
+    )
     return dom
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
@@ -133,9 +143,15 @@ const createDom = (fiber) => {
   }
 }
 
-export const validateUri = (name, value) => {
+/**
+ * @param {string} attrName
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+/** @type {(attrName: string, value: unknown) => unknown} */
+const checkAttributeUri = (attrName, value) => {
   if (typeof value !== 'string') return value
-  const attr = name.toLowerCase()
+  const attr = attrName.toLowerCase()
   if (attr !== 'href' && attr !== 'src' && attr !== 'action' && attr !== 'formaction') {
     return value
   }
@@ -147,7 +163,7 @@ export const validateUri = (name, value) => {
     normalized.startsWith('data:')
   ) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn(`[Ryunix Security] Blocked dangerous ${name} URI: ${value}`)
+      console.warn(`[Ryunix Security] Blocked dangerous ${attrName} URI: ${value}`)
     }
     return 'javascript:void(0)'
   }
@@ -155,31 +171,38 @@ export const validateUri = (name, value) => {
   return value
 }
 
+export const validateUri = checkAttributeUri
+
 /**
  * Update DOM element with new props
  * @param {HTMLElement|Text} dom - DOM element
- * @param {Object} prevProps - Previous props
- * @param {Object} nextProps - Next props
+ * @param {Record<string, unknown>} [prevProps] - Previous props
+ * @param {Record<string, unknown>} [nextProps] - Next props
  */
 const updateDom = (dom, prevProps = {}, nextProps = {}) => {
   if (dom.nodeType === 3) {
     if (prevProps.nodeValue !== nextProps.nodeValue) {
-      dom.nodeValue = nextProps.nodeValue
+      dom.nodeValue = /** @type {string} */ (nextProps.nodeValue)
     }
     return
   }
+  const el = /** @type {HTMLElement} */ (dom)
+  const domEl = /** @type {RyunixDomElement} */ (el)
+  const handlerMap = /** @type {Map<unknown, EventListener> | undefined} */ (
+    /** @type {unknown} */ (domEl._ryunixHandlers)
+  )
   // Remove old event listeners
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
-    .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2)
+    .forEach((propKey) => {
+      const eventType = propKey.toLowerCase().substring(2)
       try {
-        const originalHandler = prevProps[name]
-        const wrappedHandler = dom._ryunixHandlers?.get(originalHandler) || originalHandler
-        dom.removeEventListener(eventType, wrappedHandler)
-        if (dom._ryunixHandlers) {
-          dom._ryunixHandlers.delete(originalHandler)
+        const originalHandler = prevProps[propKey]
+        const wrappedHandler = handlerMap?.get(originalHandler) || originalHandler
+        el.removeEventListener(eventType, /** @type {EventListener} */ (wrappedHandler))
+        if (handlerMap) {
+          handlerMap.delete(originalHandler)
         }
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
@@ -193,24 +216,22 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(nextProps))
-    .forEach((name) => {
+    .forEach((propKey) => {
       // Skip special properties
       if (
-        [
-          STRINGS.STYLE,
-          OLD_STRINGS.STYLE,
-          STRINGS.CLASS_NAME,
-          OLD_STRINGS.CLASS_NAME,
-        ].includes(name)
+        propKey === STRINGS.STYLE ||
+        propKey === OLD_STRINGS.STYLE ||
+        propKey === STRINGS.CLASS_NAME ||
+        propKey === OLD_STRINGS.CLASS_NAME
       ) {
         return
       }
-      if (dom instanceof SVGElement) {
-        const attrName = toSvgAttrName(name)
-        dom.removeAttribute(attrName)
+      if (el instanceof SVGElement) {
+        const attrName = toSvgAttrName(propKey)
+        el.removeAttribute(attrName)
       } else {
-        dom[name] = ''
-        dom.removeAttribute(name)
+        /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] = ''
+        el.removeAttribute(propKey)
       }
     })
 
@@ -218,54 +239,63 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
+    .forEach((propKey) => {
       try {
         // Handle style properties
-        if (name === STRINGS.STYLE || name === OLD_STRINGS.STYLE) {
-          const styleValue = nextProps[name]
-          applyStyles(dom, styleValue)
+        if (propKey === STRINGS.STYLE || propKey === OLD_STRINGS.STYLE) {
+          const styleValue = nextProps[propKey]
+          applyStyles(el, /** @type {Record<string, unknown>} */ (styleValue))
         }
         // Handle className properties
-        else if (name === STRINGS.CLASS_NAME) {
+        else if (propKey === STRINGS.CLASS_NAME) {
           applyClasses(
-            dom,
-            prevProps[STRINGS.CLASS_NAME],
-            nextProps[STRINGS.CLASS_NAME],
+            el,
+            /** @type {string} */ (prevProps[STRINGS.CLASS_NAME]),
+            /** @type {string} */ (nextProps[STRINGS.CLASS_NAME]),
           )
-        } else if (name === OLD_STRINGS.CLASS_NAME) {
+        } else if (propKey === OLD_STRINGS.CLASS_NAME) {
           applyClasses(
-            dom,
-            prevProps[OLD_STRINGS.CLASS_NAME],
-            nextProps[OLD_STRINGS.CLASS_NAME],
+            el,
+            /** @type {string} */ (prevProps[OLD_STRINGS.CLASS_NAME]),
+            /** @type {string} */ (nextProps[OLD_STRINGS.CLASS_NAME]),
           )
         }
         // Handle other properties
         else {
           // Special handling for value and checked (controlled components)
-          if (name === 'value' || name === 'checked') {
-            if (dom[name] !== nextProps[name]) {
-              dom[name] = nextProps[name]
+          if (propKey === 'value' || propKey === 'checked') {
+            if (
+              /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] !==
+              nextProps[propKey]
+            ) {
+              /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] =
+                nextProps[propKey]
             }
           } else {
-            const isSvgNode = dom instanceof SVGElement
+            const isSvgNode = el instanceof SVGElement
             if (isSvgNode) {
-              const attrName = toSvgAttrName(name)
-              const validatedValue = validateUri(attrName, nextProps[name])
+              const attrName = toSvgAttrName(propKey)
+              /** @type {unknown} */
+              const svgValidated = checkAttributeUri(attrName, nextProps[propKey])
               // viewBox is case sensitive, we respect the camelCase for it.
-              dom.setAttribute(attrName, validatedValue)
+              el.setAttribute(attrName, /** @type {string} */ (svgValidated))
             } else {
-              const validatedValue = validateUri(name, nextProps[name])
-              dom[name] = validatedValue
+              const attrVal = nextProps[propKey]
+              /** @type {unknown} */
+              const safeValue = checkAttributeUri(propKey, attrVal);
+
+              /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] =
+                safeValue
               // Best effort: set html attributes if it's not a primitive component property
-              if (typeof nextProps[name] !== 'object' && typeof nextProps[name] !== 'function') {
-                dom.setAttribute(name, validatedValue)
+              if (typeof attrVal !== 'object' && typeof attrVal !== 'function') {
+                el.setAttribute(propKey, /** @type {string} */ (safeValue))
               }
             }
           }
         }
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
-          console.warn(`Error setting property ${name}:`, error)
+          console.warn(`Error setting property ${propKey}:`, error)
         }
       }
     })
@@ -274,11 +304,14 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2)
+    .forEach((propKey) => {
+      const eventType = propKey.toLowerCase().substring(2)
       try {
+        /** @param {Event} e */
         const handler = (e) => {
-          runWithPriority(Priority.IMMEDIATE, () => nextProps[name](e))
+          runWithPriority(Priority.IMMEDIATE, () =>
+            /** @type {(e: Event) => void} */ (nextProps[propKey])(e),
+          )
         }
         // Store the wrapped handler so it can be removed later
         // Note: For simplicity, we could also just wrap it on the fly, 
@@ -290,10 +323,16 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
         // If we wrap it, we MUST store the wrapper.
         
         // Let's use a weakMap or a property on the DOM node to store the wrappers.
-        if (!dom._ryunixHandlers) dom._ryunixHandlers = new Map()
-        dom._ryunixHandlers.set(nextProps[name], handler)
+        if (!domEl._ryunixHandlers) {
+          domEl._ryunixHandlers = /** @type {RyunixDomElement['_ryunixHandlers']} */ (
+            /** @type {unknown} */ (new Map())
+          )
+        }
+        /** @type {Map<unknown, EventListener>} */ (
+          /** @type {unknown} */ (domEl._ryunixHandlers)
+        ).set(nextProps[propKey], handler)
         
-        dom.addEventListener(eventType, handler)
+        el.addEventListener(eventType, handler)
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.warn('Error adding event listener:', error)

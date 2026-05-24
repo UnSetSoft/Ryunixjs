@@ -4,13 +4,20 @@ import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../utils/index.js'
 import { RYUNIX_PORTAL } from './portal.js'
 
 /**
+ * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ */
+
+/**
  * Run layout effects (useLayoutEffect) synchronously during commit.
  * These run after DOM mutations but before the browser paints.
+ * @param {RyunixFiber} fiber
  */
 const runLayoutEffects = (fiber) => {
   if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
+    /** @type {import('../types/internal.js').RyunixHook & { isLayout?: boolean }} */
     const hook = fiber.hooks[i]
 
     if (
@@ -32,7 +39,7 @@ const runLayoutEffects = (fiber) => {
       // Run new layout effect synchronously
       try {
         const cleanup = hook.effect()
-        hook.cancel = is.function(cleanup) ? cleanup : null
+        hook.cancel = is.function(cleanup) ? /** @type {() => void} */ (cleanup) : null
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.error('Error in layout effect:', error)
@@ -47,11 +54,13 @@ const runLayoutEffects = (fiber) => {
 
 /**
  * Run normal (non-layout) effects asynchronously after paint.
+ * @param {RyunixFiber} fiber
  */
 const runNormalEffects = (fiber) => {
   if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
+    /** @type {import('../types/internal.js').RyunixHook & { isLayout?: boolean }} */
     const hook = fiber.hooks[i]
 
     if (
@@ -73,7 +82,7 @@ const runNormalEffects = (fiber) => {
       // Run new effect
       try {
         const cleanup = hook.effect()
-        hook.cancel = is.function(cleanup) ? cleanup : null
+        hook.cancel = is.function(cleanup) ? /** @type {() => void} */ (cleanup) : null
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.error('Error in effect:', error)
@@ -93,7 +102,7 @@ function commitRoot() {
   const state = getState()
   state.deletions.forEach(commitWork)
 
-  const finishedWork = state.wipRoot
+  const finishedWork = /** @type {RyunixRootFiber} */ (state.wipRoot)
 
   // Swap the currentRoot pointer BEFORE running effects
   // This allows dispatches inside effects to base their new work on the just-finished tree
@@ -142,6 +151,9 @@ function commitRoot() {
   }
 }
 
+/**
+ * @param {RyunixFiber | null | undefined} fiber
+ */
 function commitWork(fiber) {
   if (!fiber) {
     return
@@ -226,6 +238,8 @@ function commitWork(fiber) {
 
 /**
  * Commit work for portal children into a specific container
+ * @param {RyunixFiber | null | undefined} fiber
+ * @param {Element | DocumentFragment} portalContainer
  */
 const commitPortalWork = (fiber, portalContainer) => {
   if (!fiber) return
@@ -253,6 +267,10 @@ const commitPortalWork = (fiber, portalContainer) => {
   commitPortalWork(fiber.sibling, portalContainer)
 }
 
+/**
+ * @param {RyunixFiber} fiber
+ * @param {Node} domParent
+ */
 const commitDeletion = (fiber, domParent) => {
   if (fiber.dom) {
     if (fiber.dom.parentNode) {

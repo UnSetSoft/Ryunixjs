@@ -1,41 +1,35 @@
 import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
 
+/** @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber */
+/** @typedef {import('../types/internal.js').RyunixHook} RyunixHook */
+
 /**
- * Check if a key is an event handler
- * @param {string} key - Prop key
+ * @param {string} key
  * @returns {boolean}
  */
 const isEvent = (key) => key.startsWith('on')
 
 /**
- * Check if a key is a property (not children or event)
- * @param {string} key - Prop key
+ * @param {string} key
  * @returns {boolean}
  */
 const isProperty = (key) => key !== STRINGS.CHILDREN && !isEvent(key)
 
 /**
- * Check if a property is new or changed
- * @param {Object} prev - Previous props
- * @param {Object} next - Next props
- * @returns {Function}
+ * @param {Record<string, unknown>} prev
+ * @param {Record<string, unknown>} next
  */
-const isNew = (prev, next) => (key) => {
-  // Use Object.is for better comparison (handles NaN, -0, +0)
+const isNew = (prev, next) => /** @param {string} key */ (key) => {
   return !Object.is(prev[key], next[key])
 }
 
 /**
- * Check if a property was removed
- * @param {Object} next - Next props
- * @returns {Function}
+ * @param {Record<string, unknown>} next
  */
-const isGone = (next) => (key) => !(key in next)
-
+const isGone = (next) => /** @param {string} key */ (key) => !(key in next)
 
 /**
- * Cancel effects for a single fiber
- * @param {Object} fiber - Fiber node
+ * @param {RyunixFiber} fiber
  */
 const cancelEffects = (fiber) => {
   if (!fiber?.hooks?.length) return
@@ -47,8 +41,8 @@ const cancelEffects = (fiber) => {
     )
     .forEach((hook) => {
       try {
-        hook.cancel()
-        hook.cancel = null // Clear reference to prevent memory leaks
+        if (hook.cancel) hook.cancel()
+        hook.cancel = null
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.error('Error in effect cleanup:', error)
@@ -58,14 +52,12 @@ const cancelEffects = (fiber) => {
 }
 
 /**
- * Recursively cancel effects in fiber tree
- * @param {Object} fiber - Root fiber node
+ * @param {RyunixFiber} fiber
  */
 const cancelEffectsDeep = (fiber) => {
   if (!fiber) return
 
-  // Cancel effects for current fiber
-  if (fiber.hooks?.length > 0) {
+  if (fiber.hooks?.length) {
     fiber.hooks
       .filter(
         (hook) =>
@@ -73,8 +65,8 @@ const cancelEffectsDeep = (fiber) => {
       )
       .forEach((hook) => {
         try {
-          hook.cancel()
-          hook.cancel = null // Clear reference
+          if (hook.cancel) hook.cancel()
+          hook.cancel = null
         } catch (error) {
           if (process.env.NODE_ENV !== 'production') {
             console.error('Error in deep effect cleanup:', error)
@@ -83,7 +75,6 @@ const cancelEffectsDeep = (fiber) => {
       })
   }
 
-  // Recursively process children
   if (fiber.child) cancelEffectsDeep(fiber.child)
   if (fiber.sibling) cancelEffectsDeep(fiber.sibling)
 }

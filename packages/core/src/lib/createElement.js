@@ -11,6 +11,7 @@ import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
 /**
  * @typedef {object} RyunixElement
  * @property {string | symbol | Function} type
+ * @property {string | number} [key]
  * @property {RyunixProps & { children?: RyunixNode[] }} props
  */
 

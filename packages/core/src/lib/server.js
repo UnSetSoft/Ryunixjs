@@ -3,6 +3,17 @@ import { camelToKebab, validateUri } from './dom.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
 import { resetIdCounter } from './hooks.js'
 
+/**
+ * @typedef {import('./createElement.js').RyunixNode} RyunixNode
+ * @typedef {import('./createElement.js').RyunixElement} RyunixElement
+ * @typedef {import('../types/internal.js').RyunixRenderToStringOptions} RyunixRenderToStringOptions
+ * @typedef {Promise<{ success: boolean, id: string, content: string, error?: unknown }>} RyunixSuspenseTask
+ */
+
+/**
+ * @param {unknown} unsafe
+ * @returns {string}
+ */
 export const escapeHtml = (unsafe) => {
   if (typeof unsafe !== 'string') return String(unsafe)
   return unsafe
@@ -13,6 +24,10 @@ export const escapeHtml = (unsafe) => {
     .replace(/'/g, '&#039;')
 }
 
+/**
+ * @param {Record<string, unknown>} styleObj
+ * @returns {string}
+ */
 const renderStyle = (styleObj) => {
   if (!is.object(styleObj) || is.null(styleObj)) return ''
   return Object.entries(styleObj)
@@ -26,6 +41,10 @@ const VOID_ELEMENTS = new Set([
   'link', 'meta', 'param', 'source', 'track', 'wbr'
 ])
 
+/**
+ * @param {RyunixNode | RyunixNode[]} element
+ * @returns {string}
+ */
 const renderToStringImpl = (element) => {
   if (element == null || typeof element === 'boolean') {
     return ''
@@ -39,27 +58,35 @@ const renderToStringImpl = (element) => {
     return element.map(child => renderToStringImpl(child)).join('')
   }
 
-  if (element.type === RYUNIX_TYPES.TEXT_ELEMENT) {
-    return escapeHtml(element.props.nodeValue)
+  /** @type {RyunixElement} */
+  const vnode = element
+
+  if (vnode.type === RYUNIX_TYPES.TEXT_ELEMENT) {
+    return escapeHtml(
+      /** @type {import('./createElement.js').RyunixTextElement} */ (vnode).props.nodeValue,
+    )
   }
 
-  if (element.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
-    const children = element.props?.children || []
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    const children = vnode.props?.children || []
     return children.map(child => renderToStringImpl(child)).join('')
   }
 
-  if (element.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     // Context Providers just render their children transparently on the server
     const state = getState()
     state.ssrContexts = state.ssrContexts || {}
-    const ctxId = element.props?._contextId
+    const ctxProps = /** @type {{ _contextId?: string, value?: unknown, children?: RyunixNode | RyunixNode[] }} */ (
+      vnode.props || {}
+    )
+    const ctxId = ctxProps._contextId
     const prevCtx = state.ssrContexts[ctxId]
 
     if (ctxId) {
-      state.ssrContexts[ctxId] = element.props?.value
+      state.ssrContexts[ctxId] = ctxProps.value
     }
 
-    const children = element.props?.children || []
+    const children = ctxProps.children || []
     let result = ''
     if (Array.isArray(children)) {
       result = children.map(child => renderToStringImpl(child)).join('')
@@ -74,16 +101,18 @@ const renderToStringImpl = (element) => {
     return result
   }
 
-  if (typeof element.type === 'function') {
-    const type = element.type
-    const props = element.props || {}
-    const renderedElement = type(props)
+  if (typeof vnode.type === 'function') {
+    const type = vnode.type
+    const props = vnode.props || {}
+    const renderedElement = /** @type {(props: Record<string, unknown>) => RyunixNode} */ (type)(
+      props,
+    )
     return renderToStringImpl(renderedElement)
   }
 
   // It's a standard host element
-  const type = element.type
-  const props = element.props || {}
+  const type = String(vnode.type)
+  const props = vnode.props || {}
 
   let attributes = ''
   let htmlChildren = ''
@@ -94,12 +123,15 @@ const renderToStringImpl = (element) => {
       if (Array.isArray(value)) {
         htmlChildren = value.map(child => renderToStringImpl(child)).join('')
       } else {
-        htmlChildren = renderToStringImpl(value)
+        htmlChildren = renderToStringImpl(/** @type {RyunixNode} */ (value))
       }
-    } else if (key === 'dangerouslySetInnerHTML' && value?.__html) {
-      innerHTML = value.__html
+    } else if (key === 'dangerouslySetInnerHTML') {
+      const inner = /** @type {{ __html?: string } | null | undefined} */ (value)
+      if (inner?.__html) {
+        innerHTML = inner.__html
+      }
     } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
-      const styleString = renderStyle(value)
+      const styleString = renderStyle(/** @type {Record<string, unknown>} */ (value))
       if (styleString) {
         attributes += ` style="${escapeHtml(styleString)}"`
       }
@@ -138,6 +170,12 @@ function $RC(id, templateId) {
 }
 `.replace(/\s+/g, ' ').trim()
 
+/**
+ * @param {RyunixNode | RyunixNode[]} element
+ * @param {(chunk: string) => void} push
+ * @param {RyunixSuspenseTask[]} [suspenseTasks]
+ * @returns {Promise<void>}
+ */
 const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   if (element == null || typeof element === 'boolean') {
     return
@@ -161,30 +199,40 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     return
   }
 
-  if (element.type === RYUNIX_TYPES.TEXT_ELEMENT) {
-    push(escapeHtml(element.props.nodeValue))
+  /** @type {RyunixElement} */
+  const vnode = element
+
+  if (vnode.type === RYUNIX_TYPES.TEXT_ELEMENT) {
+    push(
+      escapeHtml(
+        /** @type {import('./createElement.js').RyunixTextElement} */ (vnode).props.nodeValue,
+      ),
+    )
     return
   }
 
-  if (element.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
-    const children = element.props?.children || []
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    const children = vnode.props?.children || []
     for (const child of children) {
       await renderToStreamImpl(child, push, suspenseTasks)
     }
     return
   }
 
-  if (element.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     const state = getState()
     state.ssrContexts = state.ssrContexts || {}
-    const ctxId = element.props?._contextId
+    const ctxProps = /** @type {{ _contextId?: string, value?: unknown, children?: RyunixNode | RyunixNode[] }} */ (
+      vnode.props || {}
+    )
+    const ctxId = ctxProps._contextId
     const prevCtx = state.ssrContexts[ctxId]
 
     if (ctxId) {
-      state.ssrContexts[ctxId] = element.props?.value
+      state.ssrContexts[ctxId] = ctxProps.value
     }
 
-    const children = element.props?.children || []
+    const children = ctxProps.children || []
     if (Array.isArray(children)) {
       for (const child of children) {
         await renderToStreamImpl(child, push, suspenseTasks)
@@ -201,8 +249,17 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   }
 
   // Handle Suspense specifically
-  if (element.type === RYUNIX_TYPES.RYUNIX_SUSPENSE || element.type?.type === RYUNIX_TYPES.RYUNIX_SUSPENSE) {
-    const { fallback, children } = element.props
+  const suspenseType = vnode.type
+  const isSuspenseBoundary =
+    vnode.type === RYUNIX_TYPES.RYUNIX_SUSPENSE ||
+    (typeof suspenseType === 'object' &&
+      suspenseType != null &&
+      /** @type {{ type?: symbol }} */ (suspenseType).type === RYUNIX_TYPES.RYUNIX_SUSPENSE)
+  if (isSuspenseBoundary) {
+    const suspenseProps = /** @type {{ fallback?: RyunixNode, children?: RyunixNode | RyunixNode[] }} */ (
+      vnode.props || {}
+    )
+    const { fallback, children } = suspenseProps
     const id = `s-${Math.random().toString(36).slice(2, 9)}`
 
     // In universal mode, Suspense renders children if ready, or fallback if pending.
@@ -217,7 +274,8 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       state.isSuspenseBackground = true
 
       let content = ''
-      const subPush = (chunk) => content += chunk
+      /** @param {string} chunk */
+      const subPush = (chunk) => { content += chunk }
       try {
         await renderToStreamImpl(children, subPush, suspenseTasks)
         return { id, content, success: true }
@@ -236,19 +294,22 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     return
   }
 
-  let type = element.type
-  let props = element.props || {}
+  let type = vnode.type
+  let props = vnode.props || {}
 
   if (typeof type === 'function') {
     if (process.env.RYUNIX_DEBUG) {
       console.log('[SSR Debug] Rendering function:', type.name || 'anonymous');
     }
-    const renderedElement = await type(props)
+    const renderedElement = await /** @type {(props: Record<string, unknown>) => RyunixNode | Promise<RyunixNode>} */ (
+      type
+    )(props)
     await renderToStreamImpl(renderedElement, push, suspenseTasks)
     return
   }
 
   // It's a standard host element
+  const hostTag = String(type)
   let attributes = ''
   let innerHTML = null
   let children = props.children || []
@@ -256,10 +317,13 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   Object.entries(props).forEach(([key, value]) => {
     if (key === 'children') {
       // Ignored here, handled below
-    } else if (key === 'dangerouslySetInnerHTML' && value?.__html) {
-      innerHTML = value.__html
+    } else if (key === 'dangerouslySetInnerHTML') {
+      const inner = /** @type {{ __html?: string } | null | undefined} */ (value)
+      if (inner?.__html) {
+        innerHTML = inner.__html
+      }
     } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
-      const styleString = renderStyle(value)
+      const styleString = renderStyle(/** @type {Record<string, unknown>} */ (value))
       if (styleString) {
         attributes += ` style="${escapeHtml(styleString)}"`
       }
@@ -278,7 +342,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     }
   })
 
-  push(`<${type}${attributes}>`)
+  push(`<${hostTag}${attributes}>`)
 
   if (innerHTML !== null) {
     push(innerHTML)
@@ -292,11 +356,16 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     }
   }
 
-  if (!VOID_ELEMENTS.has(type)) {
-    push(`</${type}>`)
+  if (!VOID_ELEMENTS.has(hostTag)) {
+    push(`</${hostTag}>`)
   }
 }
 
+/**
+ * @param {RyunixNode} element
+ * @param {RyunixRenderToStringOptions} [options]
+ * @returns {ReadableStream<Uint8Array>}
+ */
 export const renderToReadableStream = (element, options = {}) => {
   const state = getState()
   const encoder = new TextEncoder()
@@ -310,7 +379,9 @@ export const renderToReadableStream = (element, options = {}) => {
       state.isServerRendering = true
       state.ssrMetadata = {}
 
+      /** @param {string} text */
       const push = (text) => controller.enqueue(encoder.encode(text))
+      /** @type {RyunixSuspenseTask[]} */
       const suspenseTasks = []
 
       try {
@@ -343,6 +414,11 @@ export const renderToReadableStream = (element, options = {}) => {
   })
 }
 
+/**
+ * @param {RyunixNode} element
+ * @param {RyunixRenderToStringOptions} [options]
+ * @returns {string}
+ */
 export const renderToString = (element, options = {}) => {
   const state = getState()
   const wasServerRendering = state.isServerRendering
@@ -359,6 +435,11 @@ export const renderToString = (element, options = {}) => {
   }
 }
 
+/**
+ * @param {RyunixNode} element
+ * @param {RyunixRenderToStringOptions} [options]
+ * @returns {Promise<string>}
+ */
 export const renderToStringAsync = async (element, options = {}) => {
   const stream = renderToReadableStream(element, options);
   const reader = stream.getReader();

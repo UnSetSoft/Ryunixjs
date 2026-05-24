@@ -1,28 +1,67 @@
 import { createElement } from './createElement.js';
 import { useStore, useEffect } from './hooks.js';
 
+/**
+ * @typedef {object} OverlayError
+ * @property {string} [name]
+ * @property {string} [message]
+ * @property {string | string[]} [stack]
+ * @property {{ fileName?: string, lineNumber?: number }} [__ryunix_source]
+ */
+
+/**
+ * @param {unknown} propsOrError
+ */
 export function RyunixDevOverlay(propsOrError) {
+  /** @type {Record<string, unknown> | Error | null | undefined} */
+  const propsInput = /** @type {Record<string, unknown> | Error | null | undefined} */ (
+    propsOrError
+  )
+
   // If propsOrError is an event or wrapped object, try to extract error
-  const rawError = propsOrError && propsOrError.nativeEvent 
-    ? propsOrError.error
-    : propsOrError;
+  const rawError =
+    propsInput &&
+    typeof propsInput === 'object' &&
+    !(propsInput instanceof Error) &&
+    propsInput.nativeEvent
+      ? propsInput.error
+      : propsInput;
     
-  let error = rawError instanceof Error || (rawError && rawError.message) 
-    ? rawError 
-    : (rawError?.error || rawError);
+  /** @type {OverlayError | null} */
+  let error = null
+  if (rawError instanceof Error) {
+    error = rawError
+  } else if (rawError && typeof rawError === 'object') {
+    if ('message' in rawError) {
+      error = /** @type {OverlayError} */ (rawError)
+    } else if ('error' in rawError) {
+      const nested = /** @type {Record<string, unknown>} */ (rawError).error
+      error =
+        nested && typeof nested === 'object'
+          ? /** @type {OverlayError} */ (nested)
+          : null
+    } else {
+      error = /** @type {OverlayError} */ (rawError)
+    }
+  }
 
   // Debug string if error is broken
-  const debugObjectStr = JSON.stringify(propsOrError, Object.getOwnPropertyNames(propsOrError || {}));
+  const debugObjectStr = JSON.stringify(propsInput, Object.getOwnPropertyNames(propsInput || {}));
 
-  const [snippet, setSnippet] = useStore(null);
-  const [startLine, setStartLine] = useStore(1);
-  const [errorFile, setErrorFile] = useStore('');
-  const [errorLine, setErrorLine] = useStore(0);
+  const [snippetState, setSnippet] = useStore(null);
+  const [startLineState, setStartLine] = useStore(1);
+  const [errorFileState, setErrorFile] = useStore('');
+  const [errorLineState, setErrorLine] = useStore(0);
+  const snippet = /** @type {string | null} */ (snippetState);
+  const startLine = /** @type {number} */ (startLineState);
+  const errorFile = /** @type {string} */ (errorFileState);
+  const errorLine = /** @type {number} */ (errorLineState);
 
   // Normalize stack ensuring we have lines
+  /** @type {string[]} */
   let stackLines = [];
   if (error && error.stack) {
-    stackLines = typeof error.stack === 'string' ? error.stack.split('\n').filter(line => {
+    stackLines = typeof error.stack === 'string' ? error.stack.split('\n').filter((/** @type {string} */ line) => {
       const trimmed = line.trim();
       if (!trimmed) return false;
       if (trimmed.includes('node_modules')) return false;
@@ -33,20 +72,25 @@ export function RyunixDevOverlay(propsOrError) {
         'app-router-server.js', 'render.js', 'createElement.js', 'index.js'
       ].some(file => trimmed.includes(file));
       return !isInternal;
-    }) : error.stack;
+    }) : Array.isArray(error.stack) ? /** @type {string[]} */ (error.stack) : [];
   }
-  
-  const errorName = error && error.name ? error.name : 'Unknown Error Type';
-  const errorMessage = error && error.message ? error.message : `Raw unhandled error. Debug: ${debugObjectStr}`;
+
+  const errorName =
+    error && typeof error.name === 'string' ? error.name : 'Unknown Error Type';
+  const errorMessage =
+    error && typeof error.message === 'string'
+      ? error.message
+      : `Raw unhandled error. Debug: ${debugObjectStr}`;
 
   useEffect(() => {
     let targetPath = null;
     let targetLine = null;
 
     // 1. Direct JSX __source mapping (injected by Webpack/SWC)
-    if (error && error.__ryunix_source && error.__ryunix_source.fileName) {
-      targetPath = error.__ryunix_source.fileName;
-      targetLine = error.__ryunix_source.lineNumber;
+    const ryunixSource = error?.__ryunix_source
+    if (ryunixSource?.fileName) {
+      targetPath = ryunixSource.fileName;
+      targetLine = ryunixSource.lineNumber ?? null;
     }
 
     // 2. Fallback to Regex Stack Parsing
@@ -174,6 +218,7 @@ export function RyunixDevOverlay(propsOrError) {
     height: 'auto'
   };
 
+  /** @param {boolean} isErrorLine */
   const lineStyle = (isErrorLine) => ({
     display: 'flex',
     backgroundColor: isErrorLine ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
@@ -223,7 +268,7 @@ export function RyunixDevOverlay(propsOrError) {
 
         snippet && createElement('div', { style: snippetContainerStyle },
           createElement('div', { style: { display: 'flex', flexDirection: 'column' } },
-            ...snippetLines.map((lineText, index) => {
+            ...snippetLines.map((/** @type {string} */ lineText, /** @type {number} */ index) => {
               const currentLineNumber = startLine + index;
               const isErrorLine = currentLineNumber === errorLine;
               return createElement('div', { key: index, style: lineStyle(isErrorLine) },
@@ -238,7 +283,7 @@ export function RyunixDevOverlay(propsOrError) {
           createElement('p', { style: { color: '#9ca3af', fontSize: '14px', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' } }, 'Call Stack'),
           createElement('div', { style: snippetContainerStyle },
             stackLines.length > 0 ? createElement('ul', { style: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' } },
-              ...stackLines.map((line, i) => {
+              ...stackLines.map((/** @type {string} */ line, /** @type {number} */ i) => {
                 if (i === 0 && (line.startsWith('Error:') || line.startsWith('TypeError:'))) return null;
                 
                 // Deterministic string-based stack frame parsing (no polynomial regex)
