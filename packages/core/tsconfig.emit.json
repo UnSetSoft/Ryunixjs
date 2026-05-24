@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "allowJs": false,
     "noEmit": false,
     "outDir": "src/lib",
     "rootDir": "src/lib",
@@ -10,5 +11,5 @@
     "moduleResolution": "node10",
     "removeComments": true
   },
-  "include": ["src/lib/batching.ts"]
+  "include": ["src/lib/batching.ts", "src/lib/priority.ts"]
 }
