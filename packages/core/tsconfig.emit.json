@@ -11,5 +11,10 @@
     "moduleResolution": "node10",
     "removeComments": true
   },
-  "include": ["src/lib/batching.ts", "src/lib/priority.ts"]
+  "include": [
+    "src/lib/batching.ts",
+    "src/lib/priority.ts",
+    "src/lib/memo.ts",
+    "src/lib/portal.ts"
+  ]
 }
