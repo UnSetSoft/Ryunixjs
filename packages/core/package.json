@@ -6,25 +6,30 @@
   "module": "./dist/Ryunix.esm.js",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./dist/Ryunix.esm.js",
       "require": "./dist/Ryunix.umd.js",
       "default": "./dist/Ryunix.umd.js"
     },
     "./package.json": "./package.json",
     "./jsx-runtime": {
+      "types": "./jsx/jsx-runtime.d.ts",
       "import": "./jsx/jsx-runtime.js",
       "require": "./jsx/jsx-runtime.js",
       "default": "./jsx/jsx-runtime.js"
     },
     "./jsx-dev-runtime": {
+      "types": "./jsx/jsx-dev-runtime.d.ts",
       "import": "./jsx/jsx-dev-runtime.js",
       "require": "./jsx/jsx-dev-runtime.js",
       "default": "./jsx/jsx-dev-runtime.js"
     }
   },
+  "types": "./types/index.d.ts",
   "files": [
     "dist",
-    "jsx"
+    "jsx",
+    "types"
   ],
   "type": "module",
   "scripts": {
