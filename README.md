@@ -82,13 +82,13 @@ to do it efficiently.
 
 RyunixJS is managed as a monorepo containing several specialized packages:
 
-| Package                                                    | Description                                                            |
-| :--------------------------------------------------------- | :--------------------------------------------------------------------- |
-| [`@unsetsoft/ryunixjs`](./packages/core)                   | The core library containing the reconciler, hooks, and DOM utilities.  |
-| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Unified tooling and Webpack configurations for different environments. |
-| [`@unsetsoft/cra`](./packages/cra)                         | The Official CLI to scaffold new Ryunix projects effortlessly.         |
-| [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for debugging and inspecting component trees.        |
-| [Ryunix VS Code Extension](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs) | Syntax highlighting and editor support for `.ryx` files.             |
+| Package | Description |
+| :------ | :---------- |
+| [`@unsetsoft/ryunixjs`](./packages/core) | Core library: reconciler, hooks, and DOM utilities. |
+| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets) | Tooling and Webpack configurations. |
+| [`@unsetsoft/cra`](./packages/cra) | CLI to scaffold new Ryunix projects. |
+| [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for component tree debugging. |
+| [VS Code extension][vscode-ext] | Syntax highlighting and editor support for `.ryx`. |
 
 ## 🛠️ Getting Started
 
@@ -105,8 +105,10 @@ cd my-ryunix-app
 npm run dev
 ```
 
-Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs)
-for `.ryx` syntax highlighting (optional; the CRA can add workspace recommendations with `--vscode`).
+Install the [VS Code extension][vscode-ext] for `.ryx` syntax highlighting
+(optional; the CRA can add workspace recommendations with `--vscode`).
+
+[vscode-ext]: https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs
 
 ## 📚 Documentation
 

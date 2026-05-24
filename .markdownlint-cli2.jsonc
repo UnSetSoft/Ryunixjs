@@ -6,6 +6,7 @@
     "node_modules",
     "**/node_modules/**",
     ".claude/**",
-    ".cursor/**"
+    ".cursor/**",
+    "text.md"
   ]
 }

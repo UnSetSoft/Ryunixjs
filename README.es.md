@@ -76,13 +76,13 @@ eficiencia.
 
 RyunixJS es un monorepo con varios paquetes especializados:
 
-| Paquete                                                    | Descripción                                          |
-| :--------------------------------------------------------- | :--------------------------------------------------- |
-| [`@unsetsoft/ryunixjs`](./packages/core)                   | Core: reconciliador, hooks y utilidades DOM.         |
-| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Tooling unificado y configuraciones Webpack.         |
-| [`@unsetsoft/cra`](./packages/cra)                         | CLI oficial para crear proyectos Ryunix.             |
+| Paquete | Descripción |
+| :------ | :---------- |
+| [`@unsetsoft/ryunixjs`](./packages/core) | Core: reconciliador, hooks y utilidades DOM. |
+| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets) | Tooling unificado y configuraciones Webpack. |
+| [`@unsetsoft/cra`](./packages/cra) | CLI oficial para crear proyectos Ryunix. |
 | [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Extensión para inspeccionar el árbol de componentes. |
-| [Extensión VS Code Ryunix](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs) | Resaltado de sintaxis y soporte de editor para archivos `.ryx`. |
+| [Extensión VS Code][vscode-ext] | Resaltado de sintaxis y soporte para `.ryx`. |
 
 ## 🛠️ Primeros pasos
 
@@ -99,8 +99,10 @@ cd my-ryunix-app
 npm run dev
 ```
 
-Instala la [extensión de VS Code](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs)
-para resaltado de `.ryx` (opcional; la CRA puede añadir recomendaciones del workspace con `--vscode`).
+Instala la [extensión de VS Code][vscode-ext] para resaltado de `.ryx`
+(opcional; la CRA puede añadir recomendaciones del workspace con `--vscode`).
+
+[vscode-ext]: https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs
 
 ## 📚 Documentación
 
