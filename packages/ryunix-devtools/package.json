@@ -5,7 +5,8 @@
   "main": "manifest.json",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:background": "tsc -p tsconfig.emit.json"
+    "build": "tsc -p tsconfig.emit.json",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "ryunix",
