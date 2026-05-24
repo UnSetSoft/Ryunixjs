@@ -1,9 +1,17 @@
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import terser from '@rollup/plugin-terser'
+import typescript from '@rollup/plugin-typescript'
+
+const tsPlugin = typescript({
+  include: ['src/**/*.ts'],
+  compilerOptions: {
+    allowJs: false,
+    declaration: false,
+  },
+})
 
 const Ryunix = [
-  // ESM BUILD (para bundlers)
   {
     input: 'src/main.js',
     output: {
@@ -11,10 +19,8 @@ const Ryunix = [
       format: 'esm',
       sourcemap: true,
     },
-    plugins: [resolve({ extensions: ['.js', '.mjs'] }), commonjs()],
+    plugins: [tsPlugin, resolve({ extensions: ['.js', '.ts'] }), commonjs()],
   },
-
-  // UMD BUILD (para browser)
   {
     input: 'src/main.js',
     output: [
@@ -34,7 +40,11 @@ const Ryunix = [
         sourcemap: true,
       },
     ],
-    plugins: [resolve({ browser: true }), commonjs()],
+    plugins: [
+      tsPlugin,
+      resolve({ browser: true, extensions: ['.js', '.ts'] }),
+      commonjs(),
+    ],
   },
 ]
 

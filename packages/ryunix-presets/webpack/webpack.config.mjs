@@ -26,7 +26,7 @@ import { renderDevRoute } from './utils/ssrDevHandler.mjs'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import { remarkGithubAlerts } from './plugins/remark-github-alerts.mjs'
+import { remarkGithubAlerts } from './plugins/remark-github-alerts.js'
 import rehypeHighlight from 'rehype-highlight'
 
 const __filename = fileURLToPath(import.meta.url)

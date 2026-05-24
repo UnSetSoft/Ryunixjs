@@ -4,7 +4,8 @@
   "description": "DevTools extension for debugging Ryunix applications",
   "main": "manifest.json",
   "scripts": {
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:background": "tsc -p tsconfig.emit.json"
   },
   "keywords": [
     "ryunix",

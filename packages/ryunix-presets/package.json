@@ -34,6 +34,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:plugins": "tsc -p tsconfig.plugins.json",
     "test": "node --test webpack/plugins/remark-github-alerts.test.mjs"
   },
   "engines": {

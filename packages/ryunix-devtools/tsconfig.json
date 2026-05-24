@@ -3,6 +3,6 @@
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["*.js"],
+  "include": ["*.js", "*.ts", "chrome.d.ts"],
   "exclude": ["node_modules"]
 }

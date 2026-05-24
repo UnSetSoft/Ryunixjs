@@ -5,16 +5,25 @@
 
 const ALERT_RE = /^\\?\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\\?\]\s*/i
 
-function paragraphText(node) {
+type MdastNode = {
+  type?: string
+  children?: MdastNode[]
+  value?: string
+  data?: {
+    hProperties?: Record<string, unknown> & { className?: string | string[] }
+  }
+}
+
+function paragraphText(node: MdastNode | undefined): string {
   if (!node || node.type !== 'paragraph' || !Array.isArray(node.children)) return ''
   return node.children
     .filter((child) => child.type === 'text')
-    .map((child) => child.value)
+    .map((child) => child.value ?? '')
     .join('')
 }
 
-function setAlertClasses(node, alertType) {
-  node.data = node.data || {}
+function setAlertClasses(node: MdastNode, alertType: string): void {
+  node.data = node.data ?? {}
   const existing = node.data.hProperties?.className
   const classes = [
     ...(Array.isArray(existing) ? existing : existing ? [existing] : []),
@@ -22,13 +31,13 @@ function setAlertClasses(node, alertType) {
     `docs-alert--${alertType}`,
   ]
   node.data.hProperties = {
-    ...(node.data.hProperties || {}),
+    ...(node.data.hProperties ?? {}),
     className: classes,
     dataAlert: alertType,
   }
 }
 
-function stripAlertMarker(paragraph, match) {
+function stripAlertMarker(paragraph: MdastNode, match: RegExpMatchArray): boolean {
   const text = paragraphText(paragraph)
   const rest = text.slice(match[0].length).trim()
   if (!rest) return false
@@ -36,7 +45,7 @@ function stripAlertMarker(paragraph, match) {
   return true
 }
 
-function visit(node, fn) {
+function visit(node: MdastNode, fn: (node: MdastNode) => void): void {
   if (!node || typeof node !== 'object') return
   fn(node)
   const children = node.children
@@ -45,7 +54,7 @@ function visit(node, fn) {
 }
 
 export function remarkGithubAlerts() {
-  return (tree) => {
+  return (tree: MdastNode) => {
     visit(tree, (node) => {
       if (node.type !== 'blockquote' || !Array.isArray(node.children) || node.children.length === 0) {
         return
