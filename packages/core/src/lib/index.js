@@ -1,3 +1,10 @@
+/**
+ * Public API surface of `@unsetsoft/ryunixjs`.
+ * Re-exports createElement, hooks, render, SSR helpers, and related utilities.
+ *
+ * @module lib/index
+ */
+
 export { createElement, Fragment, cloneElement, isValidElement } from './createElement.js'
 export { render, init, safeRender, hydrate } from './render.js'
 export { renderToString, renderToReadableStream, escapeHtml, renderToStringAsync } from './server.js'

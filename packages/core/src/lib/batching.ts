@@ -1,6 +1,6 @@
 let isBatching = false
 
-const pendingUpdates: Array<() => void> = []
+let pendingUpdates: Array<() => void> = []
 
 export function batchUpdates(callback: () => void): void {
   const wasBatching = isBatching
@@ -29,7 +29,7 @@ export function flushUpdates(): void {
   if (pendingUpdates.length === 0) return
 
   const updates = pendingUpdates
-  pendingUpdates.length = 0
+  pendingUpdates = []
 
   updates.forEach((update) => update())
 }

@@ -1,154 +1,126 @@
-const path = require('path')
-const fs = require('fs')
-const util = require('util')
-const exec = util.promisify(require('child_process').exec)
-const pc = require('picocolors')
-const { getPkgManager } = require('./helpers/get-pkg-manager')
-const { isFolderEmpty } = require('./helpers/is-folder-empty')
-const { copyRecursiveSync } = require('./helpers/copy')
-const { install } = require('./helpers/install')
-const { tryGitInit } = require('./helpers/git')
-
-async function createApp({ appPath, appName, channel, compiler, tailwind, eslint, vscode }) {
-  const root = path.resolve(appPath)
-
-  if (fs.existsSync(root)) {
-    if (!isFolderEmpty(root, appName)) {
-      process.exit(1)
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createApp = createApp;
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+const util_1 = require("util");
+const child_process_1 = require("child_process");
+const picocolors_1 = __importDefault(require("picocolors"));
+const get_pkg_manager_1 = require("./helpers/get-pkg-manager");
+const is_folder_empty_1 = require("./helpers/is-folder-empty");
+const copy_1 = require("./helpers/copy");
+const git_1 = require("./helpers/git");
+const exec = (0, util_1.promisify)(child_process_1.exec);
+async function createApp({ appPath, appName, channel, compiler, tailwind, eslint, vscode, }) {
+    const root = path_1.default.resolve(appPath);
+    if (fs_1.default.existsSync(root)) {
+        if (!(0, is_folder_empty_1.isFolderEmpty)(root, appName)) {
+            process.exit(1);
+        }
     }
-  } else {
-    fs.mkdirSync(root, { recursive: true })
-  }
-
-  console.log(`\nCreating a new Ryunix app in ${pc.green(root)}.\n`)
-  process.chdir(root)
-
-  // 1. Copy Template
-  let templateName = 'ryunix-base'
-  if (tailwind && eslint) templateName = 'ryunix-all'
-  else if (tailwind) templateName = 'ryunix-tailwind'
-  else if (eslint) templateName = 'ryunix-eslint'
-
-  const templateDir = path.resolve(__dirname, '..', 'templates', templateName)
-  if (!fs.existsSync(templateDir)) {
-    console.error(pc.red(`Could not locate the template: ${templateDir}`))
-    process.exit(1)
-  }
-
-  console.log(`Copying files from template...\n`)
-  copyRecursiveSync(templateDir, root)
-
-  // Rename gitignore to .gitignore (NPM strips out .gitignore when publishing the template)
-  const gitignorePath = path.join(root, 'gitignore')
-  if (fs.existsSync(gitignorePath)) {
-    fs.renameSync(gitignorePath, path.join(root, '.gitignore'))
-  }
-
-  // 2. Adjust package.json
-  const packageJsonPath = path.join(root, 'package.json')
-  let packageJson = {}
-  if (fs.existsSync(packageJsonPath)) {
-    packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-  }
-
-  packageJson.name = appName
-  packageJson.version = '0.1.0'
-  packageJson.private = true
-
-  // Adjust versions based on channel
-  const isCanary = channel === 'Canary'
-  const versionTag = isCanary ? 'canary' : 'latest'
-
-  let ryunixVersion = versionTag
-  let presetsVersion = versionTag
-
-  const pkgManager = getPkgManager()
-
-  let viewCmd = 'npm view'
-  if (pkgManager === 'yarn') {
-    viewCmd = 'yarn info'
-  } else if (pkgManager === 'pnpm') {
-    viewCmd = 'pnpm view'
-  } else if (pkgManager === 'bun') {
-    // bun doesn't natively have a view command that returns just the version easily, fallback to npm view 
-    viewCmd = 'npm view'
-  }
-
-  try {
-    const { stdout: ryunixStdout } = await exec(`${viewCmd} @unsetsoft/ryunixjs@${versionTag} version`)
-    const { stdout: presetsStdout } = await exec(`${viewCmd} @unsetsoft/ryunix-presets@${versionTag} version`)
-    ryunixVersion = '^' + ryunixStdout.trim()
-    presetsVersion = '^' + presetsStdout.trim()
-  } catch (error) {
-    // Fallback to the tag if npm view fails
-    console.warn(pc.yellow(`\nWarning: Could not fetch exact versions for ${versionTag}. Using tag instead.`))
-  }
-
-  packageJson.dependencies = packageJson.dependencies || {}
-  packageJson.devDependencies = packageJson.devDependencies || {}
-
-  packageJson.dependencies['@unsetsoft/ryunixjs'] = ryunixVersion
-  packageJson.devDependencies['@unsetsoft/ryunix-presets'] = presetsVersion
-
-  if (tailwind) {
-    packageJson.devDependencies['tailwindcss'] = '^4.0.0'
-    packageJson.devDependencies['@tailwindcss/postcss'] = '^4.0.0'
-    packageJson.devDependencies['postcss'] = '^8.4.35'
-  }
-
-  if (eslint) {
-    packageJson.devDependencies['eslint'] = '^8.57.0'
-    packageJson.devDependencies['eslint-plugin-react'] = '^7.34.0'
-    packageJson.devDependencies['eslint-plugin-react-hooks'] = '^4.6.0'
-  }
-
-
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
-
-  // 3. Apply Optional Features
-  // Features are already pre-applied in the specialized templates
-
-
-  // 4. Update ryunix.config.js with the selected compiler
-  const configPath = path.join(root, 'ryunix.config.js')
-  if (fs.existsSync(configPath)) {
-    let configContent = fs.readFileSync(configPath, 'utf8')
-    // Add compiler to the config object
-    if (configContent.includes('const RyunixSettings = {')) {
-      configContent = configContent.replace('const RyunixSettings = {', `const RyunixSettings = {\n  compiler: '${compiler}',`)
+    else {
+        fs_1.default.mkdirSync(root, { recursive: true });
     }
-    fs.writeFileSync(configPath, configContent)
-  }
-
-  // Create vscode workspace settings if requested
-  if (vscode) {
-    const vscodeDir = path.join(root, '.vscode')
-    if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir)
-    const extensionsJson = { recommendations: ["unsetsoft.ryunixjs"] }
-    fs.writeFileSync(path.join(vscodeDir, 'extensions.json'), JSON.stringify(extensionsJson, null, 2))
-  }
-
-  // 4. Install Dependencies
-
-
-  // 5. Initialize Git
-  if (tryGitInit(root)) {
-    console.log(`\n${pc.green('Initialized a git repository.')}`)
-  }
-
-  // 6. Print Success Message
-  console.log(`\n${pc.green('Success!')} Created ${appName}`)
-  console.log('Inside that directory, you can run several commands:\\n')
-  console.log(pc.cyan(`  ${pkgManager} run dev`))
-  console.log('    Starts the development server.\\n')
-  console.log(pc.cyan(`  ${pkgManager} run build`))
-  console.log('    Builds the app for production.\\n')
-  console.log(pc.cyan(`  ${pkgManager} start`))
-  console.log('    Runs the built app in production mode.\\n')
-  console.log('We suggest that you begin by typing:\\n')
-  console.log(pc.cyan('  cd'), appName)
-  console.log(pc.cyan(`  ${pkgManager} install`))
-  console.log(pc.cyan(`  ${pkgManager} run dev\n`))
+    console.log(`\nCreating a new Ryunix app in ${picocolors_1.default.green(root)}.\n`);
+    process.chdir(root);
+    let templateName = 'ryunix-base';
+    if (tailwind && eslint)
+        templateName = 'ryunix-all';
+    else if (tailwind)
+        templateName = 'ryunix-tailwind';
+    else if (eslint)
+        templateName = 'ryunix-eslint';
+    const templateDir = path_1.default.resolve(__dirname, '..', 'templates', templateName);
+    if (!fs_1.default.existsSync(templateDir)) {
+        console.error(picocolors_1.default.red(`Could not locate the template: ${templateDir}`));
+        process.exit(1);
+    }
+    console.log(`Copying files from template...\n`);
+    (0, copy_1.copyRecursiveSync)(templateDir, root);
+    const gitignorePath = path_1.default.join(root, 'gitignore');
+    if (fs_1.default.existsSync(gitignorePath)) {
+        fs_1.default.renameSync(gitignorePath, path_1.default.join(root, '.gitignore'));
+    }
+    const packageJsonPath = path_1.default.join(root, 'package.json');
+    let packageJson = {};
+    if (fs_1.default.existsSync(packageJsonPath)) {
+        packageJson = JSON.parse(fs_1.default.readFileSync(packageJsonPath, 'utf8'));
+    }
+    packageJson.name = appName;
+    packageJson.version = '0.1.0';
+    packageJson.private = true;
+    const isCanary = channel === 'Canary';
+    const versionTag = isCanary ? 'canary' : 'latest';
+    let ryunixVersion = versionTag;
+    let presetsVersion = versionTag;
+    const pkgManager = (0, get_pkg_manager_1.getPkgManager)();
+    let viewCmd = 'npm view';
+    if (pkgManager === 'yarn') {
+        viewCmd = 'yarn info';
+    }
+    else if (pkgManager === 'pnpm') {
+        viewCmd = 'pnpm view';
+    }
+    else if (pkgManager === 'bun') {
+        viewCmd = 'npm view';
+    }
+    try {
+        const { stdout: ryunixStdout } = await exec(`${viewCmd} @unsetsoft/ryunixjs@${versionTag} version`);
+        const { stdout: presetsStdout } = await exec(`${viewCmd} @unsetsoft/ryunix-presets@${versionTag} version`);
+        ryunixVersion = '^' + ryunixStdout.trim();
+        presetsVersion = '^' + presetsStdout.trim();
+    }
+    catch {
+        console.warn(picocolors_1.default.yellow(`\nWarning: Could not fetch exact versions for ${versionTag}. Using tag instead.`));
+    }
+    const dependencies = packageJson.dependencies ?? {};
+    const devDependencies = packageJson.devDependencies ?? {};
+    dependencies['@unsetsoft/ryunixjs'] = ryunixVersion;
+    devDependencies['@unsetsoft/ryunix-presets'] = presetsVersion;
+    if (tailwind) {
+        devDependencies['tailwindcss'] = '^4.0.0';
+        devDependencies['@tailwindcss/postcss'] = '^4.0.0';
+        devDependencies['postcss'] = '^8.4.35';
+    }
+    if (eslint) {
+        devDependencies['eslint'] = '^8.57.0';
+        devDependencies['eslint-plugin-react'] = '^7.34.0';
+        devDependencies['eslint-plugin-react-hooks'] = '^4.6.0';
+    }
+    packageJson.dependencies = dependencies;
+    packageJson.devDependencies = devDependencies;
+    fs_1.default.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    const configPath = path_1.default.join(root, 'ryunix.config.js');
+    if (fs_1.default.existsSync(configPath)) {
+        let configContent = fs_1.default.readFileSync(configPath, 'utf8');
+        if (configContent.includes('const RyunixSettings = {')) {
+            configContent = configContent.replace('const RyunixSettings = {', `const RyunixSettings = {\n  compiler: '${compiler}',`);
+        }
+        fs_1.default.writeFileSync(configPath, configContent);
+    }
+    if (vscode) {
+        const vscodeDir = path_1.default.join(root, '.vscode');
+        if (!fs_1.default.existsSync(vscodeDir))
+            fs_1.default.mkdirSync(vscodeDir);
+        const extensionsJson = { recommendations: ['unsetsoft.ryunixjs'] };
+        fs_1.default.writeFileSync(path_1.default.join(vscodeDir, 'extensions.json'), JSON.stringify(extensionsJson, null, 2));
+    }
+    if ((0, git_1.tryGitInit)(root)) {
+        console.log(`\n${picocolors_1.default.green('Initialized a git repository.')}`);
+    }
+    console.log(`\n${picocolors_1.default.green('Success!')} Created ${appName}`);
+    console.log('Inside that directory, you can run several commands:\n');
+    console.log(picocolors_1.default.cyan(`  ${pkgManager} run dev`));
+    console.log('    Starts the development server.\n');
+    console.log(picocolors_1.default.cyan(`  ${pkgManager} run build`));
+    console.log('    Builds the app for production.\n');
+    console.log(picocolors_1.default.cyan(`  ${pkgManager} start`));
+    console.log('    Runs the built app in production mode.\n');
+    console.log('We suggest that you begin by typing:\n');
+    console.log(picocolors_1.default.cyan('  cd'), appName);
+    console.log(picocolors_1.default.cyan(`  ${pkgManager} install`));
+    console.log(picocolors_1.default.cyan(`  ${pkgManager} run dev\n`));
 }
-
-module.exports = { createApp }

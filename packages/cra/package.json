@@ -16,10 +16,14 @@
   ],
   "scripts": {
     "dev": "node ./src/cli.js",
+    "build": "tsc -p tsconfig.emit.json",
+    "prepublishOnly": "npm run build",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:helpers": "tsc -p tsconfig.emit.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.3"
   },
   "dependencies": {
     "command-exists-promise": "2.0.2",
