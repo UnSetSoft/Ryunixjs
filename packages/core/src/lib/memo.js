@@ -1,22 +1,28 @@
 /**
- * memo - Memoize component to prevent unnecessary re-renders
- * @param {Function} Component - Component to memoize
- * @param {Function} [arePropsEqual] - Custom comparison function (defaults to shallowEqual)
- * @returns {Function} Memoized component
+ * memo - Memoize component to prevent unnecessary re-renders.
+ *
+ * @param {import('./createElement.js').RyunixComponent} Component
+ * @param {(prev: Record<string, unknown>, next: Record<string, unknown>) => boolean} [arePropsEqual]
+ * @returns {import('./createElement.js').RyunixComponent}
  */
 const memo = (Component, arePropsEqual = shallowEqual) => {
+  /** @param {Record<string, unknown>} props */
   const MemoizedComponent = (props) => {
     return Component(props)
   }
   MemoizedComponent._isMemo = true
   MemoizedComponent._wrappedComponent = Component
   MemoizedComponent._arePropsEqual = arePropsEqual
-  MemoizedComponent.displayName = `Memo(${Component.displayName || Component.name || 'Component'})`
+  const named = /** @type {{ displayName?: string; name?: string }} */ (Component)
+  MemoizedComponent.displayName = `Memo(${named.displayName || named.name || 'Component'})`
   return MemoizedComponent
 }
 
 /**
- * Custom comparison function for memo
+ * Shallow props comparison for `memo`.
+ * @param {Record<string, unknown>} prevProps
+ * @param {Record<string, unknown>} nextProps
+ * @returns {boolean}
  */
 const shallowEqual = (prevProps, nextProps) => {
   const prevKeys = Object.keys(prevProps)
@@ -28,7 +34,10 @@ const shallowEqual = (prevProps, nextProps) => {
 }
 
 /**
- * Deep comparison for complex objects
+ * Deep comparison for complex objects.
+ * @param {unknown} a
+ * @param {unknown} b
+ * @returns {boolean}
  */
 const deepEqual = (a, b) => {
   if (a === b) return true
@@ -40,7 +49,12 @@ const deepEqual = (a, b) => {
 
   if (keysA.length !== keysB.length) return false
 
-  return keysA.every((key) => deepEqual(a[key], b[key]))
+  return keysA.every((key) =>
+    deepEqual(
+      /** @type {Record<string, unknown>} */ (a)[key],
+      /** @type {Record<string, unknown>} */ (b)[key],
+    ),
+  )
 }
 
 export { memo, shallowEqual, deepEqual }

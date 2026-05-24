@@ -1,23 +1,16 @@
 /**
- * Portal type marker
+ * Portal type marker.
+ * @type {symbol}
  */
 const RYUNIX_PORTAL = Symbol.for('ryunix.portal')
 
 /**
  * createPortal - Renders children into a different DOM container,
- * outside the normal parent hierarchy (e.g., for modals, tooltips, dropdowns).
+ * outside the normal parent hierarchy (modals, tooltips, dropdowns).
  *
- * Usage:
- *   const Modal = ({ children }) => {
- *     return createPortal(
- *       createElement('div', { className: 'modal' }, children),
- *       document.getElementById('modal-root')
- *     )
- *   }
- *
- * @param {Object} children - Element(s) to render
- * @param {HTMLElement} container - DOM container to render into
- * @returns {Object} Portal element
+ * @param {import('./createElement.js').RyunixNode} children - Element(s) to render
+ * @param {Element | DocumentFragment} container - DOM container to render into
+ * @returns {import('./createElement.js').RyunixPortalElement | null}
  */
 const createPortal = (children, container) => {
   if (!container) {

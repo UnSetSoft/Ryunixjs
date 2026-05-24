@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "noImplicitAny": true,
+    "types": ["node"]
+  },
+  "include": [
+    "src/utils/**/*.js",
+    "src/lib/createElement.js",
+    "src/lib/memo.js",
+    "src/lib/forwardRef.js",
+    "src/lib/portal.js",
+    "src/lib/batching.js",
+    "src/lib/serverActions.js",
+    "src/lib/errorBoundary.js",
+    "src/lib/serverBoundary.js"
+  ],
+  "exclude": ["dist", "node_modules"]
+}

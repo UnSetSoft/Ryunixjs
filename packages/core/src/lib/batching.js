@@ -1,12 +1,12 @@
+/** @type {boolean} */
 let isBatching = false
+
+/** @type {Array<() => void>} */
 let pendingUpdates = []
 
 /**
- * The `batchUpdates` function in JavaScript allows for batching multiple updates and flushing them all
- * at once.
- * @param callback - The `callback` parameter in the `batchUpdates` function is a function that will be
- * executed within a batch update. This function can contain multiple updates that need to be processed
- * together in a batch to improve performance and avoid unnecessary re-renders.
+ * Batch multiple state updates and flush them together.
+ * @param {() => void} callback - Updates to run inside the batch
  */
 const batchUpdates = (callback) => {
   const wasBatching = isBatching
@@ -24,10 +24,8 @@ const batchUpdates = (callback) => {
 }
 
 /**
- * The `queueUpdate` function adds an update to a queue and flushes the updates if not currently
- * batching.
- * @param update - The `update` parameter is the new update that needs to be added to the queue for
- * processing.
+ * Queue an update; flushes immediately unless a batch is active.
+ * @param {() => void} update
  */
 const queueUpdate = (update) => {
   pendingUpdates.push(update)
@@ -37,18 +35,13 @@ const queueUpdate = (update) => {
   }
 }
 
-/**
- * The `flushUpdates` function processes and executes pending updates stored in an array.
- * @returns If the `pendingUpdates` array is empty, the `flushUpdates` function will return nothing
- * (undefined).
- */
+/** Execute all queued updates. */
 const flushUpdates = () => {
   if (pendingUpdates.length === 0) return
 
   const updates = pendingUpdates
   pendingUpdates = []
 
-  // Execute all updates
   updates.forEach((update) => update())
 }
 

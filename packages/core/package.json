@@ -41,7 +41,8 @@
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
     "test": "jest --testPathPattern=src",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.checkjs.json",
+    "typecheck:checkjs": "tsc --noEmit -p tsconfig.checkjs.json"
   },
   "dependencies": {},
   "devDependencies": {

@@ -1,25 +1,22 @@
 /**
  * forwardRef - Allows parent components to pass a ref to a child component.
  *
- * Usage:
- *   const MyInput = forwardRef((props, ref) => {
- *     return createElement('input', { ...props, ref })
- *   })
- *
- * @param {Function} render - A function component that receives (props, ref)
- * @returns {Function} A component that forwards refs
+ * @param {(props: Record<string, unknown>, ref: unknown) => import('./createElement.js').RyunixNode} render
+ * @returns {import('./createElement.js').RyunixComponent}
  */
 const forwardRef = (render) => {
   if (typeof render !== 'function') {
     throw new Error('forwardRef requires a render function')
   }
 
+  /** @param {Record<string, unknown> & { ref?: unknown }} props */
   const ForwardRefComponent = (props) => {
     const { ref, ...restProps } = props || {}
     return render(restProps, ref || null)
   }
 
-  ForwardRefComponent.displayName = `ForwardRef(${render.displayName || render.name || 'Component'})`
+  const named = /** @type {{ displayName?: string; name?: string }} */ (render)
+  ForwardRefComponent.displayName = `ForwardRef(${named.displayName || named.name || 'Component'})`
   ForwardRefComponent._isForwardRef = true
   ForwardRefComponent._render = render
 
