@@ -1,4 +1,4 @@
-import Ryunix from '../lib/index.js'
+import * as Ryunix from '../lib/index.js'
 import { workLoop } from '../lib/workers.js'
 import { useStore } from '../lib/hooks.js'
 
