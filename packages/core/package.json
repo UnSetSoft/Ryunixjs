@@ -32,7 +32,7 @@
     "prepublishOnly": "npm run build",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish",
-    "lint": "eslint . --ext .js --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc",
+    "lint": "eslint src jsx --max-warnings=0 --config ../../eslint.config.mjs",
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
     "test": "jest"
