@@ -57,10 +57,12 @@ const StartServer = async (cliSettings) => {
     cleanCacheDir(cacheDir)
   }
 
-  const clientConfig = Array.isArray(webpackConfig) ? webpackConfig.find(c => c.name === 'client') || webpackConfig[0] : webpackConfig
+  const clientConfig = Array.isArray(webpackConfig)
+    ? webpackConfig.find((c) => c.name === 'client') || webpackConfig[0]
+    : webpackConfig
 
   if (Array.isArray(webpackConfig)) {
-    webpackConfig.forEach(c => c.mode = mode ? 'production' : 'development')
+    webpackConfig.forEach((c) => (c.mode = mode ? 'production' : 'development'))
   } else {
     webpackConfig.mode = mode ? 'production' : 'development'
   }
@@ -110,7 +112,9 @@ const StartServer = async (cliSettings) => {
 
       if (devMode) {
         content.push('')
-        content.push(`${chalk.yellow('⚠️')}  ${chalk.yellow('Development mode active')}`)
+        content.push(
+          `${chalk.yellow('⚠️')}  ${chalk.yellow('Development mode active')}`,
+        )
         content.push(chalk.gray('Build for production to optimize performance'))
       }
 
@@ -123,7 +127,7 @@ const StartServer = async (cliSettings) => {
           title: chalk.bold('Dev Server'),
           titleAlignment: 'center',
           minimumWidth: 50,
-        })
+        }),
       )
     } catch (err) {
       logger.error(`[error] ${err.message}`)

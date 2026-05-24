@@ -7,13 +7,13 @@ export function createActionProxy(actionId) {
         'X-Ryunix-Action': 'true',
       },
       body: JSON.stringify({ actionId, args }),
-    });
+    })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Server Action failed');
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || 'Server Action failed')
     }
 
-    return response.json();
-  };
+    return response.json()
+  }
 }

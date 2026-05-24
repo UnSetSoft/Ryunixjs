@@ -5,7 +5,16 @@ import { transformSync } from '@swc/core'
 /**
  * Valid API route file names
  */
-const API_FILE_NAMES = ['route.js', 'route.ts', 'route.ryx', 'router.js', 'router.ts', 'router.ryx', 'endpoint.js', 'endpoint.ts']
+const API_FILE_NAMES = [
+  'route.js',
+  'route.ts',
+  'route.ryx',
+  'router.js',
+  'router.ts',
+  'router.ryx',
+  'endpoint.js',
+  'endpoint.ts',
+]
 
 class ApiRouterPlugin {
   constructor(options = {}) {
@@ -24,38 +33,48 @@ class ApiRouterPlugin {
       callback()
     })
 
-    compiler.hooks.beforeCompile.tapAsync('ApiRouterPlugin', (params, callback) => {
-      const appDirPath = path.resolve(process.cwd(), this.appDir)
-      const apiDirPath = path.join(appDirPath, 'api')
+    compiler.hooks.beforeCompile.tapAsync(
+      'ApiRouterPlugin',
+      (params, callback) => {
+        const appDirPath = path.resolve(process.cwd(), this.appDir)
+        const apiDirPath = path.join(appDirPath, 'api')
 
-      if (!fs.existsSync(apiDirPath)) {
-        if (this.debug) console.log(`[ApiRouter] No api directory found at ${apiDirPath}`)
+        if (!fs.existsSync(apiDirPath)) {
+          if (this.debug)
+            console.log(`[ApiRouter] No api directory found at ${apiDirPath}`)
+          callback()
+          return
+        }
+
+        // Add api directory to webpack's context dependencies so it detects new files/folders
+        if (params && params.compilationDependencies) {
+          params.contextDependencies.add(apiDirPath)
+        }
+
+        try {
+          this.compileApiRoutes(
+            apiDirPath,
+            path.resolve(process.cwd(), this.outputPath),
+          )
+        } catch (error) {
+          console.error('[ApiRouter] ❌ ERROR compiling api routes:', error)
+        }
+
         callback()
-        return
-      }
+      },
+    )
 
-      // Add api directory to webpack's context dependencies so it detects new files/folders
-      if (params && params.compilationDependencies) {
-        params.contextDependencies.add(apiDirPath)
-      }
-
-      try {
-        this.compileApiRoutes(apiDirPath, path.resolve(process.cwd(), this.outputPath))
-      } catch (error) {
-        console.error('[ApiRouter] ❌ ERROR compiling api routes:', error)
-      }
-
-      callback()
-    })
-
-    compiler.hooks.afterCompile.tapAsync('ApiRouterPlugin', (compilation, callback) => {
-      const appDirPath = path.resolve(process.cwd(), this.appDir)
-      const apiDirPath = path.join(appDirPath, 'api')
-      if (fs.existsSync(apiDirPath)) {
-        compilation.contextDependencies.add(apiDirPath)
-      }
-      callback()
-    })
+    compiler.hooks.afterCompile.tapAsync(
+      'ApiRouterPlugin',
+      (compilation, callback) => {
+        const appDirPath = path.resolve(process.cwd(), this.appDir)
+        const apiDirPath = path.join(appDirPath, 'api')
+        if (fs.existsSync(apiDirPath)) {
+          compilation.contextDependencies.add(apiDirPath)
+        }
+        callback()
+      },
+    )
   }
 
   compileApiRoutes(sourceDir, outDir) {
@@ -102,12 +121,12 @@ class ApiRouterPlugin {
             react: {
               pragma: 'Ryunix.createElement',
               pragmaFrag: 'Ryunix.Fragment',
-            }
-          }
+            },
+          },
         },
         module: {
-          type: 'es6'
-        }
+          type: 'es6',
+        },
       })
 
       // Always output as .mjs for native Node ESM support
@@ -122,7 +141,8 @@ class ApiRouterPlugin {
       }
 
       if (shouldWrite) {
-        if (this.debug) console.log(`[ApiRouter] Compiled: ${sourcePath} -> ${outFilePath}`)
+        if (this.debug)
+          console.log(`[ApiRouter] Compiled: ${sourcePath} -> ${outFilePath}`)
         fs.writeFileSync(outFilePath, code)
       }
     } catch (e) {

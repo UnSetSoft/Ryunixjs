@@ -76,13 +76,13 @@ eficiencia.
 
 RyunixJS es un monorepo con varios paquetes especializados:
 
-| Paquete | Descripción |
-| :------ | :---------- |
-| [`@unsetsoft/ryunixjs`](./packages/core) | Core: reconciliador, hooks y utilidades DOM. |
-| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets) | Tooling unificado y configuraciones Webpack. |
-| [`@unsetsoft/cra`](./packages/cra) | CLI oficial para crear proyectos Ryunix. |
+| Paquete                                                    | Descripción                                          |
+| :--------------------------------------------------------- | :--------------------------------------------------- |
+| [`@unsetsoft/ryunixjs`](./packages/core)                   | Core: reconciliador, hooks y utilidades DOM.         |
+| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Tooling unificado y configuraciones Webpack.         |
+| [`@unsetsoft/cra`](./packages/cra)                         | CLI oficial para crear proyectos Ryunix.             |
 | [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Extensión para inspeccionar el árbol de componentes. |
-| [Extensión VS Code][vscode-ext] | Resaltado de sintaxis y soporte para `.ryx`. |
+| [Extensión VS Code][vscode-ext]                            | Resaltado de sintaxis y soporte para `.ryx`.         |
 
 ## 🛠️ Primeros pasos
 

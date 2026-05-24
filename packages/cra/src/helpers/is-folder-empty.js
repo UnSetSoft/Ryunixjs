@@ -30,8 +30,8 @@ function isFolderEmpty(root, name) {
   if (conflicts.length > 0) {
     console.log(
       `The directory ${picocolors.green(
-        name
-      )} contains files that could conflict:`
+        name,
+      )} contains files that could conflict:`,
     )
     console.log()
     for (const file of conflicts) {
@@ -39,7 +39,7 @@ function isFolderEmpty(root, name) {
     }
     console.log()
     console.log(
-      'Either try using a new directory name, or remove the files listed above.'
+      'Either try using a new directory name, or remove the files listed above.',
     )
     return false
   }

@@ -54,12 +54,16 @@ const lazy = (importFn) => {
     useEffect(() => {
       if (status === SUSPENSE_STATUS.PENDING && promise) {
         let active = true
-        promise.then(() => {
-          if (active) forceUpdate((x) => x + 1)
-        }).catch(() => {
-          if (active) forceUpdate((x) => x + 1)
-        })
-        return () => { active = false }
+        promise
+          .then(() => {
+            if (active) forceUpdate((x) => x + 1)
+          })
+          .catch(() => {
+            if (active) forceUpdate((x) => x + 1)
+          })
+        return () => {
+          active = false
+        }
       }
     }, [])
 

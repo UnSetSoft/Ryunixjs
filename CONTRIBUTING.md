@@ -126,21 +126,21 @@ convention for your branches:
 Configure on [npmjs.com](https://www.npmjs.com/) → package → **Settings** →
 **Trusted publishing** for each published package:
 
-| Package | `repository.directory` |
-| :------ | :--------------------- |
-| `@unsetsoft/ryunixjs` | `packages/core` |
+| Package                     | `repository.directory`    |
+| :-------------------------- | :------------------------ |
+| `@unsetsoft/ryunixjs`       | `packages/core`           |
 | `@unsetsoft/ryunix-presets` | `packages/ryunix-presets` |
-| `@unsetsoft/cra` | `packages/cra` |
+| `@unsetsoft/cra`            | `packages/cra`            |
 
-| Field | Value |
-| :---- | :---- |
-| Provider | GitHub Actions |
-| Repository | `UnSetSoft/Ryunixjs` |
-| Workflow filename | `release.yml` |
-| Environment | *(leave empty unless you add a GitHub Environment)* |
+| Field             | Value                                               |
+| :---------------- | :-------------------------------------------------- |
+| Provider          | GitHub Actions                                      |
+| Repository        | `UnSetSoft/Ryunixjs`                                |
+| Workflow filename | `release.yml`                                       |
+| Environment       | _(leave empty unless you add a GitHub Environment)_ |
 
-Recommended after verifying OIDC publish: **Publishing access** → *Require 2FA and
-disallow tokens* (revoke old automation tokens).
+Recommended after verifying OIDC publish: **Publishing access** → _Require 2FA and
+disallow tokens_ (revoke old automation tokens).
 
 Release workflow: **Actions → Release → Run workflow** with **dry-run** until
 versions in `package.json` are ready. Tag `v*` triggers a real publish (`canary`

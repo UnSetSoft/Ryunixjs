@@ -196,10 +196,10 @@ exist for Turbo to run them.
 
 ## Related documentation
 
-| Topic                         | Document                                               |
-| :---------------------------- | :----------------------------------------------------- |
-| Monorepo onboarding           | [repository-guide.md](./repository-guide.md)           |
-| Automated tests               | [automated-testing.md](./automated-testing.md)         |
-| Integration app (`run:web`)   | [local-integration-app.md](./local-integration-app.md) |
-| Doc index                     | [overview.md](../overview.md)                          |
-| Contributing / PR checks      | [CONTRIBUTING.md](../../CONTRIBUTING.md)               |
+| Topic                       | Document                                               |
+| :-------------------------- | :----------------------------------------------------- |
+| Monorepo onboarding         | [repository-guide.md](./repository-guide.md)           |
+| Automated tests             | [automated-testing.md](./automated-testing.md)         |
+| Integration app (`run:web`) | [local-integration-app.md](./local-integration-app.md) |
+| Doc index                   | [overview.md](../overview.md)                          |
+| Contributing / PR checks    | [CONTRIBUTING.md](../../CONTRIBUTING.md)               |

@@ -1,121 +1,142 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'
+import path from 'path'
 
 class AppRouterPlugin {
   constructor(options = {}) {
-    this.appDir = options.appDir || 'src/app';
-    this.outputPath = options.outputPath || '.ryunix/server/app/app-router.js';
-    this.ssgOutputPath = options.ssgOutputPath || null;
-    this.debug = options.debug || false;
+    this.appDir = options.appDir || 'src/app'
+    this.outputPath = options.outputPath || '.ryunix/server/app/app-router.js'
+    this.ssgOutputPath = options.ssgOutputPath || null
+    this.debug = options.debug || false
   }
 
   apply(compiler) {
-    let lastScanTime = 0;
-    let lastRoutes = null;
+    let lastScanTime = 0
+    let lastRoutes = null
 
-    compiler.hooks.beforeCompile.tapAsync('AppRouterPlugin', (params, callback) => {
-      const appDirPath = path.resolve(process.cwd(), this.appDir);
+    compiler.hooks.beforeCompile.tapAsync(
+      'AppRouterPlugin',
+      (params, callback) => {
+        const appDirPath = path.resolve(process.cwd(), this.appDir)
 
-      if (!fs.existsSync(appDirPath)) {
-        if (this.debug) console.log(`[AppRouter] No app directory found at ${appDirPath}`);
-        callback();
-        return;
-      }
-
-      if (params && params.compilationDependencies) {
-        params.contextDependencies.add(appDirPath)
-      }
-
-      try {
-        const newestMtime = this.getNewestMtime(appDirPath);
-
-        if (newestMtime > lastScanTime || !lastRoutes) {
-          const routes = this.scanDirectory(appDirPath, '');
-          this.generateRouterFile(routes, path.resolve(process.cwd(), this.outputPath));
-          lastScanTime = newestMtime;
-          lastRoutes = routes;
+        if (!fs.existsSync(appDirPath)) {
+          if (this.debug)
+            console.log(`[AppRouter] No app directory found at ${appDirPath}`)
+          callback()
+          return
         }
-      } catch (error) {
-        console.error('[AppRouter] ❌ ERROR generating app router:', error);
-      }
 
-      callback();
-    });
+        if (params && params.compilationDependencies) {
+          params.contextDependencies.add(appDirPath)
+        }
 
-    compiler.hooks.afterCompile.tapAsync('AppRouterPlugin', (compilation, callback) => {
-      const appDirPath = path.resolve(process.cwd(), this.appDir)
-      if (fs.existsSync(appDirPath)) {
-        compilation.contextDependencies.add(appDirPath)
-      }
-      callback()
-    })
+        try {
+          const newestMtime = this.getNewestMtime(appDirPath)
+
+          if (newestMtime > lastScanTime || !lastRoutes) {
+            const routes = this.scanDirectory(appDirPath, '')
+            this.generateRouterFile(
+              routes,
+              path.resolve(process.cwd(), this.outputPath),
+            )
+            lastScanTime = newestMtime
+            lastRoutes = routes
+          }
+        } catch (error) {
+          console.error('[AppRouter] ❌ ERROR generating app router:', error)
+        }
+
+        callback()
+      },
+    )
+
+    compiler.hooks.afterCompile.tapAsync(
+      'AppRouterPlugin',
+      (compilation, callback) => {
+        const appDirPath = path.resolve(process.cwd(), this.appDir)
+        if (fs.existsSync(appDirPath)) {
+          compilation.contextDependencies.add(appDirPath)
+        }
+        callback()
+      },
+    )
   }
 
   scanDirectory(dir, basePath) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    let layout = null;
-    let index = null;
-    let errorFile = null;
-    let loadingFile = null;
-    const children = [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    let layout = null
+    let index = null
+    let errorFile = null
+    let loadingFile = null
+    const children = []
 
     const isAsync = (filePath) => {
-      if (!filePath) return false;
+      if (!filePath) return false
       try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        return /export\s+async\s+default\s+function/i.test(content) ||
+        const content = fs.readFileSync(filePath, 'utf8')
+        return (
+          /export\s+async\s+default\s+function/i.test(content) ||
           /export\s+default\s+async\s+function/i.test(content) ||
-          /async\s+function\s+([A-Z][\w]*)/.test(content);
+          /async\s+function\s+([A-Z][\w]*)/.test(content)
+        )
       } catch (e) {
-        return false;
+        return false
       }
-    };
+    }
 
     const getPath = (obj) => {
-      if (!obj) return null;
-      if (typeof obj === 'string') return obj;
-      return obj.path || obj.serverPath || obj.clientPath;
-    };
+      if (!obj) return null
+      if (typeof obj === 'string') return obj
+      return obj.path || obj.serverPath || obj.clientPath
+    }
 
     for (const entry of entries) {
       if (entry.isFile()) {
-        const ext = path.extname(entry.name);
-        if (!['.ryx', '.js', '.jsx', '.ts', '.tsx', '.mdx'].includes(ext)) continue;
+        const ext = path.extname(entry.name)
+        if (!['.ryx', '.js', '.jsx', '.ts', '.tsx', '.mdx'].includes(ext))
+          continue
 
-        const base = path.basename(entry.name, ext);
-        let name = base;
+        const base = path.basename(entry.name, ext)
+        let name = base
 
-        const fullPath = path.join(dir, entry.name).replace(/\\/g, '/');
-        const content = fs.readFileSync(fullPath, 'utf8');
+        const fullPath = path.join(dir, entry.name).replace(/\\/g, '/')
+        const content = fs.readFileSync(fullPath, 'utf8')
 
         // Robust directive detection using regex
-        let isServer = base.endsWith('.server') || /^\s*\/\/\s*@server/im.test(content);
-        let isClient = base.endsWith('.client') || /^\s*\/\/\s*@client/im.test(content);
+        let isServer =
+          base.endsWith('.server') || /^\s*\/\/\s*@server/im.test(content)
+        let isClient =
+          base.endsWith('.client') || /^\s*\/\/\s*@client/im.test(content)
 
         if (base.endsWith('.server')) {
-          name = base.slice(0, -7);
+          name = base.slice(0, -7)
         } else if (base.endsWith('.client')) {
-          name = base.slice(0, -7);
+          name = base.slice(0, -7)
         }
 
         // Auto-detection if no explicit directives/suffixes
         if (!isServer && !isClient) {
-          const hasHooks = /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(content);
-          const hasAsyncExport = /export\s+async\s+default|export\s+default\s+async/.test(content);
+          const hasHooks =
+            /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(
+              content,
+            )
+          const hasAsyncExport =
+            /export\s+async\s+default|export\s+default\s+async/.test(content)
 
           if (hasHooks) {
-            isClient = true;
+            isClient = true
           } else if (hasAsyncExport) {
-            isServer = true;
+            isServer = true
           } else {
             // Default to shared for ambiguous components
-            isServer = false;
-            isClient = false;
+            isServer = false
+            isClient = false
           }
         }
 
         if (this.debug) {
-          console.log(`[AppRouter] File: ${entry.name} -> isServer: ${isServer}, isClient: ${isClient}`);
+          console.log(
+            `[AppRouter] File: ${entry.name} -> isServer: ${isServer}, isClient: ${isClient}`,
+          )
         }
 
         const assign = (type, path) => {
@@ -123,44 +144,56 @@ class AppRouterPlugin {
             return {
               path: isServer || isClient ? null : path,
               serverPath: isServer ? path : null,
-              clientPath: isClient ? path : null
-            };
+              clientPath: isClient ? path : null,
+            }
           }
-          if (isServer) type.serverPath = path;
-          else if (isClient) type.clientPath = path;
-          else type.path = path;
-          return type;
-        };
+          if (isServer) type.serverPath = path
+          else if (isClient) type.clientPath = path
+          else type.path = path
+          return type
+        }
 
-        if (name === 'layout') layout = assign(layout, fullPath);
-        else if (name === 'index') index = assign(index, fullPath);
-        else if (name === 'error') errorFile = assign(errorFile, fullPath);
-        else if (name === 'loading') loadingFile = assign(loadingFile, fullPath);
+        if (name === 'layout') layout = assign(layout, fullPath)
+        else if (name === 'index') index = assign(index, fullPath)
+        else if (name === 'error') errorFile = assign(errorFile, fullPath)
+        else if (name === 'loading') loadingFile = assign(loadingFile, fullPath)
       }
     }
 
     for (const entry of entries) {
       if (entry.isDirectory()) {
-        const routeSegment = entry.name;
-        const routePath = routeSegment.replace(/\[(\.\.\.)?([^\]]+)\]/g, ':$1$2');
+        const routeSegment = entry.name
+        const routePath = routeSegment.replace(
+          /\[(\.\.\.)?([^\]]+)\]/g,
+          ':$1$2',
+        )
 
-        let newBasePath = basePath;
+        let newBasePath = basePath
         if (newBasePath === '/' || newBasePath === '') {
-          newBasePath = `/${routePath}`;
+          newBasePath = `/${routePath}`
         } else {
-          newBasePath = `${basePath}/${routePath}`;
+          newBasePath = `${basePath}/${routePath}`
         }
 
-        const childRoutes = this.scanDirectory(path.join(dir, entry.name), newBasePath);
+        const childRoutes = this.scanDirectory(
+          path.join(dir, entry.name),
+          newBasePath,
+        )
         if (childRoutes) {
-          if (Array.isArray(childRoutes)) children.push(...childRoutes);
-          else children.push(childRoutes);
+          if (Array.isArray(childRoutes)) children.push(...childRoutes)
+          else children.push(childRoutes)
         }
       }
     }
 
-    if (!layout && !index && children.length === 0 && !errorFile && !loadingFile) {
-      return null;
+    if (
+      !layout &&
+      !index &&
+      children.length === 0 &&
+      !errorFile &&
+      !loadingFile
+    ) {
+      return null
     }
 
     const node = {
@@ -172,152 +205,185 @@ class AppRouterPlugin {
       error: errorFile,
       loading: loadingFile,
       children,
-    };
+    }
 
-    if (!layout && !index && !errorFile && !loadingFile) return children;
+    if (!layout && !index && !errorFile && !loadingFile) return children
 
-    return node;
+    return node
   }
 
   generateRouterFile(routeNode, outputPath) {
     const generate = (isServerBuild) => {
-      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`;
-      let componentIdCounter = 0;
-      const getNextId = () => componentIdCounter++;
-      const flattenedRoutes = [];
-      const ssgRoutes = [];
-      let rootLayouts = [];
+      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`
+      let componentIdCounter = 0
+      const getNextId = () => componentIdCounter++
+      const flattenedRoutes = []
+      const ssgRoutes = []
+      let rootLayouts = []
 
-      const appDirPath = path.resolve(process.cwd(), this.appDir);
-      const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx')) ? path.join(appDirPath, 'error.ryx') : null;
+      const appDirPath = path.resolve(process.cwd(), this.appDir)
+      const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx'))
+        ? path.join(appDirPath, 'error.ryx')
+        : null
 
-      let errorsId = null;
+      let errorsId = null
       if (errorsPath) {
-        errorsId = `Errors_App`;
-        importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`;
+        errorsId = `Errors_App`
+        importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`
       }
 
       const traverse = (node, parentLayouts = []) => {
         if (Array.isArray(node)) {
-          for (const child of node) traverse(child, parentLayouts);
-          return;
+          for (const child of node) traverse(child, parentLayouts)
+          return
         }
 
-        const currentLayouts = [...parentLayouts];
+        const currentLayouts = [...parentLayouts]
 
         const processComponent = (prefix, componentObj, isAsync) => {
-          if (!componentObj) return null;
-          const id = `${prefix}_${getNextId()}`;
+          if (!componentObj) return null
+          const id = `${prefix}_${getNextId()}`
           const compPath = isServerBuild
-            ? (componentObj.serverPath || componentObj.path || componentObj.clientPath)
-            : (componentObj.clientPath || componentObj.path);
+            ? componentObj.serverPath ||
+              componentObj.path ||
+              componentObj.clientPath
+            : componentObj.clientPath || componentObj.path
 
           if (!compPath) {
-            return { id, isServerComponent: true, isAsync, isProxy: true };
+            return { id, isServerComponent: true, isAsync, isProxy: true }
           }
 
-          importStatements += `import * as ${id} from '${this.getRelativeImport(compPath, outputPath)}';\n`;
-          return { id, isServerComponent: !!componentObj.serverPath, isAsync };
-        };
+          importStatements += `import * as ${id} from '${this.getRelativeImport(compPath, outputPath)}';\n`
+          return { id, isServerComponent: !!componentObj.serverPath, isAsync }
+        }
 
         if (node.layout) {
-          const layoutInfo = processComponent('Layout', node.layout, !!node.layoutIsAsync);
-          const layoutLoadingInfo = processComponent('Loading', node.loading, false);
-          const layoutErrorInfo = processComponent('Error', node.error, false);
+          const layoutInfo = processComponent(
+            'Layout',
+            node.layout,
+            !!node.layoutIsAsync,
+          )
+          const layoutLoadingInfo = processComponent(
+            'Loading',
+            node.loading,
+            false,
+          )
+          const layoutErrorInfo = processComponent('Error', node.error, false)
 
           if (layoutInfo) {
-            layoutInfo.loading = layoutLoadingInfo;
-            layoutInfo.error = layoutErrorInfo;
-            currentLayouts.push(layoutInfo);
-            if (parentLayouts.length === 0 && !rootLayouts.some(l => l.id === layoutInfo.id)) {
-              rootLayouts.push(layoutInfo);
+            layoutInfo.loading = layoutLoadingInfo
+            layoutInfo.error = layoutErrorInfo
+            currentLayouts.push(layoutInfo)
+            if (
+              parentLayouts.length === 0 &&
+              !rootLayouts.some((l) => l.id === layoutInfo.id)
+            ) {
+              rootLayouts.push(layoutInfo)
             }
           }
         }
 
         if (node.index) {
-          const indexInfo = processComponent('Index', node.index, !!node.indexIsAsync);
-          const loadingInfo = processComponent('Loading', node.loading, false);
-          const errorFileInfo = processComponent('Error', node.error, false);
+          const indexInfo = processComponent(
+            'Index',
+            node.index,
+            !!node.indexIsAsync,
+          )
+          const loadingInfo = processComponent('Loading', node.loading, false)
+          const errorFileInfo = processComponent('Error', node.error, false)
 
           if (indexInfo) {
             const formatComp = (info) => {
-              if (!info) return 'null';
-              if (info.isProxy) return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)} }`;
-              return `{ default: getOptExport(${info.id}, 'default'), isServerComponent: ${info.isServerComponent}, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)}, Metatags: getOptExport(${info.id}, 'Metatags') || getOptExport(${info.id}, 'frontmatter') || {}, generateMetadata: getOptExport(${info.id}, 'generateMetadata') }`;
-            };
+              if (!info) return 'null'
+              if (info.isProxy)
+                return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)} }`
+              return `{ default: getOptExport(${info.id}, 'default'), isServerComponent: ${info.isServerComponent}, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)}, Metatags: getOptExport(${info.id}, 'Metatags') || getOptExport(${info.id}, 'frontmatter') || {}, generateMetadata: getOptExport(${info.id}, 'generateMetadata') }`
+            }
 
-            const layoutsArrayStr = `[${currentLayouts.map(l => formatComp(l)).join(', ')}]`;
-            const indexConfigStr = formatComp(indexInfo);
-            const loadingConfigStr = formatComp(loadingInfo);
-            const errorConfigStr = formatComp(errorFileInfo);
+            const layoutsArrayStr = `[${currentLayouts.map((l) => formatComp(l)).join(', ')}]`
+            const indexConfigStr = formatComp(indexInfo)
+            const loadingConfigStr = formatComp(loadingInfo)
+            const errorConfigStr = formatComp(errorFileInfo)
 
-            const errorPropStr = errorsId ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })` : indexConfigStr;
+            const errorPropStr = errorsId
+              ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })`
+              : indexConfigStr
 
             flattenedRoutes.push(`
     {
       path: '${node.path}',
       component: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} loading={${loadingConfigStr}} error={${errorConfigStr}} props={props} />
-    }`);
+    }`)
 
             if (isServerBuild) {
-              ssgRoutes.push({ path: node.path, meta: {} });
+              ssgRoutes.push({ path: node.path, meta: {} })
             }
           }
         }
 
         if (Array.isArray(node.children)) {
-          for (const child of node.children) traverse(child, currentLayouts);
+          for (const child of node.children) traverse(child, currentLayouts)
         }
-      };
+      }
 
-      if (routeNode) traverse(routeNode);
+      if (routeNode) traverse(routeNode)
 
       if (errorsId) {
-        const layoutsArrayStr = `[${rootLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isServerComponent: ${l.isServerComponent}, id: '${l.id}', isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
+        const layoutsArrayStr = `[${rootLayouts.map((l) => `{ default: getOptExport(${l.id}, 'default'), isServerComponent: ${l.isServerComponent}, id: '${l.id}', isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`
         flattenedRoutes.push(`
     {
       path: '*',
       NotFound: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
-    }`);
+    }`)
       }
 
       return {
         content: this.assembleFileContent(importStatements, flattenedRoutes),
-        ssgRoutes
-      };
-    };
+        ssgRoutes,
+      }
+    }
 
-    const clientResult = generate(false);
-    const serverResult = generate(true);
+    const clientResult = generate(false)
+    const serverResult = generate(true)
 
-    this.writeIfChanged(outputPath, clientResult.content);
+    this.writeIfChanged(outputPath, clientResult.content)
 
-    const serverEntryPath = path.join(path.dirname(outputPath), 'app-router-server.js');
-    const serverEntryContent = `/* AUTO-GENERATED SERVER ROUTER */\n${serverResult.content}\nexport const ssgRoutes = ${JSON.stringify(serverResult.ssgRoutes, null, 2)};\n`;
-    this.writeIfChanged(serverEntryPath, serverEntryContent);
+    const serverEntryPath = path.join(
+      path.dirname(outputPath),
+      'app-router-server.js',
+    )
+    const serverEntryContent = `/* AUTO-GENERATED SERVER ROUTER */\n${serverResult.content}\nexport const ssgRoutes = ${JSON.stringify(serverResult.ssgRoutes, null, 2)};\n`
+    this.writeIfChanged(serverEntryPath, serverEntryContent)
 
-    const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx');
+    const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx')
 
     // Look for global CSS to include in the client bundle
-    let globalCssImport = '';
+    let globalCssImport = ''
     const possibleCssPaths = [
       path.resolve(process.cwd(), 'styles/global.css'),
       path.resolve(process.cwd(), 'src/styles/global.css'),
       path.resolve(process.cwd(), 'app/globals.css'),
       path.resolve(process.cwd(), 'src/app/globals.css'),
-    ];
+    ]
 
-    const foundCss = possibleCssPaths.find(p => fs.existsSync(p));
+    const foundCss = possibleCssPaths.find((p) => fs.existsSync(p))
     if (foundCss) {
-      const relCss = this.getRelativeImport(foundCss, mainEntryPath);
-      globalCssImport = `import '${relCss}';\n`;
+      const relCss = this.getRelativeImport(foundCss, mainEntryPath)
+      globalCssImport = `import '${relCss}';\n`
     }
 
-    this.writeIfChanged(mainEntryPath, `import Ryunix from '@unsetsoft/ryunixjs';\n${globalCssImport}import AppRouter from './${path.basename(outputPath)}';\nif (typeof window !== 'undefined') { globalThis.Ryunix = Ryunix; }\nRyunix.init(<AppRouter />);\n`);
+    this.writeIfChanged(
+      mainEntryPath,
+      `import Ryunix from '@unsetsoft/ryunixjs';\n${globalCssImport}import AppRouter from './${path.basename(outputPath)}';\nif (typeof window !== 'undefined') { globalThis.Ryunix = Ryunix; }\nRyunix.init(<AppRouter />);\n`,
+    )
 
-    const ssgManifestPath = this.ssgOutputPath ? path.resolve(process.cwd(), this.ssgOutputPath) : path.join(path.dirname(outputPath), 'ssg', 'routes.json');
-    this.writeIfChanged(ssgManifestPath, JSON.stringify(serverResult.ssgRoutes, null, 2));
+    const ssgManifestPath = this.ssgOutputPath
+      ? path.resolve(process.cwd(), this.ssgOutputPath)
+      : path.join(path.dirname(outputPath), 'ssg', 'routes.json')
+    this.writeIfChanged(
+      ssgManifestPath,
+      JSON.stringify(serverResult.ssgRoutes, null, 2),
+    )
   }
 
   assembleFileContent(importStatements, flattenedRoutes) {
@@ -528,41 +594,43 @@ export default function AppRouter() {
 
   return content;
 }
-`;
+`
   }
 
   writeIfChanged(filePath, content) {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.mkdirSync(path.dirname(filePath), { recursive: true })
     if (fs.existsSync(filePath)) {
-      if (fs.readFileSync(filePath, 'utf8') === content) return;
+      if (fs.readFileSync(filePath, 'utf8') === content) return
     }
-    fs.writeFileSync(filePath, content);
+    fs.writeFileSync(filePath, content)
   }
 
   getRelativeImport(targetPath, outputPath) {
-    const relativePath = path.relative(path.dirname(outputPath), targetPath).replace(/\\/g, '/');
-    return relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
+    const relativePath = path
+      .relative(path.dirname(outputPath), targetPath)
+      .replace(/\\/g, '/')
+    return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
   }
 
   getNewestMtime(dirPath) {
-    let newest = 0;
+    let newest = 0
     try {
-      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true })
       for (const entry of entries) {
-        const fullPath = path.join(dirPath, entry.name);
+        const fullPath = path.join(dirPath, entry.name)
         try {
-          const stats = fs.statSync(fullPath);
-          const mtime = stats.mtimeMs;
-          if (mtime > newest) newest = mtime;
+          const stats = fs.statSync(fullPath)
+          const mtime = stats.mtimeMs
+          if (mtime > newest) newest = mtime
           if (entry.isDirectory()) {
-            const childNewest = this.getNewestMtime(fullPath);
-            if (childNewest > newest) newest = childNewest;
+            const childNewest = this.getNewestMtime(fullPath)
+            if (childNewest > newest) newest = childNewest
           }
-        } catch { }
+        } catch {}
       }
-    } catch { }
-    return newest;
+    } catch {}
+    return newest
   }
 }
 
-export default AppRouterPlugin;
+export default AppRouterPlugin

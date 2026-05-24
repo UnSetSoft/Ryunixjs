@@ -32,16 +32,24 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
   let ryunixCreateElement = null
 
   try {
-    const serverBundlePath = resolveApp(dir, `${buildDir}/server/app-router-server.bundle.mjs`)
+    const serverBundlePath = resolveApp(
+      dir,
+      `${buildDir}/server/app-router-server.bundle.mjs`,
+    )
     if (fs.existsSync(serverBundlePath)) {
       if (typeof global.window === 'undefined') {
         global.window = { location: { pathname: req.url } }
       }
       if (typeof global.document === 'undefined') {
-        global.document = { querySelector: () => null, getElementById: () => null }
+        global.document = {
+          querySelector: () => null,
+          getElementById: () => null,
+        }
       }
 
-      const serverModule = await import(`file://${serverBundlePath}?update=${Date.now()}`)
+      const serverModule = await import(
+        `file://${serverBundlePath}?update=${Date.now()}`
+      )
       AppRouterApp = serverModule.default?.default || serverModule.default
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')
@@ -61,7 +69,7 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     try {
       const element = ryunixCreateElement(AppRouterApp)
       if (typeof global.Ryunix?.renderToStringAsync === 'function') {
-        renderedString = await global.Ryunix.renderToStringAsync(element);
+        renderedString = await global.Ryunix.renderToStringAsync(element)
       } else {
         renderedString = ryunixRenderToString(element)
       }
@@ -71,8 +79,9 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
   }
 
   // Generic mock route for prerenderRoute (to inject metadata)
-  const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {};
-  if (config.debug) console.log('[Ryunix SSR Dev] Captured metadata:', ssrMetadata);
+  const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {}
+  if (config.debug)
+    console.log('[Ryunix SSR Dev] Captured metadata:', ssrMetadata)
   const mockRoute = { path: req.url, meta: ssrMetadata }
 
   try {
@@ -83,9 +92,16 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     try {
       const cssDir = resolveApp(dir, `${buildDir}/static/css`)
       if (outputFs.existsSync(cssDir)) {
-        const cssFiles = outputFs.readdirSync(cssDir).filter(f => f.endsWith('.css'))
-        if (config.debug) console.log(`[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`);
-        const styleLinks = cssFiles.map(f => `<link rel="stylesheet" href="/css/${f}" />`).join('\n')
+        const cssFiles = outputFs
+          .readdirSync(cssDir)
+          .filter((f) => f.endsWith('.css'))
+        if (config.debug)
+          console.log(
+            `[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`,
+          )
+        const styleLinks = cssFiles
+          .map((f) => `<link rel="stylesheet" href="/css/${f}" />`)
+          .join('\n')
 
         if (styleLinks) {
           html = html.replace('</head>', `${styleLinks}\n</head>`)

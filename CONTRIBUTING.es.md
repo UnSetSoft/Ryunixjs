@@ -123,11 +123,11 @@ En [npmjs.com](https://www.npmjs.com/) → paquete → **Settings** → **Truste
 publishing**, para `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` y
 `@unsetsoft/cra`:
 
-| Campo | Valor |
-| :---- | :---- |
-| Provider | GitHub Actions |
-| Repository | `UnSetSoft/Ryunixjs` |
-| Workflow filename | `release.yml` |
+| Campo             | Valor                |
+| :---------------- | :------------------- |
+| Provider          | GitHub Actions       |
+| Repository        | `UnSetSoft/Ryunixjs` |
+| Workflow filename | `release.yml`        |
 
 Tras validar: **Publishing access** → exigir 2FA y deshabilitar tokens; revoca
 tokens de automatización antiguos.

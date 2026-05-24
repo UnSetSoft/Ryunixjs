@@ -8,10 +8,10 @@ application. To see monorepo changes in the browser via a real linked app, use
 the separate guide:
 [local integration app](./local-integration-app.md).
 
-| Path | Guide |
-| :--- | :---- |
-| Automated tests (this document) | Jest in `packages/core`, `pnpm test`, `pnpm lint` |
-| Local integration app | [local-integration-app.md](./local-integration-app.md) |
+| Path                            | Guide                                                  |
+| :------------------------------ | :----------------------------------------------------- |
+| Automated tests (this document) | Jest in `packages/core`, `pnpm test`, `pnpm lint`      |
+| Local integration app           | [local-integration-app.md](./local-integration-app.md) |
 
 ---
 
@@ -32,13 +32,13 @@ the separate guide:
 
 ## Summary by package
 
-| Package / scope | Path | Automated tests | Main command |
-| :-------------- | :--- | :-------------- | :----------- |
-| `@unsetsoft/ryunixjs` | `packages/core` | **Yes** (Jest + jsdom) | `pnpm --filter @unsetsoft/ryunixjs test` |
-| `@unsetsoft/ryunix-presets` | `packages/ryunix-presets` | No | [Integration app](./local-integration-app.md) |
-| `@unsetsoft/cra` | `packages/cra` | No | Manual CLI (see below) |
-| `@unsetsoft/ryunix-devtools` | `packages/ryunix-devtools` | No | [Integration app](./local-integration-app.md) |
-| **Monorepo (root)** | `/` | Turbo runs core `test` | `pnpm test`, `pnpm lint`, `pnpm build` |
+| Package / scope              | Path                       | Automated tests        | Main command                                  |
+| :--------------------------- | :------------------------- | :--------------------- | :-------------------------------------------- |
+| `@unsetsoft/ryunixjs`        | `packages/core`            | **Yes** (Jest + jsdom) | `pnpm --filter @unsetsoft/ryunixjs test`      |
+| `@unsetsoft/ryunix-presets`  | `packages/ryunix-presets`  | No                     | [Integration app](./local-integration-app.md) |
+| `@unsetsoft/cra`             | `packages/cra`             | No                     | Manual CLI (see below)                        |
+| `@unsetsoft/ryunix-devtools` | `packages/ryunix-devtools` | No                     | [Integration app](./local-integration-app.md) |
+| **Monorepo (root)**          | `/`                        | Turbo runs core `test` | `pnpm test`, `pnpm lint`, `pnpm build`        |
 
 The only package with a Jest suite is `@unsetsoft/ryunixjs` (`packages/core`).
 
@@ -54,14 +54,14 @@ The only package with a Jest suite is `@unsetsoft/ryunixjs` (`packages/core`).
 
 ## Global commands
 
-| Command | What it does |
-| :------ | :----------- |
-| `pnpm install` | Installs dependencies for all workspaces. |
-| `pnpm build` | Builds packages (Turbo; `build` depends on `^build`). |
-| `pnpm test` | Runs `test` in packages that define it (today: **core** only). Turbo requires `build` first. |
-| `pnpm lint` | Root ESLint + per-package `lint` via Turbo. |
-| `pnpm lint:fix` | Fixes lint and formats with Prettier. |
-| `pnpm run lint:md` | Markdownlint on `docs/`, root `*.md`, and package READMEs. |
+| Command            | What it does                                                                                 |
+| :----------------- | :------------------------------------------------------------------------------------------- |
+| `pnpm install`     | Installs dependencies for all workspaces.                                                    |
+| `pnpm build`       | Builds packages (Turbo; `build` depends on `^build`).                                        |
+| `pnpm test`        | Runs `test` in packages that define it (today: **core** only). Turbo requires `build` first. |
+| `pnpm lint`        | Root ESLint + per-package `lint` via Turbo.                                                  |
+| `pnpm lint:fix`    | Fixes lint and formats with Prettier.                                                        |
+| `pnpm run lint:md` | Markdownlint on `docs/`, root `*.md`, and package READMEs.                                   |
 
 The `pnpm run:web*` commands are not automated tests; see
 [local-integration-app.md](./local-integration-app.md).
@@ -80,10 +80,10 @@ pnpm lint
 GitHub Actions (`.github/workflows/ci.yml`) runs on push/PR to `canary` and
 `main`:
 
-| Job | Checks |
-| :-- | :----- |
-| **quality** (Node 20 & 22) | `pnpm run build:core`, `pnpm test`, `pnpm lint`, `pnpm lint:md`, `pnpm format:check` |
-| **smoke-app** | Scaffold `ryunix-base` with `workspace:*` and `ryunix build` (`scripts/ci-smoke-build.mjs`) |
+| Job                        | Checks                                                                                      |
+| :------------------------- | :------------------------------------------------------------------------------------------ |
+| **quality** (Node 20 & 22) | `pnpm run build:core`, `pnpm test`, `pnpm lint`, `pnpm lint:md`, `pnpm format:check`        |
+| **smoke-app**              | Scaffold `ryunix-base` with `workspace:*` and `ryunix build` (`scripts/ci-smoke-build.mjs`) |
 
 Only `@unsetsoft/ryunixjs` is built in CI; `@unsetsoft/ryunix-presets` has no
 build script.
@@ -164,12 +164,12 @@ To avoid mixing with the integration app, use a folder outside `test/` (e.g.
 
 ### What to validate (generator)
 
-| Step | Check |
-| :--- | :---- |
-| Generation | Template copied (`ryunix-base`, `--tailwind`, `--eslint`, etc.) |
-| `package.json` | `@unsetsoft/ryunixjs` and `@unsetsoft/ryunix-presets` resolve |
-| Install | The wizard runs the chosen package manager without errors |
-| Generated app | `pnpm dev` starts with `ryunix dev` |
+| Step           | Check                                                           |
+| :------------- | :-------------------------------------------------------------- |
+| Generation     | Template copied (`ryunix-base`, `--tailwind`, `--eslint`, etc.) |
+| `package.json` | `@unsetsoft/ryunixjs` and `@unsetsoft/ryunix-presets` resolve   |
+| Install        | The wizard runs the chosen package manager without errors       |
+| Generated app  | `pnpm dev` starts with `ryunix dev`                             |
 
 Docs: [CLI and helpers](../cra/cli-and-helpers.md),
 [Template generation](../cra/template-generation.md).
@@ -178,19 +178,19 @@ Docs: [CLI and helpers](../cra/cli-and-helpers.md),
 
 ## Packages without Jest
 
-| Package | Automated tests | Where to validate changes |
-| :------ | :-------------- | :-------------------------- |
-| `@unsetsoft/ryunix-presets` | No | [Integration app](./local-integration-app.md) — routing, build, SSR |
-| `@unsetsoft/ryunix-devtools` | No | [Integration app](./local-integration-app.md) — extension + Chrome |
+| Package                      | Automated tests | Where to validate changes                                           |
+| :--------------------------- | :-------------- | :------------------------------------------------------------------ |
+| `@unsetsoft/ryunix-presets`  | No              | [Integration app](./local-integration-app.md) — routing, build, SSR |
+| `@unsetsoft/ryunix-devtools` | No              | [Integration app](./local-integration-app.md) — extension + Chrome  |
 
 ---
 
 ## Related documentation
 
-| Topic | Link |
-| :---- | :--- |
-| Local integration app | [local-integration-app.md](./local-integration-app.md) |
-| Repository guide | [repository-guide.md](./repository-guide.md) |
+| Topic                  | Link                                                     |
+| :--------------------- | :------------------------------------------------------- |
+| Local integration app  | [local-integration-app.md](./local-integration-app.md)   |
+| Repository guide       | [repository-guide.md](./repository-guide.md)             |
 | Tech stack and scripts | [tech-stack-and-scripts.md](./tech-stack-and-scripts.md) |
-| Contributing | [CONTRIBUTING.md](../../../CONTRIBUTING.md) |
-| Docs index | [overview.md](../overview.md) |
+| Contributing           | [CONTRIBUTING.md](../../../CONTRIBUTING.md)              |
+| Docs index             | [overview.md](../overview.md)                            |

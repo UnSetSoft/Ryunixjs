@@ -102,11 +102,13 @@ function commitRoot() {
   // After hydration is done, reset the flag and cleanup unconsumed nodes
   if (state.isHydrating || state.hydrationFailed) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-      console.log(`[Ryunix Debug] commitRoot - isHydrating: ${state.isHydrating}, hydrationFailed: ${state.hydrationFailed}`);
+      console.log(
+        `[Ryunix Debug] commitRoot - isHydrating: ${state.isHydrating}, hydrationFailed: ${state.hydrationFailed}`,
+      )
     }
     if (state.hydrationFailed) {
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Hydration failed. Clearing container.');
+        console.log('[Ryunix Debug] Hydration failed. Clearing container.')
       }
       const container = state.containerRoot || finishedWork.dom
       if (container) {
@@ -116,8 +118,12 @@ function commitRoot() {
       // If there is a cursor left, it means these are SSR nodes that weren't matched
       // by any client fiber. We must remove them to avoid duplication.
       let cursor = state.hydrateCursor
-      if (cursor && process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Removing unmatched root siblings.');
+      if (
+        cursor &&
+        process.env.NODE_ENV !== 'production' &&
+        process.env.RYUNIX_DEBUG
+      ) {
+        console.log('[Ryunix Debug] Removing unmatched root siblings.')
       }
       while (cursor) {
         const next = cursor.nextSibling
@@ -132,7 +138,6 @@ function commitRoot() {
     state.hydrationFailed = false
     state.hydrateCursor = null
   }
-
 
   commitWork(finishedWork.child)
 
@@ -175,7 +180,7 @@ function commitWork(fiber) {
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
     if (fiber.dom != null) {
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Appending PLACEMENT:', fiber.type);
+        console.log('[Ryunix Debug] Appending PLACEMENT:', fiber.type)
       }
       domParent.appendChild(fiber.dom)
     }
@@ -194,7 +199,7 @@ function commitWork(fiber) {
     const state = getState()
     if (state.hydrationFailed) {
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Hydration fallback PLACEMENT:', fiber.type);
+        console.log('[Ryunix Debug] Hydration fallback PLACEMENT:', fiber.type)
       }
       // Since container is cleared on fallback, treat as normal placement
       // No need to check fiber.dom.parentNode !== domParent because the container was cleared.
@@ -205,7 +210,7 @@ function commitWork(fiber) {
       runNormalEffects(fiber)
     } else {
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Hydrating node:', fiber.type);
+        console.log('[Ryunix Debug] Hydrating node:', fiber.type)
       }
       if (fiber.dom != null) {
         updateDom(fiber.dom, {}, fiber.props)

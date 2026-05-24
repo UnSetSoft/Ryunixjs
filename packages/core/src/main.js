@@ -10,5 +10,5 @@ export {
   defaultComponents,
 } from './lib/components.js'
 
-if (typeof window !== 'undefined') window.Ryunix = Ryunix;
+if (typeof window !== 'undefined') window.Ryunix = Ryunix
 export default Ryunix

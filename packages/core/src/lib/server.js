@@ -1,4 +1,10 @@
-import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, is, getState } from '../utils/index.js'
+import {
+  RYUNIX_TYPES,
+  STRINGS,
+  OLD_STRINGS,
+  is,
+  getState,
+} from '../utils/index.js'
 import { camelToKebab, validateUri } from './dom.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
 import { resetIdCounter } from './hooks.js'
@@ -22,8 +28,20 @@ const renderStyle = (styleObj) => {
 }
 
 const VOID_ELEMENTS = new Set([
-  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-  'link', 'meta', 'param', 'source', 'track', 'wbr'
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
 ])
 
 const renderToStringImpl = (element) => {
@@ -36,7 +54,7 @@ const renderToStringImpl = (element) => {
   }
 
   if (Array.isArray(element)) {
-    return element.map(child => renderToStringImpl(child)).join('')
+    return element.map((child) => renderToStringImpl(child)).join('')
   }
 
   if (element.type === RYUNIX_TYPES.TEXT_ELEMENT) {
@@ -45,7 +63,7 @@ const renderToStringImpl = (element) => {
 
   if (element.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
     const children = element.props?.children || []
-    return children.map(child => renderToStringImpl(child)).join('')
+    return children.map((child) => renderToStringImpl(child)).join('')
   }
 
   if (element.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
@@ -62,7 +80,7 @@ const renderToStringImpl = (element) => {
     const children = element.props?.children || []
     let result = ''
     if (Array.isArray(children)) {
-      result = children.map(child => renderToStringImpl(child)).join('')
+      result = children.map((child) => renderToStringImpl(child)).join('')
     } else {
       result = renderToStringImpl(children)
     }
@@ -92,7 +110,7 @@ const renderToStringImpl = (element) => {
   Object.entries(props).forEach(([key, value]) => {
     if (key === 'children') {
       if (Array.isArray(value)) {
-        htmlChildren = value.map(child => renderToStringImpl(child)).join('')
+        htmlChildren = value.map((child) => renderToStringImpl(child)).join('')
       } else {
         htmlChildren = renderToStringImpl(value)
       }
@@ -107,7 +125,11 @@ const renderToStringImpl = (element) => {
       if (value) {
         attributes += ` class="${escapeHtml(value)}"`
       }
-    } else if (!key.startsWith('on') && key !== '__source' && key !== '__self') {
+    } else if (
+      !key.startsWith('on') &&
+      key !== '__source' &&
+      key !== '__self'
+    ) {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
@@ -136,7 +158,9 @@ function $RC(id, templateId) {
     t.remove();
   }
 }
-`.replace(/\s+/g, ' ').trim()
+`
+  .replace(/\s+/g, ' ')
+  .trim()
 
 const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   if (element == null || typeof element === 'boolean') {
@@ -145,8 +169,8 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
 
   // Await the element if it's a promise (e.g. from an async Server Component directly rendered)
   if (element instanceof Promise) {
-    element = await element;
-    if (element == null || typeof element === 'boolean') return;
+    element = await element
+    if (element == null || typeof element === 'boolean') return
   }
 
   if (typeof element === 'string' || typeof element === 'number') {
@@ -201,7 +225,10 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   }
 
   // Handle Suspense specifically
-  if (element.type === RYUNIX_TYPES.RYUNIX_SUSPENSE || element.type?.type === RYUNIX_TYPES.RYUNIX_SUSPENSE) {
+  if (
+    element.type === RYUNIX_TYPES.RYUNIX_SUSPENSE ||
+    element.type?.type === RYUNIX_TYPES.RYUNIX_SUSPENSE
+  ) {
     const { fallback, children } = element.props
     const id = `s-${Math.random().toString(36).slice(2, 9)}`
 
@@ -217,7 +244,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       state.isSuspenseBackground = true
 
       let content = ''
-      const subPush = (chunk) => content += chunk
+      const subPush = (chunk) => (content += chunk)
       try {
         await renderToStreamImpl(children, subPush, suspenseTasks)
         return { id, content, success: true }
@@ -241,7 +268,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
 
   if (typeof type === 'function') {
     if (process.env.RYUNIX_DEBUG) {
-      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous');
+      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous')
     }
     const renderedElement = await type(props)
     await renderToStreamImpl(renderedElement, push, suspenseTasks)
@@ -267,7 +294,11 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       if (value) {
         attributes += ` class="${escapeHtml(value)}"`
       }
-    } else if (!key.startsWith('on') && key !== '__source' && key !== '__self') {
+    } else if (
+      !key.startsWith('on') &&
+      key !== '__source' &&
+      key !== '__self'
+    ) {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
@@ -328,8 +359,12 @@ export const renderToReadableStream = (element, options = {}) => {
           const task = suspenseTasks.shift()
           const res = await task
           if (res.success) {
-            push(`<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`)
-            push(`<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`)
+            push(
+              `<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`,
+            )
+            push(
+              `<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`,
+            )
           }
         }
 
@@ -339,7 +374,7 @@ export const renderToReadableStream = (element, options = {}) => {
       } finally {
         state.isServerRendering = wasServerRendering
       }
-    }
+    },
   })
 }
 
@@ -348,10 +383,10 @@ export const renderToString = (element, options = {}) => {
   const wasServerRendering = state.isServerRendering
   state.isServerRendering = true
   state.ssrMetadata = {}
-  
+
   // Reset idCounter for deterministic useId values
   resetIdCounter()
-  
+
   try {
     return renderToStringImpl(element)
   } finally {
@@ -360,17 +395,17 @@ export const renderToString = (element, options = {}) => {
 }
 
 export const renderToStringAsync = async (element, options = {}) => {
-  const stream = renderToReadableStream(element, options);
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let result = '';
+  const stream = renderToReadableStream(element, options)
+  const reader = stream.getReader()
+  const decoder = new TextDecoder()
+  let result = ''
 
   while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    result += decoder.decode(value, { stream: true });
+    const { done, value } = await reader.read()
+    if (done) break
+    result += decoder.decode(value, { stream: true })
   }
 
-  result += decoder.decode();
-  return result;
+  result += decoder.decode()
+  return result
 }

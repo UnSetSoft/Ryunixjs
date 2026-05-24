@@ -10,12 +10,16 @@ const copyRecursiveSync = (src, dest) => {
     }
     fs.readdirSync(src).forEach((childItemName) => {
       // Don't copy node_modules or output folders if they somehow exist in template
-      if (childItemName === 'node_modules' || childItemName === 'dist' || childItemName === '.ryunix') {
+      if (
+        childItemName === 'node_modules' ||
+        childItemName === 'dist' ||
+        childItemName === '.ryunix'
+      ) {
         return
       }
       copyRecursiveSync(
         require('path').join(src, childItemName),
-        require('path').join(dest, childItemName)
+        require('path').join(dest, childItemName),
       )
     })
   } else {

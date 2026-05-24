@@ -196,10 +196,10 @@ definir el script para que Turbo lo ejecute.
 
 ## Documentación relacionada
 
-| Tema                             | Documento                                                          |
-| :------------------------------- | :----------------------------------------------------------------- |
-| Onboarding del monorepo          | [guia-del-repositorio.md](./guia-del-repositorio.md)               |
-| Tests automatizados              | [tests-automatizados.md](./tests-automatizados.md)                 |
-| App integración (`run:web`)      | [app-de-integracion-local.md](./app-de-integracion-local.md)       |
-| Índice de docs                   | [resumen.md](../resumen.md)                                        |
-| Contribución / comprobaciones PR | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)                     |
+| Tema                             | Documento                                                    |
+| :------------------------------- | :----------------------------------------------------------- |
+| Onboarding del monorepo          | [guia-del-repositorio.md](./guia-del-repositorio.md)         |
+| Tests automatizados              | [tests-automatizados.md](./tests-automatizados.md)           |
+| App integración (`run:web`)      | [app-de-integracion-local.md](./app-de-integracion-local.md) |
+| Índice de docs                   | [resumen.md](../resumen.md)                                  |
+| Contribución / comprobaciones PR | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)               |

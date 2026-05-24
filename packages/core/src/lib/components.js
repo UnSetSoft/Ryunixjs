@@ -1,6 +1,11 @@
 import { createDom } from './dom.js'
 import { reconcileChildren } from './reconciler.js'
-import { getState, RYUNIX_TYPES, EFFECT_TAGS, nextValidSibling } from '../utils/index.js'
+import {
+  getState,
+  RYUNIX_TYPES,
+  EFFECT_TAGS,
+  nextValidSibling,
+} from '../utils/index.js'
 import { createElement } from './createElement.js'
 import { createContext } from './hooks.js'
 
@@ -72,7 +77,8 @@ const updateHostComponent = (fiber) => {
       } else {
         if (process.env.NODE_ENV !== 'production') {
           console.warn(
-            `[Hydration] Mismatch at ${getTypeLabel(fiber.type)}. Expected ${domNode.nodeType === 1 ? domNode.tagName : 'text'
+            `[Hydration] Mismatch at ${getTypeLabel(fiber.type)}. Expected ${
+              domNode.nodeType === 1 ? domNode.tagName : 'text'
             } but got ${fiber.type}. Falling back to CSR.`,
           )
         }
@@ -96,7 +102,6 @@ const getTypeLabel = (type) => {
   if (typeof type === 'function') return type.name || 'anonymous'
   return String(type)
 }
-
 
 /**
  * The Component `Image` takes in a `src` and other props, and returns an `img` element with the

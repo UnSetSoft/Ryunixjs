@@ -9,7 +9,13 @@ import { spawnSync } from 'node:child_process'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const smokeDir = path.join(root, '_ci', 'smoke-app')
-const templateDir = path.join(root, 'packages', 'cra', 'templates', 'ryunix-base')
+const templateDir = path.join(
+  root,
+  'packages',
+  'cra',
+  'templates',
+  'ryunix-base',
+)
 
 function copyRecursive(src, dest) {
   fs.mkdirSync(dest, { recursive: true })

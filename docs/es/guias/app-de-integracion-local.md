@@ -10,10 +10,10 @@ real creada con el framework.
 No sustituye a Jest ni a `pnpm lint` — ver
 [tests-automatizados.md](./tests-automatizados.md).
 
-| Vía | Guía |
-| :-- | :--- |
-| Tests automatizados | [tests-automatizados.md](./tests-automatizados.md) |
-| App de integración (este documento) | `test/webpack` + `pnpm run:web` |
+| Vía                                 | Guía                                               |
+| :---------------------------------- | :------------------------------------------------- |
+| Tests automatizados                 | [tests-automatizados.md](./tests-automatizados.md) |
+| App de integración (este documento) | `test/webpack` + `pnpm run:web`                    |
 
 ---
 
@@ -37,15 +37,15 @@ No sustituye a Jest ni a `pnpm lint` — ver
 
 Antes de los comandos, conviene distinguir estos términos:
 
-| Término | Qué es |
-| :------ | :----- |
-| **Monorepo (raíz `Ryunixjs/`)** | Repositorio del **framework**: `packages/core`, `packages/ryunix-presets`, etc. No es una app web; no tiene `app/index.ryx` en la raíz. |
-| **App de integración** | Una **app Ryunix normal** (`app/*.ryx`, `ryunix.config.js`) viva en `test/webpack/`. Simula lo que genera `npx @unsetsoft/cra`. |
-| **`test/webpack`** | Ruta **recomendada** para esa app. Está en `.gitignore`: no se sube a git; cada persona la crea en su máquina. |
-| **`workspace:*`** | En el `package.json` de la app, indica a pnpm: «usa el paquete que está en `packages/` de este repo», no la versión de npmjs.com. |
-| **Symlink (enlace simbólico)** | Tras `pnpm install`, `test/webpack/node_modules/@unsetsoft/ryunixjs` apunta a `packages/core/`. Así el navegador carga el código que se edita en el monorepo. |
-| **`pnpm run:web`** | Script de la **raíz** que ejecuta `ryunix dev` dentro de `test/webpack` (servidor de desarrollo + HMR). |
-| **`pnpm dev` (raíz)** | **No** abre la app de integración. Hoy lanza tareas Turbo (p. ej. CLI de CRA). Para el navegador se usa `pnpm run:web`. |
+| Término                         | Qué es                                                                                                                                                        |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Monorepo (raíz `Ryunixjs/`)** | Repositorio del **framework**: `packages/core`, `packages/ryunix-presets`, etc. No es una app web; no tiene `app/index.ryx` en la raíz.                       |
+| **App de integración**          | Una **app Ryunix normal** (`app/*.ryx`, `ryunix.config.js`) viva en `test/webpack/`. Simula lo que genera `npx @unsetsoft/cra`.                               |
+| **`test/webpack`**              | Ruta **recomendada** para esa app. Está en `.gitignore`: no se sube a git; cada persona la crea en su máquina.                                                |
+| **`workspace:*`**               | En el `package.json` de la app, indica a pnpm: «usa el paquete que está en `packages/` de este repo», no la versión de npmjs.com.                             |
+| **Symlink (enlace simbólico)**  | Tras `pnpm install`, `test/webpack/node_modules/@unsetsoft/ryunixjs` apunta a `packages/core/`. Así el navegador carga el código que se edita en el monorepo. |
+| **`pnpm run:web`**              | Script de la **raíz** que ejecuta `ryunix dev` dentro de `test/webpack` (servidor de desarrollo + HMR).                                                       |
+| **`pnpm dev` (raíz)**           | **No** abre la app de integración. Hoy lanza tareas Turbo (p. ej. CLI de CRA). Para el navegador se usa `pnpm run:web`.                                       |
 
 ```text
 Ryunixjs/                    ← monorepo (framework)
@@ -60,12 +60,12 @@ Ryunixjs/                    ← monorepo (framework)
 
 ### Para qué sirve esta app
 
-| Objetivo | Ejemplo |
-| :------- | :------ |
-| Ver cambios en `packages/core` | Página con `useStore`, hidratación |
-| Probar `ryunix-presets` | `ryunix dev`, rutas en `app/`, `ryunix build` |
-| Probar DevTools | Extensión Chrome + pestaña Ryunix en F12 |
-| Validar plantillas CRA | Misma estructura que `ryunix-base` |
+| Objetivo                       | Ejemplo                                       |
+| :----------------------------- | :-------------------------------------------- |
+| Ver cambios en `packages/core` | Página con `useStore`, hidratación            |
+| Probar `ryunix-presets`        | `ryunix dev`, rutas en `app/`, `ryunix build` |
+| Probar DevTools                | Extensión Chrome + pestaña Ryunix en F12      |
+| Validar plantillas CRA         | Misma estructura que `ryunix-base`            |
 
 ---
 
@@ -131,11 +131,11 @@ libre):
 }
 ```
 
-| Campo | Significado |
-| :---- | :---------- |
-| `"@unsetsoft/ryunixjs": "workspace:*"` | Runtime: código de `packages/core`. |
+| Campo                                        | Significado                                                   |
+| :------------------------------------------- | :------------------------------------------------------------ |
+| `"@unsetsoft/ryunixjs": "workspace:*"`       | Runtime: código de `packages/core`.                           |
 | `"@unsetsoft/ryunix-presets": "workspace:*"` | Tooling: CLI `ryunix` y Webpack de `packages/ryunix-presets`. |
-| Scripts `dev` / `build` / `start` | Los mismos que en una app generada por CRA. |
+| Scripts `dev` / `build` / `start`            | Los mismos que en una app generada por CRA.                   |
 
 `pnpm-workspace.yaml` en la raíz ya incluye `test/*`, así que pnpm reconoce
 `test/webpack` como parte del monorepo.
@@ -205,12 +205,12 @@ Cuando `test/webpack` **ya existe**, el flujo habitual es más corto:
 2. **`pnpm run:web`** — dejar el proceso en marcha (servidor dev).
 3. **Editar código** según el ámbito:
 
-| Se edita… | Acción después de guardar |
-| :-------- | :------------------------ |
-| `test/webpack/app/**/*.ryx` | Nada extra: HMR recarga la página. |
-| `packages/core/src/**` | En otra terminal: `pnpm --filter @unsetsoft/ryunixjs build`, luego **recargar** el navegador (F5). |
-| `packages/ryunix-presets/**` | Detener `pnpm run:web` (Ctrl+C) y volver a ejecutarlo. |
-| `packages/ryunix-devtools/**` | Recargar la extensión en `chrome://extensions/`. |
+| Se edita…                     | Acción después de guardar                                                                          |
+| :---------------------------- | :------------------------------------------------------------------------------------------------- |
+| `test/webpack/app/**/*.ryx`   | Nada extra: HMR recarga la página.                                                                 |
+| `packages/core/src/**`        | En otra terminal: `pnpm --filter @unsetsoft/ryunixjs build`, luego **recargar** el navegador (F5). |
+| `packages/ryunix-presets/**`  | Detener `pnpm run:web` (Ctrl+C) y volver a ejecutarlo.                                             |
+| `packages/ryunix-devtools/**` | Recargar la extensión en `chrome://extensions/`.                                                   |
 
 - **Antes de un PR** que toque el core: ejecutar también
   [tests-automatizados.md](./tests-automatizados.md) (`pnpm test`, `pnpm lint`).
@@ -221,11 +221,11 @@ Cuando `test/webpack` **ya existe**, el flujo habitual es más corto:
 
 ## Comandos desde la raíz del monorepo
 
-| Comando | Qué hace | Cuándo usarlo |
-| :------ | :------- | :-------------- |
-| `pnpm run:web` | `ryunix dev` en `test/webpack` | Desarrollo diario en el navegador |
-| `pnpm run:web:build` | `ryunix build` en la app | Probar SSG / bundles de producción |
-| `pnpm run:web:start` | `ryunix start` | Servir build de producción local |
+| Comando              | Qué hace                       | Cuándo usarlo                      |
+| :------------------- | :----------------------------- | :--------------------------------- |
+| `pnpm run:web`       | `ryunix dev` en `test/webpack` | Desarrollo diario en el navegador  |
+| `pnpm run:web:build` | `ryunix build` en la app       | Probar SSG / bundles de producción |
+| `pnpm run:web:start` | `ryunix start`                 | Servir build de producción local   |
 
 **Requisito:** existir `test/webpack/package.json` (pasos de la primera vez).
 
@@ -242,12 +242,12 @@ ruta no es `test/webpack`.
 2. `pnpm run:web`.
 3. Comprobar en la app:
 
-| Área | Comprobación |
-| :--- | :----------- |
-| Routing | Rutas bajo `app/`, `layout.ryx`, `errors.ryx` |
-| Build | `pnpm run:web:build` sin errores; carpeta `.ryunix/` |
-| SSR / hidratación | Sin errores de hidratación en consola |
-| API | `app/api/**/router.js` en dev y tras `build` + `start` |
+| Área              | Comprobación                                           |
+| :---------------- | :----------------------------------------------------- |
+| Routing           | Rutas bajo `app/`, `layout.ryx`, `errors.ryx`          |
+| Build             | `pnpm run:web:build` sin errores; carpeta `.ryunix/`   |
+| SSR / hidratación | Sin errores de hidratación en consola                  |
+| API               | `app/api/**/router.js` en dev y tras `build` + `start` |
 
 Docs: [CLI y arranque](../ryunix-presets/cli-y-arranque.md),
 [Enrutamiento y SSG](../ryunix-presets/enrutamiento-y-ssg.md).
@@ -263,11 +263,11 @@ Detalle: `packages/ryunix-devtools/README.md`.
 
 ### Resumen rápido
 
-| Cambio en… | En la app de integración |
-| :--------- | :----------------------- |
+| Cambio en…                  | En la app de integración                            |
+| :-------------------------- | :-------------------------------------------------- |
 | Core (hooks, reconciliador) | `pnpm test` → `build` del core → recargar navegador |
-| Presets (Webpack, CLI) | Reiniciar `pnpm run:web` + checklist arriba |
-| DevTools | App + extensión recargada |
+| Presets (Webpack, CLI)      | Reiniciar `pnpm run:web` + checklist arriba         |
+| DevTools                    | App + extensión recargada                           |
 
 ---
 
@@ -288,11 +288,11 @@ Continuar desde el **paso 4** de [Paso a paso: primera vez](#paso-a-paso-primera
 
 ### ¿`test/webpack` u otra carpeta?
 
-| | `test/webpack` (recomendado) | Carpeta fuera de `test/` |
-| :- | :--------------------------- | :----------------------- |
-| `pnpm run:web` desde la raíz | Sí | No (solo `pnpm dev` dentro de la app) |
-| `workspace:*` automático | Sí | Configuración manual |
-| Git | Ignorada con el resto de `test/` | Depende de dónde esté |
+|                              | `test/webpack` (recomendado)     | Carpeta fuera de `test/`              |
+| :--------------------------- | :------------------------------- | :------------------------------------ |
+| `pnpm run:web` desde la raíz | Sí                               | No (solo `pnpm dev` dentro de la app) |
+| `workspace:*` automático     | Sí                               | Configuración manual                  |
+| Git                          | Ignorada con el resto de `test/` | Depende de dónde esté                 |
 
 ---
 
@@ -317,10 +317,10 @@ pueden vivir junto a esa ruta.
 
 ## Git y commits
 
-| Ámbito | ¿Aparece en `git status`? | Acción |
-| :----- | :------------------------ | :----- |
-| `packages/*`, `docs/` | Sí | Commit y PR a `canary` |
-| `test/webpack/**` | No (`.gitignore`) | Solo entorno local |
+| Ámbito                | ¿Aparece en `git status`? | Acción                 |
+| :-------------------- | :------------------------ | :--------------------- |
+| `packages/*`, `docs/` | Sí                        | Commit y PR a `canary` |
+| `test/webpack/**`     | No (`.gitignore`)         | Solo entorno local     |
 
 La app de integración es **herramienta personal de desarrollo**, no parte del
 código que se publica en el framework.
@@ -329,9 +329,9 @@ código que se publica en el framework.
 
 ## Documentación relacionada
 
-| Tema | Enlace |
-| :--- | :----- |
-| Tests automatizados | [tests-automatizados.md](./tests-automatizados.md) |
-| Guía del repositorio | [guia-del-repositorio.md](./guia-del-repositorio.md) |
+| Tema                       | Enlace                                                           |
+| :------------------------- | :--------------------------------------------------------------- |
+| Tests automatizados        | [tests-automatizados.md](./tests-automatizados.md)               |
+| Guía del repositorio       | [guia-del-repositorio.md](./guia-del-repositorio.md)             |
 | Pila tecnológica y scripts | [pila-tecnologica-y-scripts.md](./pila-tecnologica-y-scripts.md) |
-| Índice docs | [resumen.md](../resumen.md) |
+| Índice docs                | [resumen.md](../resumen.md)                                      |

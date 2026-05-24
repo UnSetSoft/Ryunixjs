@@ -100,12 +100,38 @@ const createDom = (fiber) => {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
       const isSvg = [
-        'svg', 'path', 'g', 'circle', 'polygon', 'rect', 'line', 'polyline',
-        'ellipse', 'text', 'tspan', 'defs', 'use', 'symbol', 'mask',
-        'clipPath', 'linearGradient', 'radialGradient', 'stop', 'filter',
-        'feGaussianBlur', 'feOffset', 'feMerge', 'feMergeNode', 'feBlend',
-        'feColorMatrix', 'feComposite', 'foreignObject', 'image', 'marker',
-        'pattern', 'textPath',
+        'svg',
+        'path',
+        'g',
+        'circle',
+        'polygon',
+        'rect',
+        'line',
+        'polyline',
+        'ellipse',
+        'text',
+        'tspan',
+        'defs',
+        'use',
+        'symbol',
+        'mask',
+        'clipPath',
+        'linearGradient',
+        'radialGradient',
+        'stop',
+        'filter',
+        'feGaussianBlur',
+        'feOffset',
+        'feMerge',
+        'feMergeNode',
+        'feBlend',
+        'feColorMatrix',
+        'feComposite',
+        'foreignObject',
+        'image',
+        'marker',
+        'pattern',
+        'textPath',
       ].includes(fiber.type)
 
       if (isSvg) {
@@ -136,7 +162,12 @@ const createDom = (fiber) => {
 export const validateUri = (name, value) => {
   if (typeof value !== 'string') return value
   const attr = name.toLowerCase()
-  if (attr !== 'href' && attr !== 'src' && attr !== 'action' && attr !== 'formaction') {
+  if (
+    attr !== 'href' &&
+    attr !== 'src' &&
+    attr !== 'action' &&
+    attr !== 'formaction'
+  ) {
     return value
   }
 
@@ -176,7 +207,8 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
       const eventType = name.toLowerCase().substring(2)
       try {
         const originalHandler = prevProps[name]
-        const wrappedHandler = dom._ryunixHandlers?.get(originalHandler) || originalHandler
+        const wrappedHandler =
+          dom._ryunixHandlers?.get(originalHandler) || originalHandler
         dom.removeEventListener(eventType, wrappedHandler)
         if (dom._ryunixHandlers) {
           dom._ryunixHandlers.delete(originalHandler)
@@ -187,7 +219,6 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
         }
       }
     })
-
 
   // Remove old properties
   Object.keys(prevProps)
@@ -257,7 +288,10 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
               const validatedValue = validateUri(name, nextProps[name])
               dom[name] = validatedValue
               // Best effort: set html attributes if it's not a primitive component property
-              if (typeof nextProps[name] !== 'object' && typeof nextProps[name] !== 'function') {
+              if (
+                typeof nextProps[name] !== 'object' &&
+                typeof nextProps[name] !== 'function'
+              ) {
                 dom.setAttribute(name, validatedValue)
               }
             }
@@ -281,18 +315,18 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
           runWithPriority(Priority.IMMEDIATE, () => nextProps[name](e))
         }
         // Store the wrapped handler so it can be removed later
-        // Note: For simplicity, we could also just wrap it on the fly, 
+        // Note: For simplicity, we could also just wrap it on the fly,
         // but we need the exact reference for removeEventListener.
-        // Actually, the current removeDom logic uses prevProps[name], 
+        // Actually, the current removeDom logic uses prevProps[name],
         // which won't work if we wrap it here and don't store it.
         // Wait, the current removeEventListener call in dom.js:177 is:
         // dom.removeEventListener(eventType, prevProps[name])
         // If we wrap it, we MUST store the wrapper.
-        
+
         // Let's use a weakMap or a property on the DOM node to store the wrappers.
         if (!dom._ryunixHandlers) dom._ryunixHandlers = new Map()
         dom._ryunixHandlers.set(nextProps[name], handler)
-        
+
         dom.addEventListener(eventType, handler)
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
@@ -301,8 +335,6 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
       }
     })
 }
-
-
 
 /**
  * Clear all children from a DOM element

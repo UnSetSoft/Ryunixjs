@@ -33,11 +33,18 @@ class RyunixRoutesPlugin {
         const routesFile = path.resolve(process.cwd(), this.routesPath)
 
         if (!fs.existsSync(routesFile)) {
-          const hasAppDir = fs.existsSync(path.resolve(process.cwd(), 'app')) || fs.existsSync(path.resolve(process.cwd(), 'src/app'))
+          const hasAppDir =
+            fs.existsSync(path.resolve(process.cwd(), 'app')) ||
+            fs.existsSync(path.resolve(process.cwd(), 'src/app'))
           if (!hasAppDir) {
-            console.log('[SSG] ❌ The route file was not found:', this.routesPath)
+            console.log(
+              '[SSG] ❌ The route file was not found:',
+              this.routesPath,
+            )
           } else if (this.debug) {
-            console.log('[SSG] ℹ️ Skipping legacy SSG generation (App Router in use, routes.ryx not found).')
+            console.log(
+              '[SSG] ℹ️ Skipping legacy SSG generation (App Router in use, routes.ryx not found).',
+            )
           }
           callback()
           return
@@ -61,7 +68,8 @@ class RyunixRoutesPlugin {
           fs.mkdirSync(path.dirname(outputPath), { recursive: true })
           fs.writeFileSync(outputPath, manifest)
 
-          if (this.debug) console.log('✅ [SSG Plugin] Process successfully completed')
+          if (this.debug)
+            console.log('✅ [SSG Plugin] Process successfully completed')
         } catch (error) {
           console.error('\n' + '='.repeat(70))
           console.error('[SSG] ❌ ERROR generating route manifest:')

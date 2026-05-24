@@ -368,11 +368,7 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
  */
 const requestHandler = async (req, res) => {
   const rootDir = process.cwd()
-  const staticDir = path.join(
-    rootDir,
-    config.buildDir,
-    'static',
-  )
+  const staticDir = path.join(rootDir, config.buildDir, 'static')
 
   try {
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`)

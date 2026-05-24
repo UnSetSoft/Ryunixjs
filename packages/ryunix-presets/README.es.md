@@ -55,15 +55,15 @@ raíz.
 
 ### Opciones principales
 
-| Opción     | Tipo              | Por defecto | Descripción                                        |
-| :--------- | :---------------- | :---------- | :------------------------------------------------- |
-| `ssr`      | `boolean`         | `true`      | Habilita Server-Side Rendering.                    |
-| `mdx`      | `boolean`         | `false`     | Habilita soporte MDX nativo.                       |
-| `rootDir`  | `string`          | `"src"`     | Directorio del código fuente.                    |
-| `buildDir` | `string`          | `".ryunix"` | Directorio de salida del build.                  |
-| `port`     | `number`          | `3000`      | Puerto del servidor de desarrollo.               |
+| Opción     | Tipo              | Por defecto | Descripción                                         |
+| :--------- | :---------------- | :---------- | :-------------------------------------------------- |
+| `ssr`      | `boolean`         | `true`      | Habilita Server-Side Rendering.                     |
+| `mdx`      | `boolean`         | `false`     | Habilita soporte MDX nativo.                        |
+| `rootDir`  | `string`          | `"src"`     | Directorio del código fuente.                       |
+| `buildDir` | `string`          | `".ryunix"` | Directorio de salida del build.                     |
+| `port`     | `number`          | `3000`      | Puerto del servidor de desarrollo.                  |
 | `favicon`  | `string\|boolean` | `true`      | Ruta del favicon o booleano para el predeterminado. |
-| `debug`    | `boolean`         | `false`     | Registro detallado para depuración.                |
+| `debug`    | `boolean`         | `false`     | Registro detallado para depuración.                 |
 
 ### Servidor y seguridad
 

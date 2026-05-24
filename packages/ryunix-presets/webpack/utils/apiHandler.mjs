@@ -33,30 +33,44 @@ function matchRoute(requestUrl, apiDirPath) {
     // Exact match first
     for (const entry of entries) {
       if (entry.isDirectory() && entry.name === currentPart) {
-        const match = findMatch(path.join(currentDir, entry.name), restParts, { ...params })
+        const match = findMatch(path.join(currentDir, entry.name), restParts, {
+          ...params,
+        })
         if (match) return match
       }
     }
 
     // Dynamic match like [id]
     for (const entry of entries) {
-      if (entry.isDirectory() && entry.name.startsWith('[') && entry.name.endsWith(']') && !entry.name.startsWith('[...')) {
+      if (
+        entry.isDirectory() &&
+        entry.name.startsWith('[') &&
+        entry.name.endsWith(']') &&
+        !entry.name.startsWith('[...')
+      ) {
         const paramName = entry.name.slice(1, -1)
-        const match = findMatch(path.join(currentDir, entry.name), restParts, { ...params, [paramName]: currentPart })
+        const match = findMatch(path.join(currentDir, entry.name), restParts, {
+          ...params,
+          [paramName]: currentPart,
+        })
         if (match) return match
       }
     }
 
     // Dynamic catch-all like [...slug]
     for (const entry of entries) {
-      if (entry.isDirectory() && entry.name.startsWith('[...') && entry.name.endsWith(']')) {
+      if (
+        entry.isDirectory() &&
+        entry.name.startsWith('[...') &&
+        entry.name.endsWith(']')
+      ) {
         const paramName = entry.name.slice(4, -1)
         for (const name of ['route.mjs', 'router.mjs']) {
           const filePath = path.join(currentDir, entry.name, name)
           if (fs.existsSync(filePath)) {
             return {
               filePath,
-              params: { ...params, [paramName]: currentUrlParts }
+              params: { ...params, [paramName]: currentUrlParts },
             }
           }
         }
@@ -96,9 +110,10 @@ export async function handleApiRequest(req, res, apiRootPath) {
   try {
     const fileUrl = pathToFileURL(match.filePath).href
     // Add cache busting in dev to hot-reload routes
-    const importUrl = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV
-      ? `${fileUrl}?update=${Date.now()}`
-      : fileUrl
+    const importUrl =
+      process.env.NODE_ENV === 'development' || !process.env.NODE_ENV
+        ? `${fileUrl}?update=${Date.now()}`
+        : fileUrl
 
     const module = await import(importUrl)
 
@@ -129,7 +144,9 @@ export async function handleApiRequest(req, res, apiRootPath) {
         }
       } else if (result !== undefined && !res.headersSent) {
         const isObject = typeof result === 'object' && result !== null
-        res.writeHead(200, { 'Content-Type': isObject ? 'application/json' : 'text/plain' })
+        res.writeHead(200, {
+          'Content-Type': isObject ? 'application/json' : 'text/plain',
+        })
         res.end(isObject ? JSON.stringify(result) : String(result))
       }
 
@@ -143,7 +160,12 @@ export async function handleApiRequest(req, res, apiRootPath) {
     console.error(`[API Error]:`, err)
     if (!res.headersSent) {
       res.writeHead(500, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: 'Internal Server Error', details: err.message }))
+      res.end(
+        JSON.stringify({
+          error: 'Internal Server Error',
+          details: err.message,
+        }),
+      )
     }
     return true
   }

@@ -8,10 +8,10 @@ Ryunix completa. Para ver cambios en el navegador con una app real enlazada al
 monorepo, usar la guía aparte:
 [app de integración local](./app-de-integracion-local.md).
 
-| Vía | Guía |
-| :-- | :--- |
-| Tests automatizados (este documento) | Jest en `packages/core`, `pnpm test`, `pnpm lint` |
-| App de integración local | [app-de-integracion-local.md](./app-de-integracion-local.md) |
+| Vía                                  | Guía                                                         |
+| :----------------------------------- | :----------------------------------------------------------- |
+| Tests automatizados (este documento) | Jest en `packages/core`, `pnpm test`, `pnpm lint`            |
+| App de integración local             | [app-de-integracion-local.md](./app-de-integracion-local.md) |
 
 ---
 
@@ -32,13 +32,13 @@ monorepo, usar la guía aparte:
 
 ## Resumen por paquete
 
-| Paquete / ámbito | Ruta | Tests automatizados | Comando principal |
-| :--------------- | :--- | :------------------ | :---------------- |
-| `@unsetsoft/ryunixjs` | `packages/core` | **Sí** (Jest + jsdom) | `pnpm --filter @unsetsoft/ryunixjs test` |
-| `@unsetsoft/ryunix-presets` | `packages/ryunix-presets` | No | [App de integración](./app-de-integracion-local.md) |
-| `@unsetsoft/cra` | `packages/cra` | No | CLI manual (ver abajo) |
-| `@unsetsoft/ryunix-devtools` | `packages/ryunix-devtools` | No | [App de integración](./app-de-integracion-local.md) |
-| **Monorepo (raíz)** | `/` | Turbo orquesta `test` del core | `pnpm test`, `pnpm lint`, `pnpm build` |
+| Paquete / ámbito             | Ruta                       | Tests automatizados            | Comando principal                                   |
+| :--------------------------- | :------------------------- | :----------------------------- | :-------------------------------------------------- |
+| `@unsetsoft/ryunixjs`        | `packages/core`            | **Sí** (Jest + jsdom)          | `pnpm --filter @unsetsoft/ryunixjs test`            |
+| `@unsetsoft/ryunix-presets`  | `packages/ryunix-presets`  | No                             | [App de integración](./app-de-integracion-local.md) |
+| `@unsetsoft/cra`             | `packages/cra`             | No                             | CLI manual (ver abajo)                              |
+| `@unsetsoft/ryunix-devtools` | `packages/ryunix-devtools` | No                             | [App de integración](./app-de-integracion-local.md) |
+| **Monorepo (raíz)**          | `/`                        | Turbo orquesta `test` del core | `pnpm test`, `pnpm lint`, `pnpm build`              |
 
 El único paquete con suite Jest es `@unsetsoft/ryunixjs` (`packages/core`).
 
@@ -54,14 +54,14 @@ El único paquete con suite Jest es `@unsetsoft/ryunixjs` (`packages/core`).
 
 ## Comandos globales
 
-| Comando | Qué hace |
-| :------ | :------- |
-| `pnpm install` | Instala dependencias de todos los workspaces. |
-| `pnpm build` | Compila paquetes (Turbo; `build` depende de `^build`). |
-| `pnpm test` | Ejecuta `test` en paquetes que lo definan (hoy: solo **core**). Turbo exige `build` antes. |
-| `pnpm lint` | ESLint en la raíz + `lint` por paquete vía Turbo. |
-| `pnpm lint:fix` | Corrige lint y formatea con Prettier. |
-| `pnpm run lint:md` | Markdownlint en `docs/`, `*.md` raíz y README de paquetes. |
+| Comando            | Qué hace                                                                                   |
+| :----------------- | :----------------------------------------------------------------------------------------- |
+| `pnpm install`     | Instala dependencias de todos los workspaces.                                              |
+| `pnpm build`       | Compila paquetes (Turbo; `build` depende de `^build`).                                     |
+| `pnpm test`        | Ejecuta `test` en paquetes que lo definan (hoy: solo **core**). Turbo exige `build` antes. |
+| `pnpm lint`        | ESLint en la raíz + `lint` por paquete vía Turbo.                                          |
+| `pnpm lint:fix`    | Corrige lint y formatea con Prettier.                                                      |
+| `pnpm run lint:md` | Markdownlint en `docs/`, `*.md` raíz y README de paquetes.                                 |
 
 Los comandos `pnpm run:web*` no son tests automatizados; ver
 [app-de-integracion-local.md](./app-de-integracion-local.md).
@@ -79,10 +79,10 @@ pnpm lint
 
 GitHub Actions (`.github/workflows/ci.yml`) en push/PR a `canary` y `main`:
 
-| Job | Comprueba |
-| :-- | :-------- |
-| **quality** (Node 20 y 22) | `pnpm run build:core`, `pnpm test`, `pnpm lint`, `pnpm lint:md`, `pnpm format:check` |
-| **smoke-app** | Plantilla `ryunix-base` con `workspace:*` y `ryunix build` (`scripts/ci-smoke-build.mjs`) |
+| Job                        | Comprueba                                                                                 |
+| :------------------------- | :---------------------------------------------------------------------------------------- |
+| **quality** (Node 20 y 22) | `pnpm run build:core`, `pnpm test`, `pnpm lint`, `pnpm lint:md`, `pnpm format:check`      |
+| **smoke-app**              | Plantilla `ryunix-base` con `workspace:*` y `ryunix build` (`scripts/ci-smoke-build.mjs`) |
 
 Solo se compila `@unsetsoft/ryunixjs` en CI; `@unsetsoft/ryunix-presets` no tiene
 build.
@@ -163,12 +163,12 @@ Para no mezclar con la app de integración, usar una carpeta fuera de `test/`
 
 ### Qué validar (generador)
 
-| Paso | Comprobación |
-| :--- | :----------- |
-| Generación | Plantilla copiada (`ryunix-base`, `--tailwind`, `--eslint`, etc.) |
+| Paso           | Comprobación                                                               |
+| :------------- | :------------------------------------------------------------------------- |
+| Generación     | Plantilla copiada (`ryunix-base`, `--tailwind`, `--eslint`, etc.)          |
 | `package.json` | Dependencias `@unsetsoft/ryunixjs` y `@unsetsoft/ryunix-presets` resueltas |
-| Instalación | El asistente ejecuta el gestor de paquetes elegido sin error |
-| App generada | `pnpm dev` arranca con `ryunix dev` |
+| Instalación    | El asistente ejecuta el gestor de paquetes elegido sin error               |
+| App generada   | `pnpm dev` arranca con `ryunix dev`                                        |
 
 Documentación: [CLI y ayudantes](../cra/cli-y-ayudantes.md),
 [Generación de plantillas](../cra/generacion-de-plantillas.md).
@@ -177,19 +177,19 @@ Documentación: [CLI y ayudantes](../cra/cli-y-ayudantes.md),
 
 ## Paquetes sin Jest
 
-| Paquete | Tests automatizados | Dónde validar cambios |
-| :------ | :------------------ | :-------------------- |
-| `@unsetsoft/ryunix-presets` | No | [App de integración](./app-de-integracion-local.md) — routing, build, SSR |
-| `@unsetsoft/ryunix-devtools` | No | [App de integración](./app-de-integracion-local.md) — extensión + Chrome |
+| Paquete                      | Tests automatizados | Dónde validar cambios                                                     |
+| :--------------------------- | :------------------ | :------------------------------------------------------------------------ |
+| `@unsetsoft/ryunix-presets`  | No                  | [App de integración](./app-de-integracion-local.md) — routing, build, SSR |
+| `@unsetsoft/ryunix-devtools` | No                  | [App de integración](./app-de-integracion-local.md) — extensión + Chrome  |
 
 ---
 
 ## Documentación relacionada
 
-| Tema | Enlace |
-| :--- | :----- |
-| App de integración local | [app-de-integracion-local.md](./app-de-integracion-local.md) |
-| Guía del repositorio | [guia-del-repositorio.md](./guia-del-repositorio.md) |
+| Tema                       | Enlace                                                           |
+| :------------------------- | :--------------------------------------------------------------- |
+| App de integración local   | [app-de-integracion-local.md](./app-de-integracion-local.md)     |
+| Guía del repositorio       | [guia-del-repositorio.md](./guia-del-repositorio.md)             |
 | Pila tecnológica y scripts | [pila-tecnologica-y-scripts.md](./pila-tecnologica-y-scripts.md) |
-| Contribución | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md) |
-| Índice docs | [resumen.md](../resumen.md) |
+| Contribución               | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)                   |
+| Índice docs                | [resumen.md](../resumen.md)                                      |

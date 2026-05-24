@@ -1,4 +1,4 @@
-import { createElement } from './createElement.js';
+import { createElement } from './createElement.js'
 
 /**
  * ServerBoundary is a special component used to wrap content that is rendered
@@ -8,7 +8,11 @@ import { createElement } from './createElement.js';
 export function ServerBoundary({ children, id }) {
   // On the client, this component just renders a container.
   // The children are already in the DOM from the server.
-  return createElement('div', { 'data-ryunix-server': id, style: { display: 'contents' } }, children);
+  return createElement(
+    'div',
+    { 'data-ryunix-server': id, style: { display: 'contents' } },
+    children,
+  )
 }
 
-ServerBoundary.ryunix_type = 'RYUNIX_SERVER_BOUNDARY';
+ServerBoundary.ryunix_type = 'RYUNIX_SERVER_BOUNDARY'

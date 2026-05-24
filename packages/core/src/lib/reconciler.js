@@ -58,7 +58,9 @@ const reconcileChildren = (wipFiber, elements) => {
         dom: null,
         parent: wipFiber,
         alternate: null,
-        effectTag: state.isHydrating ? EFFECT_TAGS.HYDRATE : EFFECT_TAGS.PLACEMENT,
+        effectTag: state.isHydrating
+          ? EFFECT_TAGS.HYDRATE
+          : EFFECT_TAGS.PLACEMENT,
         key: element.key,
         index,
       }

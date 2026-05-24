@@ -15,8 +15,13 @@ function install(packageManager, cwd) {
 
     let mainDepsText = 'dependencies'
     try {
-      const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
-      const allDeps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })
+      const pkg = JSON.parse(
+        fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'),
+      )
+      const allDeps = Object.keys({
+        ...pkg.dependencies,
+        ...pkg.devDependencies,
+      })
       if (allDeps.length > 0) {
         mainDepsText = allDeps.join(', ')
       }
@@ -47,8 +52,8 @@ function install(packageManager, cwd) {
       if (code !== 0) {
         reject(
           new Error(
-            `${packageManager} ${args.join(' ')} failed with exit code ${code}`
-          )
+            `${packageManager} ${args.join(' ')} failed with exit code ${code}`,
+          ),
         )
         return
       }

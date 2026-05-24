@@ -14,15 +14,15 @@ Este repositorio es un **monorepo del framework**, no una app de usuario. Coloca
 
 ## Mapa de paquetes
 
-| Qué es | Dónde |
-| :--- | :--- |
-| Reconciler, fibers, hooks, SSR core | `packages/core/src/lib/` |
-| Tests del core | `packages/core/src/tests/` |
-| JSX runtime | `packages/core/jsx/` |
-| Build, `ryunix dev/build/start` | `packages/ryunix-presets/webpack/` |
-| Plantillas CRA | `packages/cra/templates/` |
-| Docs | `docs/` |
-| README público | `README.md` |
+| Qué es                              | Dónde                              |
+| :---------------------------------- | :--------------------------------- |
+| Reconciler, fibers, hooks, SSR core | `packages/core/src/lib/`           |
+| Tests del core                      | `packages/core/src/tests/`         |
+| JSX runtime                         | `packages/core/jsx/`               |
+| Build, `ryunix dev/build/start`     | `packages/ryunix-presets/webpack/` |
+| Plantillas CRA                      | `packages/cra/templates/`          |
+| Docs                                | `docs/`                            |
+| README público                      | `README.md`                        |
 
 ## Reglas
 
@@ -35,14 +35,14 @@ Este repositorio es un **monorepo del framework**, no una app de usuario. Coloca
 
 Ver `packages/cra/templates/ryunix-base/`:
 
-| Alcance | Ubicación |
-| :--- | :--- |
+| Alcance       | Ubicación                               |
+| :------------ | :-------------------------------------- |
 | Página / ruta | `app/index.ryx`, `app/<ruta>/index.ryx` |
-| Layout | `app/layout.ryx` |
-| Errores | `app/errors.ryx` |
-| API | `app/api/<nombre>/router.js` |
-| Estilos | `styles/` |
-| Config | `ryunix.config.js` |
+| Layout        | `app/layout.ryx`                        |
+| Errores       | `app/errors.ryx`                        |
+| API           | `app/api/<nombre>/router.js`            |
+| Estilos       | `styles/`                               |
+| Config        | `ryunix.config.js`                      |
 
 - **Prohibido** en apps: `src/features/`, `page.tsx`, `next.config.ts` salvo petición explícita.
 - Colocalizar UI usada solo en una ruta; carpeta compartida solo con **segundo consumidor**.

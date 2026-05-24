@@ -32,7 +32,6 @@ const isNew = (prev, next) => (key) => {
  */
 const isGone = (next) => (key) => !(key in next)
 
-
 /**
  * Cancel effects for a single fiber
  * @param {Object} fiber - Fiber node
@@ -88,11 +87,4 @@ const cancelEffectsDeep = (fiber) => {
   if (fiber.sibling) cancelEffectsDeep(fiber.sibling)
 }
 
-export {
-  cancelEffects,
-  cancelEffectsDeep,
-  isEvent,
-  isProperty,
-  isNew,
-  isGone,
-}
+export { cancelEffects, cancelEffectsDeep, isEvent, isProperty, isNew, isGone }

@@ -39,7 +39,9 @@ const createElement = (type, props, ...children) => {
   const safeProps = props || {}
   let rawChildren = children
   if (children.length === 0 && safeProps.children !== undefined) {
-    rawChildren = Array.isArray(safeProps.children) ? safeProps.children : [safeProps.children]
+    rawChildren = Array.isArray(safeProps.children)
+      ? safeProps.children
+      : [safeProps.children]
   }
 
   rawChildren = rawChildren

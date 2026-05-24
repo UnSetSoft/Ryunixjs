@@ -1,11 +1,15 @@
 import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index.js'
 import { createElement, Fragment } from './createElement.js'
 import { scheduleWork } from './bridge.js'
-import { Priority, scheduleUpdate, runWithPriority, getCurrentPriority } from './priority.js'
+import {
+  Priority,
+  scheduleUpdate,
+  runWithPriority,
+  getCurrentPriority,
+} from './priority.js'
 import { RYUNIX_PORTAL } from './portal.js'
 import { queueUpdate } from './batching.js'
 import { validateHookContext as validateHookCall } from './devtools.js'
-
 
 const haveDepsChanged = (oldDeps, newDeps) => {
   if (!oldDeps || !newDeps) return true
@@ -16,12 +20,12 @@ const haveDepsChanged = (oldDeps, newDeps) => {
 const useStore = (initialState, priority = getCurrentPriority()) => {
   // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
-    return [is.function(initialState) ? initialState() : initialState, () => { }]
+    return [is.function(initialState) ? initialState() : initialState, () => {}]
   }
 
   const state = getState()
   if (state.isServerRendering) {
-    return [is.function(initialState) ? initialState() : initialState, () => { }]
+    return [is.function(initialState) ? initialState() : initialState, () => {}]
   }
 
   const reducer = (state, action) =>
@@ -29,16 +33,20 @@ const useStore = (initialState, priority = getCurrentPriority()) => {
   return useReducer(reducer, initialState, undefined, priority)
 }
 
-
-const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPriority()) => {
+const useReducer = (
+  reducer,
+  initialState,
+  init,
+  defaultPriority = getCurrentPriority(),
+) => {
   // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
-    return [init ? init(initialState) : initialState, () => { }]
+    return [init ? init(initialState) : initialState, () => {}]
   }
 
   const state = getState()
   if (state.isServerRendering) {
-    return [init ? init(initialState) : initialState, () => { }]
+    return [init ? init(initialState) : initialState, () => {}]
   }
 
   validateHookCall()
@@ -92,7 +100,6 @@ const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPri
   state.hookIndex++
   return [hook.state, dispatch]
 }
-
 
 /**
  * The `useEffect` function in JavaScript is used to manage side effects in functional components by
@@ -276,7 +283,7 @@ const createContext = (
     return createElement(
       RYUNIX_TYPES.RYUNIX_CONTEXT,
       { value, children, _contextId: contextId },
-      ...flattenArray([children])
+      ...flattenArray([children]),
     )
   }
 
@@ -285,7 +292,7 @@ const createContext = (
   const useContext = (ctxID = contextId) => {
     const state = getState()
     if (state.isServerRendering) {
-      return (state.ssrContexts && state.ssrContexts[ctxID] !== undefined)
+      return state.ssrContexts && state.ssrContexts[ctxID] !== undefined
         ? state.ssrContexts[ctxID]
         : defaultValue
     }
@@ -489,9 +496,7 @@ const RouterProvider = ({ routes, children }) => {
     )
   }
 
-  const [location, setLocation] = useStore(
-    window.location.pathname
-  )
+  const [location, setLocation] = useStore(window.location.pathname)
 
   useEffect(() => {
     const update = () => setLocation(window.location.pathname)
@@ -814,7 +819,9 @@ const useLayoutEffect = (callback, deps) => {
     throw new Error('useLayoutEffect callback must be a function')
   }
   if (deps !== undefined && !Array.isArray(deps)) {
-    throw new Error('useLayoutEffect dependencies must be an array or undefined')
+    throw new Error(
+      'useLayoutEffect dependencies must be an array or undefined',
+    )
   }
 
   const { wipFiber, hookIndex } = state
@@ -956,4 +963,3 @@ export {
   usePathname,
   useSearchParams,
 }
-

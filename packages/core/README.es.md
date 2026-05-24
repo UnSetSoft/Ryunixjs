@@ -57,17 +57,17 @@ npm install @unsetsoft/ryunixjs
 
 ### Hooks
 
-| Hook                           | Descripción                                              |
-| :----------------------------- | :------------------------------------------------------- |
-| `useStore(initial)`            | Gestión de estado (equivalente Ryunix de `useState`).    |
-| `useReducer(reducer, initial)` | Estado avanzado con reducers.                            |
-| `useEffect(cb, deps)`          | Efectos secundarios.                                     |
-| `useLayoutEffect(cb, deps)`    | Efectos síncronos antes del pintado del navegador.       |
-| `useRef(initial)`              | Referencia persistente entre renders.                    |
-| `useMemo(cb, deps)`            | Valores memorizados.                                     |
-| `useCallback(cb, deps)`        | Funciones memorizadas.                                   |
-| `useContext(id)`               | Consume un valor de contexto.                            |
-| `useId()`                      | Genera IDs únicos y estables para SSR.                   |
+| Hook                           | Descripción                                           |
+| :----------------------------- | :---------------------------------------------------- |
+| `useStore(initial)`            | Gestión de estado (equivalente Ryunix de `useState`). |
+| `useReducer(reducer, initial)` | Estado avanzado con reducers.                         |
+| `useEffect(cb, deps)`          | Efectos secundarios.                                  |
+| `useLayoutEffect(cb, deps)`    | Efectos síncronos antes del pintado del navegador.    |
+| `useRef(initial)`              | Referencia persistente entre renders.                 |
+| `useMemo(cb, deps)`            | Valores memorizados.                                  |
+| `useCallback(cb, deps)`        | Funciones memorizadas.                                |
+| `useContext(id)`               | Consume un valor de contexto.                         |
+| `useId()`                      | Genera IDs únicos y estables para SSR.                |
 
 ### Hooks especializados
 

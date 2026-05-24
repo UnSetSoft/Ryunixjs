@@ -82,13 +82,13 @@ to do it efficiently.
 
 RyunixJS is managed as a monorepo containing several specialized packages:
 
-| Package | Description |
-| :------ | :---------- |
-| [`@unsetsoft/ryunixjs`](./packages/core) | Core library: reconciler, hooks, and DOM utilities. |
-| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets) | Tooling and Webpack configurations. |
-| [`@unsetsoft/cra`](./packages/cra) | CLI to scaffold new Ryunix projects. |
-| [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for component tree debugging. |
-| [VS Code extension][vscode-ext] | Syntax highlighting and editor support for `.ryx`. |
+| Package                                                    | Description                                         |
+| :--------------------------------------------------------- | :-------------------------------------------------- |
+| [`@unsetsoft/ryunixjs`](./packages/core)                   | Core library: reconciler, hooks, and DOM utilities. |
+| [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Tooling and Webpack configurations.                 |
+| [`@unsetsoft/cra`](./packages/cra)                         | CLI to scaffold new Ryunix projects.                |
+| [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for component tree debugging.     |
+| [VS Code extension][vscode-ext]                            | Syntax highlighting and editor support for `.ryx`.  |
 
 ## 🛠️ Getting Started
 
