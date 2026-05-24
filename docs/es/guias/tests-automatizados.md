@@ -121,7 +121,7 @@ Modo watch (desarrollo):
 
 ```bash
 cd packages/core
-pnpm exec jest --testPathPattern=src --watch
+pnpm exec jest --watch
 ```
 
 ### Escribir un test nuevo

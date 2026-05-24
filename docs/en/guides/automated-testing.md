@@ -122,7 +122,7 @@ Watch mode (development):
 
 ```bash
 cd packages/core
-pnpm exec jest --testPathPattern=src --watch
+pnpm exec jest --watch
 ```
 
 ### Writing a new test

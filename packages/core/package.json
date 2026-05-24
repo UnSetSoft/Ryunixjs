@@ -35,7 +35,7 @@
     "lint": "eslint . --ext .js --fix --max-warnings=0 --config .eslintrc.js --no-eslintrc",
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
-    "test": "jest --testPathPattern=src"
+    "test": "jest"
   },
   "dependencies": {},
   "devDependencies": {
