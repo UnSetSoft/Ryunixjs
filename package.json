@@ -15,6 +15,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "build:core": "pnpm --filter @unsetsoft/ryunixjs build",
     "lint": "eslint . --max-warnings=0 --config eslint.config.mjs && turbo run lint && pnpm run lint:md",
     "lint:md": "markdownlint-cli2",
     "lint:md:fix": "markdownlint-cli2 --fix && prettier -w \"docs/**/*.md\" \"*.md\" \"packages/*/README.md\" --prose-wrap always --print-width 80",
@@ -29,8 +30,8 @@
     "release:stable": "npm run kg:bump && pnpm run format && pnpm --parallel --filter @unsetsoft/ryunixjs run release",
     "cra:release": "pnpm --parallel --filter @unsetsoft/cra run release",
     "cra:nightly": "pnpm --parallel --filter @unsetsoft/cra run nightly:release",
-    "publish:all": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish",
-    "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish --tag canary",
+    "publish:all": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish --provenance --access public",
+    "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" publish --provenance --access public --tag canary",
     "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
     "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",

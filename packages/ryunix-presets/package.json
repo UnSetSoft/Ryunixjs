@@ -4,7 +4,11 @@
   "version": "1.0.26-canary.37",
   "author": "Neyunse",
   "type": "module",
-  "repository": "https://github.com/UnSetSoft/Ryunixjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UnSetSoft/Ryunixjs.git",
+    "directory": "packages/ryunix-presets"
+  },
   "license": "MIT",
   "keywords": [
     "ryunixjs"
@@ -16,7 +20,9 @@
     "@unsetsoft/ryunixjs": "^1.2.5-canary.0 || ^1.2.4"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
   },
   "exports": {
     "./webpack": "./webpack/index.js"

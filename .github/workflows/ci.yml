@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - canary
+      - main
+  pull_request:
+    branches:
+      - canary
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, format & tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build @unsetsoft/ryunixjs
+        run: pnpm run build:core
+
+      - name: Run unit tests
+        run: pnpm run test
+
+      - name: Lint (ESLint + packages)
+        run: pnpm run lint
+
+      - name: Lint Markdown
+        run: pnpm run lint:md
+
+      - name: Check formatting (Prettier)
+        run: pnpm run format:check
+
+  smoke-app:
+    name: Integration smoke (CRA template build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: quality
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build @unsetsoft/ryunixjs
+        run: pnpm run build:core
+
+      - name: Build smoke app from template
+        run: node scripts/ci-smoke-build.mjs

@@ -56,8 +56,15 @@
   "keywords": [
     "ryunixjs"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UnSetSoft/Ryunixjs.git",
+    "directory": "packages/core"
+  },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
   },
   "bugs": {
     "url": "https://github.com/UnSetSoft/Ryunixjs/issues"

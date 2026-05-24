@@ -77,8 +77,19 @@ pnpm test
 pnpm lint
 ```
 
-El workflow de GitHub (`.github/workflows/eslint.yml`) ejecuta **lint**, no la
-suite Jest. Los tests del core deben pasar en local hasta que CI los incorpore.
+GitHub Actions (`.github/workflows/ci.yml`) en push/PR a `canary` y `main`:
+
+| Job | Comprueba |
+| :-- | :-------- |
+| **quality** (Node 20 y 22) | `pnpm run build:core`, `pnpm test`, `pnpm lint`, `pnpm lint:md`, `pnpm format:check` |
+| **smoke-app** | Plantilla `ryunix-base` con `workspace:*` y `ryunix build` (`scripts/ci-smoke-build.mjs`) |
+
+Solo se compila `@unsetsoft/ryunixjs` en CI; `@unsetsoft/ryunix-presets` no tiene
+build.
+
+Publicación: `.github/workflows/release.yml` con **Trusted Publishing (OIDC)** y
+provenance (sin `NPM_TOKEN`). Configura Trusted Publisher en npmjs.com por paquete
+con workflow `release.yml` — ver `CONTRIBUTING.es.md`.
 
 ---
 

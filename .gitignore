@@ -5,6 +5,7 @@ yarn.lock
 .ryunix
 package-lock.json
 _cra
+_ci
 test
 .yarn
 .pnp.loader.mjs

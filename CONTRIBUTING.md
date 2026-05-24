@@ -113,6 +113,39 @@ convention for your branches:
 
    verification in canary.
 
+### GitHub Actions (CI & npm publish)
+
+- **CI** (`.github/workflows/ci.yml`): builds only `@unsetsoft/ryunixjs` (Rollup).
+  `@unsetsoft/ryunix-presets` has no build step (ships `webpack/` as source).
+  Also runs Jest, ESLint, Markdown lint, Prettier, and a CRA smoke build.
+- **Release** (`.github/workflows/release.yml`): **npm Trusted Publishing (OIDC)**
+  with provenance. No `NPM_TOKEN` secret.
+
+#### npm Trusted Publisher (one-time per package)
+
+Configure on [npmjs.com](https://www.npmjs.com/) → package → **Settings** →
+**Trusted publishing** for each published package:
+
+| Package | `repository.directory` |
+| :------ | :--------------------- |
+| `@unsetsoft/ryunixjs` | `packages/core` |
+| `@unsetsoft/ryunix-presets` | `packages/ryunix-presets` |
+| `@unsetsoft/cra` | `packages/cra` |
+
+| Field | Value |
+| :---- | :---- |
+| Provider | GitHub Actions |
+| Repository | `UnSetSoft/Ryunixjs` |
+| Workflow filename | `release.yml` |
+| Environment | *(leave empty unless you add a GitHub Environment)* |
+
+Recommended after verifying OIDC publish: **Publishing access** → *Require 2FA and
+disallow tokens* (revoke old automation tokens).
+
+Release workflow: **Actions → Release → Run workflow** with **dry-run** until
+versions in `package.json` are ready. Tag `v*` triggers a real publish (`canary`
+in the tag name → npm tag `canary`, otherwise `latest`).
+
 ## 📄 License
 
 By contributing to RyunixJS, you agree that your contributions will be licensed

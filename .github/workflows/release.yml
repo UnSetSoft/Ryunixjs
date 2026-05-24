@@ -1,0 +1,130 @@
+# npm Trusted Publishing (OIDC) — configure on npmjs.com per package:
+#   Provider: GitHub Actions
+#   Repository: UnSetSoft/Ryunixjs
+#   Workflow filename: release.yml
+# Requires npm CLI >= 11.5.1 and Node >= 22.14 (see publish job).
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: npm dist-tag to publish
+        required: true
+        type: choice
+        options:
+          - canary
+          - latest
+        default: canary
+      dry_run:
+        description: Validate publish with --dry-run (no OIDC / no upload)
+        required: false
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Build, test & smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build @unsetsoft/ryunixjs
+        run: pnpm run build:core
+
+      - name: Run unit tests
+        run: pnpm run test
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Integration smoke build
+        run: node scripts/ci-smoke-build.mjs
+
+      - name: Publish dry-run (canary)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run && inputs.channel == 'canary'
+        run: pnpm run publish:canary -- --dry-run
+
+      - name: Publish dry-run (latest)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run && inputs.channel == 'latest'
+        run: pnpm run publish:all -- --dry-run
+
+  publish:
+    name: Publish to npm (OIDC)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: verify
+    if: >-
+      (github.event_name == 'workflow_dispatch' && !inputs.dry_run) ||
+      github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js (OIDC → npm)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Ensure npm CLI supports trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build @unsetsoft/ryunixjs
+        run: pnpm run build:core
+
+      - name: Publish canary (OIDC + provenance)
+        if: >-
+          (github.event_name == 'workflow_dispatch' && inputs.channel == 'canary') ||
+          (github.event_name == 'push' && contains(github.ref_name, 'canary'))
+        run: pnpm run publish:canary
+        env:
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      - name: Publish latest (OIDC + provenance)
+        if: >-
+          (github.event_name == 'workflow_dispatch' && inputs.channel == 'latest') ||
+          (github.event_name == 'push' && !contains(github.ref_name, 'canary'))
+        run: pnpm run publish:all
+        env:
+          NPM_CONFIG_PROVENANCE: 'true'

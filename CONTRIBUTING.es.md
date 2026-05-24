@@ -109,6 +109,33 @@ Usa esta convención de nombres:
 
 2. **Stable**: Releases finales tras verificación exhaustiva en canary.
 
+### GitHub Actions (CI y publicación npm)
+
+- **CI** (`.github/workflows/ci.yml`): solo compila `@unsetsoft/ryunixjs` (Rollup).
+  `@unsetsoft/ryunix-presets` no tiene build (publica `webpack/` tal cual).
+  También Jest, ESLint, Markdown, Prettier y smoke build CRA.
+- **Release** (`.github/workflows/release.yml`): **Trusted Publishing (OIDC)** con
+  provenance. Sin secreto `NPM_TOKEN`.
+
+#### Trusted Publisher en npm (una vez por paquete)
+
+En [npmjs.com](https://www.npmjs.com/) → paquete → **Settings** → **Trusted
+publishing**, para `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` y
+`@unsetsoft/cra`:
+
+| Campo | Valor |
+| :---- | :---- |
+| Provider | GitHub Actions |
+| Repository | `UnSetSoft/Ryunixjs` |
+| Workflow filename | `release.yml` |
+
+Tras validar: **Publishing access** → exigir 2FA y deshabilitar tokens; revoca
+tokens de automatización antiguos.
+
+**Actions → Release → Run workflow** con **dry-run** hasta que las versiones en
+`package.json` estén listas. Tag `v*` publica en serio (`canary` en el nombre →
+tag npm `canary`; si no → `latest`).
+
 ## 📄 Licencia
 
 Al contribuir a RyunixJS, aceptas que tus contribuciones se licencien bajo la
