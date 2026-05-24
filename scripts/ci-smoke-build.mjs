@@ -67,7 +67,8 @@ if (fs.existsSync(gitignoreSrc)) {
 patchPackageJson(smokeDir)
 
 console.log('\n[ci-smoke] Installing workspace (includes smoke app)...\n')
-run('pnpm', ['install'], root)
+// Smoke app package.json is generated here; lockfile cannot be pre-baked for it in CI.
+run('pnpm', ['install', '--no-frozen-lockfile'], root)
 
 console.log('\n[ci-smoke] Running ryunix build...\n')
 run('pnpm', ['--filter', './_ci/smoke-app', 'run', 'build'], root)
