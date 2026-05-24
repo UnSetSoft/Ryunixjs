@@ -8,6 +8,7 @@ const { isFolderEmpty } = require('./helpers/is-folder-empty')
 const { copyRecursiveSync } = require('./helpers/copy')
 const { install } = require('./helpers/install')
 const { tryGitInit } = require('./helpers/git')
+const { ensurePublicFavicon } = require('./helpers/ensure-public-favicon')
 
 async function createApp({
   appPath,
@@ -45,6 +46,7 @@ async function createApp({
 
   console.log(`Copying files from template...\n`)
   copyRecursiveSync(templateDir, root)
+  ensurePublicFavicon(root)
 
   // Rename gitignore to .gitignore (NPM strips out .gitignore when publishing the template)
   const gitignorePath = path.join(root, 'gitignore')

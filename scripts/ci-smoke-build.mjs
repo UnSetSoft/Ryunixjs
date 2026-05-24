@@ -6,6 +6,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+const { ensurePublicFavicon } = require(
+  '../packages/cra/src/helpers/ensure-public-favicon.js',
+)
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const smokeDir = path.join(root, '_ci', 'smoke-app')
@@ -65,6 +71,7 @@ if (fs.existsSync(gitignoreSrc)) {
 }
 
 patchPackageJson(smokeDir)
+ensurePublicFavicon(smokeDir)
 
 console.log('\n[ci-smoke] Installing workspace (includes smoke app)...\n')
 // Smoke app package.json is generated here; lockfile cannot be pre-baked for it in CI.
