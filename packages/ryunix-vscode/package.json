@@ -3,7 +3,7 @@
   "displayName": "RyunixJS",
   "description": "Ryunix language support for .ryx files",
   "publisher": "unsetsoft",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "license": "MIT",
   "private": true,
   "homepage": "https://github.com/UnSetSoft/Ryunixjs",
@@ -29,11 +29,12 @@
     "compile:client": "tsc -p ./ --noEmit",
     "bundle:server": "esbuild server/src/server.ts --bundle --platform=node --format=cjs --outfile=server/out/server.js",
     "bundle:client": "esbuild src/extension.ts --bundle --platform=node --format=cjs --outfile=out/extension.js --external:vscode --packages=bundle",
-    "compile": "rm -rf out && mkdir -p out server/out && pnpm run bundle:server && pnpm run bundle:client",
+    "compile": "node scripts/prepare-out-dirs.mjs && pnpm run bundle:server && pnpm run bundle:client",
     "watch": "tsc -watch -p ./ --noEmit",
     "prebuild": "pnpm run compile",
     "build": "vsce package --no-dependencies",
     "publish:marketplace": "vsce publish --no-dependencies",
+    "publish:openvsx": "ovsx publish --no-dependencies",
     "test": "tsc -p server/tsconfig.json && node test/grammar.test.cjs && node test/resolve-root.test.cjs"
   },
   "categories": [
@@ -129,6 +130,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/vscode": "^1.75.0",
+    "ovsx": "^0.10.12",
     "@vscode/vsce": "^3.9.1",
     "esbuild": "^0.25.12",
     "typescript": "^5.7.0",

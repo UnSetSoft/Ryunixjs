@@ -1,0 +1,146 @@
+# Publish packages/ryunix-vscode to Visual Studio Marketplace and Open VSX.
+#
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   VSCE_PAT — Azure DevOps PAT with "Marketplace → Manage" (see VS Code publishing docs)
+#   OVSX_PAT — Personal access token from https://open-vsx.org/user-settings/tokens
+#
+# Triggers:
+#   - Tag push: vscode-v* (e.g. vscode-v1.1.1) — version is synced into package.json before build
+#   - workflow_dispatch — optional dry-run (build + .vsix only, no upload)
+#
+# Before tagging: bump "version" in packages/ryunix-vscode/package.json and update CHANGELOG.
+
+name: VS Code extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and package only (no Marketplace / Open VSX upload)
+        required: false
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'vscode-v*'
+
+concurrency:
+  group: vscode-extension-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  EXTENSION_DIR: packages/ryunix-vscode
+
+jobs:
+  verify:
+    name: Build & test extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set extension version from tag
+        if: github.event_name == 'push'
+        working-directory: ${{ env.EXTENSION_DIR }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#vscode-v}"
+          node <<NODE
+          const fs = require('fs');
+          const version = '${VERSION}';
+          const pkgPath = 'package.json';
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+          pkg.version = version;
+          fs.writeFileSync(pkgPath, \`\${JSON.stringify(pkg, null, 2)}\n\`);
+          console.log(\`Set extension version to \${version}\`);
+          NODE
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Extension unit tests
+        run: pnpm --filter ./packages/ryunix-vscode run test
+
+      - name: Compile & package .vsix
+        working-directory: ${{ env.EXTENSION_DIR }}
+        run: pnpm run build
+
+      - name: Upload .vsix artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ryunix-vscode-vsix
+          path: ${{ env.EXTENSION_DIR }}/*.vsix
+          if-no-files-found: error
+
+  publish:
+    name: Publish to Marketplaces
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: verify
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install --filter ./packages/ryunix-vscode...
+
+      - name: Download .vsix artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ryunix-vscode-vsix
+          path: ${{ env.EXTENSION_DIR }}
+
+      - name: Publish to Visual Studio Marketplace
+        working-directory: ${{ env.EXTENSION_DIR }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "::error::Missing repository secret VSCE_PAT"
+            exit 1
+          fi
+          VSIX=$(ls -1 *.vsix | head -1)
+          echo "Publishing $VSIX to Visual Studio Marketplace"
+          pnpm exec vsce publish -i "$VSIX" --no-dependencies
+
+      - name: Publish to Open VSX
+        working-directory: ${{ env.EXTENSION_DIR }}
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          if [ -z "$OVSX_PAT" ]; then
+            echo "::error::Missing repository secret OVSX_PAT"
+            exit 1
+          fi
+          VSIX=$(ls -1 *.vsix | head -1)
+          echo "Publishing $VSIX to Open VSX"
+          pnpm exec ovsx publish "$VSIX"

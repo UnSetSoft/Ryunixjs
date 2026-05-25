@@ -119,14 +119,24 @@ pnpm install
 pnpm --filter ./packages/ryunix-vscode run build
 ```
 
-Publishing to the Marketplace (maintainers only):
+Publishing (maintainers only):
 
 ```bash
 pnpm --filter ./packages/ryunix-vscode run publish:marketplace
+pnpm --filter ./packages/ryunix-vscode run publish:openvsx
 ```
 
-Requires a [Visual Studio Marketplace](https://marketplace.visualstudio.com/)
-publisher token for `unsetsoft`.
+Requires `VSCE_PAT` (Visual Studio Marketplace) and `OVSX_PAT` ([Open VSX](https://open-vsx.org/user-settings/tokens)) for publisher `unsetsoft`.
+
+### CI (GitHub Actions)
+
+Workflow [`.github/workflows/vscode-extension.yml`](../../.github/workflows/vscode-extension.yml):
+
+1. Add repository secrets `VSCE_PAT` and `OVSX_PAT`.
+2. Bump `version` in this `package.json` and update `CHANGELOG.md`.
+3. Push tag `vscode-v<version>` (e.g. `vscode-v1.1.1`) or run the workflow manually with **dry_run** disabled.
+
+Manual dry-run (package only): Actions → **VS Code extension** → Run workflow → leave **dry_run** checked.
 
 ## Package layout
 

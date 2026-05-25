@@ -10,6 +10,7 @@ server/out/**/*.map
 server/tsconfig.json
 tsconfig.json
 test/**
+scripts/**
 node_modules/**
 *.vsix
 **/*.map
