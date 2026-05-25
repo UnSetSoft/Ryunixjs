@@ -1,4 +1,6 @@
-<!-- markdownlint-disable MD013 -->
+<!-- markdownlint-disable MD033 MD041 MD013 -->
+
+> **Language / Idioma:** [English](./README.md) · [Español](./README.es.md)
 
 # Ryunix VS Code Extension
 
