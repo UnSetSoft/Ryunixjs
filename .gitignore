@@ -6,7 +6,11 @@ yarn.lock
 package-lock.json
 _cra
 _ci
-test
+test/*
+!test/webpack/
+test/webpack/node_modules/
+test/webpack/.ryunix/
+test/webpack/*.vsix
 !packages/ryunix-vscode/test/
 !packages/ryunix-vscode/test/**
 .yarn
@@ -14,4 +18,5 @@ test
 .pnp.cjs
 .turbo
 text.md
+MIGRACION-JS-A-TS.md
 pnpm-lock.yaml

@@ -1,28 +1,39 @@
 import { createElement } from './createElement.js'
 import { useStore, useEffect } from './hooks.js'
-
 export function RyunixDevOverlay(propsOrError) {
-  // If propsOrError is an event or wrapped object, try to extract error
+  const propsInput = propsOrError
   const rawError =
-    propsOrError && propsOrError.nativeEvent ? propsOrError.error : propsOrError
-
-  let error =
-    rawError instanceof Error || (rawError && rawError.message)
-      ? rawError
-      : rawError?.error || rawError
-
-  // Debug string if error is broken
+    propsInput &&
+    typeof propsInput === 'object' &&
+    !(propsInput instanceof Error) &&
+    propsInput.nativeEvent
+      ? propsInput.error
+      : propsInput
+  let error = null
+  if (rawError instanceof Error) {
+    error = rawError
+  } else if (rawError && typeof rawError === 'object') {
+    if ('message' in rawError) {
+      error = rawError
+    } else if ('error' in rawError) {
+      const nested = rawError.error
+      error = nested && typeof nested === 'object' ? nested : null
+    } else {
+      error = rawError
+    }
+  }
   const debugObjectStr = JSON.stringify(
-    propsOrError,
-    Object.getOwnPropertyNames(propsOrError || {}),
+    propsInput,
+    Object.getOwnPropertyNames(propsInput || {}),
   )
-
-  const [snippet, setSnippet] = useStore(null)
-  const [startLine, setStartLine] = useStore(1)
-  const [errorFile, setErrorFile] = useStore('')
-  const [errorLine, setErrorLine] = useStore(0)
-
-  // Normalize stack ensuring we have lines
+  const [snippetState, setSnippet] = useStore(null)
+  const [startLineState, setStartLine] = useStore(1)
+  const [errorFileState, setErrorFile] = useStore('')
+  const [errorLineState, setErrorLine] = useStore(0)
+  const snippet = snippetState
+  const startLine = startLineState
+  const errorFile = errorFileState
+  const errorLine = errorLineState
   let stackLines = []
   if (error && error.stack) {
     stackLines =
@@ -31,7 +42,6 @@ export function RyunixDevOverlay(propsOrError) {
             const trimmed = line.trim()
             if (!trimmed) return false
             if (trimmed.includes('node_modules')) return false
-            // Filter out internal Ryunix core framework files to isolate user code
             const isInternal = [
               'components.js',
               'workers.js',
@@ -48,36 +58,30 @@ export function RyunixDevOverlay(propsOrError) {
             ].some((file) => trimmed.includes(file))
             return !isInternal
           })
-        : error.stack
+        : Array.isArray(error.stack)
+          ? error.stack
+          : []
   }
-
-  const errorName = error && error.name ? error.name : 'Unknown Error Type'
+  const errorName =
+    error && typeof error.name === 'string' ? error.name : 'Unknown Error Type'
   const errorMessage =
-    error && error.message
+    error && typeof error.message === 'string'
       ? error.message
       : `Raw unhandled error. Debug: ${debugObjectStr}`
-
   useEffect(() => {
     let targetPath = null
     let targetLine = null
-
-    // 1. Direct JSX __source mapping (injected by Webpack/SWC)
-    if (error && error.__ryunix_source && error.__ryunix_source.fileName) {
-      targetPath = error.__ryunix_source.fileName
-      targetLine = error.__ryunix_source.lineNumber
+    const ryunixSource = error?.__ryunix_source
+    if (ryunixSource?.fileName) {
+      targetPath = ryunixSource.fileName
+      targetLine = ryunixSource.lineNumber ?? null
     }
-
-    // 2. Fallback to Regex Stack Parsing
     if (!targetPath || !targetLine) {
       for (let i = 0; i < stackLines.length; i++) {
         const line = stackLines[i]
         if (!line.includes(':')) continue
-
-        // Deterministic string-based parsing (no regex on uncontrolled data)
         let matchedPath = null
         let matchedLine = null
-
-        // V8 format: "at fn (file:line:col)" — extract content between parens
         const parenOpen = line.indexOf('(')
         const parenClose = line.lastIndexOf(')')
         if (parenOpen !== -1 && parenClose > parenOpen) {
@@ -93,8 +97,6 @@ export function RyunixDevOverlay(propsOrError) {
             }
           }
         }
-
-        // V8 format without parens: "at file:line:col"
         if (!matchedPath) {
           const trimmed = line.trim()
           if (trimmed.startsWith('at ')) {
@@ -111,8 +113,6 @@ export function RyunixDevOverlay(propsOrError) {
             }
           }
         }
-
-        // Ryunix format: "file.ryx:line" or "file.jsx:line"
         if (!matchedPath) {
           const exts = ['.ryx', '.jsx', '.js', '.ts', '.tsx']
           const c1 = line.lastIndexOf(':')
@@ -128,7 +128,6 @@ export function RyunixDevOverlay(propsOrError) {
             }
           }
         }
-
         if (matchedPath && matchedLine) {
           targetPath = matchedPath
           targetLine = matchedLine
@@ -136,7 +135,6 @@ export function RyunixDevOverlay(propsOrError) {
         }
       }
     }
-
     if (targetPath && targetLine) {
       setErrorFile(targetPath)
       setErrorLine(targetLine)
@@ -153,7 +151,6 @@ export function RyunixDevOverlay(propsOrError) {
         .catch((err) => console.error('Failed to fetch source snippet', err))
     }
   }, [error])
-
   const overlayStyle = {
     position: 'fixed',
     top: 0,
@@ -169,7 +166,6 @@ export function RyunixDevOverlay(propsOrError) {
     padding: '20px',
     fontFamily: 'system-ui, -apple-system, sans-serif',
   }
-
   const modalStyle = {
     backgroundColor: '#0c0c0c',
     width: '100%',
@@ -182,7 +178,6 @@ export function RyunixDevOverlay(propsOrError) {
     overflow: 'hidden',
     border: '1px solid #333',
   }
-
   const headerStyle = {
     backgroundColor: '#161616',
     padding: '16px 24px',
@@ -191,7 +186,6 @@ export function RyunixDevOverlay(propsOrError) {
     justifyContent: 'space-between',
     alignItems: 'center',
   }
-
   const badgeStyle = {
     backgroundColor: 'rgba(239, 68, 68, 0.2)',
     color: '#ef4444',
@@ -202,14 +196,12 @@ export function RyunixDevOverlay(propsOrError) {
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   }
-
   const contentStyle = {
     padding: '32px',
     overflowY: 'auto',
     flex: 1,
     color: '#fff',
   }
-
   const titleStyle = {
     fontSize: '24px',
     fontWeight: 'bold',
@@ -218,7 +210,6 @@ export function RyunixDevOverlay(propsOrError) {
     wordBreak: 'break-word',
     lineHeight: 1.4,
   }
-
   const snippetContainerStyle = {
     backgroundColor: '#000',
     borderRadius: '8px',
@@ -233,7 +224,6 @@ export function RyunixDevOverlay(propsOrError) {
     maxHeight: '150px',
     height: 'auto',
   }
-
   const lineStyle = (isErrorLine) => ({
     display: 'flex',
     backgroundColor: isErrorLine ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
@@ -241,9 +231,7 @@ export function RyunixDevOverlay(propsOrError) {
     borderRadius: '4px',
     borderLeft: isErrorLine ? '3px solid #ef4444' : '3px solid transparent',
   })
-
   const snippetLines = snippet ? snippet.split('\n') : []
-
   let badgeText = 'UNHANDLED RUNTIME ERROR'
   if (
     errorName &&
@@ -252,7 +240,6 @@ export function RyunixDevOverlay(propsOrError) {
   ) {
     badgeText = errorName.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase()
   }
-
   return createElement(
     'div',
     { style: overlayStyle },
@@ -314,7 +301,6 @@ export function RyunixDevOverlay(propsOrError) {
           ': ',
           errorMessage,
         ),
-
         errorFile &&
           createElement(
             'div',
@@ -349,7 +335,6 @@ export function RyunixDevOverlay(propsOrError) {
             ':',
             errorLine,
           ),
-
         snippet &&
           createElement(
             'div',
@@ -391,7 +376,6 @@ export function RyunixDevOverlay(propsOrError) {
               }),
             ),
           ),
-
         createElement(
           'div',
           { style: { marginBottom: '16px' } },
@@ -432,13 +416,9 @@ export function RyunixDevOverlay(propsOrError) {
                         line.startsWith('TypeError:'))
                     )
                       return null
-
-                    // Deterministic string-based stack frame parsing (no polynomial regex)
                     const trimmed = line.trim()
                     let fnName = '<anonymous>'
                     let filePath = line
-
-                    // V8 format: "at fnName (file:line:col)" or "at file:line:col"
                     if (trimmed.startsWith('at ')) {
                       const rest = trimmed.slice(3)
                       const parenOpen = rest.indexOf('(')
@@ -448,7 +428,6 @@ export function RyunixDevOverlay(propsOrError) {
                           rest.slice(0, parenOpen).trim() || '<anonymous>'
                         filePath = rest.slice(parenOpen + 1, parenClose)
                       } else {
-                        // "at file:line:col" — no function name
                         if (rest.includes(':')) {
                           fnName = '<anonymous>'
                         } else {
@@ -456,15 +435,11 @@ export function RyunixDevOverlay(propsOrError) {
                         }
                         filePath = rest
                       }
-                    }
-                    // Firefox format: "fnName@file:line:col"
-                    else if (trimmed.includes('@')) {
+                    } else if (trimmed.includes('@')) {
                       const atIdx = trimmed.indexOf('@')
                       fnName = trimmed.slice(0, atIdx) || '<anonymous>'
                       filePath = trimmed.slice(atIdx + 1)
-                    }
-                    // Ryunix format: "fnName file.ext:line"
-                    else {
+                    } else {
                       const exts = ['.ryx', '.jsx', '.js', '.ts', '.tsx']
                       const parts = trimmed.split(/\s+/)
                       if (parts.length >= 2) {
@@ -481,7 +456,6 @@ export function RyunixDevOverlay(propsOrError) {
                         }
                       }
                     }
-
                     return createElement(
                       'li',
                       { key: i },

@@ -40,8 +40,9 @@ Antes de los comandos, conviene distinguir estos términos:
 | Término                         | Qué es                                                                                                                                                        |
 | :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Monorepo (raíz `Ryunixjs/`)** | Repositorio del **framework**: `packages/core`, `packages/ryunix-presets`, etc. No es una app web; no tiene `app/index.ryx` en la raíz.                       |
-| **App de integración**          | Una **app Ryunix normal** (`app/*.ryx`, `ryunix.config.js`) viva en `test/webpack/`. Simula lo que genera `npx @unsetsoft/cra`.                               |
-| **`test/webpack`**              | Ruta **recomendada** para esa app. Está en `.gitignore`: no se sube a git; cada persona la crea en su máquina.                                                |
+| **App de integración**          | **Copia** del sitio **ryunix-doc** en `test/webpack/` (`src/app/*.ryx`, MDX, `ryunix.config.js` con `rootDir: "src"`).                                        |
+| **`ryunix-doc` (repo aparte)**  | Proyecto canónico para deploy (p. ej. Vercel); suele vivir junto al monorepo en `../ryunix-doc`.                                                              |
+| **`test/webpack`**              | Copia local enlazada con `workspace:*` a `packages/*`. Se versiona en git (salvo `node_modules/`, `.ryunix/`).                                                |
 | **`workspace:*`**               | En el `package.json` de la app, indica a pnpm: «usa el paquete que está en `packages/` de este repo», no la versión de npmjs.com.                             |
 | **Symlink (enlace simbólico)**  | Tras `pnpm install`, `test/webpack/node_modules/@unsetsoft/ryunixjs` apunta a `packages/core/`. Así el navegador carga el código que se edita en el monorepo. |
 | **`pnpm run:web`**              | Script de la **raíz** que ejecuta `ryunix dev` dentro de `test/webpack` (servidor de desarrollo + HMR).                                                       |
@@ -89,25 +90,25 @@ pnpm install
 Instala `packages/*` y deja listo el workspace. Aún **no** existe la app en
 `test/webpack`.
 
-### 2. Crear la carpeta de la app (copiar plantilla)
+### 2. Preparar `test/webpack` (docs)
 
-La plantilla oficial está en `packages/cra/templates/ryunix-base/`. Se copia a
-`test/webpack`:
+El monorepo incluye una **copia** del sitio en `test/webpack/`. El repo canónico
+es **ryunix-doc** (hermano del monorepo o remoto `neyunse/ryunix-doc`). Tras
+clonar Ryunixjs, copia o sincroniza fuentes y refresca enlaces del workspace:
 
 ```bash
-mkdir -p test
-cp -r packages/cra/templates/ryunix-base test/webpack
-cp packages/cra/templates/ryunix-base/gitignore test/webpack/.gitignore
+pnpm run setup:web
 ```
 
-Comprobar que existen, por ejemplo, `test/webpack/app/index.ryx` y
-`test/webpack/ryunix.config.js`.
+Eso ejecuta `setup-test-webpack.mjs`: escribe `package.json` con `workspace:*`,
+elimina lockfiles locales y corre `pnpm install`. Comprobar `test/webpack/src/app/index.ryx`
+y `test/webpack/ryunix.config.js`.
 
-### 3. Configurar `package.json` con `workspace:*`
+Si `test/webpack` no existe, el script copia `ryunix-base` como respaldo mínimo.
 
-La plantilla copiada **no trae** dependencias al framework; hay que añadirlas.
-Editar `test/webpack/package.json` para que quede así (nombre del proyecto
-libre):
+### 3. `package.json` con `workspace:*`
+
+`setup:web` deja el manifest así (no uses versiones fijas de npm para el core):
 
 ```json
 {

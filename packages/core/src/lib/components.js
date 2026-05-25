@@ -8,22 +8,19 @@ import {
 } from '../utils/index.js'
 import { createElement } from './createElement.js'
 import { createContext } from './hooks.js'
-
 const updateFunctionComponent = (fiber) => {
   const state = getState()
   state.wipFiber = fiber
   state.hookIndex = 0
   state.wipFiber.hooks = []
-
   if (state.isHydrating) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
   }
-
-  // Memo bailout: skip re-render if props haven't changed
-  if (fiber.type._isMemo && fiber.alternate) {
+  const componentType = fiber.type
+  if (componentType._isMemo && fiber.alternate) {
     const { children: _pc, ...prevRest } = fiber.alternate.props || {}
     const { children: _nc, ...nextRest } = fiber.props || {}
-    if (fiber.type._arePropsEqual(prevRest, nextRest)) {
+    if (componentType._arePropsEqual?.(prevRest, nextRest)) {
       fiber.hooks = fiber.alternate.hooks
       const oldChild = fiber.alternate.child
       if (oldChild) {
@@ -33,30 +30,23 @@ const updateFunctionComponent = (fiber) => {
       return
     }
   }
-
-  let children = [fiber.type(fiber.props)]
-
-  if (fiber.type._contextId && fiber.props.value !== undefined) {
-    fiber._contextId = fiber.type._contextId
+  let children = [componentType(fiber.props)]
+  if (componentType._contextId && fiber.props?.value !== undefined) {
+    fiber._contextId = componentType._contextId
     fiber._contextValue = fiber.props.value
   }
-
   reconcileChildren(fiber, children)
 }
-
 const updateHostComponent = (fiber) => {
   const state = getState()
-
   if (fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     fiber._contextId = fiber.props?._contextId
     fiber._contextValue = fiber.props?.value
   }
-
   const isPassthrough =
     fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT ||
     fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT ||
     fiber.type === Symbol.for('ryunix.portal')
-
   if (state.isHydrating && isPassthrough) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
   } else if (!fiber.dom) {
@@ -68,18 +58,14 @@ const updateHostComponent = (fiber) => {
         typeof fiber.type === 'string' &&
         domNode.nodeType === 1 &&
         domNode.tagName.toLowerCase() === fiber.type.toLowerCase()
-
       if (isText || isElement) {
         fiber.dom = domNode
         fiber.effectTag = EFFECT_TAGS.HYDRATE
-        // Move cursor to first child for children to consume
         state.hydrateCursor = nextValidSibling(domNode.firstChild)
       } else {
         if (process.env.NODE_ENV !== 'production') {
           console.warn(
-            `[Hydration] Mismatch at ${getTypeLabel(fiber.type)}. Expected ${
-              domNode.nodeType === 1 ? domNode.tagName : 'text'
-            } but got ${fiber.type}. Falling back to CSR.`,
+            `[Hydration] Mismatch at ${getTypeLabel(fiber.type)}. Expected ${domNode.nodeType === 1 ? domNode.tagName : 'text'} but got ${String(fiber.type)}. Falling back to CSR.`,
           )
         }
         state.isHydrating = false
@@ -92,37 +78,21 @@ const updateHostComponent = (fiber) => {
       fiber.dom = createDom(fiber)
     }
   }
-
   const children = fiber.props?.children || []
   reconcileChildren(fiber, children)
 }
-
 const getTypeLabel = (type) => {
   if (typeof type === 'symbol') return type.description || type.toString()
   if (typeof type === 'function') return type.name || 'anonymous'
   return String(type)
 }
-
-/**
- * The Component `Image` takes in a `src` and other props, and returns an `img` element with the
- * specified `src` and props.
- * @returns The `Image` component is being returned. It is a functional component that renders an `img`
- * element with the specified `src` and other props passed to it.
- */
 const Image = ({ src, ...props }) => {
   return createElement('img', { ...props, src })
 }
-
 const { Provider: MDXProvider, useContext: useMDXComponents } = createContext(
   'ryunix.mdx',
   {},
 )
-
-/**
- * Get merged MDX components from context and provided components
- * @param {Object} components - Additional components to merge
- * @returns {Object} Merged components object
- */
 const getMDXComponents = (components) => {
   const contextComponents = useMDXComponents()
   return {
@@ -130,76 +100,48 @@ const getMDXComponents = (components) => {
     ...components,
   }
 }
-
-/**
- * Default MDX components with Ryunix-optimized rendering
- */
+const mdxHost = (tag, props) => createElement(tag, props)
 const defaultComponents = {
-  // Headings
-  h1: (props) => createElement('h1', { ...props }),
-  h2: (props) => createElement('h2', { ...props }),
-  h3: (props) => createElement('h3', { ...props }),
-  h4: (props) => createElement('h4', { ...props }),
-  h5: (props) => createElement('h5', { ...props }),
-  h6: (props) => createElement('h6', { ...props }),
-
-  // Text
-  p: (props) => createElement('p', { ...props }),
-  a: (props) => createElement('a', { ...props }),
-  strong: (props) => createElement('strong', { ...props }),
-  em: (props) => createElement('em', { ...props }),
-  code: (props) => createElement('code', { ...props }),
-
-  // Lists
-  ul: (props) => createElement('ul', { ...props }),
-  ol: (props) => createElement('ol', { ...props }),
-  li: (props) => createElement('li', { ...props }),
-
-  // Blocks
-  blockquote: (props) => createElement('blockquote', { ...props }),
-  pre: (props) => createElement('pre', { ...props }),
-  hr: (props) => createElement('hr', { ...props }),
-
-  // Tables
-  table: (props) => createElement('table', { ...props }),
-  thead: (props) => createElement('thead', { ...props }),
-  tbody: (props) => createElement('tbody', { ...props }),
-  tr: (props) => createElement('tr', { ...props }),
-  th: (props) => createElement('th', { ...props }),
-  td: (props) => createElement('td', { ...props }),
-
-  // Media
-  img: (props) => createElement('img', { ...props }),
+  h1: (props) => mdxHost('h1', props),
+  h2: (props) => mdxHost('h2', props),
+  h3: (props) => mdxHost('h3', props),
+  h4: (props) => mdxHost('h4', props),
+  h5: (props) => mdxHost('h5', props),
+  h6: (props) => mdxHost('h6', props),
+  p: (props) => mdxHost('p', props),
+  a: (props) => mdxHost('a', props),
+  strong: (props) => mdxHost('strong', props),
+  em: (props) => mdxHost('em', props),
+  code: (props) => mdxHost('code', props),
+  ul: (props) => mdxHost('ul', props),
+  ol: (props) => mdxHost('ol', props),
+  li: (props) => mdxHost('li', props),
+  blockquote: (props) => mdxHost('blockquote', props),
+  pre: (props) => mdxHost('pre', props),
+  hr: (props) => mdxHost('hr', props),
+  table: (props) => mdxHost('table', props),
+  thead: (props) => mdxHost('thead', props),
+  tbody: (props) => mdxHost('tbody', props),
+  tr: (props) => mdxHost('tr', props),
+  th: (props) => mdxHost('th', props),
+  td: (props) => mdxHost('td', props),
+  img: (props) => mdxHost('img', props),
 }
-
-/**
- * MDX Wrapper component
- * Provides default styling and components for MDX content
- */
 const MDXContent = ({ children, components = {} }) => {
   const mergedComponents = getMDXComponents(components)
-
   return createElement(
     MDXProvider,
     { value: mergedComponents },
     createElement('div', null, children),
   )
 }
-
 export {
-  // Internal use
   updateFunctionComponent,
   updateHostComponent,
-
-  // Built-in components
-
-  // MDX Support
   MDXContent,
   MDXProvider,
   useMDXComponents,
   getMDXComponents,
   defaultComponents,
-
-  // Custom components
   Image,
 }

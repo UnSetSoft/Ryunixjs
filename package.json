@@ -23,6 +23,7 @@
     "format": "prettier -w .",
     "format:check": "prettier -c .",
     "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rimraf node_modules",
     "kg:init": "gmvu init",
     "kg:bump": "gmvu bump",
@@ -34,9 +35,13 @@
     "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" --filter \"!ryunixjs\" publish --provenance --access public --tag canary",
     "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
+    "setup:web": "node setup-test-webpack.mjs",
     "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",
     "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run build",
-    "run:web:start": "pnpm --filter ./test/webpack run start"
+    "run:web:start": "pnpm --filter ./test/webpack run start",
+    "run:web2": "pnpm --filter ./test/webpack2 run dev",
+    "run:web2:build": "pnpm --filter ./test/webpack2 run build",
+    "run:web2:start": "pnpm --filter ./test/webpack2 run start"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
@@ -63,6 +68,7 @@
     "prettier": "3.7.4",
     "rimraf": "6.1.2",
     "turbo": "2.8.17",
+    "@types/node": "22.19.3",
     "typescript": "5.9.3"
   },
   "packageManager": "pnpm@10.26.0",

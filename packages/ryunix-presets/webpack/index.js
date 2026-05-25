@@ -1,6 +1,4 @@
-import webpackConfig from './webpack.config.mjs'
-
+import webpackConfig from './webpack.config.js'
 const ryunixWebpack = () => webpackConfig
-
 export default ryunixWebpack
 export { ryunixWebpack }

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "noEmit": false,
+    "outDir": "src",
+    "rootDir": "src",
+    "declaration": false,
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "node10",
+    "removeComments": true
+  },
+  "include": ["src/lib/**/*.ts", "src/utils/**/*.ts", "src/main.ts"],
+  "exclude": ["src/types/**/*.d.ts", "src/tests/**"]
+}

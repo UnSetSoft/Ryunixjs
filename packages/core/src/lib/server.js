@@ -8,7 +8,6 @@ import {
 import { camelToKebab, validateUri } from './dom.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
 import { resetIdCounter } from './hooks.js'
-
 export const escapeHtml = (unsafe) => {
   if (typeof unsafe !== 'string') return String(unsafe)
   return unsafe
@@ -18,7 +17,6 @@ export const escapeHtml = (unsafe) => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
 }
-
 const renderStyle = (styleObj) => {
   if (!is.object(styleObj) || is.null(styleObj)) return ''
   return Object.entries(styleObj)
@@ -26,7 +24,6 @@ const renderStyle = (styleObj) => {
     .map(([key, value]) => `${camelToKebab(key)}:${value}`)
     .join(';')
 }
-
 const VOID_ELEMENTS = new Set([
   'area',
   'base',
@@ -43,70 +40,56 @@ const VOID_ELEMENTS = new Set([
   'track',
   'wbr',
 ])
-
 const renderToStringImpl = (element) => {
   if (element == null || typeof element === 'boolean') {
     return ''
   }
-
   if (typeof element === 'string' || typeof element === 'number') {
     return escapeHtml(element)
   }
-
   if (Array.isArray(element)) {
     return element.map((child) => renderToStringImpl(child)).join('')
   }
-
-  if (element.type === RYUNIX_TYPES.TEXT_ELEMENT) {
-    return escapeHtml(element.props.nodeValue)
+  const vnode = element
+  if (vnode.type === RYUNIX_TYPES.TEXT_ELEMENT) {
+    return escapeHtml(vnode.props.nodeValue)
   }
-
-  if (element.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
-    const children = element.props?.children || []
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    const children = vnode.props?.children || []
     return children.map((child) => renderToStringImpl(child)).join('')
   }
-
-  if (element.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
-    // Context Providers just render their children transparently on the server
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     const state = getState()
     state.ssrContexts = state.ssrContexts || {}
-    const ctxId = element.props?._contextId
+    const ctxProps = vnode.props || {}
+    const ctxId = ctxProps._contextId
     const prevCtx = state.ssrContexts[ctxId]
-
     if (ctxId) {
-      state.ssrContexts[ctxId] = element.props?.value
+      state.ssrContexts[ctxId] = ctxProps.value
     }
-
-    const children = element.props?.children || []
+    const children = ctxProps.children || []
     let result = ''
     if (Array.isArray(children)) {
       result = children.map((child) => renderToStringImpl(child)).join('')
     } else {
       result = renderToStringImpl(children)
     }
-
     if (ctxId) {
       state.ssrContexts[ctxId] = prevCtx
     }
-
     return result
   }
-
-  if (typeof element.type === 'function') {
-    const type = element.type
-    const props = element.props || {}
+  if (typeof vnode.type === 'function') {
+    const type = vnode.type
+    const props = vnode.props || {}
     const renderedElement = type(props)
     return renderToStringImpl(renderedElement)
   }
-
-  // It's a standard host element
-  const type = element.type
-  const props = element.props || {}
-
+  const type = String(vnode.type)
+  const props = vnode.props || {}
   let attributes = ''
   let htmlChildren = ''
   let innerHTML = null
-
   Object.entries(props).forEach(([key, value]) => {
     if (key === 'children') {
       if (Array.isArray(value)) {
@@ -114,8 +97,11 @@ const renderToStringImpl = (element) => {
       } else {
         htmlChildren = renderToStringImpl(value)
       }
-    } else if (key === 'dangerouslySetInnerHTML' && value?.__html) {
-      innerHTML = value.__html
+    } else if (key === 'dangerouslySetInnerHTML') {
+      const inner = value
+      if (inner?.__html) {
+        innerHTML = inner.__html
+      }
     } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
       const styleString = renderStyle(value)
       if (styleString) {
@@ -139,16 +125,12 @@ const renderToStringImpl = (element) => {
       }
     }
   })
-
   if (VOID_ELEMENTS.has(type)) {
     return `<${type}${attributes} />`
   }
-
   const finalContent = innerHTML !== null ? innerHTML : htmlChildren
-
   return `<${type}${attributes}>${finalContent}</${type}>`
 }
-
 const RC_SCRIPT = `
 function $RC(id, templateId) {
   var b = document.getElementById(id);
@@ -161,54 +143,46 @@ function $RC(id, templateId) {
 `
   .replace(/\s+/g, ' ')
   .trim()
-
 const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   if (element == null || typeof element === 'boolean') {
     return
   }
-
-  // Await the element if it's a promise (e.g. from an async Server Component directly rendered)
   if (element instanceof Promise) {
     element = await element
     if (element == null || typeof element === 'boolean') return
   }
-
   if (typeof element === 'string' || typeof element === 'number') {
     push(escapeHtml(element))
     return
   }
-
   if (Array.isArray(element)) {
     for (const child of element) {
       await renderToStreamImpl(child, push, suspenseTasks)
     }
     return
   }
-
-  if (element.type === RYUNIX_TYPES.TEXT_ELEMENT) {
-    push(escapeHtml(element.props.nodeValue))
+  const vnode = element
+  if (vnode.type === RYUNIX_TYPES.TEXT_ELEMENT) {
+    push(escapeHtml(vnode.props.nodeValue))
     return
   }
-
-  if (element.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
-    const children = element.props?.children || []
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
+    const children = vnode.props?.children || []
     for (const child of children) {
       await renderToStreamImpl(child, push, suspenseTasks)
     }
     return
   }
-
-  if (element.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
+  if (vnode.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     const state = getState()
     state.ssrContexts = state.ssrContexts || {}
-    const ctxId = element.props?._contextId
+    const ctxProps = vnode.props || {}
+    const ctxId = ctxProps._contextId
     const prevCtx = state.ssrContexts[ctxId]
-
     if (ctxId) {
-      state.ssrContexts[ctxId] = element.props?.value
+      state.ssrContexts[ctxId] = ctxProps.value
     }
-
-    const children = element.props?.children || []
+    const children = ctxProps.children || []
     if (Array.isArray(children)) {
       for (const child of children) {
         await renderToStreamImpl(child, push, suspenseTasks)
@@ -216,35 +190,30 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     } else {
       await renderToStreamImpl(children, push, suspenseTasks)
     }
-
     if (ctxId) {
       state.ssrContexts[ctxId] = prevCtx
     }
-
     return
   }
-
-  // Handle Suspense specifically
-  if (
-    element.type === RYUNIX_TYPES.RYUNIX_SUSPENSE ||
-    element.type?.type === RYUNIX_TYPES.RYUNIX_SUSPENSE
-  ) {
-    const { fallback, children } = element.props
+  const suspenseType = vnode.type
+  const isSuspenseBoundary =
+    vnode.type === RYUNIX_TYPES.RYUNIX_SUSPENSE ||
+    (typeof suspenseType === 'object' &&
+      suspenseType != null &&
+      suspenseType.type === RYUNIX_TYPES.RYUNIX_SUSPENSE)
+  if (isSuspenseBoundary) {
+    const suspenseProps = vnode.props || {}
+    const { fallback, children } = suspenseProps
     const id = `s-${Math.random().toString(36).slice(2, 9)}`
-
-    // In universal mode, Suspense renders children if ready, or fallback if pending.
-    // BUT we want to force a background task for the REAL children if we hit a lazy component.
-
     push(`<!--$?--><template id="B:${id}"></template><div id="S:${id}">`)
-
-    // 1. Start rendering the actual content in the background
     const task = (async () => {
       const state = getState()
       const wasBackground = state.isSuspenseBackground
       state.isSuspenseBackground = true
-
       let content = ''
-      const subPush = (chunk) => (content += chunk)
+      const subPush = (chunk) => {
+        content += chunk
+      }
       try {
         await renderToStreamImpl(children, subPush, suspenseTasks)
         return { id, content, success: true }
@@ -254,18 +223,13 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
         state.isSuspenseBackground = wasBackground
       }
     })()
-
     suspenseTasks.push(task)
-
-    // 2. Render fallback immediately for the main stream
     await renderToStreamImpl(fallback, push, suspenseTasks)
     push(`</div><!--$/-->`)
     return
   }
-
-  let type = element.type
-  let props = element.props || {}
-
+  let type = vnode.type
+  let props = vnode.props || {}
   if (typeof type === 'function') {
     if (process.env.RYUNIX_DEBUG) {
       console.log('[SSR Debug] Rendering function:', type.name || 'anonymous')
@@ -274,17 +238,17 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     await renderToStreamImpl(renderedElement, push, suspenseTasks)
     return
   }
-
-  // It's a standard host element
+  const hostTag = String(type)
   let attributes = ''
   let innerHTML = null
   let children = props.children || []
-
   Object.entries(props).forEach(([key, value]) => {
     if (key === 'children') {
-      // Ignored here, handled below
-    } else if (key === 'dangerouslySetInnerHTML' && value?.__html) {
-      innerHTML = value.__html
+    } else if (key === 'dangerouslySetInnerHTML') {
+      const inner = value
+      if (inner?.__html) {
+        innerHTML = inner.__html
+      }
     } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
       const styleString = renderStyle(value)
       if (styleString) {
@@ -308,9 +272,7 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       }
     }
   })
-
-  push(`<${type}${attributes}>`)
-
+  push(`<${hostTag}${attributes}>`)
   if (innerHTML !== null) {
     push(innerHTML)
   } else {
@@ -322,39 +284,25 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       await renderToStreamImpl(children, push, suspenseTasks)
     }
   }
-
-  if (!VOID_ELEMENTS.has(type)) {
-    push(`</${type}>`)
+  if (!VOID_ELEMENTS.has(hostTag)) {
+    push(`</${hostTag}>`)
   }
 }
-
 export const renderToReadableStream = (element, options = {}) => {
   const state = getState()
   const encoder = new TextEncoder()
-
-  // Reset idCounter for deterministic useId values
   resetIdCounter()
-
   return new ReadableStream({
     async start(controller) {
       const wasServerRendering = state.isServerRendering
       state.isServerRendering = true
       state.ssrMetadata = {}
-
       const push = (text) => controller.enqueue(encoder.encode(text))
       const suspenseTasks = []
-
       try {
-        // 0. Inject RC helper script first
         const nonceAttr = options.nonce ? ` nonce="${options.nonce}"` : ''
         push(`<script${nonceAttr} data-ryunix-ssr>${RC_SCRIPT}</script>`)
-
-        // 1. Render initial tree (with fallbacks)
         await renderToStreamImpl(element, push, suspenseTasks)
-
-        // 2. Process suspense tasks as they complete
-        // For now, we wait for all, but in a real streaming scenario,
-        // we could push them as they resolve.
         while (suspenseTasks.length > 0) {
           const task = suspenseTasks.shift()
           const res = await task
@@ -367,7 +315,6 @@ export const renderToReadableStream = (element, options = {}) => {
             )
           }
         }
-
         controller.close()
       } catch (e) {
         controller.error(e)
@@ -377,35 +324,28 @@ export const renderToReadableStream = (element, options = {}) => {
     },
   })
 }
-
 export const renderToString = (element, options = {}) => {
   const state = getState()
   const wasServerRendering = state.isServerRendering
   state.isServerRendering = true
   state.ssrMetadata = {}
-
-  // Reset idCounter for deterministic useId values
   resetIdCounter()
-
   try {
     return renderToStringImpl(element)
   } finally {
     state.isServerRendering = wasServerRendering
   }
 }
-
 export const renderToStringAsync = async (element, options = {}) => {
   const stream = renderToReadableStream(element, options)
   const reader = stream.getReader()
   const decoder = new TextDecoder()
   let result = ''
-
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
     result += decoder.decode(value, { stream: true })
   }
-
   result += decoder.decode()
   return result
 }

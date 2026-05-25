@@ -3,7 +3,11 @@
   "version": "1.3.1",
   "description": "DevTools extension for debugging Ryunix applications",
   "main": "manifest.json",
-  "scripts": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.emit.json && prettier -w \"*.js\"",
+    "prepublishOnly": "npm run build"
+  },
   "keywords": [
     "ryunix",
     "devtools",

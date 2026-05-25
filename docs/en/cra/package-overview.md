@@ -1,139 +1,149 @@
-<!-- markdownlint-disable MD013 MD060 -->
+# Create Ryunix App — package overview
 
-# `packages/cra` — `@unsetsoft/cra`
+> **Language / Idioma:** [English](./package-overview.md) ·
+> [Español](../../es/cra/resumen-del-paquete.md)
 
-Official **project scaffolder** for Ryunix (`npx @unsetsoft/cra`). Copies a
-template, resolves npm versions (latest or canary), optionally adds Tailwind,
-ESLint, VS Code workspace files, and initializes git. **Not** a runtime dependency
-of existing apps.
+The npm package **`@unsetsoft/cra`** lives in `packages/cra/`. It is the
+**official scaffolder** of the RyunixJS monorepo: it generates new project
+folders from templates and wires the user to `@unsetsoft/ryunixjs` and
+`@unsetsoft/ryunix-presets`. It does not ship the UI engine or Webpack.
 
-**Read next:** [cli-and-helpers.md](./cli-and-helpers.md) and
-[template-generation.md](./template-generation.md).
+---
+
+## Table of contents
+
+- [Create Ryunix App — package overview](#create-ryunix-app--package-overview)
+  - [Table of contents](#table-of-contents)
+  - [Role in the monorepo](#role-in-the-monorepo)
+  - [Public usage](#public-usage)
+  - [Layout of `packages/cra/`](#layout-of-packagescra)
+  - [TypeScript and published artifacts](#typescript-and-published-artifacts)
+  - [High-level flow](#high-level-flow)
+  - [Related documentation](#related-documentation)
 
 ---
 
 ## Role in the monorepo
 
-| Aspect        | Detail                                                                          |
-| :------------ | :------------------------------------------------------------------------------ |
-| **Consumers** | Developers creating new Ryunix projects                                         |
-| **Output**    | App folder with `app/`, `ryunix.config.js`, `package.json`                      |
-| **Injects**   | `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` (+ optional Tailwind/ESLint) |
-| **Publish**   | npm; included in root `pnpm publish:all`                                        |
+| Package                     | Responsibility                                      |
+| :-------------------------- | :-------------------------------------------------- |
+| `@unsetsoft/cra`            | Create the app skeleton (CLI + `templates/`)        |
+| `@unsetsoft/ryunix-presets` | `ryunix dev`, `build`, `start`; Webpack and routing |
+| `@unsetsoft/ryunixjs`       | Runtime: VDOM, hooks, reconciler, browser SSR       |
 
-```mermaid
-flowchart LR
-  User[npx @unsetsoft/cra]
-  CRA[packages/cra]
-  T[templates/ryunix-*]
-  App[New project]
-  User --> CRA --> T --> App
-  App --> Presets[ryunix CLI]
-```
+After running CRA, the developer works in a **generated app** with `app/*.ryx`,
+`ryunix.config.js`, and scripts that call the preset’s `ryunix` binary. CRA is
+not imported at runtime from the app.
 
 ---
 
-## Package layout
+## Public usage
+
+```bash
+npx @unsetsoft/cra@latest
+npx @unsetsoft/cra@latest my-app --latest --tailwind
+```
+
+The binary points at `src/cli.js` (JavaScript emitted from `src/cli.ts`). See
+[CLI and helpers](./cli-and-helpers.md) for flags and prompts.
+
+---
+
+## Layout of `packages/cra/`
 
 ```text
 packages/cra/
+├── package.json          # name: @unsetsoft/cra; bin → src/cli.js
+├── tsconfig.json         # typecheck (--noEmit)
+├── tsconfig.emit.json    # compiles .ts → .js under src/
+├── README.md / README.es.md
 ├── src/
-│   ├── cli.js              # Commander entry (package bin)
-│   └── create-app.js       # Prompts, copy, versions, .vscode, git
-├── helpers/                # copy, git, pkg manager, favicon, …
-├── templates/
-│   ├── ryunix-base/
-│   ├── ryunix-tailwind/
-│   ├── ryunix-eslint/
-│   └── ryunix-all/
-└── package.json
+│   ├── cli.ts            # Entry: Commander + prompts
+│   ├── create-app.ts     # Template copy, npm versions, patches
+│   └── helpers/
+│       ├── copy.ts           # Recursive copy (skips node_modules, dist, .ryunix)
+│       ├── get-pkg-manager.ts  # npm | pnpm | yarn | bun (user-agent)
+│       ├── is-folder-empty.ts  # Validates target directory
+│       ├── git.ts              # Optional git init + initial commit
+│       └── install.ts          # install helper (not used by create-app today)
+└── templates/
+    ├── ryunix-base/
+    ├── ryunix-tailwind/
+    ├── ryunix-eslint/
+    └── ryunix-all/
 ```
 
-### Template selection
+What is **not** part of the framework runtime:
 
-| Condition                 | Template          |
-| :------------------------ | :---------------- |
-| `--tailwind` + `--eslint` | `ryunix-all`      |
-| `--tailwind` only         | `ryunix-tailwind` |
-| `--eslint` only           | `ryunix-eslint`   |
-| neither                   | `ryunix-base`     |
+- `templates/` are sample projects in JS / `.ryx`; they are copied as-is to the
+  user’s disk.
+- `.js` files next to `.ts` under `src/` are **`tsc` output**, not hand-edited
+  source (except after `pnpm run build`).
 
-Flags `--no-tailwind`, `--no-eslint`, `--no-vscode` skip interactive prompts.
+---
 
-### Typical generated tree
+## TypeScript and published artifacts
 
-```text
-app/index.ryx, layout.ryx, errors.ryx
-app/api/hello/router.js
-styles/global.css
-ryunix.config.js
-package.json
+| Aspect  | Detail                                                    |
+| :------ | :-------------------------------------------------------- |
+| Source  | `src/**/*.ts` only                                        |
+| Check   | `pnpm --filter @unsetsoft/cra typecheck`                  |
+| Emit    | `pnpm --filter @unsetsoft/cra build` → CommonJS in `src/` |
+| Publish | `prepublishOnly` runs `build` before npm publish          |
+
+CLI migration is **complete**. Templates remain JavaScript and `.ryx` because
+they describe end-user apps, not the CRA package itself.
+
+See [TypeScript in the monorepo](../guides/typescript-in-the-monorepo.md) for
+workspace-wide details.
+
+---
+
+## High-level flow
+
+```mermaid
+flowchart LR
+  subgraph cra ["@unsetsoft/cra"]
+    CLI[cli.ts]
+    CA[create-app.ts]
+    T[templates/*]
+    CLI --> CA
+    CA --> T
+  end
+  subgraph app ["Generated app"]
+    RYX[app/*.ryx]
+    CFG[ryunix.config.js]
+    PKG[package.json]
+  end
+  subgraph presets ["@unsetsoft/ryunix-presets"]
+    RY[ryunix dev / build / start]
+  end
+  subgraph core ["@unsetsoft/ryunixjs"]
+    RT[UI runtime]
+  end
+  T --> RYX
+  T --> CFG
+  T --> PKG
+  PKG --> RY
+  RY --> RT
 ```
 
-Templates ship `gitignore` (no leading dot) for npm publish; CRA renames to
-`.gitignore`. `public/favicon.png` is created if missing.
+1. The user runs `npx @unsetsoft/cra`.
+2. `cli.ts` collects name, channel (`latest` / `canary`), compiler (`swc` /
+   `babel`), Tailwind, ESLint, and VS Code options.
+3. `create-app.ts` picks a template, copies files, and resolves
+   `@unsetsoft/ryunixjs` and `@unsetsoft/ryunix-presets` versions from the npm
+   registry.
+4. The user runs `install` and `run dev`; the preset builds and serves the app.
 
 ---
 
-## `create-app.js` flow
+## Related documentation
 
-1. Resolve destination; ensure empty folder.
-2. Pick template from flags/prompts.
-3. Recursive copy (skips `node_modules`, `dist`, `.ryx` in source template).
-4. Patch `package.json` name and privacy.
-5. Query registry for `@unsetsoft/ryunixjs` and `@unsetsoft/ryunix-presets` versions.
-6. Add Tailwind/ESLint deps when requested.
-7. Inject `compiler: 'swc'|'babel'` into `ryunix.config.js`.
-8. If `--vscode`: write `.vscode/extensions.json` + `settings.json`.
-9. `git init` + initial commit.
-10. Print instructions — user runs `pnpm install` and `pnpm run dev` (**install is not run automatically**).
-
----
-
-## CLI flags
-
-| Flag                                   | Effect                             |
-| :------------------------------------- | :--------------------------------- |
-| `[directory]`                          | Project path/name                  |
-| `--latest` / `--canary`                | Ryunix package channel             |
-| `--tailwind` / `--eslint` / `--vscode` | Skip prompts; enable feature       |
-| `--compiler swc\|babel`                | Written to `ryunix.config.js`      |
-| `--no-*`                               | Disable optional features via argv |
-
-### `--vscode` workspace
-
-Recommends `unsetsoft.ryunixjs` and `dbaeumer.vscode-eslint`; with `--eslint`, also
-Prettier and `*.ryx` formatting. See
-[../ryunix-vscode/package-overview.md](../ryunix-vscode/package-overview.md).
-
----
-
-## Commands
-
-```bash
-pnpm --filter @unsetsoft/cra run dev
-npx @unsetsoft/cra@latest my-app --canary --tailwind --eslint --vscode
-```
-
-Maintainers: `pnpm run cra:release` or `pnpm run cra:nightly` at repo root.
-
----
-
-## Related packages
-
-| Package                   | Relationship                               |
-| :------------------------ | :----------------------------------------- |
-| `core` / `ryunix-presets` | Versions added to generated `package.json` |
-| `ryunix-vscode`           | Recommended via `--vscode`                 |
-| `ryunix-devtools`         | Not installed by CRA                       |
-
----
-
-## Docs in `docs/en/cra/`
-
-| Document                                           | Topic                 |
-| :------------------------------------------------- | :-------------------- |
-| [cli-and-helpers.md](./cli-and-helpers.md)         | CLI and helpers       |
-| [template-generation.md](./template-generation.md) | Maintaining templates |
-
-Spanish: [docs/es/cra/resumen-paquete.md](../../es/cra/resumen-paquete.md).
+| Document                                                    | Content                                   |
+| :---------------------------------------------------------- | :---------------------------------------- |
+| [cli-and-helpers.md](./cli-and-helpers.md)                  | `cli.ts`, `create-app.ts`, helpers, flags |
+| [template-generation.md](./template-generation.md)          | All four templates and app layout         |
+| [Repository guide](../guides/repository-guide.md)           | Monorepo map                              |
+| [Local integration app](../guides/local-integration-app.md) | Test CRA / presets with `test/`           |
+| `packages/cra/README.md`                                    | CLI usage for publishers and end users    |

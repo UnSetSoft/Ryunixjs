@@ -8,12 +8,10 @@ export function createActionProxy(actionId) {
       },
       body: JSON.stringify({ actionId, args }),
     })
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       throw new Error(errorData.error || 'Server Action failed')
     }
-
     return response.json()
   }
 }

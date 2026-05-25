@@ -40,6 +40,29 @@ Es una biblioteca ligera y de alto rendimiento responsable de:
 Aunque puedes usarlo de forma independiente en integraciones personalizadas, lo habitual
 es consumirlo mediante `@unsetsoft/ryunix-presets` y el CLI oficial.
 
+## 📘 TypeScript
+
+Los tipos están en `types/index.d.ts` (entrada principal) y
+`jsx/jsx-runtime.d.ts` (JSX automático). Instala `@unsetsoft/ryunixjs` como
+dependencia; no hace falta un paquete `@types` aparte.
+
+```typescript
+import {
+  useStore,
+  createElement,
+  type RyunixElement,
+} from '@unsetsoft/ryunixjs'
+
+function Counter(): RyunixElement {
+  const [count, setCount] = useStore(0)
+  return createElement('button', { onClick: () => setCount(count + 1) }, count)
+}
+```
+
+Para JSX, configura `"jsxImportSource": "@unsetsoft/ryunixjs"` en tu
+`tsconfig.json` (o usa el preset Webpack/SWC de Ryunix, que lo aplica en
+archivos `.ryx`).
+
 ## 🚀 Instalación
 
 ```bash

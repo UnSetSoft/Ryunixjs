@@ -1,5 +1,4 @@
 import * as Ryunix from './lib/index.js'
-
 export * from './lib/index.js'
 export {
   Image,
@@ -9,6 +8,5 @@ export {
   getMDXComponents,
   defaultComponents,
 } from './lib/components.js'
-
 if (typeof window !== 'undefined') window.Ryunix = Ryunix
 export default Ryunix

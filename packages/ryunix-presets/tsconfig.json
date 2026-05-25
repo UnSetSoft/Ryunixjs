@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "node10",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strictPropertyInitialization": false
+  },
+  "include": [
+    "webpack/**/*.ts",
+    "webpack/**/*.d.ts",
+    "webpack/types/presets-shims.d.ts"
+  ],
+  "exclude": ["node_modules", "webpack/template/**"]
+}

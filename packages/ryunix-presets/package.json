@@ -25,11 +25,24 @@
     "provenance": true
   },
   "exports": {
-    "./webpack": "./webpack/index.js"
+    ".": {
+      "types": "./webpack/config.d.ts"
+    },
+    "./webpack": {
+      "types": "./webpack/config.d.ts",
+      "import": "./webpack/index.js",
+      "default": "./webpack/index.js"
+    }
   },
   "types": "./webpack/config.d.ts",
   "bin": {
-    "ryunix": "./webpack/bin/index.mjs"
+    "ryunix": "./webpack/bin/index.js"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.emit.json && prettier -w \"webpack/**/*.js\"",
+    "prepublishOnly": "npm run build",
+    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

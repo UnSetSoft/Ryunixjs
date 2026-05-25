@@ -8,39 +8,25 @@ import {
 } from '../utils/index.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
 import { Priority, runWithPriority } from './priority.js'
-
-/**
- * Convert camelCase to kebab-case for CSS properties
- * @param {string} camelCase - CamelCase string
- * @returns {string} Kebab-case string
- */
 const camelToKebab = (camelCase) => {
   return camelCase.replace(
     CAMEL_TO_KEBAB_REGEX,
     (match) => `-${match.toLowerCase()}`,
   )
 }
-
-/**
- * Apply styles to DOM element
- * @param {HTMLElement} dom - DOM element
- * @param {Object} styleObj - Style object
- */
 const applyStyles = (dom, styleObj) => {
   if (!is.object(styleObj) || is.null(styleObj)) {
     dom.style.cssText = ''
     return
   }
-
   try {
     const cssText = Object.entries(styleObj)
-      .filter(([_, value]) => value != null) // Filter out null/undefined
+      .filter(([_, value]) => value != null)
       .map(([key, value]) => {
         const kebabKey = camelToKebab(key)
         return `${kebabKey}: ${value}`
       })
       .join('; ')
-
     dom.style.cssText = cssText
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
@@ -48,15 +34,7 @@ const applyStyles = (dom, styleObj) => {
     }
   }
 }
-
-/**
- * Apply CSS classes to DOM element
- * @param {HTMLElement} dom - DOM element
- * @param {string} prevClasses - Previous class string
- * @param {string} nextClasses - Next class string
- */
 const applyClasses = (dom, prevClasses, nextClasses) => {
-  // Allow empty/undefined - just remove classes
   if (!nextClasses || nextClasses.trim() === '') {
     if (prevClasses) {
       const oldClasses = prevClasses.split(/\s+/).filter(Boolean)
@@ -64,27 +42,16 @@ const applyClasses = (dom, prevClasses, nextClasses) => {
     }
     return
   }
-
-  // Remove old classes
   if (prevClasses) {
     const oldClasses = prevClasses.split(/\s+/).filter(Boolean)
     dom.classList.remove(...oldClasses)
   }
-
-  // Add new classes
   const newClasses = nextClasses.split(/\s+/).filter(Boolean)
   if (newClasses.length > 0) {
     dom.classList.add(...newClasses)
   }
 }
-
-/**
- * Create a DOM element from fiber
- * @param {Object} fiber - Fiber node
- * @returns {HTMLElement|Text|null}
- */
 const createDom = (fiber) => {
-  // Fragments and Context Providers don't create real DOM nodes
   if (
     fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT ||
     fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT ||
@@ -92,13 +59,12 @@ const createDom = (fiber) => {
   ) {
     return null
   }
-
   let dom
-
   try {
     if (fiber.type === RYUNIX_TYPES.TEXT_ELEMENT) {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
+      const hostType = fiber.type
       const isSvg = [
         'svg',
         'path',
@@ -132,12 +98,11 @@ const createDom = (fiber) => {
         'marker',
         'pattern',
         'textPath',
-      ].includes(fiber.type)
-
+      ].includes(hostType)
       if (isSvg) {
-        dom = document.createElementNS('http://www.w3.org/2000/svg', fiber.type)
+        dom = document.createElementNS('http://www.w3.org/2000/svg', hostType)
       } else {
-        dom = document.createElement(fiber.type)
+        dom = document.createElement(hostType)
       }
     } else {
       if (process.env.NODE_ENV !== 'production') {
@@ -148,7 +113,6 @@ const createDom = (fiber) => {
       }
       return null
     }
-
     updateDom(dom, {}, fiber.props)
     return dom
   } catch (error) {
@@ -158,10 +122,9 @@ const createDom = (fiber) => {
     return null
   }
 }
-
-export const validateUri = (name, value) => {
+const checkAttributeUri = (attrName, value) => {
   if (typeof value !== 'string') return value
-  const attr = name.toLowerCase()
+  const attr = attrName.toLowerCase()
   if (
     attr !== 'href' &&
     attr !== 'src' &&
@@ -170,7 +133,6 @@ export const validateUri = (name, value) => {
   ) {
     return value
   }
-
   const normalized = value.replace(/\s+/g, '').toLowerCase()
   if (
     normalized.startsWith('javascript:') ||
@@ -178,40 +140,37 @@ export const validateUri = (name, value) => {
     normalized.startsWith('data:')
   ) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn(`[Ryunix Security] Blocked dangerous ${name} URI: ${value}`)
+      console.warn(
+        `[Ryunix Security] Blocked dangerous ${attrName} URI: ${value}`,
+      )
     }
     return 'javascript:void(0)'
   }
-
   return value
 }
-
-/**
- * Update DOM element with new props
- * @param {HTMLElement|Text} dom - DOM element
- * @param {Object} prevProps - Previous props
- * @param {Object} nextProps - Next props
- */
+export const validateUri = checkAttributeUri
 const updateDom = (dom, prevProps = {}, nextProps = {}) => {
   if (dom.nodeType === 3) {
     if (prevProps.nodeValue !== nextProps.nodeValue) {
-      dom.nodeValue = nextProps.nodeValue
+      dom.nodeValue = String(nextProps.nodeValue ?? '')
     }
     return
   }
-  // Remove old event listeners
+  const el = dom
+  const domEl = el
+  const handlerMap = domEl._ryunixHandlers
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
-    .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2)
+    .forEach((propKey) => {
+      const eventType = propKey.toLowerCase().substring(2)
       try {
-        const originalHandler = prevProps[name]
+        const originalHandler = prevProps[propKey]
         const wrappedHandler =
-          dom._ryunixHandlers?.get(originalHandler) || originalHandler
-        dom.removeEventListener(eventType, wrappedHandler)
-        if (dom._ryunixHandlers) {
-          dom._ryunixHandlers.delete(originalHandler)
+          handlerMap?.get(originalHandler) || originalHandler
+        el.removeEventListener(eventType, wrappedHandler)
+        if (handlerMap) {
+          handlerMap.delete(originalHandler)
         }
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
@@ -219,115 +178,93 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
         }
       }
     })
-
-  // Remove old properties
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(nextProps))
-    .forEach((name) => {
-      // Skip special properties
+    .forEach((propKey) => {
       if (
-        [
-          STRINGS.STYLE,
-          OLD_STRINGS.STYLE,
-          STRINGS.CLASS_NAME,
-          OLD_STRINGS.CLASS_NAME,
-        ].includes(name)
+        propKey === STRINGS.STYLE ||
+        propKey === OLD_STRINGS.STYLE ||
+        propKey === STRINGS.CLASS_NAME ||
+        propKey === OLD_STRINGS.CLASS_NAME
       ) {
         return
       }
-      if (dom instanceof SVGElement) {
-        const attrName = toSvgAttrName(name)
-        dom.removeAttribute(attrName)
+      if (el instanceof SVGElement) {
+        const attrName = toSvgAttrName(propKey)
+        el.removeAttribute(attrName)
       } else {
-        dom[name] = ''
-        dom.removeAttribute(name)
+        el[propKey] = ''
+        el.removeAttribute(propKey)
       }
     })
-
-  // Set new properties
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
+    .forEach((propKey) => {
       try {
-        // Handle style properties
-        if (name === STRINGS.STYLE || name === OLD_STRINGS.STYLE) {
-          const styleValue = nextProps[name]
-          applyStyles(dom, styleValue)
-        }
-        // Handle className properties
-        else if (name === STRINGS.CLASS_NAME) {
+        if (propKey === STRINGS.STYLE || propKey === OLD_STRINGS.STYLE) {
+          const styleValue = nextProps[propKey]
+          applyStyles(el, styleValue)
+        } else if (propKey === STRINGS.CLASS_NAME) {
           applyClasses(
-            dom,
+            el,
             prevProps[STRINGS.CLASS_NAME],
             nextProps[STRINGS.CLASS_NAME],
           )
-        } else if (name === OLD_STRINGS.CLASS_NAME) {
+        } else if (propKey === OLD_STRINGS.CLASS_NAME) {
           applyClasses(
-            dom,
+            el,
             prevProps[OLD_STRINGS.CLASS_NAME],
             nextProps[OLD_STRINGS.CLASS_NAME],
           )
-        }
-        // Handle other properties
-        else {
-          // Special handling for value and checked (controlled components)
-          if (name === 'value' || name === 'checked') {
-            if (dom[name] !== nextProps[name]) {
-              dom[name] = nextProps[name]
+        } else {
+          if (propKey === 'value' || propKey === 'checked') {
+            if (el[propKey] !== nextProps[propKey]) {
+              el[propKey] = nextProps[propKey]
             }
           } else {
-            const isSvgNode = dom instanceof SVGElement
+            const isSvgNode = el instanceof SVGElement
             if (isSvgNode) {
-              const attrName = toSvgAttrName(name)
-              const validatedValue = validateUri(attrName, nextProps[name])
-              // viewBox is case sensitive, we respect the camelCase for it.
-              dom.setAttribute(attrName, validatedValue)
+              const attrName = toSvgAttrName(propKey)
+              const svgValidated = checkAttributeUri(
+                attrName,
+                nextProps[propKey],
+              )
+              el.setAttribute(attrName, svgValidated)
             } else {
-              const validatedValue = validateUri(name, nextProps[name])
-              dom[name] = validatedValue
-              // Best effort: set html attributes if it's not a primitive component property
+              const attrVal = nextProps[propKey]
+              const safeValue = checkAttributeUri(propKey, attrVal)
+              el[propKey] = safeValue
               if (
-                typeof nextProps[name] !== 'object' &&
-                typeof nextProps[name] !== 'function'
+                typeof attrVal !== 'object' &&
+                typeof attrVal !== 'function'
               ) {
-                dom.setAttribute(name, validatedValue)
+                el.setAttribute(propKey, safeValue)
               }
             }
           }
         }
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
-          console.warn(`Error setting property ${name}:`, error)
+          console.warn(`Error setting property ${propKey}:`, error)
         }
       }
     })
-
-  // Add new event listeners
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2)
+    .forEach((propKey) => {
+      const eventType = propKey.toLowerCase().substring(2)
       try {
         const handler = (e) => {
-          runWithPriority(Priority.IMMEDIATE, () => nextProps[name](e))
+          runWithPriority(Priority.IMMEDIATE, () => nextProps[propKey](e))
         }
-        // Store the wrapped handler so it can be removed later
-        // Note: For simplicity, we could also just wrap it on the fly,
-        // but we need the exact reference for removeEventListener.
-        // Actually, the current removeDom logic uses prevProps[name],
-        // which won't work if we wrap it here and don't store it.
-        // Wait, the current removeEventListener call in dom.js:177 is:
-        // dom.removeEventListener(eventType, prevProps[name])
-        // If we wrap it, we MUST store the wrapper.
-
-        // Let's use a weakMap or a property on the DOM node to store the wrappers.
-        if (!dom._ryunixHandlers) dom._ryunixHandlers = new Map()
-        dom._ryunixHandlers.set(nextProps[name], handler)
-
-        dom.addEventListener(eventType, handler)
+        if (!domEl._ryunixHandlers) {
+          domEl._ryunixHandlers = new Map()
+        }
+        domEl._ryunixHandlers.set(nextProps[propKey], handler)
+        el.addEventListener(eventType, handler)
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.warn('Error adding event listener:', error)
@@ -335,18 +272,12 @@ const updateDom = (dom, prevProps = {}, nextProps = {}) => {
       }
     })
 }
-
-/**
- * Clear all children from a DOM element
- * @param {HTMLElement} container - DOM element to clear
- */
 const clearContainer = (container) => {
   if (!container) return
   while (container.firstChild) {
     container.removeChild(container.firstChild)
   }
 }
-
 export {
   createDom,
   updateDom,

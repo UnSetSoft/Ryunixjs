@@ -1,7 +1,3 @@
-/**
- * SVG attribute name mapping: camelCase → kebab-case
- * Centralized to avoid duplication across dom.js and server.js
- */
 const SVG_ATTR_MAP = {
   strokeWidth: 'stroke-width',
   strokeLinecap: 'stroke-linecap',
@@ -36,13 +32,7 @@ const SVG_ATTR_MAP = {
   markerMid: 'marker-mid',
   markerEnd: 'marker-end',
 }
-
-/**
- * Convert a camelCase SVG attribute name to its kebab-case equivalent.
- * Returns the original name if no mapping exists.
- * @param {string} name - camelCase attribute name
- * @returns {string} kebab-case attribute name
- */
-const toSvgAttrName = (name) => SVG_ATTR_MAP[name] || name
-
-export { SVG_ATTR_MAP, toSvgAttrName }
+export function toSvgAttrName(name) {
+  return SVG_ATTR_MAP[name] ?? name
+}
+export { SVG_ATTR_MAP }

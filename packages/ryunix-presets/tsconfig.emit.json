@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "noEmit": false,
+    "noEmitOnError": false,
+    "noImplicitAny": false,
+    "strictPropertyInitialization": false,
+    "outDir": "webpack",
+    "rootDir": "webpack",
+    "declaration": false,
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "node10",
+    "removeComments": false,
+    "skipLibCheck": true
+  },
+  "include": ["webpack/**/*.ts", "webpack/types/presets-shims.d.ts"],
+  "exclude": ["node_modules", "webpack/template/**"]
+}

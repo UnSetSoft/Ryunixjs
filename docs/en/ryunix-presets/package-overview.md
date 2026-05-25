@@ -1,151 +1,187 @@
-<!-- markdownlint-disable MD013 MD060 -->
+# Ryunix Presets — package overview
 
-# `packages/ryunix-presets` — `@unsetsoft/ryunix-presets`
+> **Language / Idioma:** [English](./package-overview.md) ·
+> [Español](../../es/ryunix-presets/resumen-del-paquete.md)
 
-**Build tooling and CLI** for Ryunix applications: the `ryunix` command, dual
-Webpack compilers (client + server), file-based App Router, SSG, API routes, and
-loaders for server/client boundaries and Server Actions. Apps use this package
-only as a **devDependency** — not in the browser runtime bundle as a library.
+The npm package **`@unsetsoft/ryunix-presets`** lives in
+`packages/ryunix-presets/`. It is RyunixJS **build tooling and CLI**: the
+`ryunix` command, dual Webpack (client + server), file-based routing under
+`app/`, SSG, API routes, and loaders (RSC, Server Actions, MDX). It lists core
+as a `peerDependency`.
 
-**Read next:** [cli-and-startup.md](./cli-and-startup.md) and
-[routing-and-ssg.md](./routing-and-ssg.md).
+---
+
+## Table of contents
+
+- [Ryunix Presets — package overview](#ryunix-presets--package-overview)
+  - [Table of contents](#table-of-contents)
+  - [Role in the monorepo](#role-in-the-monorepo)
+  - [Public usage](#public-usage)
+  - [Layout of `packages/ryunix-presets/`](#layout-of-packagesryunix-presets)
+  - [CLI commands (`ryunix`)](#cli-commands-ryunix)
+  - [TypeScript and published artifacts](#typescript-and-published-artifacts)
+  - [High-level flow](#high-level-flow)
+  - [Related documentation](#related-documentation)
 
 ---
 
 ## Role in the monorepo
 
-| Aspect           | Detail                                                   |
-| :--------------- | :------------------------------------------------------- |
-| **Consumers**    | CRA-generated apps, templates, `test/webpack`            |
-| **Peer**         | `@unsetsoft/ryunixjs`                                    |
-| **Distribution** | Source under `webpack/` (no separate preset build in CI) |
-| **Binary**       | `ryunix` → `webpack/bin/index.mjs`                       |
+| Package                     | Responsibility                                        |
+| :-------------------------- | :---------------------------------------------------- |
+| `@unsetsoft/ryunix-presets` | Dev server, build, start, Webpack, `ryunix.config.js` |
+| `@unsetsoft/ryunixjs`       | Runtime imported in bundles the preset produces       |
+| `@unsetsoft/cra`            | Adds the preset to new apps’ `devDependencies`        |
 
-```mermaid
-flowchart LR
-  Dev[ryunix dev]
-  Build[ryunix build]
-  Start[ryunix start]
-  Dev --> WDS[webpack-dev-server]
-  Build --> Out[.ryunix/static + server]
-  Start --> Prod[prod.server]
-  Out --> Start
-```
+**Compile-time routing**, **SSG**, and the **dev server** live here—not in
+`packages/core`, except for APIs core exports for SSR and Server Actions.
 
 ---
 
-## Package layout
+## Public usage
+
+In the app `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev": "ryunix dev",
+    "build": "ryunix build",
+    "start": "ryunix start"
+  },
+  "devDependencies": {
+    "@unsetsoft/ryunix-presets": "^1.0.x"
+  }
+}
+```
+
+Root config:
+
+```javascript
+/** @type {import('@unsetsoft/ryunix-presets').RyunixUserConfig} */
+const RyunixSettings = { compiler: 'swc' }
+export default RyunixSettings
+```
+
+Published types: `webpack/config.d.ts` (`RyunixUserConfig`).
+
+---
+
+## Layout of `packages/ryunix-presets/`
 
 ```text
 packages/ryunix-presets/
-├── package.json
+├── package.json              # bin: ryunix → webpack/bin/index.js
+├── tsconfig.json             # typecheck
+├── tsconfig.emit.json        # compiles webpack/**/*.ts → .js next to sources
 └── webpack/
-    ├── bin/                    # CLI + dev/prod servers + prerender
-    ├── utils/                  # Ryunix plugins (AppRouter, API, SSG, SSR dev, …)
-    ├── loaders/                # RSC + server-action loaders
-    ├── webpack.config.mjs
-    ├── eslint.config.mjs
-    └── index.js
+    ├── bin/
+    │   ├── index.ts          # yargs CLI: dev, build, start, lint, customHtml
+    │   ├── dev.server.ts     # Development server
+    │   ├── prod.server.ts    # Production server
+    │   ├── compiler.ts       # Runs Webpack
+    │   └── prerender.ts      # SSG after build
+    ├── utils/
+    │   ├── config.cjs        # Defaults and ryunix.config loading
+    │   ├── appRouterPlugin.ts
+    │   ├── ApiRouterPlugin.ts
+    │   ├── ssg.ts / ssgPlugin.ts
+    │   └── apiHandler.ts, ssrDevHandler.ts, …
+    ├── loaders/
+    │   ├── ryunix-rsc-loader.ts
+    │   └── ryunix-server-action-loader.ts
+    ├── plugins/
+    │   └── remark-github-alerts.ts
+    ├── webpack.config.ts     # Dual client/server config
+    ├── eslint.config.ts      # Opinionated ESLint for `ryunix lint`
+    ├── config.d.ts           # Consumer types
+    ├── index.ts              # Package export (types / utilities)
+    └── template/
+        └── index.html        # Base HTML template
 ```
 
-### Ryunix plugins (`utils/`)
-
-| Module                 | Role                                                               |
-| :--------------------- | :----------------------------------------------------------------- |
-| **AppRouterPlugin**    | Scans `app/`, generates `.ryunix/server/app/*`, SSG route manifest |
-| **ApiRouterPlugin**    | Compiles `app/api/**` to `.ryunix/server/api/**`                   |
-| **RyunixRoutesPlugin** | Legacy SSG from `pages/routes.ryx`                                 |
-| **ssrDevHandler**      | SSR HTML in development                                            |
-| **apiHandler**         | Serves `/api/*` in dev and prod                                    |
-
-### Loaders
-
-| Loader                          | Role                                                 |
-| :------------------------------ | :--------------------------------------------------- |
-| **ryunix-rsc-loader**           | Strips `// @server` / `// @client` by compile target |
-| **ryunix-server-action-loader** | Server registration + client `createActionProxy`     |
-
-### CLI
-
-| Command      | Summary                                     |
-| :----------- | :------------------------------------------ |
-| `dev`        | Webpack dev server, HMR, SSR/API middleware |
-| `build`      | Production compile + optional SSG prerender |
-| `start`      | Static server (requires prior build)        |
-| `lint`       | ESLint on `**/*.ryx`                        |
-| `customHtml` | Legacy HTML template copy                   |
+npm publishes the **`webpack/`** folder only. `.js` next to `.ts` under
+`webpack/` includes `tsc` output and legacy sources; run `build` after editing
+`.ts` before testing the CLI locally.
 
 ---
 
-## App conventions
+## CLI commands (`ryunix`)
 
-### `app/` (App Router)
+| Command             | Summary                                                    |
+| :------------------ | :--------------------------------------------------------- |
+| `ryunix dev`        | Development mode, HMR, SSR handler                         |
+| `ryunix build`      | Cleans `.ryunix/`, Webpack compile, optional SSG prerender |
+| `ryunix start`      | Serves production build (`build/static`)                   |
+| `ryunix lint`       | ESLint with preset config                                  |
+| `ryunix customHtml` | Copies base `index.html` into `public/`                    |
 
-| File                        | Role                                                            |
-| :-------------------------- | :-------------------------------------------------------------- |
-| `index.ryx`                 | Route page                                                      |
-| `layout.ryx`                | Nested layout                                                   |
-| `loading.ryx`               | Suspense fallback                                               |
-| `error.ryx`                 | Route error UI (plugin looks for `error.ryx`, not `errors.ryx`) |
-| `// @server` / `// @client` | Boundary directives                                             |
-
-**Server vs client:** `export async default` → server; hooks → client.
-
-**Metadata:** `Metatags`, `frontmatter`, `generateMetadata`.
-
-**API:** `app/api/<name>/router.js` → `/api/<name>`.
-
-### Build output (default `.ryunix/`)
-
-| Path                  | Contents            |
-| :-------------------- | :------------------ |
-| `.ryunix/static/`     | Client assets       |
-| `.ryunix/server/app/` | Generated routers   |
-| `.ryunix/server/api/` | API handlers        |
-| `.ryunix/cache/`      | Webpack + SSG cache |
-
-Do not hand-edit generated `app-router.js` / `main.ryx`.
-
-Config: [config-loading.md](./config-loading.md).
+Details: [cli-and-bootstrapping.md](./cli-and-bootstrapping.md).
 
 ---
 
-## Commands
+## TypeScript and published artifacts
 
-In an app directory:
+| Aspect            | Detail                                                           |
+| :---------------- | :--------------------------------------------------------------- |
+| Maintainer source | `webpack/**/*.ts` (entry/utils migration per module)             |
+| Check             | `pnpm --filter @unsetsoft/ryunix-presets typecheck`              |
+| Emit              | `pnpm --filter @unsetsoft/ryunix-presets build`                  |
+| Consumer          | Uses published `.d.ts` + `.js` only; does not compile the preset |
 
-```bash
-pnpm run dev
-pnpm run build
-pnpm run start
+Some files remain `.cjs` (`config.cjs`, `settingfile.cjs`) for Node config
+loading.
+
+See [TypeScript in the monorepo](../guides/typescript-in-the-monorepo.md).
+
+---
+
+## High-level flow
+
+```mermaid
+flowchart LR
+  subgraph app ["User app"]
+    CFG[ryunix.config.js]
+    APP[app/**/*.ryx]
+    API[app/api/**/router.js]
+  end
+  subgraph presets ["@unsetsoft/ryunix-presets"]
+    CLI[ryunix CLI]
+    WP[Dual Webpack]
+    AR[AppRouterPlugin]
+    CLI --> WP
+    WP --> AR
+  end
+  subgraph out ["Output"]
+    STATIC[.ryunix/static]
+    SERVER[.ryunix/server]
+  end
+  subgraph core ["@unsetsoft/ryunixjs"]
+    RT[Runtime in bundles]
+  end
+  CFG --> CLI
+  APP --> WP
+  API --> WP
+  WP --> STATIC
+  WP --> SERVER
+  WP --> RT
 ```
 
-Monorepo lint:
-
-```bash
-pnpm --filter @unsetsoft/ryunix-presets exec eslint webpack --max-warnings=0 --config ../../eslint.config.mjs
-```
-
----
-
-## Related packages
-
-| Package         | Relationship                        |
-| :-------------- | :---------------------------------- |
-| `core`          | Runtime bundled or externalized     |
-| `cra`           | Installs preset and scripts         |
-| `ryunix-vscode` | ESLint language `ryunix` for `.ryx` |
+1. `ryunix dev` loads config, discovers routes under `app/`, starts Webpack +
+   server.
+2. `ryunix build` produces static and server artifacts for production/SSG.
+3. The browser loads chunks that import `@unsetsoft/ryunixjs`.
 
 ---
 
-## Docs in `docs/en/ryunix-presets/`
+## Related documentation
 
-| Document                                   | Topic              |
-| :----------------------------------------- | :----------------- |
-| [cli-and-startup.md](./cli-and-startup.md) | Dev/prod servers   |
-| [config-loading.md](./config-loading.md)   | `ryunix.config.js` |
-| [routing-and-ssg.md](./routing-and-ssg.md) | App Router and SSG |
-| [api-router.md](./api-router.md)           | API routes         |
-| [webpack-loaders.md](./webpack-loaders.md) | RSC and actions    |
-
-Spanish: [docs/es/ryunix-presets/resumen-paquete.md](../../es/ryunix-presets/resumen-paquete.md).
+| Document                                                | Content                       |
+| :------------------------------------------------------ | :---------------------------- |
+| [cli-and-bootstrapping.md](./cli-and-bootstrapping.md)  | Dev/prod servers, commands    |
+| [configuration-loading.md](./configuration-loading.md)  | `ryunix.config.js`            |
+| [routing-and-ssg.md](./routing-and-ssg.md)              | Router and prerender          |
+| [api-router.md](./api-router.md)                        | API routes                    |
+| [webpack-loaders.md](./webpack-loaders.md)              | RSC and Server Actions        |
+| [core/package-overview.md](../core/package-overview.md) | Engine bundled by the preset  |
+| `packages/ryunix-presets/README.md`                     | User-facing install and flags |

@@ -1,12 +1,9 @@
 /**
- * Content Script - FIXED
+ * Content Script — bridges page hook messages to the extension runtime.
  */
-
-// Listen to messages from page
 window.addEventListener('message', (event) => {
   if (event.source !== window) return
   if (!event.data.source) return
-
   if (event.data.source === 'ryunix-hook') {
     chrome.runtime
       .sendMessage({
@@ -18,8 +15,6 @@ window.addEventListener('message', (event) => {
       })
   }
 })
-
-// Inject hook script
 function injectHook() {
   try {
     const script = document.createElement('script')
@@ -36,8 +31,6 @@ function injectHook() {
     console.error('[Ryunix DevTools] Error injecting hook:', error)
   }
 }
-
-// Wait for DOM
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', injectHook)
 } else {

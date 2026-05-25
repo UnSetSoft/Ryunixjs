@@ -7,60 +7,48 @@ import {
   runWithPriority,
   getCurrentPriority,
 } from './priority.js'
-import { RYUNIX_PORTAL } from './portal.js'
 import { queueUpdate } from './batching.js'
 import { validateHookContext as validateHookCall } from './devtools.js'
-
 const haveDepsChanged = (oldDeps, newDeps) => {
   if (!oldDeps || !newDeps) return true
   if (oldDeps.length !== newDeps.length) return true
   return oldDeps.some((dep, i) => !Object.is(dep, newDeps[i]))
 }
-
 const useStore = (initialState, priority = getCurrentPriority()) => {
-  // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
     return [is.function(initialState) ? initialState() : initialState, () => {}]
   }
-
   const state = getState()
   if (state.isServerRendering) {
     return [is.function(initialState) ? initialState() : initialState, () => {}]
   }
-
   const reducer = (state, action) =>
     is.function(action) ? action(state) : action
   return useReducer(reducer, initialState, undefined, priority)
 }
-
 const useReducer = (
   reducer,
   initialState,
   init,
   defaultPriority = getCurrentPriority(),
 ) => {
-  // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
     return [init ? init(initialState) : initialState, () => {}]
   }
-
   const state = getState()
   if (state.isServerRendering) {
     return [init ? init(initialState) : initialState, () => {}]
   }
-
   validateHookCall()
-
-  const { wipFiber, hookIndex } = state
+  const { hookIndex } = state
+  const wipFiber = state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
-
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_STORE,
     state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
     queue: [],
   }
-
   if (oldHook?.queue) {
     oldHook.queue.forEach((action) => {
       try {
@@ -72,7 +60,6 @@ const useReducer = (
       }
     })
   }
-
   const dispatch = (action, priority = defaultPriority) => {
     if (action === undefined) {
       if (process.env.NODE_ENV !== 'production') {
@@ -80,14 +67,10 @@ const useReducer = (
       }
       return
     }
-
     hook.queue.push(action)
-
     const currentState = getState()
     const activeRoot = currentState.currentRoot || currentState.wipRoot
-
     if (!activeRoot) return
-
     const newRoot = {
       dom: activeRoot.dom,
       props: activeRoot.props,
@@ -95,46 +78,29 @@ const useReducer = (
     }
     queueUpdate(() => scheduleWork(newRoot, priority))
   }
-
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
   return [hook.state, dispatch]
 }
-
-/**
- * The `useEffect` function in JavaScript is used to manage side effects in functional components by
- * comparing dependencies and executing a callback function when dependencies change.
- * @param callback - The `callback` parameter in the `useEffect` function is a function that will be
- * executed as the effect. This function can perform side effects like data fetching, subscriptions, or
- * DOM manipulations.
- * @param deps - The `deps` parameter in the `useEffect` function stands for dependencies. It is an
- * optional array that contains values that the effect depends on. The effect will only re-run if any
- * of the values in the `deps` array have changed since the last render. If the `deps` array
- */
 const useEffect = (callback, deps) => {
-  // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
     return
   }
-
   const state = getState()
   if (state.isServerRendering) {
     return
   }
-
   validateHookCall()
-
   if (!is.function(callback)) {
     throw new Error('useEffect callback must be a function')
   }
   if (deps !== undefined && !Array.isArray(deps)) {
     throw new Error('useEffect dependencies must be an array or undefined')
   }
-
-  const { wipFiber, hookIndex } = state
+  const { hookIndex } = state
+  const wipFiber = state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
   const hasChanged = haveDepsChanged(oldHook?.deps, deps)
-
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_EFFECT,
@@ -142,81 +108,48 @@ const useEffect = (callback, deps) => {
     effect: hasChanged ? callback : null,
     cancel: oldHook?.cancel,
   }
-
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
 }
-
-/**
- * The useRef function in JavaScript creates a reference object with an initial value for use in functional components.
- * @param initialValue - The `initialValue` parameter in the `useRef` function represents the initial
- * value that will be assigned to the `current` property of the reference object. This initial value
- * will be used if there is no previous value stored in the hook.
- * @returns The `useRef` function is returning the `current` property of the `hook.value` object, which
- * contains the initial value passed to the `useRef` function.
- */
 const useRef = (initialValue) => {
-  // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
     return { current: initialValue }
   }
-
   const state = getState()
   if (state.isServerRendering) {
     return { current: initialValue }
   }
-
   validateHookCall()
-
-  const { wipFiber, hookIndex } = state
+  const { hookIndex } = state
+  const wipFiber = state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
-
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_REF,
     value: oldHook ? oldHook.value : { current: initialValue },
   }
-
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
   return hook.value
 }
-
-/**
- * The useMemo function in JavaScript is used to memoize the result of a computation based on
- * dependencies.
- * @param compute - The `compute` parameter in the `useMemo` function is a callback function that
- * calculates the value that `useMemo` will memoize and return. This function will be called to compute
- * the memoized value when necessary.
- * @param deps - The `deps` parameter in the `useMemo` function refers to an array of dependencies.
- * These dependencies are used to determine whether the memoized value needs to be recalculated or if
- * the previously calculated value can be reused. The `useMemo` hook will recompute the memoized value
- * only if
- * @returns The `useMemo` function is returning the `value` calculated by the `compute` function.
- */
 const useMemo = (compute, deps) => {
-  // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
     return compute()
   }
-
   const state = getState()
   if (state.isServerRendering) {
     return compute()
   }
-
   validateHookCall()
-
   if (!is.function(compute)) {
     throw new Error('useMemo callback must be a function')
   }
   if (!Array.isArray(deps)) {
     throw new Error('useMemo requires a dependencies array')
   }
-
-  const { wipFiber, hookIndex } = state
+  const { hookIndex } = state
+  const wipFiber = state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
-
   let value
   if (oldHook && !haveDepsChanged(oldHook.deps, deps)) {
     value = oldHook.value
@@ -230,51 +163,22 @@ const useMemo = (compute, deps) => {
       throw error
     }
   }
-
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_MEMO,
     value,
     deps,
   }
-
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
   return value
 }
-
-/**
- * The useCallback function in JavaScript ensures that a callback function is memoized based on its
- * dependencies.
- * @param callback - A function that you want to memoize and return for later use.
- * @param deps - The `deps` parameter in the `useCallback` function refers to an array of dependencies.
- * These dependencies are used to determine when the callback function should be re-evaluated and
- * memoized. If any of the dependencies change, the callback function will be re-executed and the
- * memoized value will
- * @returns The useCallback function is returning the memoized version of the callback function passed
- * as the first argument, based on the dependencies array provided as the second argument.
- */
 const useCallback = (callback, deps) => {
   if (!is.function(callback)) {
     throw new Error('useCallback requires a function as first argument')
   }
   return useMemo(() => callback, deps)
 }
-
-/**
- * The createContext function creates a context provider and useContext hook in JavaScript.
- * @param [contextId] - The `contextId` parameter in the `createContext` function is used to specify
- * the unique identifier for the context being created. It defaults to `RYUNIX_TYPES.RYUNIX_CONTEXT` if
- * not provided.
- * @param [defaultValue] - The `defaultValue` parameter in the `createContext` function is used to
- * specify the default value that will be returned by the `useContext` hook if no provider is found in
- * the component tree. It is an optional parameter, and if not provided, an empty object `{}` will be
- * used as
- * @returns The `createContext` function returns an object with two properties: `Provider` and
- * `useContext`. The `Provider` property is a component that accepts `children` and `value` props, and
- * sets the `_contextId` and `_contextValue` properties on the element. The `useContext` property is a
- * hook function that retrieves the context value based on the context ID provided, or
- */
 const createContext = (
   contextId = RYUNIX_TYPES.RYUNIX_CONTEXT,
   defaultValue = {},
@@ -286,46 +190,36 @@ const createContext = (
       ...flattenArray([children]),
     )
   }
-
   Provider._contextId = contextId
-
   const useContext = (ctxID = contextId) => {
     const state = getState()
     if (state.isServerRendering) {
-      return state.ssrContexts && state.ssrContexts[ctxID] !== undefined
-        ? state.ssrContexts[ctxID]
+      const ssrContexts = state.ssrContexts
+      return ssrContexts && ssrContexts[ctxID] !== undefined
+        ? ssrContexts[ctxID]
         : defaultValue
     }
-
     validateHookCall()
-
     let fiber = state.wipFiber
-
     while (fiber) {
       if (fiber._contextId === ctxID && fiber._contextValue !== undefined) {
         return fiber._contextValue
       }
-      if (
-        fiber.type?._contextId === ctxID &&
-        fiber.props?.value !== undefined
-      ) {
+      const fiberType = fiber.type
+      if (fiberType?._contextId === ctxID && fiber.props?.value !== undefined) {
         return fiber.props.value
       }
       fiber = fiber.parent
     }
     return defaultValue
   }
-
-  return { Provider, useContext }
+  return {
+    Provider: Provider,
+    useContext,
+  }
 }
-
-/**
- * The `useQuery` function extracts query parameters from the URL in a browser environment.
- * @returns An object containing the query parameters from the current URL is being returned.
- */
 const useQuery = () => {
   if (typeof window === 'undefined') return {}
-
   const searchParams = new URLSearchParams(window.location.search)
   const query = {}
   for (const [key, value] of searchParams.entries()) {
@@ -333,18 +227,8 @@ const useQuery = () => {
   }
   return query
 }
-
-/**
- * The function `useHash` in JavaScript is used to manage and update the hash portion of the URL in a
- * web application.
- * @returns The `useHash` function returns the current hash value from the window's location. If the
- * window is undefined (e.g., in a server-side environment), it returns an empty string. The function
- * also sets up an event listener to update the hash value when the hash in the URL changes and removes
- * the event listener when the component unmounts.
- */
 const useHash = () => {
   if (typeof window === 'undefined') return ''
-
   const [hash, setHash] = useStore(window.location.hash)
   useEffect(() => {
     const onHashChange = () => setHash(window.location.hash)
@@ -353,42 +237,18 @@ const useHash = () => {
   }, [])
   return hash
 }
-
-/**
- * The `useMetadata` function in JavaScript is used to dynamically update metadata tags in the document
- * head based on provided tags and options.
- * @param [tags] - The `tags` parameter in the `useMetadata` function is an object that contains
- * metadata information for the webpage. It can include properties like `pageTitle`, `canonical`, and
- * other custom metadata tags like `og:title`, `og:description`, `twitter:title`,
- * `twitter:description`, etc. These tags
- * @param [options] - The `options` parameter in the `useMetadata` function is an object that can
- * contain the following properties:
- * - `title`: An object that can have the following properties:
- *  - `template`: A string that defines the template for the page title. It can include a placeholder
- * `%s` that will be replaced with the actual page title.
- * - `prefix`: A string that will be used as the default title if no specific page title is provided.
- * @returns The `useMetadata` function does not return anything. It is a custom hook that updates the
- * document's metadata (such as title and meta tags) based on the provided `tags` and `options` whenever
- * they change.
- * This hook can't be reached by google crawler.
- */
-
 const useMetadata = (tags = {}, options = {}) => {
   const state = getState()
   if (state.isServerRendering) {
     state.ssrMetadata = { ...state.ssrMetadata, ...tags }
     return
   }
-
   useEffect(() => {
     if (typeof document === 'undefined') return
-    // ...
-
     let finalTitle = 'Ryunix App'
     const template = options.title?.template
     const defaultTitle = options.title?.prefix || 'Ryunix App'
     const pageTitle = tags.pageTitle || tags.title
-
     if (is.string(pageTitle) && pageTitle.trim()) {
       finalTitle = template?.includes('%s')
         ? template.replace('%s', pageTitle)
@@ -396,9 +256,7 @@ const useMetadata = (tags = {}, options = {}) => {
     } else {
       finalTitle = defaultTitle
     }
-
     document.title = finalTitle
-
     if (tags.canonical) {
       let link = document.querySelector('link[rel="canonical"]')
       if (!link) {
@@ -408,14 +266,11 @@ const useMetadata = (tags = {}, options = {}) => {
       }
       link.setAttribute('href', tags.canonical)
     }
-
     Object.entries(tags).forEach(([key, value]) => {
       if (['title', 'pageTitle', 'canonical'].includes(key)) return
-
       const isProperty = key.startsWith('og:') || key.startsWith('twitter:')
       const selector = `meta[${isProperty ? 'property' : 'name'}='${key}']`
       let meta = document.head.querySelector(selector)
-
       if (!meta) {
         meta = document.createElement('meta')
         meta.setAttribute(isProperty ? 'property' : 'name', key)
@@ -425,23 +280,19 @@ const useMetadata = (tags = {}, options = {}) => {
     })
   }, [JSON.stringify(tags), JSON.stringify(options)])
 }
-
-// Router Context
 const RouterContext = createContext('ryunix.navigation', {
   location: '/',
   params: {},
   query: {},
-  navigate: (path) => {},
+  navigate: (_path) => {},
   route: null,
 })
-
 const findRoute = (routes, path) => {
   const pathname = path.split('?')[0].split('#')[0]
   const notFoundRoute = routes.find((route) => route.NotFound)
   const notFound = notFoundRoute
     ? { route: { component: notFoundRoute.NotFound }, params: {} }
     : { route: { component: null }, params: {} }
-
   for (const route of routes) {
     if (route.subRoutes) {
       const childRoute = findRoute(route.subRoutes, path)
@@ -449,7 +300,6 @@ const findRoute = (routes, path) => {
     }
     if (route.path === '*') return notFound
     if (!route.path || typeof route.path !== 'string') continue
-
     const keys = []
     const pattern = new RegExp(
       `^${route.path.replace(/:(\.\.\.)?(\w+)/g, (match, isCatchAll, key) => {
@@ -457,7 +307,6 @@ const findRoute = (routes, path) => {
         return isCatchAll ? '(.+)' : '([^/]+)'
       })}$`,
     )
-
     const matchPath = pathname.match(pattern)
     if (matchPath) {
       const params = keys.reduce((acc, keyObj, index) => {
@@ -470,18 +319,17 @@ const findRoute = (routes, path) => {
   }
   return notFound
 }
-
-/**
- * The `RouterProvider` component manages routing in a Ryunix application by updating the location based
- * on window events and providing context for the current route.
- * @returns The `RouterProvider` component is returning a `RouterContext.Provider` component with a
- * `value` prop set to `contextValue`, and wrapping the `children` within a `Fragment`.
- */
+const getSsrPathname = () => {
+  const pathname = globalThis?.window?.location?.pathname
+  if (typeof pathname === 'string' && pathname) {
+    return pathname.split('?')[0].split('#')[0]
+  }
+  return '/'
+}
 const RouterProvider = ({ routes, children }) => {
-  // SSR: Return server-safe version without hooks
   if (typeof window === 'undefined') {
-    const location = window.location.pathname
-    const currentRouteData = findRoute(routes, location) || {}
+    const location = getSsrPathname()
+    const currentRouteData = findRoute(routes, location)
     const contextValue = {
       location,
       params: currentRouteData.params || {},
@@ -495,9 +343,7 @@ const RouterProvider = ({ routes, children }) => {
       Fragment({ children }),
     )
   }
-
   const [location, setLocation] = useStore(window.location.pathname)
-
   useEffect(() => {
     const update = () => setLocation(window.location.pathname)
     window.addEventListener('popstate', update)
@@ -507,7 +353,6 @@ const RouterProvider = ({ routes, children }) => {
       window.removeEventListener('hashchange', update)
     }
   }, [])
-
   const navigate = (path) => {
     if (typeof window !== 'undefined' && window.__RYUNIX_MPA__) {
       window.location.assign(path)
@@ -516,10 +361,8 @@ const RouterProvider = ({ routes, children }) => {
     window.history.pushState({}, '', path)
     setLocation(path)
   }
-
-  const currentRouteData = findRoute(routes, location) || {}
+  const currentRouteData = findRoute(routes, location)
   const query = useQuery()
-
   const contextValue = {
     location,
     params: currentRouteData.params || {},
@@ -527,37 +370,19 @@ const RouterProvider = ({ routes, children }) => {
     navigate,
     route: currentRouteData.route,
   }
-
   return createElement(
     RouterContext.Provider,
     { value: contextValue },
     Fragment({ children }),
   )
 }
-
-/**
- * The function `useRouter` returns the context of the Router for navigation in a Ryunix application.
- * @returns The `useRouter` function is returning the result of calling
- * `RouterContext.useContext('ryunix.navigation')`. This function is likely attempting to retrieve the
- * navigation context from the RouterContext.
- */
 const useRouter = () => {
   return RouterContext.useContext('ryunix.navigation')
 }
-
-/**
- * The `Children` function in JavaScript uses router hooks to handle scrolling to a specific element
- * based on the hash in the URL.
- * @returns The `Children` component is returning the result of calling `createElement` with
- * `route.component` as the first argument and an object with `key`, `params`, `query`, and `hash`
- * properties as the second argument. The `key` property is set to `location`, and the `params`,
- * `query`, and `hash` properties are passed as values from the component's props.
- */
 const Children = () => {
   const { route, params, query, location } = useRouter()
   if (!route || !route.component) return null
   const hash = useHash()
-
   useEffect(() => {
     if (hash) {
       const id = hash.slice(1)
@@ -565,7 +390,6 @@ const Children = () => {
       if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' })
     }
   }, [hash])
-
   return createElement(route.component, {
     key: location,
     params,
@@ -574,47 +398,28 @@ const Children = () => {
     location,
   })
 }
-
-/**
- * usePathname - Returns the current pathname
- */
 const usePathname = () => {
   const { location } = useRouter()
   return location.split('?')[0].split('#')[0]
 }
-
-/**
- * useSearchParams - Returns the current URLSearchParams object
- */
 const useSearchParams = () => {
   const { query } = useRouter()
   return new URLSearchParams(query)
 }
-
-/**
- * Link - Base link component for SPA navigation
- * Supports optional prefetching of lazy components.
- */
 const Link = ({ to, prefetch = true, ...props }) => {
   const { navigate } = useRouter()
-
   const handleClick = (e) => {
     if (e.button !== 0 || e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) {
       return
     }
-
     e.preventDefault()
     navigate(to)
   }
-
   const handleMouseEnter = () => {
     if (prefetch && typeof window !== 'undefined') {
-      // Logic for prefetching could go here if route component is known
     }
   }
-
   const { className: _omitClassName, ...cleanedProps } = props
-
   return createElement(
     'a',
     {
@@ -627,20 +432,11 @@ const Link = ({ to, prefetch = true, ...props }) => {
     props.children,
   )
 }
-
-/**
- * The NavLink function in JavaScript is a component that generates a link element with customizable
- * classes and active state based on the current location.
- * @returns The `NavLink` component is returning a JSX element representing an anchor (`<a>`) tag with
- * the following attributes and properties:
- */
 const NavLink = ({ to, exact = false, ...props }) => {
   const { location, navigate } = useRouter()
   const isActive = exact ? location === to : location.startsWith(to)
-
   const resolveClass = (cls) =>
     typeof cls === 'function' ? cls({ isActive }) : cls || ''
-
   const handleClick = (e) => {
     if (e.button !== 0 || e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) {
       return
@@ -648,18 +444,13 @@ const NavLink = ({ to, exact = false, ...props }) => {
     e.preventDefault()
     navigate(to)
   }
-
   const classAttrName = props['ryunix-class'] ? 'ryunix-class' : 'className'
-  const classAttrValue = resolveClass(
-    props['ryunix-class'] || props['className'],
-  )
-
+  const classAttrValue = resolveClass(props['ryunix-class'] || props.className)
   const {
     ['ryunix-class']: _omitRyunix,
     className: _omitClassName,
     ...cleanedProps
   } = props
-
   return createElement(
     'a',
     {
@@ -671,37 +462,23 @@ const NavLink = ({ to, exact = false, ...props }) => {
     props.children,
   )
 }
-
-/**
- * useStore with priority support
- */
 const useStorePriority = (initialState) => {
   const reducer = (state, action) =>
     typeof action === 'function' ? action.value(state) : action.value
-
-  const [state, baseDispatch] = useReducer(reducer, initialState)
-
+  const [state, baseDispatch] = useReducer(reducer, initialState, undefined)
   const dispatch = (action, priority = Priority.NORMAL) => {
     const wrappedAction = {
       value: action,
       priority,
     }
-
     scheduleUpdate(() => baseDispatch(wrappedAction, priority), priority)
   }
-
   return [state, dispatch]
 }
-
-/**
- * useTransition - Mark updates as non-urgent
- */
 const useTransition = () => {
   const [isPending, setIsPending] = useStorePriority(false)
-
   const startTransition = (callback) => {
     setIsPending(true, Priority.IMMEDIATE)
-
     setTimeout(() => {
       runWithPriority(Priority.LOW, () => {
         callback()
@@ -709,41 +486,18 @@ const useTransition = () => {
       })
     }, 0)
   }
-
   return [isPending, startTransition]
 }
-
-/**
- * useDeferredValue - Defer value updates
- */
 const useDeferredValue = (value) => {
   const [deferredValue, setDeferredValue] = useStorePriority(value)
-
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDeferredValue(value, Priority.LOW)
     }, 100)
-
     return () => clearTimeout(timeout)
   }, [value])
-
   return deferredValue
 }
-
-/**
- * The `usePersitentStore` function manages state using local storage in JavaScript, allowing for easy
- * storage and retrieval of data.
- * @param key - The `key` parameter in the `usePersitentStore` function is a string that represents the key
- * under which the data will be stored in the browser's local storage. It is used to retrieve and store
- * data associated with this specific key.
- * @param [initialState] - The `initialState` parameter in the `usePersitentStore` function is the initial
- * value that will be used if there is no data stored in the local storage under the specified `key`.
- * It serves as the default value for the state if no data is retrieved from the local storage.
- * @returns The `usePersitentStore` function returns an array containing two elements:
- * 1. The current state value retrieved from local storage or the initial state if not found.
- * 2. The `setValue` function that updates the state value and stores it in the local storage as a JSON
- * string.
- */
 const usePersistentStore = (key, initialState = '') => {
   const [state, dispatch] = useStore(() => {
     try {
@@ -753,14 +507,6 @@ const usePersistentStore = (key, initialState = '') => {
       return initialState
     }
   })
-
-  /**
-   * The function `setValue` dispatches a value and stores it in the local storage as a JSON string,
-   * handling any errors with a console log.
-   * @param value - The `value` parameter in the `setValue` function is the data that you want to set.
-   * It is dispatched to update the state and then stored in the browser's local storage after being
-   * converted to a JSON string.
-   */
   const setValue = (value) => {
     try {
       dispatch(value)
@@ -769,52 +515,24 @@ const usePersistentStore = (key, initialState = '') => {
       console.error(error)
     }
   }
-
   return [state, setValue]
 }
-
-/**
- * The `useSwitch` function returns a state value and a toggle function to switch the state between
- * true and false.
- * @param [initialState=false] - The `initialState` parameter in the `useSwitch` function is used to
- * set the initial value of the state. If no value is provided when calling `useSwitch`, the default
- * initial state will be `false`.
- * @returns An array containing the current state value and a function `toggle` that toggles the state
- * value.
- */
 const useSwitch = (initialState = false) => {
   const [state, dispatch] = useStore(initialState)
-
-  /**
-   * The function `toggle` toggles the state by dispatching the opposite value of the current state.
-   * Uses functional update to avoid stale closure issues with rapid calls.
-   */
   const toggle = () => {
     dispatch((prev) => !prev)
   }
-
   return [state, toggle]
 }
-
-/**
- * useLayoutEffect - Like useEffect but runs synchronously after DOM mutations
- * and before the browser paints. Use for DOM measurements.
- * @param {Function} callback - Effect callback
- * @param {Array} deps - Dependencies array
- */
 const useLayoutEffect = (callback, deps) => {
-  // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
     return
   }
-
   const state = getState()
   if (state.isServerRendering) {
     return
   }
-
   validateHookCall()
-
   if (!is.function(callback)) {
     throw new Error('useLayoutEffect callback must be a function')
   }
@@ -823,99 +541,59 @@ const useLayoutEffect = (callback, deps) => {
       'useLayoutEffect dependencies must be an array or undefined',
     )
   }
-
-  const { wipFiber, hookIndex } = state
+  const { hookIndex } = state
+  const wipFiber = state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
   const hasChanged = haveDepsChanged(oldHook?.deps, deps)
-
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_EFFECT,
     deps,
     effect: hasChanged ? callback : null,
     cancel: oldHook?.cancel,
-    isLayout: true, // Flag to run synchronously during commit
+    isLayout: true,
   }
-
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
 }
-
-// Counter for deterministic ID generation
 let idCounter = 0
-
-/**
- * Reset the idCounter for useId - call this before each SSR renderToString
- * to ensure deterministic IDs across multiple renders
- */
 const resetIdCounter = () => {
   idCounter = 0
 }
-
-/**
- * useId - Generate a deterministic, unique ID that is stable across SSR and hydration.
- * @returns {string} A unique ID string
- */
 const useId = () => {
   const state = getState()
-
   if (state.isServerRendering) {
-    // On server, use a simple incrementing counter (reset per renderToString call)
     return `:r${idCounter++}:`
   }
-
   validateHookCall()
-
-  const { wipFiber, hookIndex } = state
+  const { hookIndex } = state
+  const wipFiber = state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
-
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_REF,
     value: oldHook ? oldHook.value : `:r${idCounter++}:`,
   }
-
   wipFiber.hooks[hookIndex] = hook
   state.hookIndex++
   return hook.value
 }
-
-/**
- * useDebounce - Returns a debounced version of the value that only updates
- * after the specified delay has passed since the last change.
- * @param {*} value - Value to debounce
- * @param {number} delay - Delay in milliseconds (default: 300)
- * @returns {*} Debounced value
- */
 const useDebounce = (value, delay = 300) => {
   const [debouncedValue, setDebouncedValue] = useStore(value)
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedValue(value)
     }, delay)
-
     return () => clearTimeout(timer)
   }, [value, delay])
-
   return debouncedValue
 }
-
-/**
- * useThrottle - Returns a throttled version of the value that only updates
- * at most once per specified interval.
- * @param {*} value - Value to throttle
- * @param {number} interval - Minimum interval in milliseconds (default: 300)
- * @returns {*} Throttled value
- */
 const useThrottle = (value, interval = 300) => {
   const [throttledValue, setThrottledValue] = useStore(value)
   const lastUpdated = useRef(Date.now())
-
   useEffect(() => {
     const now = Date.now()
     const elapsed = now - lastUpdated.current
-
     if (elapsed >= interval) {
       lastUpdated.current = now
       setThrottledValue(value)
@@ -924,14 +602,11 @@ const useThrottle = (value, interval = 300) => {
         lastUpdated.current = Date.now()
         setThrottledValue(value)
       }, interval - elapsed)
-
       return () => clearTimeout(timer)
     }
   }, [value, interval])
-
   return throttledValue
 }
-
 export {
   useStore,
   useReducer,
@@ -952,9 +627,8 @@ export {
   useTransition,
   useDeferredValue,
   usePersistentStore,
-  usePersistentStore as usePersitentStore, // backwards-compatible alias
+  usePersistentStore as usePersitentStore,
   useSwitch,
-  // Router exports
   RouterProvider,
   useRouter,
   Children,

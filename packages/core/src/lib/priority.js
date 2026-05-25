@@ -1,44 +1,29 @@
 import { rIC } from '../utils/index.js'
-
-/**
- * Priority levels for updates
- */
-const Priority = {
-  IMMEDIATE: 1, // User input (clicks, typing)
-  USER_BLOCKING: 2, // Hover, scroll
-  NORMAL: 3, // Data fetching
-  LOW: 4, // Analytics
-  IDLE: 5, // Background tasks
+export const Priority = {
+  IMMEDIATE: 1,
+  USER_BLOCKING: 2,
+  NORMAL: 3,
+  LOW: 4,
+  IDLE: 5,
 }
-
 let currentPriority = Priority.NORMAL
 let pendingUpdates = []
 let isScheduling = false
-
-/**
- * Schedule update with priority
- */
-const scheduleUpdate = (callback, priority = Priority.NORMAL) => {
+export function scheduleUpdate(callback, priority = Priority.NORMAL) {
   pendingUpdates.push({ callback, priority, timestamp: Date.now() })
-
   if (!isScheduling) {
     isScheduling = true
     rIC(processPendingUpdates)
   }
 }
-
-/**
- * Process updates by priority
- */
-const processPendingUpdates = (deadline) => {
+function processPendingUpdates(deadline) {
   pendingUpdates.sort((a, b) => a.priority - b.priority)
-
   while (pendingUpdates.length > 0 && deadline.timeRemaining() > 1) {
     const update = pendingUpdates.shift()
+    if (!update) break
     currentPriority = update.priority
     update.callback()
   }
-
   if (pendingUpdates.length > 0) {
     rIC(processPendingUpdates)
   } else {
@@ -46,39 +31,20 @@ const processPendingUpdates = (deadline) => {
     currentPriority = Priority.NORMAL
   }
 }
-
-/**
- * Run callback with specific priority
- */
-const runWithPriority = (priority, callback) => {
+export function runWithPriority(priority, callback) {
   const previousPriority = currentPriority
   currentPriority = priority
-
   try {
     return callback()
   } finally {
     currentPriority = previousPriority
   }
 }
-
-/**
- * Get current priority
- */
-const getCurrentPriority = () => currentPriority
-
-/**
- * Wrap setState with priority
- */
-const createPriorityDispatch = (dispatch) => {
+export function getCurrentPriority() {
+  return currentPriority
+}
+export function createPriorityDispatch(dispatch) {
   return (action, priority = currentPriority) => {
     scheduleUpdate(() => dispatch(action), priority)
   }
-}
-
-export {
-  Priority,
-  scheduleUpdate,
-  runWithPriority,
-  getCurrentPriority,
-  createPriorityDispatch,
 }

@@ -1,4 +1,4 @@
-import * as Ryunix from '../lib/index.js'
+import Ryunix from '../main.js'
 import { workLoop } from '../lib/workers.js'
 import { useStore } from '../lib/hooks.js'
 
@@ -18,8 +18,7 @@ describe('useStore Hook', () => {
     }
   })
 
-  test('updates state correctly and reflects in DOM', () => {
-    // Define a function component that uses hooks properly
+  test('updates state correctly and reflects in DOM', async () => {
     const TestComponent = () => {
       const [message, setMessage] = useStore('')
 
@@ -44,7 +43,6 @@ describe('useStore Hook', () => {
 
     container = Ryunix.init(Root)
 
-    // Verify the container has the `dom` property configured
     expect(container.dom).toBeDefined()
 
     workLoop({ timeRemaining: () => 100 })
@@ -52,6 +50,7 @@ describe('useStore Hook', () => {
     const buttonElement = container.dom.querySelector('button')
     buttonElement.click()
 
+    await new Promise((resolve) => setTimeout(resolve, 20))
     workLoop({ timeRemaining: () => 100 })
 
     const paragraphElement = container.dom.querySelector('p')

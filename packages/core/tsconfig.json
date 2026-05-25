@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node10",
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "jsx/**/*.js",
+    "jsx/**/*.d.ts",
+    "types/**/*.d.ts",
+    "types/**/*.ts"
+  ],
+  "exclude": ["dist", "node_modules", "src/tests/**"]
+}

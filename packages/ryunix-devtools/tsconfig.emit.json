@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": false,
+    "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "outDir": ".",
+    "rootDir": "."
+  },
+  "include": [
+    "background.ts",
+    "content-script.ts",
+    "devtools.ts",
+    "hook.ts",
+    "panel.ts",
+    "chrome.d.ts",
+    "window.d.ts"
+  ]
+}
