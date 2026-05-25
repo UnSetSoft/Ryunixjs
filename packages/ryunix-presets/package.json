@@ -65,7 +65,7 @@
     "html-loader": "5.1.0",
     "html-webpack-plugin": "5.6.5",
     "mini-css-extract-plugin": "2.10.1",
-    "postcss": "8.5.8",
+    "postcss": "8.5.10",
     "postcss-loader": "8.2.1",
     "rehype-highlight": "7.0.2",
     "remark-frontmatter": "5.0.0",
