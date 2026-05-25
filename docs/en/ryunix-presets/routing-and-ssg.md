@@ -11,13 +11,13 @@ compile loop automatically.
 
 - [Ryunix Presets: Routing & SSG Architecture](#ryunix-presets-routing--ssg-architecture)
   - [Table of contents](#table-of-contents)
-  - [1. The App Router Framework (`appRouterPlugin.js`)](#1-the-app-router-framework-approuterpluginjs)
-  - [2. Legacy SSG Manifests (`ssgPlugin.js`)](#2-legacy-ssg-manifests-ssgpluginjs)
-  - [3. SSR Development Ecosystem (`ssrDevHandler.js`)](#3-ssr-development-ecosystem-ssrdevhandlerjs)
+  - [1. The App Router Framework (`appRouterPlugin.mjs`)](#1-the-app-router-framework-approuterpluginmjs)
+  - [2. Legacy SSG Manifests (`ssgPlugin.mjs`)](#2-legacy-ssg-manifests-ssgpluginmjs)
+  - [3. SSR Development Ecosystem (`ssrDevHandler.mjs`)](#3-ssr-development-ecosystem-ssrdevhandlermjs)
 
 ---
 
-## 1. The App Router Framework (`appRouterPlugin.js`)
+## 1. The App Router Framework (`appRouterPlugin.mjs`)
 
 This plugin intercepts Webpack's `beforeCompile` hook dynamically scanning the
 `src/app` directory sequentially.
@@ -51,7 +51,7 @@ This plugin intercepts Webpack's `beforeCompile` hook dynamically scanning the
 
 ---
 
-## 2. Legacy SSG Manifests (`ssgPlugin.js`)
+## 2. Legacy SSG Manifests (`ssgPlugin.mjs`)
 
 Historically recognized as `RyunixRoutesPlugin`, this plugin orchestrates legacy
 routes bound strictly by the `routes.ryx` array definition targeting `.mdx`
@@ -78,7 +78,7 @@ Brace tracking algorithms (`{` counting variables).
 
 3. **SSG Checklisting**: Finalizes by ejecting a pure JSON document
 
-   (`routes.json`) inside `.ryunix/ssg/` completely enabling the `bin/index.js`
+   (`routes.json`) inside `.ryunix/ssg/` completely enabling the `bin/index.mjs`
    SSG crawler to recursively render every valid `/docs/x` string to `.html`
    physical volumes seamlessly without executing actual headless browsers
    contexts.
@@ -99,7 +99,7 @@ Brace tracking algorithms (`{` counting variables).
 
 ---
 
-## 3. SSR Development Ecosystem (`ssrDevHandler.js`)
+## 3. SSR Development Ecosystem (`ssrDevHandler.mjs`)
 
 To ensure the Developer Experience (DX) matches production semantics natively,
 the Webpack `devServer` intercepts requests identically:

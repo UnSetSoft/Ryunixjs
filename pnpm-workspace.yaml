@@ -2,3 +2,4 @@ packages:
   - 'packages/*'
   - 'test/*'
   - 'test/webpack/*'
+  - '_ci/smoke-app'

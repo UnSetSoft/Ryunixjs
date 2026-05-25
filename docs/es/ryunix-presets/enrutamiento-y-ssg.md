@@ -11,13 +11,13 @@ cadenas AST de Virtual DOM durante el bucle de compilación de forma automática
 
 - [Ryunix Presets: Arquitectura de routing y SSG](#ryunix-presets-arquitectura-de-routing-y-ssg)
   - [Índice](#índice)
-  - [1. El framework App Router (`appRouterPlugin.js`)](#1-el-framework-app-router-approuterpluginjs)
-  - [2. Manifiestos SSG legacy (`ssgPlugin.js`)](#2-manifiestos-ssg-legacy-ssgpluginjs)
-  - [3. Ecosistema de desarrollo SSR (`ssrDevHandler.js`)](#3-ecosistema-de-desarrollo-ssr-ssrdevhandlerjs)
+  - [1. El framework App Router (`appRouterPlugin.mjs`)](#1-el-framework-app-router-approuterpluginmjs)
+  - [2. Manifiestos SSG legacy (`ssgPlugin.mjs`)](#2-manifiestos-ssg-legacy-ssgpluginmjs)
+  - [3. Ecosistema de desarrollo SSR (`ssrDevHandler.mjs`)](#3-ecosistema-de-desarrollo-ssr-ssrdevhandlermjs)
 
 ---
 
-## 1. El framework App Router (`appRouterPlugin.js`)
+## 1. El framework App Router (`appRouterPlugin.mjs`)
 
 Este plugin intercepta el hook `beforeCompile` de Webpack escaneando
 dinámicamente el directorio `src/app` de forma secuencial.
@@ -53,7 +53,7 @@ dinámicamente el directorio `src/app` de forma secuencial.
 
 ---
 
-## 2. Manifiestos SSG legacy (`ssgPlugin.js`)
+## 2. Manifiestos SSG legacy (`ssgPlugin.mjs`)
 
 Históricamente reconocido como `RyunixRoutesPlugin`, este plugin orquesta rutas
 legacy ligadas estrictamente por la definición de array `routes.ryx` dirigida a
@@ -83,7 +83,7 @@ variables).
 3. **Listado SSG**: Finaliza expulsando un documento JSON puro (`routes.json`)
 
    dentro de `.ryunix/ssg/` habilitando por completo al crawler SSG de
-   `bin/index.js` a renderizar recursivamente cada cadena válida `/docs/x` a
+   `bin/index.mjs` a renderizar recursivamente cada cadena válida `/docs/x` a
    volúmenes `.html` físicos sin ejecutar contextos de navegadores headless
    reales.
 
@@ -103,7 +103,7 @@ variables).
 
 ---
 
-## 3. Ecosistema de desarrollo SSR (`ssrDevHandler.js`)
+## 3. Ecosistema de desarrollo SSR (`ssrDevHandler.mjs`)
 
 Para garantizar que la experiencia de desarrollador (DX) coincida con la
 semántica de producción de forma nativa, el `devServer` de Webpack intercepta

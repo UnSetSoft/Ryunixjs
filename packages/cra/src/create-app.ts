@@ -6,6 +6,7 @@ import pc from 'picocolors'
 import { getPkgManager } from './helpers/get-pkg-manager'
 import { isFolderEmpty } from './helpers/is-folder-empty'
 import { copyRecursiveSync } from './helpers/copy'
+import { ensurePublicFavicon } from './helpers/ensure-public-favicon'
 import { tryGitInit } from './helpers/git'
 
 const exec = promisify(execCb)
@@ -58,6 +59,7 @@ export async function createApp({
 
   console.log(`Copying files from template...\n`)
   copyRecursiveSync(templateDir, root)
+  ensurePublicFavicon(root)
 
   const gitignorePath = path.join(root, 'gitignore')
   if (fs.existsSync(gitignorePath)) {

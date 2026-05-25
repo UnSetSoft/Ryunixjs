@@ -68,7 +68,6 @@ Este proyecto es un monorepo gestionado con **pnpm** y **Turbo**.
 | `pnpm run dev`            | Ejecuta todos los paquetes en desarrollo con Turbo.            |
 | `pnpm run build`          | Compila todos los paquetes del monorepo.                       |
 | `pnpm run test`           | Ejecuta la suite de tests.                                     |
-| `pnpm run typecheck`      | TypeScript (`tsc --noEmit`) por paquete. Ver [guía TypeScript](docs/es/guias/typescript-en-el-monorepo.md). |
 | `pnpm run lint`           | Comprueba estilo y lint.                                       |
 | `pnpm run lint:md`        | Lint de Markdown (docs, raíz, READMEs).                        |
 | `pnpm run lint:md:fix`    | Corrige Markdown (`markdownlint-cli2 --fix` + Prettier).       |
@@ -109,6 +108,33 @@ Usa esta convención de nombres:
    inicial.
 
 2. **Stable**: Releases finales tras verificación exhaustiva en canary.
+
+### GitHub Actions (CI y publicación npm)
+
+- **CI** (`.github/workflows/ci.yml`): solo compila `@unsetsoft/ryunixjs` (Rollup).
+  `@unsetsoft/ryunix-presets` no tiene build (publica `webpack/` tal cual).
+  También Jest, ESLint, Markdown, Prettier y smoke build CRA.
+- **Release** (`.github/workflows/release.yml`): **Trusted Publishing (OIDC)** con
+  provenance. Sin secreto `NPM_TOKEN`.
+
+#### Trusted Publisher en npm (una vez por paquete)
+
+En [npmjs.com](https://www.npmjs.com/) → paquete → **Settings** → **Trusted
+publishing**, para `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` y
+`@unsetsoft/cra`:
+
+| Campo             | Valor                |
+| :---------------- | :------------------- |
+| Provider          | GitHub Actions       |
+| Repository        | `UnSetSoft/Ryunixjs` |
+| Workflow filename | `release.yml`        |
+
+Tras validar: **Publishing access** → exigir 2FA y deshabilitar tokens; revoca
+tokens de automatización antiguos.
+
+**Actions → Release → Run workflow** con **dry-run** hasta que las versiones en
+`package.json` estén listas. Tag `v*` publica en serio (`canary` en el nombre →
+tag npm `canary`; si no → `latest`).
 
 ## 📄 Licencia
 

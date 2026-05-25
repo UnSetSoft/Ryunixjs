@@ -9,7 +9,7 @@ function filterClientServerDirectives(source, target) {
     // Patterns for // @server and // @client block comments
     // These can appear as:
     // 1. // @client at start of line - entire file is client-only
-    // 2. // @server at start of line - entire file is server-only  
+    // 2. // @server at start of line - entire file is server-only
     // 3. // #__SERVER__ ... #__END_SERVER__ or /* @server ... @server */
     // 4. // #__CLIENT__ ... #__END_CLIENT__ or /* @client ... @client */
     const isServerBuild = target === 'node';
@@ -59,8 +59,8 @@ export default function (content) {
         target = 'web';
     }
     const isServerBuild = target === 'node';
-    // NOTE: We used to strip @client files on the server build here, 
-    // but this breaks traditional SSR and causes imported server actions 
+    // NOTE: We used to strip @client files on the server build here,
+    // but this breaks traditional SSR and causes imported server actions
     // to be dead-code eliminated from the server bundle.
     // We now let client components execute on the server to generate initial HTML.
     // NOTE: If building for client and file has @server directive, we DO NOT return empty.
@@ -73,10 +73,15 @@ export default function (content) {
     content = filterClientServerDirectives(content, target);
     // Auto-detection: Use hooks = Client (only for server builds)
     // Only check for hooks when building for server
-    const hasHooks = isServerBuild && /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(content);
+    const hasHooks = isServerBuild &&
+        /use(Store|Effect|LayoutEffect|Context|Ref|Memo|Id|Transition)/.test(content);
     // Add RSC optimization marker for client components on server build
     if (isServerBuild && hasHooks) {
-        const hash = crypto.createHash('md5').update(this.resourcePath).digest('hex').slice(0, 8);
+        const hash = crypto
+            .createHash('md5')
+            .update(this.resourcePath)
+            .digest('hex')
+            .slice(0, 8);
         // Improved injection: handle export default more safely
         if (content.includes('export default')) {
             return `${content} \n\n/** Ryunix RSC Optimization **/

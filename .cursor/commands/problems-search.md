@@ -25,12 +25,12 @@ Considerar impacto en **publicación npm**, **CI**, **build de paquetes**, **app
 
 ## Factores y prioridades (de mayor a menor)
 
-| Nivel | Etiqueta | Criterio orientativo |
-| :--- | :--- | :--- |
-| **P0** | Crítico | Rompe build, CI, publicación, API pública del core o apps plantilla. |
-| **P1** | Alto | Regresión SSR/hidratación, routing `.ryx`, Server Actions, errores runtime probables en plantillas. |
-| **P2** | Medio | Lint, tests fallidos, deuda en presets/webpack, docs desalineadas con código. |
-| **P3** | Bajo | Estilo, nitpicks, mejoras opcionales sin impacto inmediato. |
+| Nivel  | Etiqueta | Criterio orientativo                                                                                |
+| :----- | :------- | :-------------------------------------------------------------------------------------------------- |
+| **P0** | Crítico  | Rompe build, CI, publicación, API pública del core o apps plantilla.                                |
+| **P1** | Alto     | Regresión SSR/hidratación, routing `.ryx`, Server Actions, errores runtime probables en plantillas. |
+| **P2** | Medio    | Lint, tests fallidos, deuda en presets/webpack, docs desalineadas con código.                       |
+| **P3** | Bajo     | Estilo, nitpicks, mejoras opcionales sin impacto inmediato.                                         |
 
 ### 1. Monorepo e infraestructura (P0–P1)
 

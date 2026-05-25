@@ -501,8 +501,12 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
   let ryunixCreateElement = null;
 
   try {
-    const serverBundlePath = path.join(buildDir, 'server', 'app-router-server.bundle.js');
-    if (fs.existsSync(serverBundlePath)) {
+    const serverBundleCandidates = [
+      path.join(buildDir, 'server', 'app-router-server.bundle.js'),
+      path.join(buildDir, 'server', 'app-router-server.bundle.mjs'),
+    ]
+    const serverBundlePath = serverBundleCandidates.find((p) => fs.existsSync(p))
+    if (serverBundlePath) {
       // Mock global browser APIs before importing the bundle in case of top-level references
       if (typeof global.window === 'undefined') {
         const noop = () => { }
@@ -614,10 +618,12 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
   // ─── Sitemap generation ──────────────────────────────────────────────────
   // Priority: app/sitemap.js (Next.js-style) > ryunix.config.js
 
-  const sitemapFileCandidates = finalAppPath ? [
-    path.join(finalAppPath, 'sitemap.js'),
-    path.join(finalAppPath, 'sitemap.js'),
-  ] : []
+  const sitemapFileCandidates = finalAppPath
+    ? [
+        path.join(finalAppPath, 'sitemap.mjs'),
+        path.join(finalAppPath, 'sitemap.js'),
+      ]
+    : []
   const sitemapFilePath = sitemapFileCandidates.find((p) => fs.existsSync(p))
 
   if (sitemapFilePath) {
@@ -691,10 +697,12 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
   // ─── robots.txt generation ────────────────────────────────────────────────
   // Priority: app/robots.js > ryunix.config.js
 
-  const robotsFileCandidates = finalAppPath ? [
-    path.join(finalAppPath, 'robots.js'),
-    path.join(finalAppPath, 'robots.js'),
-  ] : []
+  const robotsFileCandidates = finalAppPath
+    ? [
+        path.join(finalAppPath, 'robots.mjs'),
+        path.join(finalAppPath, 'robots.js'),
+      ]
+    : []
   const robotsFilePath = robotsFileCandidates.find((p) => fs.existsSync(p))
 
   if (robotsFilePath) {

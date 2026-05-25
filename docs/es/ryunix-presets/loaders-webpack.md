@@ -10,12 +10,12 @@ de forma inherente y sin fricción.
 
 - [Ryunix Presets: Arquitectura de loaders Webpack](#ryunix-presets-arquitectura-de-loaders-webpack)
   - [Índice](#índice)
-  - [1. Loader de Ryunix Server Components (RSC) (`ryunix-rsc-loader.js`)](#1-loader-de-ryunix-server-components-rsc-ryunix-rsc-loaderjs)
-  - [2. Loader de Server Actions (`ryunix-server-action-loader.js`)](#2-loader-de-server-actions-ryunix-server-action-loaderjs)
+  - [1. Loader de Ryunix Server Components (RSC) (`ryunix-rsc-loader.mjs`)](#1-loader-de-ryunix-server-components-rsc-ryunix-rsc-loadermjs)
+  - [2. Loader de Server Actions (`ryunix-server-action-loader.mjs`)](#2-loader-de-server-actions-ryunix-server-action-loadermjs)
 
 ---
 
-## 1. Loader de Ryunix Server Components (RSC) (`ryunix-rsc-loader.js`)
+## 1. Loader de Ryunix Server Components (RSC) (`ryunix-rsc-loader.mjs`)
 
 Este loader se inyecta en el pipeline de módulos Webpack para soportar de forma
 nativa Island Architecture sin scaffolding explícito del desarrollador.
@@ -49,7 +49,7 @@ pesada en páginas no interactivas.
 
 ---
 
-## 2. Loader de Server Actions (`ryunix-server-action-loader.js`)
+## 2. Loader de Server Actions (`ryunix-server-action-loader.mjs`)
 
 Las Server Actions son funciones asíncronas que unen sin fricción la brecha
 entre componentes frontend y ejecución backend de forma nativa mediante la
@@ -84,7 +84,7 @@ directiva `// @server`.
 
    diccionario global (`globalThis.__RYUNIX_SERVER_ACTIONS__`).
 
-3. Durante el runtime de producción nativo, `prod.server.js` intercepta de
+3. Durante el runtime de producción nativo, `prod.server.mjs` intercepta de
 
    forma nativa el payload `POST`, ejecuta la función localizada y envía
    formalmente el resultado JSON de vuelta omitiendo por completo controladores

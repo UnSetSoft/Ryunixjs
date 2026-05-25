@@ -1,1 +1,9 @@
 node_modules/
+**/dist/
+**/.turbo/
+**/.ryunix/
+_ci/
+test/
+pnpm-lock.yaml
+coverage/
+*.min.js

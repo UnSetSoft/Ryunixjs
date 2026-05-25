@@ -4,7 +4,16 @@ import { transformSync } from '@swc/core';
 /**
  * Valid API route file names
  */
-const API_FILE_NAMES = ['route.js', 'route.ts', 'route.ryx', 'router.js', 'router.ts', 'router.ryx', 'endpoint.js', 'endpoint.ts'];
+const API_FILE_NAMES = [
+    'route.js',
+    'route.ts',
+    'route.ryx',
+    'router.js',
+    'router.ts',
+    'router.ryx',
+    'endpoint.js',
+    'endpoint.ts',
+];
 class ApiRouterPlugin {
     appDir;
     outputPath;
@@ -90,12 +99,12 @@ class ApiRouterPlugin {
                         react: {
                             pragma: 'Ryunix.createElement',
                             pragmaFrag: 'Ryunix.Fragment',
-                        }
-                    }
+                        },
+                    },
                 },
                 module: {
-                    type: 'es6'
-                }
+                    type: 'es6',
+                },
             });
             // Always output as .mjs for native Node ESM support
             const outFileName = fileName.replace(/\.(ts|ryx|js)$/, '.js');

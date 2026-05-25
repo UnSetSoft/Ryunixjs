@@ -69,7 +69,6 @@ This project is a monorepo managed with **pnpm** and **Turbo**.
 | `pnpm run dev`            | Run all packages in development mode using Turbo.                           |
 | `pnpm run build`          | Build all packages in the monorepo.                                         |
 | `pnpm run test`           | Run the test suite across all packages.                                     |
-| `pnpm run typecheck`      | Run TypeScript (`tsc --noEmit`) in each package. See [typescript guide](docs/en/guides/typescript-in-the-monorepo.md). |
 | `pnpm run lint`           | Check for code style and linting issues.                                    |
 | `pnpm run lint:md`        | Lint Markdown (`docs/`, root `*.md`, package READMEs).                      |
 | `pnpm run lint:md:fix`    | Auto-fix Markdown (`markdownlint-cli2 --fix` + Prettier).                   |
@@ -113,6 +112,39 @@ convention for your branches:
 2. **Stable**: Final releases are cut from stable branches after thorough
 
    verification in canary.
+
+### GitHub Actions (CI & npm publish)
+
+- **CI** (`.github/workflows/ci.yml`): builds only `@unsetsoft/ryunixjs` (Rollup).
+  `@unsetsoft/ryunix-presets` has no build step (ships `webpack/` as source).
+  Also runs Jest, ESLint, Markdown lint, Prettier, and a CRA smoke build.
+- **Release** (`.github/workflows/release.yml`): **npm Trusted Publishing (OIDC)**
+  with provenance. No `NPM_TOKEN` secret.
+
+#### npm Trusted Publisher (one-time per package)
+
+Configure on [npmjs.com](https://www.npmjs.com/) → package → **Settings** →
+**Trusted publishing** for each published package:
+
+| Package                     | `repository.directory`    |
+| :-------------------------- | :------------------------ |
+| `@unsetsoft/ryunixjs`       | `packages/core`           |
+| `@unsetsoft/ryunix-presets` | `packages/ryunix-presets` |
+| `@unsetsoft/cra`            | `packages/cra`            |
+
+| Field             | Value                                               |
+| :---------------- | :-------------------------------------------------- |
+| Provider          | GitHub Actions                                      |
+| Repository        | `UnSetSoft/Ryunixjs`                                |
+| Workflow filename | `release.yml`                                       |
+| Environment       | _(leave empty unless you add a GitHub Environment)_ |
+
+Recommended after verifying OIDC publish: **Publishing access** → _Require 2FA and
+disallow tokens_ (revoke old automation tokens).
+
+Release workflow: **Actions → Release → Run workflow** with **dry-run** until
+versions in `package.json` are ready. Tag `v*` triggers a real publish (`canary`
+in the tag name → npm tag `canary`, otherwise `latest`).
 
 ## 📄 License
 

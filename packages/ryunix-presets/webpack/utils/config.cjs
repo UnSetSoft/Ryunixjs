@@ -6,7 +6,9 @@ let reactPlugin
 try {
   reactPlugin = require('eslint-plugin-react')
 } catch (e) {
-  console.warn('[Ryunix] eslint-plugin-react not found. Using default ESLint rules.')
+  console.warn(
+    '[Ryunix] eslint-plugin-react not found. Using default ESLint rules.',
+  )
   reactPlugin = null
 }
 
@@ -28,21 +30,34 @@ const warnDeprecated = (configPath, message) => {
     value = value[key]
   }
   if (value !== undefined) {
-    console.warn(`\x1b[33m[Ryunix Warn]\x1b[0m \x1b[1m${configPath}\x1b[0m is deprecated. ${message}`)
+    console.warn(
+      `\x1b[33m[Ryunix Warn]\x1b[0m \x1b[1m${configPath}\x1b[0m is deprecated. ${message}`,
+    )
   }
 }
 
 // Check for App Router presence
 const rootDir = userConfig?.webpack?.root ?? 'src'
-const hasAppDir = fs.existsSync(path.resolve(process.cwd(), 'app')) || fs.existsSync(path.resolve(process.cwd(), `${rootDir}/app`))
+const hasAppDir =
+  fs.existsSync(path.resolve(process.cwd(), 'app')) ||
+  fs.existsSync(path.resolve(process.cwd(), `${rootDir}/app`))
 
 // Global old SSG deprecations
-warnDeprecated('experimental.ssg', 'The old SSG configuration is deprecated and will be removed in future versions in favor of App Router SSG conventions.')
+warnDeprecated(
+  'experimental.ssg',
+  'The old SSG configuration is deprecated and will be removed in future versions in favor of App Router SSG conventions.',
+)
 
 // App Router specific deprecations
 if (hasAppDir) {
-  warnDeprecated('static.seo', 'The global static.seo configuration is redundant when using the App Router. Use exported metadata in layout.ryx/page.ryx instead.')
-  warnDeprecated('static.customTemplate', 'Custom templates are replaced by the root layout.ryx when using the App Router.')
+  warnDeprecated(
+    'static.seo',
+    'The global static.seo configuration is redundant when using the App Router. Use exported metadata in layout.ryx/page.ryx instead.',
+  )
+  warnDeprecated(
+    'static.customTemplate',
+    'Custom templates are replaced by the root layout.ryx when using the App Router.',
+  )
 }
 // ============================================================================
 // Helpers
@@ -117,7 +132,10 @@ const defaultSettings = {
   mdx: getConfigValue('mdx', getConfigValue('experimental.mdx', false)),
   env: getConfigValue('env', getConfigValue('experimental.env', {})),
   rootDir: getConfigValue('rootDir', getConfigValue('webpack.root', 'src')),
-  buildDir: getConfigValue('buildDir', getConfigValue('webpack.output.buildDirectory', '.ryunix')),
+  buildDir: getConfigValue(
+    'buildDir',
+    getConfigValue('webpack.output.buildDirectory', '.ryunix'),
+  ),
   port: getConfigValue('port', getConfigValue('webpack.devServer.port', 3000)),
   proxy: getConfigValue('proxy', getConfigValue('webpack.devServer.proxy', [])),
   favicon: getConfigValue('favicon', getConfigValue('static.favicon', true)),
@@ -150,7 +168,10 @@ const defaultSettings = {
 
   webpack: {
     get production() {
-      return process.env.RYUNIX_MODE === 'production' || getConfigValue('webpack.production', false)
+      return (
+        process.env.RYUNIX_MODE === 'production' ||
+        getConfigValue('webpack.production', false)
+      )
     },
     target: getConfigValue('webpack.target', 'web'),
     resolve: {
@@ -201,13 +222,28 @@ warnDeprecated('experimental.ssr', 'Use the root "ssr" option instead.')
 warnDeprecated('experimental.mdx', 'Use the root "mdx" option instead.')
 warnDeprecated('experimental.env', 'Use the root "env" option instead.')
 warnDeprecated('webpack.root', 'Use the root "rootDir" option instead.')
-warnDeprecated('webpack.output.buildDirectory', 'Use the root "buildDir" option instead.')
+warnDeprecated(
+  'webpack.output.buildDirectory',
+  'Use the root "buildDir" option instead.',
+)
 warnDeprecated('webpack.devServer.port', 'Use the root "port" option instead.')
-warnDeprecated('webpack.devServer.proxy', 'Use the root "proxy" option instead.')
+warnDeprecated(
+  'webpack.devServer.proxy',
+  'Use the root "proxy" option instead.',
+)
 warnDeprecated('static.favicon', 'Use the root "favicon" option instead.')
-warnDeprecated('static.seo', 'Static SEO configuration is legacy. Use layouts and metadata instead.')
-warnDeprecated('static.customTemplate', 'Custom templates are legacy. Use root layouts instead.')
-warnDeprecated('experimental.ssg', 'Configuration-based SSG is legacy. Use file-based metadata in the "app" directory.')
+warnDeprecated(
+  'static.seo',
+  'Static SEO configuration is legacy. Use layouts and metadata instead.',
+)
+warnDeprecated(
+  'static.customTemplate',
+  'Custom templates are legacy. Use root layouts instead.',
+)
+warnDeprecated(
+  'experimental.ssg',
+  'Configuration-based SSG is legacy. Use file-based metadata in the "app" directory.',
+)
 
 if (defaultSettings.debug) {
   process.env.RYUNIX_DEBUG = 'true'

@@ -50,22 +50,22 @@ Optional body in English explaining why.
 
 ## Tipos y scopes
 
-| type | Uso |
-| :--- | :--- |
+| type                                                                      | Uso      |
+| :------------------------------------------------------------------------ | :------- |
 | `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore` | estándar |
 
-| scope | Cuándo |
-| :--- | :--- |
-| `core` | `packages/core` |
-| `presets` | `packages/ryunix-presets` |
-| `cra` | `packages/cra` |
-| `devtools` | `packages/ryunix-devtools` |
-| `readme` | `README.md` raíz |
-| `guide` | `docs/en/guides/`, `docs/es/guias/` |
-| `docs` | resto de `docs/` |
-| `cursor` | `.cursor/` |
-| `claude` | `.claude/`, `CLAUDE.md` |
-| `ci`, `turbo` | CI / orquestación |
+| scope         | Cuándo                              |
+| :------------ | :---------------------------------- |
+| `core`        | `packages/core`                     |
+| `presets`     | `packages/ryunix-presets`           |
+| `cra`         | `packages/cra`                      |
+| `devtools`    | `packages/ryunix-devtools`          |
+| `readme`      | `README.md` raíz                    |
+| `guide`       | `docs/en/guides/`, `docs/es/guias/` |
+| `docs`        | resto de `docs/`                    |
+| `cursor`      | `.cursor/`                          |
+| `claude`      | `.claude/`, `CLAUDE.md`             |
+| `ci`, `turbo` | CI / orquestación                   |
 
 - **Inglés obligatorio** en el commit (simple y descriptivo); respuesta al usuario en **español** salvo otro idioma.
 - **Sin** `Co-authored-by:` de IA; si Cursor lo insertó (commit no pusheado), reescribir con `git commit-tree` (`.claude/rules/git-commits.md`); `git commit --amend` no basta.

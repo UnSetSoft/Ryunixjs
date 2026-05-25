@@ -12,7 +12,7 @@ declarativa.
 - [Ryunix Presets: Interceptación de errores basada en archivos](#ryunix-presets-interceptación-de-errores-basada-en-archivos)
   - [Índice](#índice)
   - [1. Captura de errores del App Router (`error.ryx`)](#1-captura-de-errores-del-app-router-errorryx)
-  - [2. Inyección global de desarrollo (`webpack.config.js`)](#2-inyección-global-de-desarrollo-webpackconfigjs)
+  - [2. Inyección global de desarrollo (`webpack.config.mjs`)](#2-inyección-global-de-desarrollo-webpackconfigmjs)
 
 ---
 
@@ -22,7 +22,7 @@ Durante el recorrido automatizado de directorios dentro del ciclo de
 transpilación `.ryunix/server/app/app-router.js`, Ryunix busca intrínsecamente
 nodos `error.ryx` aislados de forma universal.
 
-`AppRouterPlugin.js` identifica bindings de exportación específicos (p. ej.
+`AppRouterPlugin.mjs` identifica bindings de exportación específicos (p. ej.
 `export default function Error()`) inyectándolos globalmente a través del
 segmento topológico `isServerComponent` más cercano.
 
@@ -45,7 +45,7 @@ segmento topológico `isServerComponent` más cercano.
 
 ---
 
-## 2. Inyección global de desarrollo (`webpack.config.js`)
+## 2. Inyección global de desarrollo (`webpack.config.mjs`)
 
 Ryunix sobrescribe por completo WebSockets genéricos basados en cadenas de
 Webpack inyectando sus propios overlays de extracción dual-compiler fuertemente

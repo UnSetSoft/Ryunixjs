@@ -5,6 +5,7 @@ yarn.lock
 .ryunix
 package-lock.json
 _cra
+_ci
 test/*
 !test/webpack/
 test/webpack/node_modules/

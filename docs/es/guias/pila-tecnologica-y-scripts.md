@@ -82,7 +82,7 @@ El framework publicado en npm no incluye React ni Preact.
 | Build de librería (solo core) | **Rollup 4**                                                                                   |
 | MDX / markdown                | `@mdx-js/loader`, `@mdx-js/rollup`, plugins **remark** / **rehype**                            |
 | Estilos                       | **PostCSS**, **Sass**, `css-loader`, `mini-css-extract-plugin`, `css-minimizer-webpack-plugin` |
-| CLI                           | `yargs`, `chalk`, `boxen`; binario `ryunix` → `webpack/bin/index.js` (fuente `.ts`)            |
+| CLI                           | `yargs`, `chalk`, `boxen`; binario `ryunix` → `webpack/bin/index.mjs`                          |
 | Lint en toolchain             | ESLint 9, `eslint-webpack-plugin`, `eslint-plugin-mdx`                                         |
 
 Las apps creadas con plantillas CRA consumen `@unsetsoft/ryunix-presets` y
@@ -141,7 +141,6 @@ Los comandos se ejecutan desde la **raíz del repositorio** salvo indicación.
 | `pnpm run dev`          | Turbo: `dev` en paquetes que lo definan (p. ej. CLI interactiva de CRA) |
 | `pnpm run build`        | Turbo: compilar paquetes (`dependsOn: ^build`)                          |
 | `pnpm run test`         | Turbo: tests (tras build)                                               |
-| `pnpm run typecheck`    | Turbo: `tsc --noEmit` por paquete (ver [guía TypeScript](./typescript-en-el-monorepo.md)) |
 | `pnpm run lint`         | ESLint en el repo + Turbo `lint` + `lint:md`                            |
 | `pnpm run lint:fix`     | Prettier, ESLint `--fix`, corrección Turbo lint                         |
 | `pnpm run format`       | Prettier en modo escritura                                              |
@@ -197,10 +196,10 @@ definir el script para que Turbo lo ejecute.
 
 ## Documentación relacionada
 
-| Tema                             | Documento                                                          |
-| :------------------------------- | :----------------------------------------------------------------- |
-| Onboarding del monorepo          | [guia-del-repositorio.md](./guia-del-repositorio.md)               |
-| Tests automatizados              | [tests-automatizados.md](./tests-automatizados.md)                 |
-| App integración (`run:web`)      | [app-de-integracion-local.md](./app-de-integracion-local.md)       |
-| Índice de docs                   | [resumen.md](../resumen.md)                                        |
-| Contribución / comprobaciones PR | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)                     |
+| Tema                             | Documento                                                    |
+| :------------------------------- | :----------------------------------------------------------- |
+| Onboarding del monorepo          | [guia-del-repositorio.md](./guia-del-repositorio.md)         |
+| Tests automatizados              | [tests-automatizados.md](./tests-automatizados.md)           |
+| App integración (`run:web`)      | [app-de-integracion-local.md](./app-de-integracion-local.md) |
+| Índice de docs                   | [resumen.md](../resumen.md)                                  |
+| Contribución / comprobaciones PR | [CONTRIBUTING.es.md](../../CONTRIBUTING.es.md)               |

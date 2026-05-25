@@ -12,6 +12,7 @@ const picocolors_1 = __importDefault(require("picocolors"));
 const get_pkg_manager_1 = require("./helpers/get-pkg-manager");
 const is_folder_empty_1 = require("./helpers/is-folder-empty");
 const copy_1 = require("./helpers/copy");
+const ensure_public_favicon_1 = require("./helpers/ensure-public-favicon");
 const git_1 = require("./helpers/git");
 const exec = (0, util_1.promisify)(child_process_1.exec);
 async function createApp({ appPath, appName, channel, compiler, tailwind, eslint, vscode, }) {
@@ -40,6 +41,7 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
     }
     console.log(`Copying files from template...\n`);
     (0, copy_1.copyRecursiveSync)(templateDir, root);
+    (0, ensure_public_favicon_1.ensurePublicFavicon)(root);
     const gitignorePath = path_1.default.join(root, 'gitignore');
     if (fs_1.default.existsSync(gitignorePath)) {
         fs_1.default.renameSync(gitignorePath, path_1.default.join(root, '.gitignore'));

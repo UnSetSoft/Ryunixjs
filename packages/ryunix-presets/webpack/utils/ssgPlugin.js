@@ -30,7 +30,8 @@ class RyunixRoutesPlugin {
             }
             const routesFile = path.resolve(process.cwd(), this.routesPath);
             if (!fs.existsSync(routesFile)) {
-                const hasAppDir = fs.existsSync(path.resolve(process.cwd(), 'app')) || fs.existsSync(path.resolve(process.cwd(), 'src/app'));
+                const hasAppDir = fs.existsSync(path.resolve(process.cwd(), 'app')) ||
+                    fs.existsSync(path.resolve(process.cwd(), 'src/app'));
                 if (!hasAppDir) {
                     console.log('[SSG] ❌ The route file was not found:', this.routesPath);
                 }

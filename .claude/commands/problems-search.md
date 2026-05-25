@@ -30,12 +30,12 @@ Impacto: publicación npm, CI, build de paquetes, plantillas CRA, runtime.
 
 ## Prioridades
 
-| Nivel | Etiqueta | Criterio |
-| :--- | :--- | :--- |
-| **P0** | Crítico | Build, CI, publicación, API pública del core o plantillas rotas. |
-| **P1** | Alto | SSR/hidratación, routing `.ryx`, Server Actions, runtime en plantillas. |
-| **P2** | Medio | Lint, tests, presets/webpack, docs desalineadas. |
-| **P3** | Bajo | Estilo, nitpicks, mejoras opcionales. |
+| Nivel  | Etiqueta | Criterio                                                                |
+| :----- | :------- | :---------------------------------------------------------------------- |
+| **P0** | Crítico  | Build, CI, publicación, API pública del core o plantillas rotas.        |
+| **P1** | Alto     | SSR/hidratación, routing `.ryx`, Server Actions, runtime en plantillas. |
+| **P2** | Medio    | Lint, tests, presets/webpack, docs desalineadas.                        |
+| **P3** | Bajo     | Estilo, nitpicks, mejoras opcionales.                                   |
 
 ### Áreas
 
@@ -51,25 +51,32 @@ Impacto: publicación npm, CI, build de paquetes, plantillas CRA, runtime.
 
 ```markdown
 ## Resumen ejecutivo
+
 - X P0, Y P1, …
 - Qué atacar primero (1–3 frases).
 
 ## P0 — Crítico
+
 - [ ] **Título** — ruta — impacto — fix (1 línea)
 
 ## P1 — Alto
+
 …
 
 ## P2 — Medio
+
 …
 
 ## P3 — Bajo
+
 …
 
 ## Comprobaciones ejecutadas
+
 - comandos y resultado
 
 ## Sin hallazgos relevantes
+
 - (opcional)
 ```
 

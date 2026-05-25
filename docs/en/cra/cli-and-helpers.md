@@ -1,128 +1,64 @@
-# Create Ryunix App: CLI and helpers
+# Create Ryunix App: CLI & Helpers
 
-> **Language / Idioma:** [English](./cli-and-helpers.md) ·
-> [Español](../../es/cra/cli-y-ayudantes.md)
-
-Entry point for `@unsetsoft/cra`: arguments, interactive prompts, and modules
-under `packages/cra/src/`. Package overview:
-[package-overview.md](./package-overview.md).
+The `@unsetsoft/create-ryunix-app` package functions as the primary scaffolding
+gateway.
 
 ---
 
 ## Table of contents
 
-- [Create Ryunix App: CLI and helpers](#create-ryunix-app-cli-and-helpers)
+- [Create Ryunix App: CLI & Helpers](#create-ryunix-app-cli--helpers)
   - [Table of contents](#table-of-contents)
-  - [Entry: `cli.ts`](#entry-clits)
-  - [Engine: `create-app.ts`](#engine-create-appts)
-  - [Helpers (`src/helpers/`)](#helpers-srchelpers)
-  - [Running the CLI in the monorepo](#running-the-cli-in-the-monorepo)
+  - [1. CLI Arguments & Prompts (`cli.js`)](#1-cli-arguments--prompts-clijs)
+  - [2. The Core Execution Engine (`create-app.js`)](#2-the-core-execution-engine-create-appjs)
+  - [3. Terminal Executions (`commands.js`)](#3-terminal-executions-commandsjs)
 
 ---
 
-## Entry: `cli.ts`
+## 1. CLI Arguments & Prompts (`cli.js`)
 
-Published as `src/cli.js` (TypeScript emit). Uses **Commander** for flags and
-**prompts** when options are missing.
+Builds entirely upon Node `commander` and `prompts` interactive terminal
+libraries.
 
-### Positional argument
+- Intercepts implicit shell arguments (`--tailwind`, `--canary`,
 
-| Argument | Description |
-| :------- | :------------ |
-| `[directory]` | Project folder name or path. Prompted if omitted. |
+  `--compiler=swc`).
 
-### Flags
+- If omitted, gracefully falls back to interactive Terminal choices querying the
 
-| Flag | Effect |
-| :--- | :----- |
-| `-v, --version` | CRA package version |
-| `-h, --help` | Help text |
-| `--canary` | Canary channel for Ryunix dependencies |
-| `--latest` | Latest channel (default when channel is not prompted) |
-| `--tailwind` | Tailwind template |
-| `--eslint` | ESLint template |
-| `--vscode` | Writes `.vscode/extensions.json` recommending the Ryunix extension |
-| `--compiler <swc\|babel>` | Compiler in `ryunix.config.js` (default `swc`) |
+  developer safely avoiding installation failures.
 
-Without `--canary` or `--latest`, the CLI asks for the channel. Same for
-Tailwind, ESLint, and VS Code unless you pass the flags above.
+- Captures the exact target project directory naming structure.
 
-It then calls `createApp()` with `appPath`, `appName` (directory basename),
-`channel`, `compiler`, `tailwind`, `eslint`, and `vscode`.
+## 2. The Core Execution Engine (`create-app.js`)
 
----
+The `createApp` function orchestrates the physical folder deployments.
 
-## Engine: `create-app.ts`
+- **Dependency Resolvers**: Instead of hardcoding static versions natively
 
-Exported function `createApp(options: CreateAppOptions)`.
+  (which age out), it executes dynamic shell queries (`npm view`, `yarn info`)
+  inspecting the NPM Registry explicitly pulling the absolute latest strict
+  semantic version representing the chosen `--latest` or `--canary` tags for
+  both `@unsetsoft/ryunixjs` and `@unsetsoft/ryunix-presets`.
 
-### Steps
+- **Target Routing**: Determines exactly which of the 4 native `templates` to
 
-1. **Resolve path** — `path.resolve(appPath)`; create the folder if missing.
-2. **Validate empty** — `isFolderEmpty()`; exits with code 1 on conflicts.
-3. **Pick template** — See table in
-   [template-generation.md](./template-generation.md).
-4. **Copy** — `copyRecursiveSync(templateDir, root)`.
-5. **Rename `gitignore`** — Template file `gitignore` becomes `.gitignore` (npm
-   publish dotfile workaround).
-6. **`package.json`** — Sets `name`, `version`, `private`; queries the registry
-   (`npm view`, `yarn info`, or `pnpm view` from detected package manager) for
-   `@unsetsoft/ryunixjs` and `@unsetsoft/ryunix-presets` at `latest` or `canary`;
-   adds Tailwind or ESLint devDependencies when needed.
-7. **`ryunix.config.js`** — If the template has `const RyunixSettings = {`,
-   inserts `compiler: 'swc'|'babel'` into the object.
-8. **VS Code** — If `vscode`, writes `.vscode/extensions.json` with
-   `unsetsoft.ryunixjs`.
-9. **Git** — Optional `tryGitInit(root)` (`main` branch, initial commit).
-10. **Final message** — Prints `cd`, `install`, and `run dev` (does not run
-    install).
+  physically copy (`ryunix-base`, `ryunix-eslint`, `ryunix-tailwind`, or
+  `ryunix-all`) leveraging `copyRecursiveSync`.
 
-### Version resolution
+- **Configuration Modifications**: Statically mutates the generated
 
-```text
-npm view @unsetsoft/ryunixjs@<latest|canary> version
-npm view @unsetsoft/ryunix-presets@<latest|canary> version
-```
+  `package.json` mutating the generic `name` into the explicit developer folder
+  name. If `--compiler` was modified, it injects string replacements physically
+  directly into `ryunix.config.js`.
 
-On failure, the literal tag (`latest` / `canary`) is used and a warning is
-shown. Resolved versions are written with a `^` prefix in
-`dependencies` / `devDependencies`.
+- **VSCode Automation**: Optionally writes `.vscode/extensions.json` forcing the
 
-### Exported types
+  Editor to recommend the physical `unsetsoft.ryunixjs` syntax highlighting
+  addon natively.
 
-- `RyunixChannel`: `'Latest' | 'Canary'`
-- `RyunixCompiler`: `'swc' | 'babel'`
-- `CreateAppOptions`: `createApp` parameters
+## 3. Terminal Executions (`commands.js`)
 
----
-
-## Helpers (`src/helpers/`)
-
-| Module | Function | Role |
-| :----- | :------- | :--- |
-| `copy.ts` | `copyRecursiveSync(src, dest)` | Copies template tree; skips `node_modules`, `dist`, `.ryunix` |
-| `get-pkg-manager.ts` | `getPkgManager()` | Reads `npm_config_user_agent` → `npm` \| `yarn` \| `pnpm` \| `bun` |
-| `is-folder-empty.ts` | `isFolderEmpty(root, name)` | Allows only “safe” files (`.git`, `LICENSE`, etc.) |
-| `git.ts` | `tryGitInit(root)` | `git init`, `main` branch, `add -A`, initial commit; rolls back on failure |
-| `install.ts` | `install(pm, cwd)` | Runs package manager `install` quietly; **not** called by `create-app` today |
-
----
-
-## Running the CLI in the monorepo
-
-From the monorepo root (after `pnpm --filter @unsetsoft/cra build` if you
-changed `.ts`):
-
-```bash
-node packages/cra/src/cli.js ../_cra/my-test-app --latest --tailwind
-```
-
-See also [automated testing](../guides/automated-testing.md) and
-[local integration app](../guides/local-integration-app.md).
-
-TypeScript maintenance:
-
-```bash
-pnpm --filter @unsetsoft/cra typecheck
-pnpm --filter @unsetsoft/cra build
-```
+Houses raw OS-level execution shells checking if binary configurations exist
+(e.g. `code` executing VS Code Native extension installations out-of-band
+natively).

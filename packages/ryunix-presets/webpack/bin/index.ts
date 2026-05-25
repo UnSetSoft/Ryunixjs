@@ -70,7 +70,9 @@ const dev = {
 
     // add message to say the server is starting with chalk
     console.log(chalk.cyan('Starting development server, please wait...'))
-    console.log(`${chalk.cyan('○')}  Compiler: ${chalk.bold(config.compiler.toUpperCase())}`)
+    console.log(
+      `${chalk.cyan('○')}  Compiler: ${chalk.bold(config.compiler.toUpperCase())}`,
+    )
     try {
       await StartDevServer(settings)
     } catch (error) {
@@ -85,11 +87,7 @@ const prod = {
   describe: 'Run server for production mode. Requiere .ryunix/static',
   handler: async (arg) => {
     process.env.RYUNIX_MODE = 'production'
-    if (
-      !fs.existsSync(
-        join(process.cwd(), config.buildDir, 'static'),
-      )
-    ) {
+    if (!fs.existsSync(join(process.cwd(), config.buildDir, 'static'))) {
       logger.error('You need build first!')
       return
     }
@@ -113,7 +111,7 @@ const prod = {
           title: chalk.bold('Production Server'),
           titleAlignment: 'center',
           minimumWidth: 50,
-        })
+        }),
       )
     })
   },
@@ -138,7 +136,9 @@ const build = {
     clean(join(buildRoot, 'server', 'app-router-server.bundle.js'))
     // Note: server/api/ is cleaned by ApiRouterPlugin on its own (incremental recompile)
 
-    console.log(`${chalk.cyan('○')}  Compiling using ${chalk.bold(config.compiler.toUpperCase())}...`)
+    console.log(
+      `${chalk.cyan('○')}  Compiling using ${chalk.bold(config.compiler.toUpperCase())}...`,
+    )
     const buildStart = Date.now()
 
     compiler.run(async (err, stats) => {
@@ -160,7 +160,8 @@ const build = {
       const buildTimeMs = Date.now() - buildStart
       const minutes = Math.floor(buildTimeMs / 60000)
       const seconds = ((buildTimeMs % 60000) / 1000).toFixed(1)
-      const formattedTime = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
+      const formattedTime =
+        minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
 
       // ── SSG Prerender ──────────────────────────────────────────────────────
       if (defaultSettings.webpack.production) {
@@ -184,13 +185,19 @@ const build = {
         }
         const apiRoutes = collectRoutes(apiOutputDir)
         if (apiRoutes.length > 0) {
-          console.log(`${chalk.cyan('○')}  API routes (${chalk.bold(apiRoutes.length)}):`)
-          apiRoutes.forEach((r) => console.log(`   ${chalk.green('✔')} ${chalk.gray(`/api${r}`)}`))
+          console.log(
+            `${chalk.cyan('○')}  API routes (${chalk.bold(apiRoutes.length)}):`,
+          )
+          apiRoutes.forEach((r) =>
+            console.log(`   ${chalk.green('✔')} ${chalk.gray(`/api${r}`)}`),
+          )
           console.log('')
         }
       }
 
-      logger.info(`${chalk.green('✔')} ${chalk.bold('Compilation successful! 🎉')}`)
+      logger.info(
+        `${chalk.green('✔')} ${chalk.bold('Compilation successful! 🎉')}`,
+      )
       logger.info(`${chalk.gray('Done in')} ${chalk.bold(formattedTime)}`)
 
       compiler.close((closeErr) => {

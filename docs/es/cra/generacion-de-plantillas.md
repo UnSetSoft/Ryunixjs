@@ -1,141 +1,50 @@
-# Create Ryunix App: generación de plantillas
+# Create Ryunix App: Topologías de plantillas
 
-> **Language / Idioma:** [English](../../en/cra/template-generation.md) ·
-> [Español](./generacion-de-plantillas.md)
-
-Ryunix no genera archivos procedimentalmente en masa: usa **directorios
-snapshot** en `packages/cra/templates/` que se copian 1:1 al destino del
-usuario. Visión del paquete: [resumen-del-paquete.md](./resumen-del-paquete.md).
+En lugar de construir generadores boilerplate monolíticos masivos que mutan
+cientos de archivos de forma procedural, Ryunix aprovecha directorios snapshot
+físicos atómicos.
 
 ---
 
 ## Índice
 
-- [Create Ryunix App: generación de plantillas](#create-ryunix-app-generación-de-plantillas)
+- [Create Ryunix App: Topologías de plantillas](#create-ryunix-app-topologías-de-plantillas)
   - [Índice](#índice)
-  - [Selección de plantilla](#selección-de-plantilla)
-  - [Las cuatro plantillas](#las-cuatro-plantillas)
-  - [Layout típico (`ryunix-base`)](#layout-típico-ryunix-base)
-  - [Mecanismo de copia](#mecanismo-de-copia)
-  - [Truco del archivo `gitignore`](#truco-del-archivo-gitignore)
-  - [Qué hace el usuario después](#qué-hace-el-usuario-después)
+  - [Esqueletos precompilados (`templates/*`)](#esqueletos-precompilados-templates)
 
 ---
 
-## Selección de plantilla
+## Esqueletos precompilados (`templates/*`)
 
-Lógica en `create-app.ts`:
+El motor CLI mapea físicamente las elecciones CLI del desarrollador directamente
+a carpetas de plantilla explícitas dentro del paquete CRA.
 
-| Tailwind | ESLint | Carpeta copiada |
-| :------: | :----: | :-------------- |
-| no | no | `ryunix-base` |
-| sí | no | `ryunix-tailwind` |
-| no | sí | `ryunix-eslint` |
-| sí | sí | `ryunix-all` |
+1. **`ryunix-base`**: La aplicación Ryunix mínima viable reducida. Contiene
 
----
+   configuraciones idénticas de App Router sin configuraciones CSS externas.
 
-## Las cuatro plantillas
+2. **`ryunix-tailwind`**: Preconfigurado mapeando estrictamente el pipeline
 
-### `ryunix-base`
+   `postcss.config.js` en `globals.css` utilizando correctamente la integración
+   `@tailwindcss/postcss` de forma nativa.
 
-App mínima: rutas `.ryx`, estilos globales, API de ejemplo, `ryunix.config.js`
-vacío (el CLI inyecta `compiler`), `package.json` con scripts `dev` / `build` /
-`start` que llaman a `ryunix`.
+3. **`ryunix-eslint`**: Importa `eslint.config.mjs` enlazando las convenciones
 
-### `ryunix-tailwind`
+   estrictas del framework sin fricción.
 
-Igual que base más:
+4. **`ryunix-all`**: La amalgama comprehensiva que fusiona todo de forma nativa.
 
-- `postcss.config.js` con `@tailwindcss/postcss` y `autoprefixer`
-- `tailwind.config.js`
-- Estilos preparados para Tailwind en `styles/global.css`
+### Mecanismo de copia arquitectónica
 
-`create-app` añade en `package.json`: `tailwindcss`, `@tailwindcss/postcss`,
-`postcss`.
+- **`copyRecursiveSync`**: El generador recorre recursivamente la estructura de
 
-### `ryunix-eslint`
+  plantilla mapeándola 1:1 sobre el shell objetivo ejecutando asignaciones
+  estándar del sistema de archivos internamente.
 
-Base más linting:
+- **Bypass de Gitignore**: `npm publish` estándar elimina explícitamente
 
-- `.eslintrc.json`, `.eslintignore`
-- Plugins React en devDependencies al generar
-
-### `ryunix-all`
-
-Combinación de Tailwind y ESLint (archivos de ambas variantes).
-
-Todas incluyen `vercel.json` de ejemplo y `assets/logo.svg` en la página de
-inicio.
-
----
-
-## Layout típico (`ryunix-base`)
-
-```text
-mi-app/
-├── app/
-│   ├── index.ryx          # Página principal
-│   ├── layout.ryx         # Layout global
-│   ├── error.ryx          # Errores por ruta
-│   └── api/
-│       └── hello/
-│           └── router.js  # Ejemplo API (preset compila con SWC)
-├── styles/
-│   └── global.css
-├── assets/
-│   └── logo.svg
-├── ryunix.config.js       # RyunixUserConfig (@unsetsoft/ryunix-presets)
-├── package.json
-└── .gitignore             # Renombrado desde `gitignore` en la plantilla
-```
-
-Convenciones de app Ryunix (no Next.js): rutas bajo `app/`, sin `page.tsx` ni
-`src/features/` salvo que el proyecto lo añada después.
-
-El `package.json` de plantilla solo define scripts; las versiones de
-`@unsetsoft/ryunixjs` y `@unsetsoft/ryunix-presets` las escribe `create-app` al
-consultar npm.
-
----
-
-## Mecanismo de copia
-
-`copyRecursiveSync` en `helpers/copy.ts`:
-
-- Recorre directorios y archivos del template.
-- Omite carpetas `node_modules`, `dist` y `.ryunix` si existieran en la
-  plantilla.
-- No sustituye placeholders tipo `{{name}}` en el nombre del paquete: el
-  `package.json` de plantilla usa un nombre genérico y `create-app` sobrescribe
-  `name` con el basename del directorio elegido.
-
-No hay paso de “instalar dependencias” automático en el CLI actual.
-
----
-
-## Truco del archivo `gitignore`
-
-`npm publish` no incluye bien `.gitignore` en algunos flujos del paquete CRA.
-Las plantillas envían un archivo llamado **`gitignore`** (sin punto). Tras la
-copia, `create-app.ts` lo renombra a **`.gitignore`** en el proyecto del
-usuario.
-
-Para copiar manualmente una plantilla (p. ej. app de integración en `test/`):
-
-```bash
-cp -r packages/cra/templates/ryunix-base test/mi-app
-cp packages/cra/templates/ryunix-base/gitignore test/mi-app/.gitignore
-```
-
----
-
-## Qué hace el usuario después
-
-1. `cd` al directorio creado.
-2. Instalar dependencias (`pnpm install`, `npm install`, etc.).
-3. `pnpm run dev` (o equivalente) → ejecuta `ryunix dev` del preset.
-4. Editar `app/index.ryx` y `ryunix.config.js`.
-
-El preset (`@unsetsoft/ryunix-presets`) documenta Webpack, routing y SSG en
-[docs/es/ryunix-presets/](../ryunix-presets/).
+  archivos `.gitignore` de paquetes NPM físicos de forma nativa. Para sortear
+  esta restricción, las plantillas Ryunix se envían físicamente conteniendo un
+  archivo literalmente llamado `gitignore` exclusivamente. Tras la compilación
+  física dentro de `create-app.js`, lo renombra violentamente de vuelta a
+  `.gitignore` engañando con éxito al registro NPM.

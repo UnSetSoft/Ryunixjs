@@ -6,22 +6,19 @@ abstrae por completo el cableado boilerplate estándar de Webpack.
 Está mapeado físicamente al comando bash genérico `ryunix` mediante la
 exportación del directorio `"bin"` de `package.json`.
 
-Los archivos del toolchain se mantienen en **TypeScript** (`.ts`); Node ejecuta
-los **`.js` emitidos** por `pnpm --filter @unsetsoft/ryunix-presets build`.
-
 ---
 
 ## Índice
 
 - [Ryunix Presets: Arquitectura de CLI y arranque](#ryunix-presets-arquitectura-de-cli-y-arranque)
   - [Índice](#índice)
-  - [1. Enrutamiento CLI de nivel superior (`bin/index.js`)](#1-enrutamiento-cli-de-nivel-superior-binindexjs)
-  - [2. Motor de desarrollo (`bin/dev.server.js`)](#2-motor-de-desarrollo-bindevserverjs)
-  - [3. Servidor web de producción nativo (`bin/prod.server.js`)](#3-servidor-web-de-producción-nativo-binprodserverjs)
+  - [1. Enrutamiento CLI de nivel superior (`bin/index.mjs`)](#1-enrutamiento-cli-de-nivel-superior-binindexmjs)
+  - [2. Motor de desarrollo (`bin/dev.server.mjs`)](#2-motor-de-desarrollo-bindevservermjs)
+  - [3. Servidor web de producción nativo (`bin/prod.server.mjs`)](#3-servidor-web-de-producción-nativo-binprodservermjs)
 
 ---
 
-## 1. Enrutamiento CLI de nivel superior (`bin/index.js`)
+## 1. Enrutamiento CLI de nivel superior (`bin/index.mjs`)
 
 Ryunix utiliza `yargs` para analizar argumentos de línea de comandos con
 seguridad. Expone cinco comandos de ejecución nativos:
@@ -34,11 +31,11 @@ seguridad. Expone cinco comandos de ejecución nativos:
 2. **`dev`**: Muta la variable de entorno activa
 
    `process.env.RYUNIX_MODE = 'development'` y delega la ejecución a
-   `dev.server.js`.
+   `dev.server.mjs`.
 
 3. **`start`**: Muta `process.env.RYUNIX_MODE = 'production'` y provisiona
 
-   directamente la aplicación node interna `prod.server.js`. Valida el
+   directamente la aplicación node interna `prod.server.mjs`. Valida el
    directorio `build/static` para garantizar que existe un objetivo compilado.
 
 4. **`build`**: Elimina agresivamente artefactos de build obsoletos
@@ -55,7 +52,7 @@ seguridad. Expone cinco comandos de ejecución nativos:
 
 ---
 
-## 2. Motor de desarrollo (`bin/dev.server.js`)
+## 2. Motor de desarrollo (`bin/dev.server.mjs`)
 
 Cuando los desarrolladores invocan `npx ryunix dev`, este runtime arranca la
 arquitectura de hot-reloading.
@@ -67,8 +64,8 @@ arquitectura de hot-reloading.
 - **Emparejamiento estricto de arrays**: Como RyunixJS ejecuta una arquitectura
 
   Dual-Compiler (generando bundles Cliente y Servidor de forma concurrente), el
-  script `dev.server.js` escanea inteligentemente los arrays exportados en
-  `webpack.config.js`, extrae la configuración etiquetada estrictamente con
+  script `dev.server.mjs` escanea inteligentemente los arrays exportados en
+  `webpack.config.mjs`, extrae la configuración etiquetada estrictamente con
   `name === 'client'` y la enlaza exclusivamente a `WebpackDevServer()`.
 
 - **Enlace inteligente de puertos**: Interroga el sistema operativo
@@ -80,7 +77,7 @@ arquitectura de hot-reloading.
 
 ---
 
-## 3. Servidor web de producción nativo (`bin/prod.server.js`)
+## 3. Servidor web de producción nativo (`bin/prod.server.mjs`)
 
 A diferencia de frameworks tradicionales que dictan binarios de dependencia
 externa (p. ej. `serve`) para previsualizar builds, Ryunix incluye un servidor
@@ -111,6 +108,6 @@ explícitamente a su topología de carpetas específica.
   coincide con la firma de payload estático `/_ryunix/action` o apunta
   explícitamente a un archivo aislado dentro del directorio de compilación
   `server/api`, abandona los bucles de distribución de archivos estáticos y
-  recorre en su lugar estrictamente los endpoints `.js` del lado servidor
+  recorre en su lugar estrictamente los endpoints `.mjs` del lado servidor
   ejecutando con seguridad y omitiendo implícitamente el bucle fallback de
   layout de Single Page Application estándar.

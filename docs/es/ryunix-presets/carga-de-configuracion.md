@@ -12,7 +12,6 @@ En su lugar, expone una puerta de validación explícita controlada vía
   - [Índice](#índice)
   - [1. Descubrimiento (`settingfile.cjs`)](#1-descubrimiento-settingfilecjs)
   - [2. Pipeline de extracción (`config.cjs`)](#2-pipeline-de-extracción-configcjs)
-  - [3. Tipos públicos (`config.d.ts`)](#3-tipos-públicos-configdts)
 
 ---
 
@@ -87,25 +86,3 @@ internamente:
 
    valores legacy directamente en la forma modernizada implícitamente entre
    bastidores.
-
----
-
-## 3. Tipos públicos (`config.d.ts`)
-
-Para autocompletado en el IDE sin migrar el tooling a TypeScript, el paquete
-publica tipos en `packages/ryunix-presets/webpack/config.d.ts` (export principal:
-`RyunixUserConfig`).
-
-En el `ryunix.config.js` de una app:
-
-```javascript
-/** @type {import('@unsetsoft/ryunix-presets').RyunixUserConfig} */
-export default {
-  ssr: true,
-  compiler: 'swc',
-}
-```
-
-Tablas de opciones, valores por defecto y claves deprecadas:
-[`packages/ryunix-presets/README.es.md`](../../packages/ryunix-presets/README.es.md#configuración-ryunixconfigjs).
-La fuente de verdad del runtime sigue siendo `webpack/utils/config.cjs`.

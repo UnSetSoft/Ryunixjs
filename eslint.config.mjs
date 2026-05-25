@@ -5,7 +5,15 @@ import babelParser from '@babel/eslint-parser'
 
 export default [
   {
-    ignores: ['**/node_modules', '**/.vscode/**/*'],
+    ignores: [
+      '**/node_modules/**',
+      '**/.vscode/**',
+      '**/.turbo/**',
+      '**/.ryunix/**',
+      '**/dist/**',
+      'test/**',
+      '_ci/**',
+    ],
   },
   {
     plugins: {

@@ -28,13 +28,20 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     let ryunixRenderToString = null;
     let ryunixCreateElement = null;
     try {
-        const serverBundlePath = resolveApp(dir, `${buildDir}/server/app-router-server.bundle.mjs`);
-        if (fs.existsSync(serverBundlePath)) {
+        const serverBundleCandidates = [
+            `${buildDir}/server/app-router-server.bundle.js`,
+            `${buildDir}/server/app-router-server.bundle.mjs`,
+        ].map((rel) => resolveApp(dir, rel));
+        const serverBundlePath = serverBundleCandidates.find((p) => fs.existsSync(p));
+        if (serverBundlePath) {
             if (typeof global.window === 'undefined') {
                 global.window = { location: { pathname: req.url } };
             }
             if (typeof global.document === 'undefined') {
-                global.document = { querySelector: () => null, getElementById: () => null };
+                global.document = {
+                    querySelector: () => null,
+                    getElementById: () => null,
+                };
             }
             const serverModule = await import(`file://${serverBundlePath}?update=${Date.now()}`);
             AppRouterApp = serverModule.default?.default || serverModule.default;
@@ -77,10 +84,14 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
         try {
             const cssDir = resolveApp(dir, `${buildDir}/static/css`);
             if (outputFs.existsSync(cssDir)) {
-                const cssFiles = outputFs.readdirSync(cssDir).filter(f => f.endsWith('.css'));
+                const cssFiles = outputFs
+                    .readdirSync(cssDir)
+                    .filter((f) => f.endsWith('.css'));
                 if (config.debug)
                     console.log(`[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`);
-                const styleLinks = cssFiles.map(f => `<link rel="stylesheet" href="/css/${f}" />`).join('\n');
+                const styleLinks = cssFiles
+                    .map((f) => `<link rel="stylesheet" href="/css/${f}" />`)
+                    .join('\n');
                 if (styleLinks) {
                     html = html.replace('</head>', `${styleLinks}\n</head>`);
                 }

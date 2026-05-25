@@ -62,33 +62,33 @@ BREAKING CHANGE: only if consumers must migrate.
 
 ## Tipos (`type`)
 
-| Tipo | Uso en RyunixJS |
-| :--- | :--- |
-| `feat` | Nueva capacidad (core, presets, CRA, plantillas). |
-| `fix` | Corrección de bug o regresión. |
-| `docs` | README, `docs/`, comentarios de arquitectura. |
+| Tipo       | Uso en RyunixJS                                           |
+| :--------- | :-------------------------------------------------------- |
+| `feat`     | Nueva capacidad (core, presets, CRA, plantillas).         |
+| `fix`      | Corrección de bug o regresión.                            |
+| `docs`     | README, `docs/`, comentarios de arquitectura.             |
 | `refactor` | Reestructuración sin cambio de comportamiento observable. |
-| `perf` | Rendimiento (reconciler, build). |
-| `test` | Tests en `packages/core` u otros paquetes. |
-| `build` | Build, Rollup, Webpack, dependencias. |
-| `ci` | `.github/workflows/`. |
-| `chore` | Mantenimiento (`.gitignore`, scripts auxiliares). |
+| `perf`     | Rendimiento (reconciler, build).                          |
+| `test`     | Tests en `packages/core` u otros paquetes.                |
+| `build`    | Build, Rollup, Webpack, dependencias.                     |
+| `ci`       | `.github/workflows/`.                                     |
+| `chore`    | Mantenimiento (`.gitignore`, scripts auxiliares).         |
 
 ## Scopes (`scope`) habituales
 
-| Scope | Cuándo |
-| :--- | :--- |
-| `core` | `packages/core` |
-| `presets` | `packages/ryunix-presets` |
-| `cra` | `packages/cra` |
-| `devtools` | `packages/ryunix-devtools` |
-| `readme` | `README.md` raíz |
-| `guide` | `docs/en/guides/`, `docs/es/guias/` |
-| `docs` | Otros archivos en `docs/` |
-| `cursor` | `.cursor/` |
-| `claude` | `.claude/`, `CLAUDE.md` |
-| `ci` | GitHub Actions |
-| `turbo` | `turbo.json`, scripts raíz de orquestación |
+| Scope      | Cuándo                                     |
+| :--------- | :----------------------------------------- |
+| `core`     | `packages/core`                            |
+| `presets`  | `packages/ryunix-presets`                  |
+| `cra`      | `packages/cra`                             |
+| `devtools` | `packages/ryunix-devtools`                 |
+| `readme`   | `README.md` raíz                           |
+| `guide`    | `docs/en/guides/`, `docs/es/guias/`        |
+| `docs`     | Otros archivos en `docs/`                  |
+| `cursor`   | `.cursor/`                                 |
+| `claude`   | `.claude/`, `CLAUDE.md`                    |
+| `ci`       | GitHub Actions                             |
+| `turbo`    | `turbo.json`, scripts raíz de orquestación |
 
 Evitar scopes de otros proyectos (`learning`, `pomodoro`, `overview` de apps ajenas).
 
