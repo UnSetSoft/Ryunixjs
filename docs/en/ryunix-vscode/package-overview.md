@@ -8,11 +8,11 @@ Marketplace as
 
 ## Role in the monorepo
 
-| Aspect | Detail |
-| :----- | :----- |
-| **Consumer** | Developers editing `.ryx` files in VS Code |
-| **Not an npm runtime dependency** | Apps use `@unsetsoft/ryunixjs`; this package only affects the editor |
-| **CRA integration** | `create-app.js` can write `.vscode/extensions.json` recommending `unsetsoft.ryunixjs` when `--vscode` is set |
+| Aspect                            | Detail                                                                                                       |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Consumer**                      | Developers editing `.ryx` files in VS Code                                                                   |
+| **Not an npm runtime dependency** | Apps use `@unsetsoft/ryunixjs`; this package only affects the editor                                         |
+| **CRA integration**               | `create-app.js` can write `.vscode/extensions.json` recommending `unsetsoft.ryunixjs` when `--vscode` is set |
 
 ---
 
@@ -63,6 +63,10 @@ code --install-extension packages/ryunix-vscode/ryunixjs-1.0.2.vsix
    branches that include it).
 4. Edit grammars or snippets; reload the Extension Development Host to test.
 
+**Snippets:** `ryx-page`, `ryx-layout`, `ryx-errors`, `ryx-import`, …
+
+**Completions:** `useStore`, `Link`, `Metatags`, etc. (see package README).
+
 ---
 
 ## Release notes
@@ -76,7 +80,7 @@ code --install-extension packages/ryunix-vscode/ryunixjs-1.0.2.vsix
 
 ## Related docs
 
-| Topic | Document |
-| :---- | :------- |
-| CRA `--vscode` flag | [../cra/cli-and-helpers.md](../cra/cli-and-helpers.md) |
+| Topic                     | Document                                                              |
+| :------------------------ | :-------------------------------------------------------------------- |
+| CRA `--vscode` flag       | [../cra/cli-and-helpers.md](../cra/cli-and-helpers.md)                |
 | Chrome DevTools extension | `packages/ryunix-devtools` (browser debugging, separate from VS Code) |

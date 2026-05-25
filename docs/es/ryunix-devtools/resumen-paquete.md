@@ -8,11 +8,11 @@ advertencias de desarrollo y el profiler documentados en `core/`.
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Consumidor** | Desarrolladores que depuran apps Ryunix en el navegador |
-| **No es dependencia npm de la app** | Se carga como extensión unpacked o build de tienda |
-| **Publicación** | Excluido de `pnpm publish:all` en la raíz (distribución de extensión) |
+| Aspecto                             | Detalle                                                               |
+| :---------------------------------- | :-------------------------------------------------------------------- |
+| **Consumidor**                      | Desarrolladores que depuran apps Ryunix en el navegador               |
+| **No es dependencia npm de la app** | Se carga como extensión unpacked o build de tienda                    |
+| **Publicación**                     | Excluido de `pnpm publish:all` en la raíz (distribución de extensión) |
 
 ---
 
@@ -45,7 +45,7 @@ Usa el panel **Ryunix** en DevTools (F12) sobre una app Ryunix en ejecución.
 
 ## Documentación relacionada
 
-| Tema | Documento |
-| :--- | :-------- |
-| Profiler y avisos en el core | [../core/devtools-y-profiler.md](../core/devtools-y-profiler.md) |
-| Extensión VS Code (editor) | [../ryunix-vscode/resumen-paquete.md](../ryunix-vscode/resumen-paquete.md) |
+| Tema                         | Documento                                                                  |
+| :--------------------------- | :------------------------------------------------------------------------- |
+| Profiler y avisos en el core | [../core/devtools-y-profiler.md](../core/devtools-y-profiler.md)           |
+| Extensión VS Code (editor)   | [../ryunix-vscode/resumen-paquete.md](../ryunix-vscode/resumen-paquete.md) |

@@ -64,21 +64,21 @@ This project is a monorepo managed with **pnpm** and **Turbo**.
 
 ### Key Scripts
 
-| Command                                            | Description                                                                                         |
-| :------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
-| `pnpm run dev`                                     | Run all packages in development mode using Turbo.                                                   |
-| `pnpm run build`                                   | Build all packages in the monorepo.                                                                 |
-| `pnpm run test`                                    | Run the test suite across all packages.                                                             |
-| `pnpm run lint`                                    | Check for code style and linting issues.                                                            |
-| `pnpm run lint:md`                                 | Lint Markdown (`docs/`, root `*.md`, package READMEs).                                              |
-| `pnpm run lint:md:fix`                             | Auto-fix Markdown (`markdownlint-cli2 --fix` + Prettier).                                           |
-| `pnpm run lint:fix`                                | Automatically fix linting and formatting issues.                                                    |
-| `pnpm run format`                                  | Format all files using Prettier.                                                                    |
-| `pnpm run clean`                                   | Clean build artifacts and remove `node_modules`.                                                    |
-| `pnpm run run:web`                                 | Run the Webpack test project in development mode.                                                   |
-| `pnpm run release:canary`                          | Prepare and release the Canary version of the core library.                                         |
-| `pnpm run publish:canary`                          | Publish packages (excl. tests, devtools, VS Code ext.) with `@canary`.                              |
-| `pnpm --filter ./packages/ryunix-vscode run build` | Package the VS Code extension as `.vsix` (Marketplace: `unsetsoft.ryunixjs`).                       |
+| Command                                            | Description                                                                   |
+| :------------------------------------------------- | :---------------------------------------------------------------------------- |
+| `pnpm run dev`                                     | Run all packages in development mode using Turbo.                             |
+| `pnpm run build`                                   | Build all packages in the monorepo.                                           |
+| `pnpm run test`                                    | Run the test suite across all packages.                                       |
+| `pnpm run lint`                                    | Check for code style and linting issues.                                      |
+| `pnpm run lint:md`                                 | Lint Markdown (`docs/`, root `*.md`, package READMEs).                        |
+| `pnpm run lint:md:fix`                             | Auto-fix Markdown (`markdownlint-cli2 --fix` + Prettier).                     |
+| `pnpm run lint:fix`                                | Automatically fix linting and formatting issues.                              |
+| `pnpm run format`                                  | Format all files using Prettier.                                              |
+| `pnpm run clean`                                   | Clean build artifacts and remove `node_modules`.                              |
+| `pnpm run run:web`                                 | Run the Webpack test project in development mode.                             |
+| `pnpm run release:canary`                          | Prepare and release the Canary version of the core library.                   |
+| `pnpm run publish:canary`                          | Publish packages (excl. tests, devtools, VS Code ext.) with `@canary`.        |
+| `pnpm --filter ./packages/ryunix-vscode run build` | Package the VS Code extension as `.vsix` (Marketplace: `unsetsoft.ryunixjs`). |
 
 ## 🌿 Branching Strategy
 

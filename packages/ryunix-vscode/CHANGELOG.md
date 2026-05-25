@@ -1,12 +1,17 @@
-# Change Log
+# Changelog
 
- 
-## [1.1.4]
+## [1.0.3]
 
-- fixed minor bug
-## [1.1.3]
+- Ryunix snippets (`ryx-page`, `ryx-layout`, `ryx-errors`, `ryx-import`, …)
+- Completions for `@unsetsoft/ryunixjs` hooks and `Metatags` / `generateMetadata`
+- Remove default `formatOnSave` (no bundled formatter)
+- CRA `--vscode` writes `settings.json` (Emmet, ESLint, file associations)
+- Bilingual README (EN / ES)
 
-- fixed Readme.md
+## [1.0.2]
+
+- Monorepo package under `packages/ryunix-vscode`
+
 ## [1.0.0]
 
-- Initial release
+- Initial Marketplace release

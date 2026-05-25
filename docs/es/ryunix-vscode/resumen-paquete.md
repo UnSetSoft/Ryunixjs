@@ -8,11 +8,11 @@ Studio Marketplace como
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Consumidor** | Desarrolladores que editan archivos `.ryx` en VS Code |
-| **No es dependencia npm de runtime** | Las apps usan `@unsetsoft/ryunixjs`; este paquete solo afecta al editor |
-| **Integración CRA** | `create-app.js` puede escribir `.vscode/extensions.json` recomendando `unsetsoft.ryunixjs` con `--vscode` |
+| Aspecto                              | Detalle                                                                                                   |
+| :----------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| **Consumidor**                       | Desarrolladores que editan archivos `.ryx` en VS Code                                                     |
+| **No es dependencia npm de runtime** | Las apps usan `@unsetsoft/ryunixjs`; este paquete solo afecta al editor                                   |
+| **Integración CRA**                  | `create-app.js` puede escribir `.vscode/extensions.json` recomendando `unsetsoft.ryunixjs` con `--vscode` |
 
 ---
 
@@ -64,6 +64,10 @@ code --install-extension packages/ryunix-vscode/ryunixjs-1.0.2.vsix
 4. Edita gramáticas o snippets; recarga el Extension Development Host para
    probar.
 
+**Snippets:** `ryx-page`, `ryx-layout`, `ryx-errors`, `ryx-import`, …
+
+**Completions:** `useStore`, `Link`, `Metatags`, etc. (ver README del paquete).
+
 ---
 
 ## Notas de release
@@ -76,7 +80,7 @@ code --install-extension packages/ryunix-vscode/ryunixjs-1.0.2.vsix
 
 ## Documentación relacionada
 
-| Tema | Documento |
-| :--- | :-------- |
-| Flag CRA `--vscode` | [../cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md) |
+| Tema                      | Documento                                                                 |
+| :------------------------ | :------------------------------------------------------------------------ |
+| Flag CRA `--vscode`       | [../cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md)                    |
 | Extensión Chrome DevTools | `packages/ryunix-devtools` (depuración en navegador, distinta de VS Code) |

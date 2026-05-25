@@ -8,11 +8,11 @@ personalizados (RSC, Server Actions).
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Consumidor** | Apps generadas y la app de integración `test/webpack` |
-| **Peer** | `@unsetsoft/ryunixjs` (runtime importado por los bundles de la app) |
-| **Se distribuye como** | Código fuente en `webpack/` (sin paso de build separado en CI) |
+| Aspecto                | Detalle                                                             |
+| :--------------------- | :------------------------------------------------------------------ |
+| **Consumidor**         | Apps generadas y la app de integración `test/webpack`               |
+| **Peer**               | `@unsetsoft/ryunixjs` (runtime importado por los bundles de la app) |
+| **Se distribuye como** | Código fuente en `webpack/` (sin paso de build separado en CI)      |
 
 ---
 
@@ -52,10 +52,10 @@ pnpm --filter @unsetsoft/ryunix-presets exec eslint webpack --max-warnings=0 --c
 
 ## Documentación relacionada
 
-| Tema | Documento |
-| :--- | :-------- |
-| CLI y arranque | [cli-y-arranque.md](./cli-y-arranque.md) |
-| Routing y SSG | [enrutamiento-y-ssg.md](./enrutamiento-y-ssg.md) |
-| Rutas API | [enrutador-api.md](./enrutador-api.md) |
-| Loaders Webpack | [loaders-webpack.md](./loaders-webpack.md) |
+| Tema               | Documento                                                |
+| :----------------- | :------------------------------------------------------- |
+| CLI y arranque     | [cli-y-arranque.md](./cli-y-arranque.md)                 |
+| Routing y SSG      | [enrutamiento-y-ssg.md](./enrutamiento-y-ssg.md)         |
+| Rutas API          | [enrutador-api.md](./enrutador-api.md)                   |
+| Loaders Webpack    | [loaders-webpack.md](./loaders-webpack.md)               |
 | `ryunix.config.js` | [carga-de-configuracion.md](./carga-de-configuracion.md) |

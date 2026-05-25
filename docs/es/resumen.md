@@ -50,14 +50,14 @@ docs/
     └── cra/
 ```
 
-| Ruta (desde `docs/es/`)                    | Paquete en el repo           | Qué encontrarás                                                         |
-| :----------------------------------------- | :--------------------------- | :---------------------------------------------------------------------- |
-| [`./guias/`](./guias/)                     | _(raíz del monorepo)_        | Onboarding, pruebas, pila tecnológica y scripts raíz (ver guías abajo). |
-| [`./core/`](./core/)                       | `packages/core`              | Reconciliador, hooks, renderizado, SSR, componentes.                    |
-| [`./ryunix-presets/`](./ryunix-presets/)   | `packages/ryunix-presets`    | CLI `ryunix`, Webpack, routing, SSG, rutas API, loaders.                |
-| [`./cra/`](./cra/)                         | `packages/cra`               | CLI `create-ryunix-app` y plantillas de proyecto.                       |
-| [`./ryunix-devtools/`](./ryunix-devtools/) | `packages/ryunix-devtools`   | Extensión Chrome para inspección de componentes en runtime.             |
-| [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`     | Extensión VS Code para `.ryx` (resaltado y snippets).                   |
+| Ruta (desde `docs/es/`)                    | Paquete en el repo         | Qué encontrarás                                                         |
+| :----------------------------------------- | :------------------------- | :---------------------------------------------------------------------- |
+| [`./guias/`](./guias/)                     | _(raíz del monorepo)_      | Onboarding, pruebas, pila tecnológica y scripts raíz (ver guías abajo). |
+| [`./core/`](./core/)                       | `packages/core`            | Reconciliador, hooks, renderizado, SSR, componentes.                    |
+| [`./ryunix-presets/`](./ryunix-presets/)   | `packages/ryunix-presets`  | CLI `ryunix`, Webpack, routing, SSG, rutas API, loaders.                |
+| [`./cra/`](./cra/)                         | `packages/cra`             | CLI `create-ryunix-app` y plantillas de proyecto.                       |
+| [`./ryunix-devtools/`](./ryunix-devtools/) | `packages/ryunix-devtools` | Extensión Chrome para inspección de componentes en runtime.             |
+| [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`   | Extensión VS Code para `.ryx` (resaltado y snippets).                   |
 
 Cada carpeta de paquete incluye un **resumen de paquete** (`resumen-paquete.md`
 en español, `package-overview.md` en inglés) como punto de entrada antes de la
@@ -133,9 +133,9 @@ Scaffolder oficial (`npx @unsetsoft/cra`) y plantillas de proyecto.
 Extensión Chrome para inspeccionar árboles de componentes, props y hooks en apps
 Ryunix en ejecución.
 
-| Documento                                                        | Tema                                              |
-| :--------------------------------------------------------------- | :------------------------------------------------ |
-| [resumen-paquete.md](./ryunix-devtools/resumen-paquete.md)       | **Entrada del paquete** — resumen                 |
+| Documento                                                  | Tema                              |
+| :--------------------------------------------------------- | :-------------------------------- |
+| [resumen-paquete.md](./ryunix-devtools/resumen-paquete.md) | **Entrada del paquete** — resumen |
 
 ---
 
@@ -144,9 +144,9 @@ Ryunix en ejecución.
 Extensión de Visual Studio Marketplace (`unsetsoft.ryunixjs`) para resaltado de
 sintaxis y snippets en archivos `.ryx`.
 
-| Documento                                                        | Tema                                                   |
-| :--------------------------------------------------------------- | :----------------------------------------------------- |
-| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md)         | **Entrada del paquete** — build `.vsix`, F5, publicar  |
+| Documento                                                | Tema                                                  |
+| :------------------------------------------------------- | :---------------------------------------------------- |
+| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md) | **Entrada del paquete** — build `.vsix`, F5, publicar |
 
 ---
 

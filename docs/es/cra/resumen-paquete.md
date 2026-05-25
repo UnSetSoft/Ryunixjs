@@ -8,11 +8,11 @@ configura Tailwind, ESLint y recomendaciones de VS Code.
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Consumidor** | Desarrolladores que crean apps Ryunix (no es dependencia de runtime) |
-| **Plantillas** | `templates/` (`ryunix-base`, variantes con Tailwind, etc.) |
-| **VS Code** | `--vscode` escribe `.vscode/extensions.json` para `unsetsoft.ryunixjs` |
+| Aspecto        | Detalle                                                                |
+| :------------- | :--------------------------------------------------------------------- |
+| **Consumidor** | Desarrolladores que crean apps Ryunix (no es dependencia de runtime)   |
+| **Plantillas** | `templates/` (`ryunix-base`, variantes con Tailwind, etc.)             |
+| **VS Code**    | `--vscode` escribe `.vscode/extensions.json` para `unsetsoft.ryunixjs` |
 
 ---
 
@@ -47,8 +47,8 @@ la raíz del monorepo.
 
 ## Documentación relacionada
 
-| Tema | Documento |
-| :--- | :-------- |
-| CLI y ayudantes | [cli-y-ayudantes.md](./cli-y-ayudantes.md) |
-| Generación de plantillas | [generacion-de-plantillas.md](./generacion-de-plantillas.md) |
-| Extensión VS Code | [../ryunix-vscode/resumen-paquete.md](../ryunix-vscode/resumen-paquete.md) |
+| Tema                     | Documento                                                                  |
+| :----------------------- | :------------------------------------------------------------------------- |
+| CLI y ayudantes          | [cli-y-ayudantes.md](./cli-y-ayudantes.md)                                 |
+| Generación de plantillas | [generacion-de-plantillas.md](./generacion-de-plantillas.md)               |
+| Extensión VS Code        | [../ryunix-vscode/resumen-paquete.md](../ryunix-vscode/resumen-paquete.md) |

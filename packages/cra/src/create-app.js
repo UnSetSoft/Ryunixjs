@@ -144,9 +144,29 @@ async function createApp({
     const vscodeDir = path.join(root, '.vscode')
     if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir)
     const extensionsJson = { recommendations: ['unsetsoft.ryunixjs'] }
+    const settingsJson = {
+      'files.associations': {
+        '*.ryx': 'ryunix',
+      },
+      'emmet.includeLanguages': {
+        ryunix: 'html',
+      },
+      'eslint.validate': ['javascript', 'javascriptreact', 'ryunix'],
+      'eslint.probe': [
+        'javascript',
+        'javascriptreact',
+        'typescript',
+        'typescriptreact',
+        'ryunix',
+      ],
+    }
     fs.writeFileSync(
       path.join(vscodeDir, 'extensions.json'),
       JSON.stringify(extensionsJson, null, 2),
+    )
+    fs.writeFileSync(
+      path.join(vscodeDir, 'settings.json'),
+      JSON.stringify(settingsJson, null, 2),
     )
   }
 

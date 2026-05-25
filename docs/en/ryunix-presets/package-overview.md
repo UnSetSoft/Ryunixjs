@@ -8,11 +8,11 @@ Server Actions).
 
 ## Role in the monorepo
 
-| Aspect | Detail |
-| :----- | :----- |
-| **Consumer** | Generated apps and `test/webpack` integration app |
-| **Peer** | `@unsetsoft/ryunixjs` (runtime imported by app bundles) |
-| **Shipped as** | Source under `webpack/` (no separate build step in CI) |
+| Aspect         | Detail                                                  |
+| :------------- | :------------------------------------------------------ |
+| **Consumer**   | Generated apps and `test/webpack` integration app       |
+| **Peer**       | `@unsetsoft/ryunixjs` (runtime imported by app bundles) |
+| **Shipped as** | Source under `webpack/` (no separate build step in CI)  |
 
 ---
 
@@ -52,10 +52,10 @@ pnpm --filter @unsetsoft/ryunix-presets exec eslint webpack --max-warnings=0 --c
 
 ## Related docs
 
-| Topic | Document |
-| :---- | :------- |
+| Topic               | Document                                               |
+| :------------------ | :----------------------------------------------------- |
 | CLI & bootstrapping | [cli-and-bootstrapping.md](./cli-and-bootstrapping.md) |
-| Routing & SSG | [routing-and-ssg.md](./routing-and-ssg.md) |
-| API routes | [api-router.md](./api-router.md) |
-| Webpack loaders | [webpack-loaders.md](./webpack-loaders.md) |
-| `ryunix.config.js` | [configuration-loading.md](./configuration-loading.md) |
+| Routing & SSG       | [routing-and-ssg.md](./routing-and-ssg.md)             |
+| API routes          | [api-router.md](./api-router.md)                       |
+| Webpack loaders     | [webpack-loaders.md](./webpack-loaders.md)             |
+| `ryunix.config.js`  | [configuration-loading.md](./configuration-loading.md) |
