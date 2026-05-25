@@ -131,16 +131,3 @@ jobs:
           VSIX=$(ls -1 *.vsix | head -1)
           echo "Publishing $VSIX to Visual Studio Marketplace"
           pnpm exec vsce publish -i "$VSIX" --no-dependencies
-
-      - name: Publish to Open VSX
-        working-directory: ${{ env.EXTENSION_DIR }}
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        run: |
-          if [ -z "$OVSX_PAT" ]; then
-            echo "::error::Missing repository secret OVSX_PAT"
-            exit 1
-          fi
-          VSIX=$(ls -1 *.vsix | head -1)
-          echo "Publishing $VSIX to Open VSX"
-          pnpm exec ovsx publish "$VSIX"
