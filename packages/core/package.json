@@ -34,7 +34,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c",
-    "build:lib-ts": "tsc -p tsconfig.emit.json",
+    "build:lib-ts": "tsc -p tsconfig.emit.json && prettier -w \"src/lib/**/*.js\" \"src/utils/**/*.js\" \"src/main.js\"",
     "prepublishOnly": "npm run build:lib-ts && npm run build",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish",

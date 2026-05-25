@@ -40,7 +40,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "tsc -p tsconfig.emit.json",
+    "build": "tsc -p tsconfig.emit.json && prettier -w \"webpack/**/*.js\"",
     "prepublishOnly": "npm run build",
     "test": "node --test webpack/plugins/remark-github-alerts.test.mjs"
   },
