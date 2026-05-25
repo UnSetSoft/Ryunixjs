@@ -19,6 +19,7 @@ quieran entender cómo está construido el framework.
   - [`core/` — `packages/core`](#core--packagescore)
   - [`ryunix-presets/` — `packages/ryunix-presets`](#ryunix-presets--packagesryunix-presets)
   - [`cra/` — `packages/cra`](#cra--packagescra)
+  - [`ryunix-vscode/` — `packages/ryunix-vscode`](#ryunix-vscode--packagesryunix-vscode)
   - [Orden de lectura sugerido](#orden-de-lectura-sugerido)
   - [Otros idiomas](#otros-idiomas)
 
@@ -37,7 +38,8 @@ docs/
 │   ├── guides/
 │   ├── core/
 │   ├── ryunix-presets/
-│   └── cra/
+│   ├── cra/
+│   └── ryunix-vscode/               ← packages/ryunix-vscode — extensión VS Code
 └── es/                              ← Español (esta carpeta)
     ├── resumen.md                   ← Índice (este archivo)
     ├── guias/                     ← Guías del monorepo (nombres en español)
@@ -52,6 +54,7 @@ docs/
 | [`./core/`](./core/)                     | `packages/core`           | Reconciliador, hooks, renderizado, SSR, componentes.                    |
 | [`./ryunix-presets/`](./ryunix-presets/) | `packages/ryunix-presets` | CLI `ryunix`, Webpack, routing, SSG, rutas API, loaders.                |
 | [`./cra/`](./cra/)                       | `packages/cra`            | CLI `create-ryunix-app` y plantillas de proyecto.                       |
+| [`./ryunix-vscode/`](./ryunix-vscode/)   | `packages/ryunix-vscode`  | Extensión VS Code para `.ryx` (resaltado y snippets).                   |
 
 ---
 
@@ -112,6 +115,17 @@ Scaffolder oficial (`npx @unsetsoft/cra`) y plantillas de proyecto.
 | :--------------------------------------------------------------- | :------------------------------------------------------------ |
 | [cli-y-ayudantes.md](./cra/cli-y-ayudantes.md)                   | CLI interactiva, `create-app.js`, resolución de versiones npm |
 | [generacion-de-plantillas.md](./cra/generacion-de-plantillas.md) | `ryunix-base`, `ryunix-tailwind`, mecanismo de copia          |
+
+---
+
+## `ryunix-vscode/` — `packages/ryunix-vscode`
+
+Extensión de Visual Studio Marketplace (`unsetsoft.ryunixjs`) para resaltado de
+sintaxis y snippets en archivos `.ryx`.
+
+| Documento                                                        | Tema                                                    |
+| :--------------------------------------------------------------- | :------------------------------------------------------ |
+| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md)         | Build `.vsix`, desarrollo con F5 y flujo de publicación |
 
 ---
 

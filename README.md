@@ -53,9 +53,9 @@ to do it efficiently.
 
   and **SSG** (Static Site Generation).
 
-- **🔋 Server-Side Power**: Supports **Server Components** and \*\*Server
+- **🔋 Server-Side Power**: Supports **Server Components** and **Server Actions**
 
-  Actions\*\* for modern full-stack workflows.
+  for modern full-stack workflows.
 
 - **📝 Native MDX**: Write documentation or content-rich pages directly in MDX
 
@@ -88,7 +88,7 @@ RyunixJS is managed as a monorepo containing several specialized packages:
 | [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Tooling and Webpack configurations.                 |
 | [`@unsetsoft/cra`](./packages/cra)                         | CLI to scaffold new Ryunix projects.                |
 | [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Browser extension for component tree debugging.     |
-| [VS Code extension][vscode-ext]                            | Syntax highlighting and editor support for `.ryx`.  |
+| [`unsetsoft.ryunixjs`](./packages/ryunix-vscode)           | VS Code extension for `.ryx` files (Marketplace).   |
 
 ## 🛠️ Getting Started
 
