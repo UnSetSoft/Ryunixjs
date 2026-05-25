@@ -49,14 +49,14 @@ docs/
     └── cra/
 ```
 
-| Path (from `docs/en/`)                     | Package in repo              | What you will find                                                   |
-| :----------------------------------------- | :--------------------------- | :------------------------------------------------------------------- |
-| [`./guides/`](./guides/)                   | _(monorepo root)_            | Onboarding, testing, tech stack and root scripts (see guides below). |
-| [`./core/`](./core/)                       | `packages/core`              | Reconciler, hooks, rendering, SSR, components.                       |
-| [`./ryunix-presets/`](./ryunix-presets/)   | `packages/ryunix-presets`    | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
-| [`./cra/`](./cra/)                         | `packages/cra`               | `create-ryunix-app` CLI and project templates.                       |
-| [`./ryunix-devtools/`](./ryunix-devtools/) | `packages/ryunix-devtools`   | Chrome extension for runtime component inspection.                   |
-| [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`     | VS Code extension for `.ryx` syntax highlighting and snippets.       |
+| Path (from `docs/en/`)                     | Package in repo            | What you will find                                                   |
+| :----------------------------------------- | :------------------------- | :------------------------------------------------------------------- |
+| [`./guides/`](./guides/)                   | _(monorepo root)_          | Onboarding, testing, tech stack and root scripts (see guides below). |
+| [`./core/`](./core/)                       | `packages/core`            | Reconciler, hooks, rendering, SSR, components.                       |
+| [`./ryunix-presets/`](./ryunix-presets/)   | `packages/ryunix-presets`  | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
+| [`./cra/`](./cra/)                         | `packages/cra`             | `create-ryunix-app` CLI and project templates.                       |
+| [`./ryunix-devtools/`](./ryunix-devtools/) | `packages/ryunix-devtools` | Chrome extension for runtime component inspection.                   |
+| [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`   | VS Code extension for `.ryx` syntax highlighting and snippets.       |
 
 Each package folder includes a **package overview** (`package-overview.md` in
 English, `resumen-paquete.md` in Spanish) as the entry point before deep-dive
@@ -132,9 +132,9 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 Chrome extension for inspecting component trees, props, and hooks in running
 Ryunix apps.
 
-| Document                                                         | Topic                                    |
-| :--------------------------------------------------------------- | :--------------------------------------- |
-| [package-overview.md](./ryunix-devtools/package-overview.md)     | **Package entry** — load unpacked, zip   |
+| Document                                                     | Topic                                  |
+| :----------------------------------------------------------- | :------------------------------------- |
+| [package-overview.md](./ryunix-devtools/package-overview.md) | **Package entry** — load unpacked, zip |
 
 ---
 
@@ -143,9 +143,9 @@ Ryunix apps.
 Visual Studio Marketplace extension (`unsetsoft.ryunixjs`) for `.ryx` syntax
 highlighting and snippets.
 
-| Document                                                     | Topic                                           |
-| :----------------------------------------------------------- | :---------------------------------------------- |
-| [package-overview.md](./ryunix-vscode/package-overview.md)   | **Package entry** — build `.vsix`, F5, publish  |
+| Document                                                   | Topic                                          |
+| :--------------------------------------------------------- | :--------------------------------------------- |
+| [package-overview.md](./ryunix-vscode/package-overview.md) | **Package entry** — build `.vsix`, F5, publish |
 
 ---
 

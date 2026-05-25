@@ -1,82 +1,144 @@
 {
-  "arrowFunction": {
-    "prefix": "af",
+  "Ryunix page (index.ryx)": {
+    "prefix": "ryx-page",
     "isFileTemplate": true,
     "body": [
-      "const ${1} = (props) =>{",
+      "export const Metatags = {",
+      "\ttitle: \"${1:Page title}\",",
+      "\tdescription: '${2:Description}',",
+      "\tviewport: 'width=device-width, initial-scale=1.0',",
+      "\tcharset: 'UTF-8',",
+      "}",
+      "",
+      "export default function ${3:Page}() {",
       "\treturn (",
-      "\t<>",
-      "\t\t${2}",
-      "\t</>",
+      "\t\t<main>",
+      "\t\t\t${4}",
+      "\t\t</main>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Create a arrow function"
+    "description": "Ryunix route page with Metatags and default export",
+  },
+  "Ryunix layout (layout.ryx)": {
+    "prefix": "ryx-layout",
+    "isFileTemplate": true,
+    "body": [
+      "export const Metatags = {",
+      "\ttitle: {",
+      "\t\ttemplate: '%s | ${1:App name}',",
+      "\t\tdefault: '${1:App name}',",
+      "\t},",
+      "\tdescription: '${2:Description}',",
+      "\tviewport: 'width=device-width, initial-scale=1.0',",
+      "\tcharset: 'UTF-8',",
+      "}",
+      "",
+      "export default function ${3:RootLayout}({ children }) {",
+      "\treturn children",
+      "}",
+    ],
+    "description": "Ryunix root layout with Metatags and children",
+  },
+  "Ryunix errors (errors.ryx)": {
+    "prefix": "ryx-errors",
+    "isFileTemplate": true,
+    "body": [
+      "export default function ${1:NotFound}() {",
+      "\treturn (",
+      "\t\t<main>",
+      "\t\t\t<h1>${2:404}</h1>",
+      "\t\t\t<p>${3:Page not found}</p>",
+      "\t\t\t<a href=\"/\">${4:Go back home}</a>",
+      "\t\t</main>",
+      "\t)",
+      "}",
+    ],
+    "description": "Ryunix error boundary page (errors.ryx)",
+  },
+  "Ryunix API GET handler": {
+    "prefix": "ryx-api-get",
+    "body": [
+      "export const GET = async (req) => {",
+      "\treturn new Response(JSON.stringify({ ${1:message}: '${2:Hello}' } }), {",
+      "\t\tstatus: 200,",
+      "\t\theaders: { 'Content-Type': 'application/json' },",
+      "\t})",
+      "}",
+    ],
+    "description": "API route GET handler (router.js / router.ryx)",
+  },
+  "Import from Ryunix core": {
+    "prefix": "ryx-import",
+    "body": ["import { ${1:useStore} } from '@unsetsoft/ryunixjs'"],
+    "description": "Import hooks or components from @unsetsoft/ryunixjs",
+  },
+  "Ryunix Link": {
+    "prefix": "ryx-link",
+    "body": [
+      "import { Link } from '@unsetsoft/ryunixjs'",
+      "",
+      "<Link href=\"${1:/}\">${2:Home}</Link>",
+    ],
+    "description": "Client navigation with Link",
+  },
+  "Ryunix NavLink": {
+    "prefix": "ryx-navlink",
+    "body": [
+      "import { NavLink } from '@unsetsoft/ryunixjs'",
+      "",
+      "<NavLink href=\"${1:/}\" activeClassName=\"${2:active}\">${3:Link}</NavLink>",
+    ],
+    "description": "NavLink with active class",
+  },
+  "Ryunix Metatags export": {
+    "prefix": "ryx-metatags",
+    "body": [
+      "export const Metatags = {",
+      "\ttitle: \"${1:Page title}\",",
+      "\tdescription: '${2:Description}',",
+      "\tviewport: 'width=device-width, initial-scale=1.0',",
+      "\tcharset: 'UTF-8',",
+      "}",
+    ],
+    "description": "SEO Metatags object for a route",
+  },
+  "Ryunix component": {
+    "prefix": "ryx-component",
+    "body": [
+      "export default function ${1:Component}(${2:props}) {",
+      "\treturn (",
+      "\t\t<>",
+      "\t\t\t${3}",
+      "\t\t</>",
+      "\t)",
+      "}",
+    ],
+    "description": "Default export component with JSX return",
   },
   "div": {
     "prefix": "div",
     "body": "<div>${1}</div>",
-    "description": "Create a div"
+    "description": "HTML div element",
   },
-  "a": {
+  "anchor": {
     "prefix": "a",
-    "body": "<a href='${1}'>${2}</a>",
-    "description": "Create an anchor"
+    "body": "<a href=\"${1}\">${2}</a>",
+    "description": "HTML anchor element",
   },
   "Log to the console": {
     "prefix": "log",
-    "body": ["console.log($1);"],
-    "description": "Log to the console"
-  },
-  "Log warning to console": {
-    "prefix": "warn",
-    "body": ["console.warn($1);"],
-    "description": "Log warning to the console"
-  },
-  "Log error to console": {
-    "prefix": "error",
-    "body": ["console.error($1);"],
-    "description": "Log error to the console"
+    "body": ["console.log($1)"],
+    "description": "Log to the console",
   },
   "Import Statement": {
     "prefix": "import",
-    "body": ["import { $0 } from \"${1:module}\";"],
-    "description": "Import external module"
-  },
-  "Try-Catch Statement": {
-    "prefix": "trycatch",
-    "body": [
-      "try {",
-      "\t$TM_SELECTED_TEXT$0",
-      "} catch (${1:error}) {",
-      "\t",
-      "}"
-    ],
-    "description": "Try-Catch Statement"
-  },
-  "Function Statement": {
-    "prefix": "function",
-    "body": [
-      "function ${1:name}(${2:props}) {",
-      "\treturn <>$TM_SELECTED_TEXT$0</>",
-      "}"
-    ],
-    "description": "Function Statement"
+    "body": ["import { $0 } from \"${1:module}\""],
+    "description": "Import external module",
   },
   "If Statement": {
     "prefix": "if",
     "body": ["if (${1:condition}) {", "\t$TM_SELECTED_TEXT$0", "}"],
-    "description": "If Statement"
+    "description": "If Statement",
   },
-  "If-Else Statement": {
-    "prefix": "ifelse",
-    "body": [
-      "if (${1:condition}) {",
-      "\t$TM_SELECTED_TEXT$0",
-      "} else {",
-      "\t",
-      "}"
-    ],
-    "description": "If-Else Statement"
-  }
 }

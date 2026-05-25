@@ -8,11 +8,11 @@ profiler documented under `core/`.
 
 ## Role in the monorepo
 
-| Aspect | Detail |
-| :----- | :----- |
-| **Consumer** | Developers debugging Ryunix apps in the browser |
-| **Not an npm app dependency** | Loaded as an unpacked extension or store build |
-| **Publish** | Excluded from root `pnpm publish:all` (extension distribution, not npm) |
+| Aspect                        | Detail                                                                  |
+| :---------------------------- | :---------------------------------------------------------------------- |
+| **Consumer**                  | Developers debugging Ryunix apps in the browser                         |
+| **Not an npm app dependency** | Loaded as an unpacked extension or store build                          |
+| **Publish**                   | Excluded from root `pnpm publish:all` (extension distribution, not npm) |
 
 ---
 
@@ -45,7 +45,7 @@ Use the **Ryunix** panel in DevTools (F12) on a running Ryunix app.
 
 ## Related docs
 
-| Topic | Document |
-| :---- | :------- |
-| Core profiler & dev warnings | [../core/devtools-and-profiler.md](../core/devtools-and-profiler.md) |
-| VS Code extension (editor) | [../ryunix-vscode/package-overview.md](../ryunix-vscode/package-overview.md) |
+| Topic                        | Document                                                                     |
+| :--------------------------- | :--------------------------------------------------------------------------- |
+| Core profiler & dev warnings | [../core/devtools-and-profiler.md](../core/devtools-and-profiler.md)         |
+| VS Code extension (editor)   | [../ryunix-vscode/package-overview.md](../ryunix-vscode/package-overview.md) |

@@ -8,11 +8,11 @@ Tailwind, ESLint, and VS Code workspace recommendations.
 
 ## Role in the monorepo
 
-| Aspect | Detail |
-| :----- | :----- |
-| **Consumer** | Developers creating new Ryunix apps (not a runtime dependency) |
-| **Templates** | `templates/` (`ryunix-base`, variants with Tailwind, etc.) |
-| **VS Code** | `--vscode` writes `.vscode/extensions.json` for `unsetsoft.ryunixjs` |
+| Aspect        | Detail                                                               |
+| :------------ | :------------------------------------------------------------------- |
+| **Consumer**  | Developers creating new Ryunix apps (not a runtime dependency)       |
+| **Templates** | `templates/` (`ryunix-base`, variants with Tailwind, etc.)           |
+| **VS Code**   | `--vscode` writes `.vscode/extensions.json` for `unsetsoft.ryunixjs` |
 
 ---
 
@@ -47,8 +47,8 @@ monorepo root.
 
 ## Related docs
 
-| Topic | Document |
-| :---- | :------- |
-| CLI & helpers | [cli-and-helpers.md](./cli-and-helpers.md) |
-| Template generation | [template-generation.md](./template-generation.md) |
-| VS Code extension | [../ryunix-vscode/package-overview.md](../ryunix-vscode/package-overview.md) |
+| Topic               | Document                                                                     |
+| :------------------ | :--------------------------------------------------------------------------- |
+| CLI & helpers       | [cli-and-helpers.md](./cli-and-helpers.md)                                   |
+| Template generation | [template-generation.md](./template-generation.md)                           |
+| VS Code extension   | [../ryunix-vscode/package-overview.md](../ryunix-vscode/package-overview.md) |
