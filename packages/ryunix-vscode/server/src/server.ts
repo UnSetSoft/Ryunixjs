@@ -39,8 +39,7 @@ const documents = new TextDocuments(TextDocument)
 let program: RyunixTsProgram | undefined
 
 connection.onInitialize((params: InitializeParams): InitializeResult => {
-  const root =
-    params.workspaceFolders?.[0]?.uri ?? params.rootUri ?? ''
+  const root = params.workspaceFolders?.[0]?.uri ?? params.rootUri ?? ''
   const workspaceRoot = root
     ? resolveProjectRoot(uriToPath(root))
     : process.cwd()
@@ -171,10 +170,7 @@ connection.onCompletion((params) => {
   return result.entries.map((e) => ({
     label: e.name,
     kind: mapCompletionKind(e.kind),
-    detail:
-      typeof e.kindModifiers === 'string'
-        ? e.kindModifiers
-        : undefined,
+    detail: typeof e.kindModifiers === 'string' ? e.kindModifiers : undefined,
     sortText: e.sortText,
     insertText: e.insertText,
   }))
@@ -322,8 +318,10 @@ connection.onRenameRequest((params) => {
   const locs = program.getRename(filePath, doc.offsetAt(params.position))
   if (!locs?.length) return null
 
-  const changes: Record<string, { range: Location['range']; newText: string }[]> =
-    {}
+  const changes: Record<
+    string,
+    { range: Location['range']; newText: string }[]
+  > = {}
   for (const loc of locs) {
     const uri = pathToFileUri(loc.fileName)
     if (!changes[uri]) changes[uri] = []

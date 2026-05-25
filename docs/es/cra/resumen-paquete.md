@@ -14,12 +14,12 @@ inicializa git. **No forma parte del runtime** de las apps ya creadas.
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Quién lo usa** | Desarrolladores al crear un proyecto nuevo |
-| **Qué produce** | Carpeta de app con `app/`, `ryunix.config.js`, `package.json` |
+| Aspecto                      | Detalle                                                                          |
+| :--------------------------- | :------------------------------------------------------------------------------- |
+| **Quién lo usa**             | Desarrolladores al crear un proyecto nuevo                                       |
+| **Qué produce**              | Carpeta de app con `app/`, `ryunix.config.js`, `package.json`                    |
 | **Dependencias que inyecta** | `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` (+ Tailwind/ESLint si aplica) |
-| **Publicación** | npm; incluido en `pnpm publish:all` / canary |
+| **Publicación**              | npm; incluido en `pnpm publish:all` / canary                                     |
 
 ```mermaid
 flowchart LR
@@ -60,12 +60,12 @@ packages/cra/
 
 ### Selección de plantilla
 
-| Condición | Plantilla |
-| :-------- | :-------- |
-| `--tailwind` y `--eslint` | `ryunix-all` |
-| Solo `--tailwind` | `ryunix-tailwind` |
-| Solo `--eslint` | `ryunix-eslint` |
-| Ninguno | `ryunix-base` |
+| Condición                 | Plantilla         |
+| :------------------------ | :---------------- |
+| `--tailwind` y `--eslint` | `ryunix-all`      |
+| Solo `--tailwind`         | `ryunix-tailwind` |
+| Solo `--eslint`           | `ryunix-eslint`   |
+| Ninguno                   | `ryunix-base`     |
 
 Los prompts interactivos omiten preguntas si pasas flags (`--no-tailwind`,
 `--no-eslint`, `--no-vscode` detectados en `process.argv`).
@@ -112,22 +112,22 @@ Tras copiar: `ensurePublicFavicon()` crea `public/favicon.png` si falta.
 
 ## Flags de la CLI
 
-| Flag | Efecto |
-| :--- | :----- |
-| `[directorio]` | Nombre o ruta del proyecto |
-| `--latest` / `--canary` | Canal de versiones Ryunix |
-| `--tailwind` | Plantilla con Tailwind |
-| `--eslint` | Plantilla con ESLint (+ Prettier en `.prettierrc.json`) |
-| `--vscode` | Carpeta `.vscode` con extensiones recomendadas |
-| `--compiler swc\|babel` | Escrito en `ryunix.config.js` |
-| `--no-tailwind` / `--no-eslint` / `--no-vscode` | Omiten prompts (argv) |
+| Flag                                            | Efecto                                                  |
+| :---------------------------------------------- | :------------------------------------------------------ |
+| `[directorio]`                                  | Nombre o ruta del proyecto                              |
+| `--latest` / `--canary`                         | Canal de versiones Ryunix                               |
+| `--tailwind`                                    | Plantilla con Tailwind                                  |
+| `--eslint`                                      | Plantilla con ESLint (+ Prettier en `.prettierrc.json`) |
+| `--vscode`                                      | Carpeta `.vscode` con extensiones recomendadas          |
+| `--compiler swc\|babel`                         | Escrito en `ryunix.config.js`                           |
+| `--no-tailwind` / `--no-eslint` / `--no-vscode` | Omiten prompts (argv)                                   |
 
 ### Integración `--vscode`
 
-| Archivo | Contenido |
-| :------ | :-------- |
+| Archivo           | Contenido                                                                |
+| :---------------- | :----------------------------------------------------------------------- |
 | `extensions.json` | `unsetsoft.ryunixjs`, `dbaeumer.vscode-eslint`; + Prettier si `--eslint` |
-| `settings.json` | `*.ryx` → idioma `ryunix`, Emmet, ESLint probe, file nesting en rutas |
+| `settings.json`   | `*.ryx` → idioma `ryunix`, Emmet, ESLint probe, file nesting en rutas    |
 
 Documentación de la extensión:
 [../ryunix-vscode/resumen-paquete.md](../ryunix-vscode/resumen-paquete.md).
@@ -151,20 +151,20 @@ Publicación (mantenedores): `pnpm run cra:release` o `pnpm run cra:nightly` en 
 
 ## Relación con otros paquetes
 
-| Paquete | Relación |
-| :------ | :------- |
-| `core` / `ryunix-presets` | Versiones y deps añadidas al `package.json` generado |
-| `ryunix-vscode` | Recomendada con `--vscode`; no dependencia npm de CRA |
-| `ryunix-devtools` | No la instala; el desarrollador la carga en Chrome aparte |
+| Paquete                   | Relación                                                  |
+| :------------------------ | :-------------------------------------------------------- |
+| `core` / `ryunix-presets` | Versiones y deps añadidas al `package.json` generado      |
+| `ryunix-vscode`           | Recomendada con `--vscode`; no dependencia npm de CRA     |
+| `ryunix-devtools`         | No la instala; el desarrollador la carga en Chrome aparte |
 
 ---
 
 ## Documentación en `docs/es/cra/`
 
-| Documento | Tema |
-| :-------- | :--- |
-| [cli-y-ayudantes.md](./cli-y-ayudantes.md) | Commander, prompts, resolución de versiones |
-| [generacion-de-plantillas.md](./generacion-de-plantillas.md) | Mantener y añadir plantillas |
+| Documento                                                    | Tema                                        |
+| :----------------------------------------------------------- | :------------------------------------------ |
+| [cli-y-ayudantes.md](./cli-y-ayudantes.md)                   | Commander, prompts, resolución de versiones |
+| [generacion-de-plantillas.md](./generacion-de-plantillas.md) | Mantener y añadir plantillas                |
 
 Par en inglés: [docs/en/cra/package-overview.md](../../en/cra/package-overview.md).
 

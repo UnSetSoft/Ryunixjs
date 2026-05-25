@@ -41,17 +41,13 @@ declare module '@unsetsoft/ryunixjs' {
     deps?: unknown[],
   ): T
   export function useRef<T>(initial: T): { current: T }
-  export const RouterProvider: (props: {
-    children?: unknown
-  }) => unknown
+  export const RouterProvider: (props: { children?: unknown }) => unknown
   export const ServerBoundary: (props: { children?: unknown }) => unknown
   export const Suspense: (props: {
     children?: unknown
     fallback?: unknown
   }) => unknown
-  export function lazy(
-    loader: () => Promise<{ default: unknown }>,
-  ): unknown
+  export function lazy(loader: () => Promise<{ default: unknown }>): unknown
   export function memo<T>(component: T): T
   const _default: typeof Ryunix
   export default _default

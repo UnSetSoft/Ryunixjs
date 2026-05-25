@@ -106,7 +106,8 @@ export function normalizePath(filePath: string): string {
 
 function scriptKindFor(fileName: string): ts.ScriptKind {
   const ext = path.extname(fileName).toLowerCase()
-  if (ext === '.ryx' || ext === '.tsx' || ext === '.jsx') return ts.ScriptKind.TSX
+  if (ext === '.ryx' || ext === '.tsx' || ext === '.jsx')
+    return ts.ScriptKind.TSX
   if (ext === '.ts') return ts.ScriptKind.TS
   if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return ts.ScriptKind.JS
   return ts.ScriptKind.Unknown
@@ -232,15 +233,10 @@ export class RyunixTsProgram {
   private rebuildService(): void {
     const options = loadCompilerOptions(this.root)
     const host = this.createHost(options)
-    this.service = ts.createLanguageService(
-      host,
-      ts.createDocumentRegistry(),
-    )
+    this.service = ts.createLanguageService(host, ts.createDocumentRegistry())
   }
 
-  private createHost(
-    options: ts.CompilerOptions,
-  ): ts.LanguageServiceHost {
+  private createHost(options: ts.CompilerOptions): ts.LanguageServiceHost {
     const root = this.root
     const openContents = this.openContents
 
@@ -319,7 +315,10 @@ export class RyunixTsProgram {
     return n
   }
 
-  private safe<T>(filePath: string, fn: (normalized: string) => T): T | undefined {
+  private safe<T>(
+    filePath: string,
+    fn: (normalized: string) => T,
+  ): T | undefined {
     try {
       const n = this.ensureInProgram(filePath)
       return fn(n)
@@ -334,10 +333,7 @@ export class RyunixTsProgram {
     return (
       this.safe(filePath, (n) => {
         const s = this.svc()
-        return [
-          ...s.getSyntacticDiagnostics(n),
-          ...s.getSemanticDiagnostics(n),
-        ]
+        return [...s.getSyntacticDiagnostics(n), ...s.getSemanticDiagnostics(n)]
       }) ?? []
     )
   }

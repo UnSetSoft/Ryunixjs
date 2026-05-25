@@ -3,7 +3,8 @@ import ts from 'typescript'
 
 export function scriptKindFor(fileName: string): ts.ScriptKind {
   const ext = fileName.slice(fileName.lastIndexOf('.')).toLowerCase()
-  if (ext === '.ryx' || ext === '.tsx' || ext === '.jsx') return ts.ScriptKind.TSX
+  if (ext === '.ryx' || ext === '.tsx' || ext === '.jsx')
+    return ts.ScriptKind.TSX
   if (ext === '.ts') return ts.ScriptKind.TS
   return ts.ScriptKind.JS
 }

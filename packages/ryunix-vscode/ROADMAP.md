@@ -11,18 +11,18 @@
 
 ## Not in scope (yet)
 
-| Topic | Notes |
-| :---- | :---- |
-| MDX in editor | Build-time only |
+| Topic                            | Notes                                                 |
+| :------------------------------- | :---------------------------------------------------- |
+| MDX in editor                    | Build-time only                                       |
 | Full Ryunix-specific typechecker | LSP reuses TS; some Ryunix conventions are heuristics |
-| Inlay hints server/client | Build plugin territory |
+| Inlay hints server/client        | Build plugin territory                                |
 
 ## Future
 
-| Feature | Notes |
-| :------ | :---- |
-| Dedicated `ryunix-language-server` | Ryunix-aware rules beyond TS+jsxFactory |
-| Semantic tokens for server/client boundaries | Needs router metadata or annotations |
-| Official formatter | Prettier `*.ryx` override remains the practical path |
+| Feature                                      | Notes                                                |
+| :------------------------------------------- | :--------------------------------------------------- |
+| Dedicated `ryunix-language-server`           | Ryunix-aware rules beyond TS+jsxFactory              |
+| Semantic tokens for server/client boundaries | Needs router metadata or annotations                 |
+| Official formatter                           | Prettier `*.ryx` override remains the practical path |
 
 Run `pnpm --filter ./packages/ryunix-vscode run test` when editing TextMate grammar.

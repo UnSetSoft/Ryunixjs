@@ -23,32 +23,32 @@ Install the recommended extensions when VS Code prompts you.
 
 ## Scope
 
-| Supported in this extension | Not supported (use other tooling) |
-| :-------------------------- | :-------------------------------- |
-| `.ryx` as JS + JSX (TextMate) | MDX (`.mdx`) — validated at build via `@mdx-js/loader` |
-| **LSP** (diagnostics, go to definition, references, hover, rename) with `jsconfig.json` | Full strict TypeScript / complete project types |
-| ESLint integration via workspace `eslint.probe` / `eslint.validate` | Bundled `formatOnSave` (use Prettier in the project) |
-| Emmet in `ryunix` language mode | API routes: templates use `router.js`; `router.ryx` snippets are optional |
-| Snippets + completions (LSP or lightweight mode without LSP) | `@/` aliases without matching `paths` in `jsconfig` (mirror `ryunix.config.js`) |
+| Supported in this extension                                                             | Not supported (use other tooling)                                               |
+| :-------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| `.ryx` as JS + JSX (TextMate)                                                           | MDX (`.mdx`) — validated at build via `@mdx-js/loader`                          |
+| **LSP** (diagnostics, go to definition, references, hover, rename) with `jsconfig.json` | Full strict TypeScript / complete project types                                 |
+| ESLint integration via workspace `eslint.probe` / `eslint.validate`                     | Bundled `formatOnSave` (use Prettier in the project)                            |
+| Emmet in `ryunix` language mode                                                         | API routes: templates use `router.js`; `router.ryx` snippets are optional       |
+| Snippets + completions (LSP or lightweight mode without LSP)                            | `@/` aliases without matching `paths` in `jsconfig` (mirror `ryunix.config.js`) |
 
 File-context completions (e.g. layout template in `layout.ryx`) and `frontmatter`
 as an alias for `Metatags` are provided by `extension.js`.
 
 ## Snippets (prefix)
 
-| Prefix                     | Use                                          |
-| :------------------------- | :------------------------------------------- |
-| `ryx-page`                 | Client route page (`Metatags` + default export) |
-| `ryx-server-page`          | Server `index.ryx` (`async` default + `Metatags`) |
-| `ryx-layout`               | Root layout with `children`                  |
-| `ryx-loading`              | Route `loading.ryx` (Suspense UI)            |
-| `ryx-error`                | Route `error.ryx` (error boundary)           |
-| `ryx-errors`               | Global `errors.ryx` / 404 page               |
-| `ryx-metatags`             | `export const Metatags` only                 |
-| `ryx-import`               | `import { … } from '@unsetsoft/ryunixjs'`    |
-| `ryx-link` / `ryx-navlink` | Client navigation                            |
-| `ryx-api-get` / `ryx-api-post` | API `GET` / `POST` handlers              |
-| `ryx-component`            | Generic component                            |
+| Prefix                         | Use                                               |
+| :----------------------------- | :------------------------------------------------ |
+| `ryx-page`                     | Client route page (`Metatags` + default export)   |
+| `ryx-server-page`              | Server `index.ryx` (`async` default + `Metatags`) |
+| `ryx-layout`                   | Root layout with `children`                       |
+| `ryx-loading`                  | Route `loading.ryx` (Suspense UI)                 |
+| `ryx-error`                    | Route `error.ryx` (error boundary)                |
+| `ryx-errors`                   | Global `errors.ryx` / 404 page                    |
+| `ryx-metatags`                 | `export const Metatags` only                      |
+| `ryx-import`                   | `import { … } from '@unsetsoft/ryunixjs'`         |
+| `ryx-link` / `ryx-navlink`     | Client navigation                                 |
+| `ryx-api-get` / `ryx-api-post` | API `GET` / `POST` handlers                       |
+| `ryx-component`                | Generic component                                 |
 
 Type inside an `import { … }` block for completions (`useStore`, `Link`, …).
 
@@ -65,11 +65,11 @@ lightweight navigation remain).
 
 ## Complementary navigation
 
-| Action | Behavior |
-| :----- | :------- |
-| **Ctrl+click** (go to definition) | Local imports, `@unsetsoft/ryunixjs`, `@/` aliases (with `jsconfig`) |
-| **Hover** | Ryunix hooks, HTML tags, `className` tokens (always on) |
-| **Tailwind** | Install [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
+| Action                            | Behavior                                                                                                           |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| **Ctrl+click** (go to definition) | Local imports, `@unsetsoft/ryunixjs`, `@/` aliases (with `jsconfig`)                                               |
+| **Hover**                         | Ryunix hooks, HTML tags, `className` tokens (always on)                                                            |
+| **Tailwind**                      | Install [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
 
 Disable hover/tags: `"ryunix.enableNavigation": false`.
 

@@ -12,12 +12,12 @@ TypeScript LSP.
 
 ## Role in the monorepo
 
-| Aspect | Detail |
-| :----- | :----- |
-| **Consumers** | Developers editing `.ryx` in VS Code |
-| **App runtime** | Apps use `@unsetsoft/ryunixjs`; this package is editor-only |
-| **CRA** | `--vscode` recommends Ryunix + ESLint (+ Prettier with `--eslint`) |
-| **Publish** | Marketplace / `.vsix`; excluded from npm `publish:all` |
+| Aspect          | Detail                                                             |
+| :-------------- | :----------------------------------------------------------------- |
+| **Consumers**   | Developers editing `.ryx` in VS Code                               |
+| **App runtime** | Apps use `@unsetsoft/ryunixjs`; this package is editor-only        |
+| **CRA**         | `--vscode` recommends Ryunix + ESLint (+ Prettier with `--eslint`) |
+| **Publish**     | Marketplace / `.vsix`; excluded from npm `publish:all`             |
 
 ```mermaid
 flowchart LR
@@ -56,30 +56,30 @@ Marketplace ID is `{publisher}.{name}` → `unsetsoft.ryunixjs` (name is intenti
 
 ## How it works
 
-| Layer | Implementation |
-| :---- | :--------------- |
-| **Syntax** | `source.js.ryx` grammar + embedded `ryx-tags` |
-| **Snippets** | `javascript.code-snippets` |
-| **Completions** | `src/completion/provider.ts` — core exports, keywords, file-name templates |
+| Layer                | Implementation                                                                           |
+| :------------------- | :--------------------------------------------------------------------------------------- |
+| **Syntax**           | `source.js.ryx` grammar + embedded `ryx-tags`                                            |
+| **Snippets**         | `javascript.code-snippets`                                                               |
+| **Completions**      | `src/completion/provider.ts` — core exports, keywords, file-name templates               |
 | **Go to definition** | Ctrl+click on `@unsetsoft/ryunixjs` exports → `node_modules` or monorepo `packages/core` |
-| **Hover** | Tooltips for Ryunix exports, HTML tags, `className` tokens |
-| **Tailwind** | Defaults for Tailwind CSS IntelliSense; CRA `--tailwind` recommends that extension |
+| **Hover**            | Tooltips for Ryunix exports, HTML tags, `className` tokens                               |
+| **Tailwind**         | Defaults for Tailwind CSS IntelliSense; CRA `--tailwind` recommends that extension       |
 
 ### Language Server (LSP) — v1.1.0+
 
 With `"ryunix.languageServer.enable": true` (default), a **TypeScript-backed language
 server** analyzes `.ryx` as TSX (`Ryunix.createElement`):
 
-| LSP feature | Usage |
-| :---------- | :---- |
-| Go to definition | Ctrl+click |
-| Find references | References view |
-| Hover | Types and docs |
-| Diagnostics | Squiggles in editor |
-| Rename | F2 |
-| Document symbols | Outline |
-| Completions | Ctrl+Space (semantic) |
-| Signature help | Inside `(` |
+| LSP feature      | Usage                 |
+| :--------------- | :-------------------- |
+| Go to definition | Ctrl+click            |
+| Find references  | References view       |
+| Hover            | Types and docs        |
+| Diagnostics      | Squiggles in editor   |
+| Rename           | F2                    |
+| Document symbols | Outline               |
+| Completions      | Ctrl+Space (semantic) |
+| Signature help   | Inside `(`            |
 
 Projects need `pnpm install` and `jsconfig.json` (CRA templates include it).
 
@@ -92,12 +92,12 @@ documented as an alias for `Metatags`.
 
 ## Scope
 
-| Supported | Not supported |
-| :-------- | :------------ |
-| `.ryx` highlighting, snippets, completions | MDX (build-time loader) |
-| ESLint workspace integration (CRA) | TypeScript inside `.ryx` |
-| Emmet for `ryunix` | Bundled formatter (use Prettier in project) |
-| Grammar regression tests | LSP — see `ROADMAP.md` |
+| Supported                                  | Not supported                               |
+| :----------------------------------------- | :------------------------------------------ |
+| `.ryx` highlighting, snippets, completions | MDX (build-time loader)                     |
+| ESLint workspace integration (CRA)         | TypeScript inside `.ryx`                    |
+| Emmet for `ryunix`                         | Bundled formatter (use Prettier in project) |
+| Grammar regression tests                   | LSP — see `ROADMAP.md`                      |
 
 CRA API templates use `router.js`; `.ryx` API snippets are optional.
 
@@ -119,20 +119,20 @@ code --install-extension packages/ryunix-vscode/ryunixjs-1.0.4.vsix
 
 ## Related packages
 
-| Package | Relationship |
-| :------ | :------------- |
-| `core` | Completion export list |
-| `cra` | `--vscode` workspace files |
-| `ryunix-presets` | ESLint `ryunix`; `app/` conventions |
-| `ryunix-devtools` | Browser debugging (separate) |
+| Package           | Relationship                        |
+| :---------------- | :---------------------------------- |
+| `core`            | Completion export list              |
+| `cra`             | `--vscode` workspace files          |
+| `ryunix-presets`  | ESLint `ryunix`; `app/` conventions |
+| `ryunix-devtools` | Browser debugging (separate)        |
 
 ---
 
 ## Related docs
 
-| Topic | Document |
-| :---- | :------- |
-| CRA `--vscode` | [../cra/cli-and-helpers.md](../cra/cli-and-helpers.md) |
+| Topic            | Document                                                                     |
+| :--------------- | :--------------------------------------------------------------------------- |
+| CRA `--vscode`   | [../cra/cli-and-helpers.md](../cra/cli-and-helpers.md)                       |
 | App Router files | [../ryunix-presets/routing-and-ssg.md](../ryunix-presets/routing-and-ssg.md) |
 
 Spanish: [docs/es/ryunix-vscode/resumen-paquete.md](../../es/ryunix-vscode/resumen-paquete.md).

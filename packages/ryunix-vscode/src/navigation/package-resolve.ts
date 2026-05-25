@@ -74,10 +74,7 @@ function listJsFiles(dir: string): string[] {
   return out
 }
 
-function indexToPosition(
-  content: string,
-  index: number,
-): vscode.Position {
+function indexToPosition(content: string, index: number): vscode.Position {
   const before = content.slice(0, index)
   const lines = before.split('\n')
   const line = lines.length - 1
@@ -122,7 +119,10 @@ export function findRyunixSymbolLocation(
 
   const entry = getRyunixEntryFile(packageRoot)
   if (entry) {
-    return new vscode.Location(vscode.Uri.file(entry), new vscode.Position(0, 0))
+    return new vscode.Location(
+      vscode.Uri.file(entry),
+      new vscode.Position(0, 0),
+    )
   }
 
   return undefined
