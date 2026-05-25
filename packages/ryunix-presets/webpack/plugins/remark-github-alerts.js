@@ -46,7 +46,9 @@ function visit(node, fn) {
 export function remarkGithubAlerts() {
     return (tree) => {
         visit(tree, (node) => {
-            if (node.type !== 'blockquote' || !Array.isArray(node.children) || node.children.length === 0) {
+            if (node.type !== 'blockquote' ||
+                !Array.isArray(node.children) ||
+                node.children.length === 0) {
                 return;
             }
             const first = node.children[0];

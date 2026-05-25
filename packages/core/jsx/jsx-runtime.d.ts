@@ -1,4 +1,8 @@
-import type { RyunixElement, RyunixElementType, RyunixNode } from '../types/index'
+import type {
+  RyunixElement,
+  RyunixElementType,
+  RyunixNode,
+} from '../types/index'
 
 export function jsx(
   type: RyunixElementType,

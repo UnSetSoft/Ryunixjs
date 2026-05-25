@@ -47,7 +47,11 @@ Types ship in `types/index.d.ts` (main entry) and `jsx/jsx-runtime.d.ts`
 `@types` package is required.
 
 ```typescript
-import { useStore, createElement, type RyunixElement } from '@unsetsoft/ryunixjs'
+import {
+  useStore,
+  createElement,
+  type RyunixElement,
+} from '@unsetsoft/ryunixjs'
 
 function Counter(): RyunixElement {
   const [count, setCount] = useStore(0)

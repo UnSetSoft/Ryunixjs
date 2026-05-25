@@ -1,5 +1,9 @@
 import { EFFECT_TAGS, getState } from '../utils/index.js'
-import type { RyunixElement, RyunixFiber, RyunixNode } from '../types/internal.js'
+import type {
+  RyunixElement,
+  RyunixFiber,
+  RyunixNode,
+} from '../types/internal.js'
 
 const reconcileChildren = (wipFiber: RyunixFiber, elements: RyunixNode[]) => {
   const state = getState()
@@ -54,7 +58,9 @@ const reconcileChildren = (wipFiber: RyunixFiber, elements: RyunixNode[]) => {
         dom: null,
         parent: wipFiber,
         alternate: null,
-        effectTag: state.isHydrating ? EFFECT_TAGS.HYDRATE : EFFECT_TAGS.PLACEMENT,
+        effectTag: state.isHydrating
+          ? EFFECT_TAGS.HYDRATE
+          : EFFECT_TAGS.PLACEMENT,
         key: element.key,
         index,
       }

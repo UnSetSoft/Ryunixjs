@@ -95,7 +95,7 @@ const cloneElement = (
   }
 
   const newChildren =
-    children.length > 0 ? children : element.props.children ?? []
+    children.length > 0 ? children : (element.props.children ?? [])
 
   return createElement(
     element.type,

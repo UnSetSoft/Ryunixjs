@@ -21,7 +21,9 @@ class ApiRouterPlugin {
   outputPath: string
   debug: boolean
 
-  constructor(options: { appDir?: string; outputPath?: string; debug?: boolean } = {}) {
+  constructor(
+    options: { appDir?: string; outputPath?: string; debug?: boolean } = {},
+  ) {
     this.appDir = options.appDir || 'src/app'
     this.outputPath = options.outputPath || '.ryunix/server/api'
     this.debug = options.debug || false

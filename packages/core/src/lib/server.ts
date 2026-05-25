@@ -1,4 +1,10 @@
-import { RYUNIX_TYPES, STRINGS, OLD_STRINGS, is, getState } from '../utils/index.js'
+import {
+  RYUNIX_TYPES,
+  STRINGS,
+  OLD_STRINGS,
+  is,
+  getState,
+} from '../utils/index.js'
 import { camelToKebab, validateUri } from './dom.js'
 import { toSvgAttrName } from '../utils/svgAttributes.js'
 import { resetIdCounter } from './hooks.js'
@@ -37,8 +43,20 @@ const renderStyle = (styleObj) => {
 }
 
 const VOID_ELEMENTS = new Set([
-  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-  'link', 'meta', 'param', 'source', 'track', 'wbr'
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
 ])
 
 /**
@@ -55,7 +73,7 @@ const renderToStringImpl = (element) => {
   }
 
   if (Array.isArray(element)) {
-    return element.map(child => renderToStringImpl(child)).join('')
+    return element.map((child) => renderToStringImpl(child)).join('')
   }
 
   /** @type {RyunixElement} */
@@ -63,22 +81,23 @@ const renderToStringImpl = (element) => {
 
   if (vnode.type === RYUNIX_TYPES.TEXT_ELEMENT) {
     return escapeHtml(
-      /** @type {import('./createElement.js').RyunixTextElement} */ (vnode).props.nodeValue,
+      /** @type {import('./createElement.js').RyunixTextElement} */ vnode.props
+        .nodeValue,
     )
   }
 
   if (vnode.type === RYUNIX_TYPES.RYUNIX_FRAGMENT) {
     const children = vnode.props?.children || []
-    return children.map(child => renderToStringImpl(child)).join('')
+    return children.map((child) => renderToStringImpl(child)).join('')
   }
 
   if (vnode.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     // Context Providers just render their children transparently on the server
     const state = getState()
     state.ssrContexts = state.ssrContexts || {}
-    const ctxProps = /** @type {{ _contextId?: string, value?: unknown, children?: RyunixNode | RyunixNode[] }} */ (
-      vnode.props || {}
-    )
+    const ctxProps =
+      /** @type {{ _contextId?: string, value?: unknown, children?: RyunixNode | RyunixNode[] }} */ vnode.props ||
+      {}
     const ctxId = ctxProps._contextId
     const prevCtx = state.ssrContexts[ctxId]
 
@@ -89,7 +108,7 @@ const renderToStringImpl = (element) => {
     const children = ctxProps.children || []
     let result = ''
     if (Array.isArray(children)) {
-      result = children.map(child => renderToStringImpl(child)).join('')
+      result = children.map((child) => renderToStringImpl(child)).join('')
     } else {
       result = renderToStringImpl(children)
     }
@@ -104,9 +123,8 @@ const renderToStringImpl = (element) => {
   if (typeof vnode.type === 'function') {
     const type = vnode.type
     const props = vnode.props || {}
-    const renderedElement = /** @type {(props: Record<string, unknown>) => RyunixNode} */ (type)(
-      props,
-    )
+    const renderedElement =
+      /** @type {(props: Record<string, unknown>) => RyunixNode} */ type(props)
     return renderToStringImpl(renderedElement)
   }
 
@@ -121,9 +139,9 @@ const renderToStringImpl = (element) => {
   Object.entries(props).forEach(([key, value]) => {
     if (key === 'children') {
       if (Array.isArray(value)) {
-        htmlChildren = value.map(child => renderToStringImpl(child)).join('')
+        htmlChildren = value.map((child) => renderToStringImpl(child)).join('')
       } else {
-        htmlChildren = renderToStringImpl(/** @type {RyunixNode} */ (value))
+        htmlChildren = renderToStringImpl(/** @type {RyunixNode} */ value)
       }
     } else if (key === 'dangerouslySetInnerHTML') {
       const inner = value as { __html?: string } | null | undefined
@@ -131,7 +149,9 @@ const renderToStringImpl = (element) => {
         innerHTML = inner.__html
       }
     } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
-      const styleString = renderStyle(/** @type {Record<string, unknown>} */ (value))
+      const styleString = renderStyle(
+        /** @type {Record<string, unknown>} */ value,
+      )
       if (styleString) {
         attributes += ` style="${escapeHtml(styleString)}"`
       }
@@ -139,7 +159,11 @@ const renderToStringImpl = (element) => {
       if (value) {
         attributes += ` class="${escapeHtml(value)}"`
       }
-    } else if (!key.startsWith('on') && key !== '__source' && key !== '__self') {
+    } else if (
+      !key.startsWith('on') &&
+      key !== '__source' &&
+      key !== '__self'
+    ) {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
@@ -168,7 +192,9 @@ function $RC(id, templateId) {
     t.remove();
   }
 }
-`.replace(/\s+/g, ' ').trim()
+`
+  .replace(/\s+/g, ' ')
+  .trim()
 
 /**
  * @param {RyunixNode | RyunixNode[]} element
@@ -183,8 +209,8 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
 
   // Await the element if it's a promise (e.g. from an async Server Component directly rendered)
   if (element instanceof Promise) {
-    element = await element;
-    if (element == null || typeof element === 'boolean') return;
+    element = await element
+    if (element == null || typeof element === 'boolean') return
   }
 
   if (typeof element === 'string' || typeof element === 'number') {
@@ -205,7 +231,8 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   if (vnode.type === RYUNIX_TYPES.TEXT_ELEMENT) {
     push(
       escapeHtml(
-        /** @type {import('./createElement.js').RyunixTextElement} */ (vnode).props.nodeValue,
+        /** @type {import('./createElement.js').RyunixTextElement} */ vnode
+          .props.nodeValue,
       ),
     )
     return
@@ -222,9 +249,9 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
   if (vnode.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
     const state = getState()
     state.ssrContexts = state.ssrContexts || {}
-    const ctxProps = /** @type {{ _contextId?: string, value?: unknown, children?: RyunixNode | RyunixNode[] }} */ (
-      vnode.props || {}
-    )
+    const ctxProps =
+      /** @type {{ _contextId?: string, value?: unknown, children?: RyunixNode | RyunixNode[] }} */ vnode.props ||
+      {}
     const ctxId = ctxProps._contextId
     const prevCtx = state.ssrContexts[ctxId]
 
@@ -254,11 +281,12 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
     vnode.type === RYUNIX_TYPES.RYUNIX_SUSPENSE ||
     (typeof suspenseType === 'object' &&
       suspenseType != null &&
-      /** @type {{ type?: symbol }} */ (suspenseType).type === RYUNIX_TYPES.RYUNIX_SUSPENSE)
+      /** @type {{ type?: symbol }} */ suspenseType.type ===
+        RYUNIX_TYPES.RYUNIX_SUSPENSE)
   if (isSuspenseBoundary) {
-    const suspenseProps = /** @type {{ fallback?: RyunixNode, children?: RyunixNode | RyunixNode[] }} */ (
-      vnode.props || {}
-    )
+    const suspenseProps =
+      /** @type {{ fallback?: RyunixNode, children?: RyunixNode | RyunixNode[] }} */ vnode.props ||
+      {}
     const { fallback, children } = suspenseProps
     const id = `s-${Math.random().toString(36).slice(2, 9)}`
 
@@ -275,7 +303,9 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
 
       let content = ''
       /** @param {string} chunk */
-      const subPush = (chunk) => { content += chunk }
+      const subPush = (chunk) => {
+        content += chunk
+      }
       try {
         await renderToStreamImpl(children, subPush, suspenseTasks)
         return { id, content, success: true }
@@ -299,11 +329,12 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
 
   if (typeof type === 'function') {
     if (process.env.RYUNIX_DEBUG) {
-      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous');
+      console.log('[SSR Debug] Rendering function:', type.name || 'anonymous')
     }
-    const renderedElement = await /** @type {(props: Record<string, unknown>) => RyunixNode | Promise<RyunixNode>} */ (
-      type
-    )(props)
+    const renderedElement =
+      await /** @type {(props: Record<string, unknown>) => RyunixNode | Promise<RyunixNode>} */ type(
+        props,
+      )
     await renderToStreamImpl(renderedElement, push, suspenseTasks)
     return
   }
@@ -323,7 +354,9 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
         innerHTML = inner.__html
       }
     } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
-      const styleString = renderStyle(/** @type {Record<string, unknown>} */ (value))
+      const styleString = renderStyle(
+        /** @type {Record<string, unknown>} */ value,
+      )
       if (styleString) {
         attributes += ` style="${escapeHtml(styleString)}"`
       }
@@ -331,7 +364,11 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       if (value) {
         attributes += ` class="${escapeHtml(value)}"`
       }
-    } else if (!key.startsWith('on') && key !== '__source' && key !== '__self') {
+    } else if (
+      !key.startsWith('on') &&
+      key !== '__source' &&
+      key !== '__self'
+    ) {
       if (typeof value === 'boolean') {
         if (value) attributes += ` ${key}=""`
       } else if (value != null) {
@@ -402,8 +439,12 @@ export const renderToReadableStream = (
           const task = suspenseTasks.shift()
           const res = await task
           if (res.success) {
-            push(`<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`)
-            push(`<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`)
+            push(
+              `<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`,
+            )
+            push(
+              `<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`,
+            )
           }
         }
 
@@ -413,7 +454,7 @@ export const renderToReadableStream = (
       } finally {
         state.isServerRendering = wasServerRendering
       }
-    }
+    },
   })
 }
 
@@ -430,10 +471,10 @@ export const renderToString = (
   const wasServerRendering = state.isServerRendering
   state.isServerRendering = true
   state.ssrMetadata = {}
-  
+
   // Reset idCounter for deterministic useId values
   resetIdCounter()
-  
+
   try {
     return renderToStringImpl(element)
   } finally {
@@ -450,17 +491,17 @@ export const renderToStringAsync = async (
   element: import('../types/internal.js').RyunixNode,
   options: import('../types/internal.js').RyunixRenderToStringOptions = {},
 ) => {
-  const stream = renderToReadableStream(element, options);
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let result = '';
+  const stream = renderToReadableStream(element, options)
+  const reader = stream.getReader()
+  const decoder = new TextDecoder()
+  let result = ''
 
   while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    result += decoder.decode(value, { stream: true });
+    const { done, value } = await reader.read()
+    if (done) break
+    result += decoder.decode(value, { stream: true })
   }
 
-  result += decoder.decode();
-  return result;
+  result += decoder.decode()
+  return result
 }

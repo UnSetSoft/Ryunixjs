@@ -104,14 +104,40 @@ const createDom = (fiber) => {
     if (fiber.type === RYUNIX_TYPES.TEXT_ELEMENT) {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
-      const hostType = /** @type {string} */ (fiber.type)
+      const hostType = /** @type {string} */ fiber.type
       const isSvg = [
-        'svg', 'path', 'g', 'circle', 'polygon', 'rect', 'line', 'polyline',
-        'ellipse', 'text', 'tspan', 'defs', 'use', 'symbol', 'mask',
-        'clipPath', 'linearGradient', 'radialGradient', 'stop', 'filter',
-        'feGaussianBlur', 'feOffset', 'feMerge', 'feMergeNode', 'feBlend',
-        'feColorMatrix', 'feComposite', 'foreignObject', 'image', 'marker',
-        'pattern', 'textPath',
+        'svg',
+        'path',
+        'g',
+        'circle',
+        'polygon',
+        'rect',
+        'line',
+        'polyline',
+        'ellipse',
+        'text',
+        'tspan',
+        'defs',
+        'use',
+        'symbol',
+        'mask',
+        'clipPath',
+        'linearGradient',
+        'radialGradient',
+        'stop',
+        'filter',
+        'feGaussianBlur',
+        'feOffset',
+        'feMerge',
+        'feMergeNode',
+        'feBlend',
+        'feColorMatrix',
+        'feComposite',
+        'foreignObject',
+        'image',
+        'marker',
+        'pattern',
+        'textPath',
       ].includes(hostType)
 
       if (isSvg) {
@@ -130,7 +156,7 @@ const createDom = (fiber) => {
     }
 
     updateDom(
-      /** @type {HTMLElement | Text} */ (/** @type {HTMLElement | SVGElement | Text} */ (dom)),
+      /** @type {HTMLElement | Text} */ /** @type {HTMLElement | SVGElement | Text} */ dom,
       {},
       fiber.props,
     )
@@ -152,7 +178,12 @@ const createDom = (fiber) => {
 const checkAttributeUri = (attrName, value) => {
   if (typeof value !== 'string') return value
   const attr = attrName.toLowerCase()
-  if (attr !== 'href' && attr !== 'src' && attr !== 'action' && attr !== 'formaction') {
+  if (
+    attr !== 'href' &&
+    attr !== 'src' &&
+    attr !== 'action' &&
+    attr !== 'formaction'
+  ) {
     return value
   }
 
@@ -163,7 +194,9 @@ const checkAttributeUri = (attrName, value) => {
     normalized.startsWith('data:')
   ) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn(`[Ryunix Security] Blocked dangerous ${attrName} URI: ${value}`)
+      console.warn(
+        `[Ryunix Security] Blocked dangerous ${attrName} URI: ${value}`,
+      )
     }
     return 'javascript:void(0)'
   }
@@ -201,7 +234,8 @@ const updateDom = (
       const eventType = propKey.toLowerCase().substring(2)
       try {
         const originalHandler = prevProps[propKey]
-        const wrappedHandler = handlerMap?.get(originalHandler) || originalHandler
+        const wrappedHandler =
+          handlerMap?.get(originalHandler) || originalHandler
         el.removeEventListener(eventType, wrappedHandler as EventListener)
         if (handlerMap) {
           handlerMap.delete(originalHandler)
@@ -212,7 +246,6 @@ const updateDom = (
         }
       }
     })
-
 
   // Remove old properties
   Object.keys(prevProps)
@@ -232,7 +265,9 @@ const updateDom = (
         const attrName = toSvgAttrName(propKey)
         el.removeAttribute(attrName)
       } else {
-        /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] = ''
+        /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
+          propKey
+        ] = ''
         el.removeAttribute(propKey)
       }
     })
@@ -246,20 +281,20 @@ const updateDom = (
         // Handle style properties
         if (propKey === STRINGS.STYLE || propKey === OLD_STRINGS.STYLE) {
           const styleValue = nextProps[propKey]
-          applyStyles(el, /** @type {Record<string, unknown>} */ (styleValue))
+          applyStyles(el, /** @type {Record<string, unknown>} */ styleValue)
         }
         // Handle className properties
         else if (propKey === STRINGS.CLASS_NAME) {
           applyClasses(
             el,
-            /** @type {string} */ (prevProps[STRINGS.CLASS_NAME]),
-            /** @type {string} */ (nextProps[STRINGS.CLASS_NAME]),
+            /** @type {string} */ prevProps[STRINGS.CLASS_NAME],
+            /** @type {string} */ nextProps[STRINGS.CLASS_NAME],
           )
         } else if (propKey === OLD_STRINGS.CLASS_NAME) {
           applyClasses(
             el,
-            /** @type {string} */ (prevProps[OLD_STRINGS.CLASS_NAME]),
-            /** @type {string} */ (nextProps[OLD_STRINGS.CLASS_NAME]),
+            /** @type {string} */ prevProps[OLD_STRINGS.CLASS_NAME],
+            /** @type {string} */ nextProps[OLD_STRINGS.CLASS_NAME],
           )
         }
         // Handle other properties
@@ -267,30 +302,39 @@ const updateDom = (
           // Special handling for value and checked (controlled components)
           if (propKey === 'value' || propKey === 'checked') {
             if (
-              /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] !==
-              nextProps[propKey]
+              /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
+                propKey
+              ] !== nextProps[propKey]
             ) {
-              /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] =
-                nextProps[propKey]
+              /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
+                propKey
+              ] = nextProps[propKey]
             }
           } else {
             const isSvgNode = el instanceof SVGElement
             if (isSvgNode) {
               const attrName = toSvgAttrName(propKey)
               /** @type {unknown} */
-              const svgValidated = checkAttributeUri(attrName, nextProps[propKey])
+              const svgValidated = checkAttributeUri(
+                attrName,
+                nextProps[propKey],
+              )
               // viewBox is case sensitive, we respect the camelCase for it.
-              el.setAttribute(attrName, /** @type {string} */ (svgValidated))
+              el.setAttribute(attrName, /** @type {string} */ svgValidated)
             } else {
               const attrVal = nextProps[propKey]
               /** @type {unknown} */
-              const safeValue = checkAttributeUri(propKey, attrVal);
+              const safeValue = checkAttributeUri(propKey, attrVal)
 
-              /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (el))[propKey] =
-                safeValue
+              /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
+                propKey
+              ] = safeValue
               // Best effort: set html attributes if it's not a primitive component property
-              if (typeof attrVal !== 'object' && typeof attrVal !== 'function') {
-                el.setAttribute(propKey, /** @type {string} */ (safeValue))
+              if (
+                typeof attrVal !== 'object' &&
+                typeof attrVal !== 'function'
+              ) {
+                el.setAttribute(propKey, /** @type {string} */ safeValue)
               }
             }
           }
@@ -315,20 +359,20 @@ const updateDom = (
           )
         }
         // Store the wrapped handler so it can be removed later
-        // Note: For simplicity, we could also just wrap it on the fly, 
+        // Note: For simplicity, we could also just wrap it on the fly,
         // but we need the exact reference for removeEventListener.
-        // Actually, the current removeDom logic uses prevProps[name], 
+        // Actually, the current removeDom logic uses prevProps[name],
         // which won't work if we wrap it here and don't store it.
         // Wait, the current removeEventListener call in dom.js:177 is:
         // dom.removeEventListener(eventType, prevProps[name])
         // If we wrap it, we MUST store the wrapper.
-        
+
         // Let's use a weakMap or a property on the DOM node to store the wrappers.
         if (!domEl._ryunixHandlers) {
           domEl._ryunixHandlers = new Map()
         }
         domEl._ryunixHandlers.set(nextProps[propKey], handler)
-        
+
         el.addEventListener(eventType, handler)
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
@@ -337,8 +381,6 @@ const updateDom = (
       }
     })
 }
-
-
 
 /**
  * Clear all children from a DOM element

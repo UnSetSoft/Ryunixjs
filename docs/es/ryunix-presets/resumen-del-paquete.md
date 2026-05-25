@@ -1,7 +1,7 @@
 # Ryunix Presets — resumen del paquete
 
-> **Language / Idioma:** [English](../../en/ryunix-presets/package-overview.md) ·
-> [Español](./resumen-del-paquete.md)
+> **Language / Idioma:** [English](../../en/ryunix-presets/package-overview.md)
+> · [Español](./resumen-del-paquete.md)
 
 El paquete npm **`@unsetsoft/ryunix-presets`** vive en
 `packages/ryunix-presets/`. Es el **tooling de build y CLI** de RyunixJS:
@@ -27,11 +27,11 @@ comando `ryunix`, Webpack dual (cliente + servidor), routing por archivos en
 
 ## Rol en el monorepo
 
-| Paquete | Responsabilidad |
-| :------ | :-------------- |
+| Paquete                     | Responsabilidad                                       |
+| :-------------------------- | :---------------------------------------------------- |
 | `@unsetsoft/ryunix-presets` | Dev server, build, start, Webpack, `ryunix.config.js` |
-| `@unsetsoft/ryunixjs` | Runtime importado en los bundles que genera el preset |
-| `@unsetsoft/cra` | Añade el preset en `devDependencies` de apps nuevas |
+| `@unsetsoft/ryunixjs`       | Runtime importado en los bundles que genera el preset |
+| `@unsetsoft/cra`            | Añade el preset en `devDependencies` de apps nuevas   |
 
 Toda la lógica de **enrutamiento compile-time**, **SSG** y **servidor de
 desarrollo** vive aquí, no en `packages/core`, salvo APIs que el core exporta
@@ -109,13 +109,13 @@ fuentes legacy; tras editar `.ts`, ejecutar `build` antes de probar el CLI.
 
 ## Comandos CLI (`ryunix`)
 
-| Comando | Función resumida |
-| :------ | :--------------- |
-| `ryunix dev` | Modo desarrollo, HMR, handler SSR |
-| `ryunix build` | Limpia `.ryunix/`, compila Webpack, opcional prerender SSG |
-| `ryunix start` | Sirve build de producción (`build/static`) |
-| `ryunix lint` | ESLint con config del preset |
-| `ryunix customHtml` | Copia `index.html` base a `public/` |
+| Comando             | Función resumida                                           |
+| :------------------ | :--------------------------------------------------------- |
+| `ryunix dev`        | Modo desarrollo, HMR, handler SSR                          |
+| `ryunix build`      | Limpia `.ryunix/`, compila Webpack, opcional prerender SSG |
+| `ryunix start`      | Sirve build de producción (`build/static`)                 |
+| `ryunix lint`       | ESLint con config del preset                               |
+| `ryunix customHtml` | Copia `index.html` base a `public/`                        |
 
 Detalle: [cli-y-arranque.md](./cli-y-arranque.md).
 
@@ -123,12 +123,12 @@ Detalle: [cli-y-arranque.md](./cli-y-arranque.md).
 
 ## TypeScript y artefactos publicados
 
-| Aspecto | Detalle |
-| :------ | :------ |
+| Aspecto           | Detalle                                                                                 |
+| :---------------- | :-------------------------------------------------------------------------------------- |
 | Fuente mantenedor | `webpack/**/*.ts` (migración de entradas y utilidades en curso/completada según módulo) |
-| Comprobación | `pnpm --filter @unsetsoft/ryunix-presets typecheck` |
-| Emit | `pnpm --filter @unsetsoft/ryunix-presets build` |
-| Consumidor | Solo necesita `.d.ts` + `.js` publicados; no compila el preset |
+| Comprobación      | `pnpm --filter @unsetsoft/ryunix-presets typecheck`                                     |
+| Emit              | `pnpm --filter @unsetsoft/ryunix-presets build`                                         |
+| Consumidor        | Solo necesita `.d.ts` + `.js` publicados; no compila el preset                          |
 
 Algunos archivos siguen en `.cjs` (`config.cjs`, `settingfile.cjs`) por
 compatibilidad con carga de config en Node.
@@ -177,12 +177,12 @@ flowchart LR
 
 ## Documentación relacionada
 
-| Documento | Contenido |
-| :-------- | :-------- |
-| [cli-y-arranque.md](./cli-y-arranque.md) | Servidores dev/prod, comandos |
-| [carga-de-configuracion.md](./carga-de-configuracion.md) | `ryunix.config.js` |
-| [enrutamiento-y-ssg.md](./enrutamiento-y-ssg.md) | Router y prerender |
-| [enrutador-api.md](./enrutador-api.md) | Rutas API |
-| [loaders-webpack.md](./loaders-webpack.md) | RSC y Server Actions |
+| Documento                                                     | Contenido                       |
+| :------------------------------------------------------------ | :------------------------------ |
+| [cli-y-arranque.md](./cli-y-arranque.md)                      | Servidores dev/prod, comandos   |
+| [carga-de-configuracion.md](./carga-de-configuracion.md)      | `ryunix.config.js`              |
+| [enrutamiento-y-ssg.md](./enrutamiento-y-ssg.md)              | Router y prerender              |
+| [enrutador-api.md](./enrutador-api.md)                        | Rutas API                       |
+| [loaders-webpack.md](./loaders-webpack.md)                    | RSC y Server Actions            |
 | [core/resumen-del-paquete.md](../core/resumen-del-paquete.md) | Motor empaquetado por el preset |
-| `packages/ryunix-presets/README.md` | Instalación y flags de usuario |
+| `packages/ryunix-presets/README.md`                           | Instalación y flags de usuario  |

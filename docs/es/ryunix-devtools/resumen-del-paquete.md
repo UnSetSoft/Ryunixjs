@@ -1,12 +1,12 @@
 # Ryunix DevTools — resumen del paquete
 
-> **Language / Idioma:** [English](../../en/ryunix-devtools/package-overview.md) ·
-> [Español](./resumen-del-paquete.md)
+> **Language / Idioma:** [English](../../en/ryunix-devtools/package-overview.md)
+> · [Español](./resumen-del-paquete.md)
 
 El paquete **`@unsetsoft/ryunix-devtools`** vive en `packages/ryunix-devtools/`.
 Es una **extensión de navegador** (Chrome / Edge) para depurar aplicaciones
 Ryunix: árbol de componentes, props y contadores de hooks. No se publica como
-librería npm consumida por apps; se carga en modo *unpacked* desde el monorepo.
+librería npm consumida por apps; se carga en modo _unpacked_ desde el monorepo.
 
 ---
 
@@ -26,12 +26,12 @@ librería npm consumida por apps; se carga en modo *unpacked* desde el monorepo.
 
 ## Rol en el monorepo
 
-| Paquete | Responsabilidad |
-| :------ | :-------------- |
-| `@unsetsoft/ryunixjs` | Expone hooks de depuración en desarrollo (`devtools` en core) |
-| `@unsetsoft/ryunix-devtools` | UI en Chrome DevTools que lee ese estado |
-| `@unsetsoft/ryunix-presets` | Sirve la app donde corre la extensión |
-| `@unsetsoft/cra` | Opcionalmente recomienda la extensión VS Code / workspace |
+| Paquete                      | Responsabilidad                                               |
+| :--------------------------- | :------------------------------------------------------------ |
+| `@unsetsoft/ryunixjs`        | Expone hooks de depuración en desarrollo (`devtools` en core) |
+| `@unsetsoft/ryunix-devtools` | UI en Chrome DevTools que lee ese estado                      |
+| `@unsetsoft/ryunix-presets`  | Sirve la app donde corre la extensión                         |
+| `@unsetsoft/cra`             | Opcionalmente recomienda la extensión VS Code / workspace     |
 
 La extensión **no** participa en `ryunix build` ni en el bundle de producción de
 las apps. Es herramienta de mantenedor y desarrollador.
@@ -78,14 +78,14 @@ No hay subcarpeta `src/`: fuentes y salida viven en la **raíz del paquete**. Lo
 
 ## Piezas de la extensión
 
-| Archivo | Rol |
-| :------ | :-- |
-| `manifest.json` | Permisos, `content_scripts`, `background`, `devtools_page` |
-| `content-script.js` | Se ejecuta al inicio del documento en todas las URLs configuradas |
-| `hook.js` | Recurso accesible desde la página; enlaza con el runtime Ryunix |
-| `background.js` | Service worker (MV3) |
-| `devtools.js` + `devtools.html` | Crea el panel personalizado en DevTools |
-| `panel.js` + `panel.html` | Árbol de componentes, props, contador de hooks |
+| Archivo                         | Rol                                                               |
+| :------------------------------ | :---------------------------------------------------------------- |
+| `manifest.json`                 | Permisos, `content_scripts`, `background`, `devtools_page`        |
+| `content-script.js`             | Se ejecuta al inicio del documento en todas las URLs configuradas |
+| `hook.js`                       | Recurso accesible desde la página; enlaza con el runtime Ryunix   |
+| `background.js`                 | Service worker (MV3)                                              |
+| `devtools.js` + `devtools.html` | Crea el panel personalizado en DevTools                           |
+| `panel.js` + `panel.html`       | Árbol de componentes, props, contador de hooks                    |
 
 La detección automática de apps Ryunix depende de que el core en desarrollo
 exponga la información que el hook consume (ver
@@ -95,10 +95,10 @@ exponga la información que el hook consume (ver
 
 ## TypeScript y build
 
-| Script | Comando |
-| :----- | :------ |
+| Script      | Comando                         |
+| :---------- | :------------------------------ |
 | `typecheck` | `tsc --noEmit -p tsconfig.json` |
-| `build` | `tsc -p tsconfig.emit.json` |
+| `build`     | `tsc -p tsconfig.emit.json`     |
 
 Fuentes incluidas en emit: `background.ts`, `content-script.ts`, `devtools.ts`,
 `hook.ts`, `panel.ts`.
@@ -145,9 +145,9 @@ flowchart TB
 
 ## Documentación relacionada
 
-| Documento | Contenido |
-| :-------- | :-------- |
-| [core/devtools-y-profiler.md](../core/devtools-y-profiler.md) | Advertencias y profiler en el motor |
-| [core/resumen-del-paquete.md](../core/resumen-del-paquete.md) | Paquete `@unsetsoft/ryunixjs` |
+| Documento                                                        | Contenido                               |
+| :--------------------------------------------------------------- | :-------------------------------------- |
+| [core/devtools-y-profiler.md](../core/devtools-y-profiler.md)    | Advertencias y profiler en el motor     |
+| [core/resumen-del-paquete.md](../core/resumen-del-paquete.md)    | Paquete `@unsetsoft/ryunixjs`           |
 | [App de integración local](../guias/app-de-integracion-local.md) | Probar una app con la extensión cargada |
-| `packages/ryunix-devtools/README.md` | Instalación y compatibilidad |
+| `packages/ryunix-devtools/README.md`                             | Instalación y compatibilidad            |

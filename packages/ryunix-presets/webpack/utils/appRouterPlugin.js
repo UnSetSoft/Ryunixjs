@@ -59,9 +59,9 @@ class AppRouterPlugin {
                 return false;
             try {
                 const content = fs.readFileSync(filePath, 'utf8');
-                return /export\s+async\s+default\s+function/i.test(content) ||
+                return (/export\s+async\s+default\s+function/i.test(content) ||
                     /export\s+default\s+async\s+function/i.test(content) ||
-                    /async\s+function\s+([A-Z][\w]*)/.test(content);
+                    /async\s+function\s+([A-Z][\w]*)/.test(content));
             }
             catch (e) {
                 return false;
@@ -116,7 +116,7 @@ class AppRouterPlugin {
                         return {
                             path: isServer || isClient ? null : path,
                             serverPath: isServer ? path : null,
-                            clientPath: isClient ? path : null
+                            clientPath: isClient ? path : null,
                         };
                     }
                     if (isServer)
@@ -157,7 +157,11 @@ class AppRouterPlugin {
                 }
             }
         }
-        if (!layout && !index && children.length === 0 && !errorFile && !loadingFile) {
+        if (!layout &&
+            !index &&
+            children.length === 0 &&
+            !errorFile &&
+            !loadingFile) {
             return null;
         }
         const node = {
@@ -183,7 +187,9 @@ class AppRouterPlugin {
             const ssgRoutes = [];
             let rootLayouts = [];
             const appDirPath = path.resolve(process.cwd(), this.appDir);
-            const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx')) ? path.join(appDirPath, 'error.ryx') : null;
+            const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx'))
+                ? path.join(appDirPath, 'error.ryx')
+                : null;
             let errorsId = null;
             if (errorsPath) {
                 errorsId = `Errors_App`;
@@ -201,8 +207,10 @@ class AppRouterPlugin {
                         return null;
                     const id = `${prefix}_${getNextId()}`;
                     const compPath = isServerBuild
-                        ? (componentObj.serverPath || componentObj.path || componentObj.clientPath)
-                        : (componentObj.clientPath || componentObj.path);
+                        ? componentObj.serverPath ||
+                            componentObj.path ||
+                            componentObj.clientPath
+                        : componentObj.clientPath || componentObj.path;
                     if (!compPath) {
                         return { id, isServerComponent: true, isAsync, isProxy: true };
                     }
@@ -218,7 +226,8 @@ class AppRouterPlugin {
                         layoutInfo.loading = layoutLoadingInfo;
                         layoutInfo.error = layoutErrorInfo;
                         currentLayouts.push(layoutInfo);
-                        if (parentLayouts.length === 0 && !rootLayouts.some(l => l.id === layoutInfo.id)) {
+                        if (parentLayouts.length === 0 &&
+                            !rootLayouts.some((l) => l.id === layoutInfo.id)) {
                             rootLayouts.push(layoutInfo);
                         }
                     }
@@ -235,11 +244,13 @@ class AppRouterPlugin {
                                 return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)} }`;
                             return `{ default: getOptExport(${info.id}, 'default'), isServerComponent: ${info.isServerComponent}, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)}, Metatags: getOptExport(${info.id}, 'Metatags') || getOptExport(${info.id}, 'frontmatter') || {}, generateMetadata: getOptExport(${info.id}, 'generateMetadata') }`;
                         };
-                        const layoutsArrayStr = `[${currentLayouts.map(l => formatComp(l)).join(', ')}]`;
+                        const layoutsArrayStr = `[${currentLayouts.map((l) => formatComp(l)).join(', ')}]`;
                         const indexConfigStr = formatComp(indexInfo);
                         const loadingConfigStr = formatComp(loadingInfo);
                         const errorConfigStr = formatComp(errorFileInfo);
-                        const errorPropStr = errorsId ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })` : indexConfigStr;
+                        const errorPropStr = errorsId
+                            ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })`
+                            : indexConfigStr;
                         flattenedRoutes.push(`
     {
       path: '${node.path}',
@@ -258,7 +269,7 @@ class AppRouterPlugin {
             if (routeNode)
                 traverse(routeNode);
             if (errorsId) {
-                const layoutsArrayStr = `[${rootLayouts.map(l => `{ default: getOptExport(${l.id}, 'default'), isServerComponent: ${l.isServerComponent}, id: '${l.id}', isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
+                const layoutsArrayStr = `[${rootLayouts.map((l) => `{ default: getOptExport(${l.id}, 'default'), isServerComponent: ${l.isServerComponent}, id: '${l.id}', isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`;
                 flattenedRoutes.push(`
     {
       path: '*',
@@ -267,7 +278,7 @@ class AppRouterPlugin {
             }
             return {
                 content: this.assembleFileContent(importStatements, flattenedRoutes),
-                ssgRoutes
+                ssgRoutes,
             };
         };
         const clientResult = generate(false);
@@ -285,13 +296,15 @@ class AppRouterPlugin {
             path.resolve(process.cwd(), 'app/globals.css'),
             path.resolve(process.cwd(), 'src/app/globals.css'),
         ];
-        const foundCss = possibleCssPaths.find(p => fs.existsSync(p));
+        const foundCss = possibleCssPaths.find((p) => fs.existsSync(p));
         if (foundCss) {
             const relCss = this.getRelativeImport(foundCss, mainEntryPath);
             globalCssImport = `import '${relCss}';\n`;
         }
         this.writeIfChanged(mainEntryPath, `import Ryunix from '@unsetsoft/ryunixjs';\n${globalCssImport}import AppRouter from './${path.basename(outputPath)}';\nif (typeof window !== 'undefined') { globalThis.Ryunix = Ryunix; }\nRyunix.init(<AppRouter />);\n`);
-        const ssgManifestPath = this.ssgOutputPath ? path.resolve(process.cwd(), this.ssgOutputPath) : path.join(path.dirname(outputPath), 'ssg', 'routes.json');
+        const ssgManifestPath = this.ssgOutputPath
+            ? path.resolve(process.cwd(), this.ssgOutputPath)
+            : path.join(path.dirname(outputPath), 'ssg', 'routes.json');
         this.writeIfChanged(ssgManifestPath, JSON.stringify(serverResult.ssgRoutes, null, 2));
     }
     assembleFileContent(importStatements, flattenedRoutes) {
@@ -513,7 +526,9 @@ export default function AppRouter() {
         fs.writeFileSync(filePath, content);
     }
     getRelativeImport(targetPath, outputPath) {
-        const relativePath = path.relative(path.dirname(outputPath), targetPath).replace(/\\/g, '/');
+        const relativePath = path
+            .relative(path.dirname(outputPath), targetPath)
+            .replace(/\\/g, '/');
         return relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
     }
     getNewestMtime(dirPath) {

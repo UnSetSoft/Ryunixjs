@@ -39,7 +39,10 @@
             const startTime = this.renderTimes.get(fiberData.id);
             if (startTime != null) {
                 fiberData.renderTime = performance.now() - startTime;
-                this.emit('render', { id: fiberData.id, duration: fiberData.renderTime });
+                this.emit('render', {
+                    id: fiberData.id,
+                    duration: fiberData.renderTime,
+                });
             }
         },
         getFiberId(fiber) {

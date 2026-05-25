@@ -66,7 +66,10 @@ export interface RyunixFiber {
   _isMemo?: boolean
   _isLazy?: boolean
   _isForwardRef?: boolean
-  _arePropsEqual?: (prev: Record<string, unknown>, next: Record<string, unknown>) => boolean
+  _arePropsEqual?: (
+    prev: Record<string, unknown>,
+    next: Record<string, unknown>,
+  ) => boolean
   containerInfo?: Element | DocumentFragment
   _isPortal?: boolean
   __devtoolsId?: string
@@ -115,10 +118,7 @@ export interface RyunixRouterContextValue {
   route: RyunixRoute | null
 }
 
-export type ScheduleWorkFn = (
-  root: RyunixRootFiber,
-  priority?: number,
-) => void
+export type ScheduleWorkFn = (root: RyunixRootFiber, priority?: number) => void
 
 export interface IdleDeadline {
   timeRemaining: () => number

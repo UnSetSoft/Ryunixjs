@@ -1,7 +1,12 @@
 import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index.js'
 import { createElement, Fragment } from './createElement.js'
 import { scheduleWork } from './bridge.js'
-import { Priority, scheduleUpdate, runWithPriority, getCurrentPriority } from './priority.js'
+import {
+  Priority,
+  scheduleUpdate,
+  runWithPriority,
+  getCurrentPriority,
+} from './priority.js'
 import { RYUNIX_PORTAL } from './portal.js'
 import { queueUpdate } from './batching.js'
 import { validateHookContext as validateHookCall } from './devtools.js'
@@ -42,9 +47,9 @@ const useStore = (initialState, priority = getCurrentPriority()) => {
   if (typeof window === 'undefined') {
     return [
       is.function(initialState)
-        ? /** @type {() => unknown} */ (initialState)()
+        ? /** @type {() => unknown} */ initialState()
         : initialState,
-      () => { },
+      () => {},
     ]
   }
 
@@ -52,9 +57,9 @@ const useStore = (initialState, priority = getCurrentPriority()) => {
   if (state.isServerRendering) {
     return [
       is.function(initialState)
-        ? /** @type {() => unknown} */ (initialState)()
+        ? /** @type {() => unknown} */ initialState()
         : initialState,
-      () => { },
+      () => {},
     ]
   }
 
@@ -63,9 +68,7 @@ const useStore = (initialState, priority = getCurrentPriority()) => {
    * @param {unknown} action
    */
   const reducer = (state: unknown, action: unknown) =>
-    is.function(action)
-      ? (action as (s: unknown) => unknown)(state)
-      : action
+    is.function(action) ? (action as (s: unknown) => unknown)(state) : action
   return useReducer(reducer, initialState, undefined, priority)
 }
 
@@ -76,40 +79,47 @@ const useStore = (initialState, priority = getCurrentPriority()) => {
  * @param {number} [defaultPriority]
  * @returns {[unknown, (action: unknown, priority?: number) => void]}
  */
-const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPriority()) => {
+const useReducer = (
+  reducer,
+  initialState,
+  init,
+  defaultPriority = getCurrentPriority(),
+) => {
   // SSR safety check - more reliable than state.isServerRendering
   if (typeof window === 'undefined') {
-    return [init ? init(initialState) : initialState, () => { }]
+    return [init ? init(initialState) : initialState, () => {}]
   }
 
   const state = getState()
   if (state.isServerRendering) {
-    return [init ? init(initialState) : initialState, () => { }]
+    return [init ? init(initialState) : initialState, () => {}]
   }
 
   validateHookCall()
 
   const { hookIndex } = state
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_STORE,
     state: oldHook ? oldHook.state : init ? init(initialState) : initialState,
-    queue: /** @type {unknown[]} */ ([]),
+    queue: /** @type {unknown[]} */ [],
   }
 
   if (oldHook?.queue) {
-    oldHook.queue.forEach(/** @param {unknown} action */ (action) => {
-      try {
-        hook.state = reducer(hook.state, action)
-      } catch (error) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Error in reducer:', error)
+    oldHook.queue.forEach(
+      /** @param {unknown} action */ (action) => {
+        try {
+          hook.state = reducer(hook.state, action)
+        } catch (error) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.error('Error in reducer:', error)
+          }
         }
-      }
-    })
+      },
+    )
   }
 
   /** @param {unknown} action @param {number} [priority] */
@@ -124,17 +134,18 @@ const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPri
     hook.queue.push(action)
 
     const currentState = getState()
-    const activeRoot = /** @type {RyunixRootFiber | null | undefined} */ (
-      currentState.currentRoot || currentState.wipRoot
-    )
+    const activeRoot =
+      /** @type {RyunixRootFiber | null | undefined} */ currentState.currentRoot ||
+      currentState.wipRoot
 
     if (!activeRoot) return
 
-    const newRoot = /** @type {RyunixRootFiber} */ ({
+    const newRoot = /** @type {RyunixRootFiber} */ {
       dom: activeRoot.dom,
       props: activeRoot.props,
-      alternate: /** @type {RyunixRootFiber | null} */ (currentState.currentRoot || null),
-    })
+      alternate:
+        /** @type {RyunixRootFiber | null} */ currentState.currentRoot || null,
+    }
     queueUpdate(() => scheduleWork(newRoot, priority))
   }
 
@@ -142,7 +153,6 @@ const useReducer = (reducer, initialState, init, defaultPriority = getCurrentPri
   state.hookIndex++
   return [hook.state, dispatch]
 }
-
 
 /**
  * The `useEffect` function in JavaScript is used to manage side effects in functional components by
@@ -178,7 +188,7 @@ const useEffect = (callback, deps) => {
   }
 
   const { hookIndex } = state
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
   const hasChanged = haveDepsChanged(oldHook?.deps, deps)
 
@@ -216,20 +226,20 @@ const useRef = (initialValue) => {
   validateHookCall()
 
   const { hookIndex } = state
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_REF,
     value: oldHook
-      ? /** @type {{ value: { current: unknown } }} */ (oldHook).value
+      ? /** @type {{ value: { current: unknown } }} */ oldHook.value
       : { current: initialValue },
   }
 
   wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
   state.hookIndex++
-  return /** @type {{ current: unknown }} */ (hook.value)
+  return /** @type {{ current: unknown }} */ hook.value
 }
 
 /**
@@ -267,12 +277,12 @@ const useMemo = (compute, deps) => {
   }
 
   const { hookIndex } = state
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
   let value
   if (oldHook && !haveDepsChanged(oldHook.deps, deps)) {
-    value = /** @type {{ value?: unknown }} */ (oldHook).value
+    value = /** @type {{ value?: unknown }} */ oldHook.value
   } else {
     try {
       value = compute()
@@ -312,7 +322,10 @@ const useCallback = (callback, deps) => {
   if (!is.function(callback)) {
     throw new Error('useCallback requires a function as first argument')
   }
-  return /** @type {(...args: never[]) => unknown} */ (useMemo(() => callback, deps))
+  return /** @type {(...args: never[]) => unknown} */ useMemo(
+    () => callback,
+    deps,
+  )
 }
 
 /**
@@ -337,7 +350,7 @@ const createContext = (
     return createElement(
       RYUNIX_TYPES.RYUNIX_CONTEXT,
       { value, children, _contextId: contextId },
-      ...flattenArray([children])
+      ...flattenArray([children]),
     )
   }
 
@@ -347,9 +360,8 @@ const createContext = (
   const useContext = (ctxID = contextId) => {
     const state = getState()
     if (state.isServerRendering) {
-      const ssrContexts = /** @type {Record<string | symbol, unknown> | undefined} */ (
-        state.ssrContexts
-      )
+      const ssrContexts =
+        /** @type {Record<string | symbol, unknown> | undefined} */ state.ssrContexts
       return ssrContexts && ssrContexts[ctxID] !== undefined
         ? ssrContexts[ctxID]
         : defaultValue
@@ -358,17 +370,16 @@ const createContext = (
     validateHookCall()
 
     /** @type {RyunixFiber | null | undefined} */
-    let fiber = /** @type {RyunixFiber} */ (state.wipFiber)
+    let fiber = /** @type {RyunixFiber} */ state.wipFiber
 
     while (fiber) {
       if (fiber._contextId === ctxID && fiber._contextValue !== undefined) {
         return fiber._contextValue
       }
-      const fiberType = fiber.type as import('../types/internal.js').RyunixComponent | undefined
-      if (
-        fiberType?._contextId === ctxID &&
-        fiber.props?.value !== undefined
-      ) {
+      const fiberType = fiber.type as
+        | import('../types/internal.js').RyunixComponent
+        | undefined
+      if (fiberType?._contextId === ctxID && fiber.props?.value !== undefined) {
         return fiber.props.value
       }
       fiber = fiber.parent
@@ -377,7 +388,8 @@ const createContext = (
   }
 
   return {
-    Provider: /** @type {RyunixComponent & { _contextId?: string | symbol }} */ (Provider),
+    Provider:
+      /** @type {RyunixComponent & { _contextId?: string | symbol }} */ Provider,
     useContext,
   }
 }
@@ -412,7 +424,7 @@ const useHash = () => {
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
-  return /** @type {string} */ (hash)
+  return /** @type {string} */ hash
 }
 
 /**
@@ -492,14 +504,17 @@ const useMetadata = (
 
 // Router Context
 /** @type {ReturnType<typeof createContext>} */
-const RouterContext = createContext('ryunix.navigation', /** @type {RyunixRouterContextValue} */ ({
-  location: '/',
-  params: {},
-  query: {},
-  /** @param {string} _path */
-  navigate: (_path) => {},
-  route: null,
-}))
+const RouterContext = createContext(
+  'ryunix.navigation',
+  /** @type {RyunixRouterContextValue} */ {
+    location: '/',
+    params: {},
+    query: {},
+    /** @param {string} _path */
+    navigate: (_path) => {},
+    route: null,
+  },
+)
 
 /**
  * @param {RyunixRoute[]} routes
@@ -524,19 +539,29 @@ const findRoute = (routes, path) => {
     /** @type {{ key: string, isCatchAll: boolean }[]} */
     const keys = []
     const pattern = new RegExp(
-      `^${route.path.replace(/:(\.\.\.)?(\w+)/g, (/** @type {string} */ match, /** @type {string | undefined} */ isCatchAll, /** @type {string} */ key) => {
-        keys.push({ key, isCatchAll: !!isCatchAll })
-        return isCatchAll ? '(.+)' : '([^/]+)'
-      })}$`,
+      `^${route.path.replace(
+        /:(\.\.\.)?(\w+)/g,
+        (
+          /** @type {string} */ match,
+          /** @type {string | undefined} */ isCatchAll,
+          /** @type {string} */ key,
+        ) => {
+          keys.push({ key, isCatchAll: !!isCatchAll })
+          return isCatchAll ? '(.+)' : '([^/]+)'
+        },
+      )}$`,
     )
 
     const matchPath = pathname.match(pattern)
     if (matchPath) {
-      const params = keys.reduce((acc, keyObj, index) => {
-        const val = matchPath[index + 1]
-        acc[keyObj.key] = keyObj.isCatchAll && val ? val.split('/') : val
-        return acc
-      }, /** @type {Record<string, string | string[]>} */ ({}))
+      const params = keys.reduce(
+        (acc, keyObj, index) => {
+          const val = matchPath[index + 1]
+          acc[keyObj.key] = keyObj.isCatchAll && val ? val.split('/') : val
+          return acc
+        },
+        /** @type {Record<string, string | string[]>} */ {},
+      )
       return { route, params }
     }
   }
@@ -574,15 +599,16 @@ const RouterProvider = ({ routes, children }) => {
       route: currentRouteData.route,
     }
     return createElement(
-      /** @type {string | symbol | Function} */ (RouterContext.Provider),
+      /** @type {string | symbol | Function} */ RouterContext.Provider,
       { value: contextValue },
       Fragment({ children }),
     )
   }
 
-  const [location, setLocation] = /** @type {[string, (action: unknown, priority?: number) => void]} */ (
-    useStore(window.location.pathname)
-  )
+  const [location, setLocation] =
+    /** @type {[string, (action: unknown, priority?: number) => void]} */ useStore(
+      window.location.pathname,
+    )
 
   useEffect(() => {
     const update = () => setLocation(window.location.pathname)
@@ -617,7 +643,7 @@ const RouterProvider = ({ routes, children }) => {
   }
 
   return createElement(
-    /** @type {string | symbol | Function} */ (RouterContext.Provider),
+    /** @type {string | symbol | Function} */ RouterContext.Provider,
     { value: contextValue },
     Fragment({ children }),
   )
@@ -627,9 +653,12 @@ const RouterProvider = ({ routes, children }) => {
  * The function `useRouter` returns the context of the Router for navigation in a Ryunix application.
  * @returns {RyunixRouterContextValue}
  */
-const useRouter = (): import('../types/internal.js').RyunixRouterContextValue => {
-  return RouterContext.useContext('ryunix.navigation') as import('../types/internal.js').RyunixRouterContextValue
-}
+const useRouter =
+  (): import('../types/internal.js').RyunixRouterContextValue => {
+    return RouterContext.useContext(
+      'ryunix.navigation',
+    ) as import('../types/internal.js').RyunixRouterContextValue
+  }
 
 /**
  * The `Children` function in JavaScript uses router hooks to handle scrolling to a specific element
@@ -643,19 +672,22 @@ const Children = () => {
 
   useEffect(() => {
     if (hash) {
-      const id = /** @type {string} */ (hash).slice(1)
+      const id = /** @type {string} */ hash.slice(1)
       const el = document.getElementById(id)
       if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' })
     }
   }, [hash])
 
-  return createElement(/** @type {string | symbol | Function} */ (route.component), {
-    key: location,
-    params,
-    query,
-    hash,
-    location,
-  })
+  return createElement(
+    /** @type {string | symbol | Function} */ route.component,
+    {
+      key: location,
+      params,
+      query,
+      hash,
+      location,
+    },
+  )
 }
 
 /**
@@ -741,9 +773,9 @@ const NavLink = ({ to, exact = false, ...props }) => {
 
   const classAttrName = props['ryunix-class'] ? 'ryunix-class' : 'className'
   const classAttrValue = resolveClass(
-    /** @type {string | ((args: { isActive: boolean }) => string) | undefined} */ (
-      props['ryunix-class'] || props.className
-    ),
+    /** @type {string | ((args: { isActive: boolean }) => string) | undefined} */ props[
+      'ryunix-class'
+    ] || props.className,
   )
 
   const {
@@ -773,7 +805,7 @@ const useStorePriority = (initialState) => {
   /** @param {unknown} state @param {{ value: unknown, priority?: number }} action */
   const reducer = (state, action) =>
     typeof action === 'function'
-      ? /** @type {{ value: (s: unknown) => unknown }} */ (action).value(state)
+      ? /** @type {{ value: (s: unknown) => unknown }} */ action.value(state)
       : action.value
 
   const [state, baseDispatch] = useReducer(reducer, initialState, undefined)
@@ -810,7 +842,7 @@ const useTransition = () => {
     }, 0)
   }
 
-  return [/** @type {boolean} */ (isPending), startTransition]
+  return [/** @type {boolean} */ isPending, startTransition]
 }
 
 /**
@@ -895,7 +927,7 @@ const useSwitch = (initialState = false) => {
     dispatch(/** @param {boolean} prev */ (prev) => !prev)
   }
 
-  return [/** @type {boolean} */ (state), toggle]
+  return [/** @type {boolean} */ state, toggle]
 }
 
 /**
@@ -922,11 +954,13 @@ const useLayoutEffect = (callback, deps) => {
     throw new Error('useLayoutEffect callback must be a function')
   }
   if (deps !== undefined && !Array.isArray(deps)) {
-    throw new Error('useLayoutEffect dependencies must be an array or undefined')
+    throw new Error(
+      'useLayoutEffect dependencies must be an array or undefined',
+    )
   }
 
   const { hookIndex } = state
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
   const hasChanged = haveDepsChanged(oldHook?.deps, deps)
 
@@ -970,20 +1004,20 @@ const useId = () => {
   validateHookCall()
 
   const { hookIndex } = state
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
 
   const hook = {
     hookID: hookIndex,
     type: RYUNIX_TYPES.RYUNIX_REF,
     value: oldHook
-      ? /** @type {{ value: string }} */ (oldHook).value
+      ? /** @type {{ value: string }} */ oldHook.value
       : `:r${idCounter++}:`,
   }
 
   wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
   state.hookIndex++
-  return /** @type {string} */ (/** @type {{ value: string }} */ (hook).value)
+  return /** @type {string} */ /** @type {{ value: string }} */ hook.value
 }
 
 /**
@@ -1069,4 +1103,3 @@ export {
   usePathname,
   useSearchParams,
 }
-

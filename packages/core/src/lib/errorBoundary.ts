@@ -29,4 +29,5 @@ export function ErrorBoundary({
   )
 }
 
-;(ErrorBoundary as { ryunix_type?: string }).ryunix_type = 'RYUNIX_ERROR_BOUNDARY'
+;(ErrorBoundary as { ryunix_type?: string }).ryunix_type =
+  'RYUNIX_ERROR_BOUNDARY'

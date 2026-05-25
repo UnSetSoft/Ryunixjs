@@ -15,7 +15,9 @@ export function forwardRef(render: ForwardRefRender): ForwardRefComponent {
     throw new Error('forwardRef requires a render function')
   }
 
-  const ForwardRefComponent = ((props: Record<string, unknown> & { ref?: unknown }) => {
+  const ForwardRefComponent = ((
+    props: Record<string, unknown> & { ref?: unknown },
+  ) => {
     const { ref, ...restProps } = props || {}
     return render(restProps, ref ?? null)
   }) as ForwardRefComponent

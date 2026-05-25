@@ -26,11 +26,11 @@ SSR, and hydration. Apps depend on it at runtime; the build toolchain
 
 ## Role in the monorepo
 
-| Package | Responsibility |
-| :------ | :------------- |
-| `@unsetsoft/ryunixjs` | Browser runtime and SSR render APIs |
-| `@unsetsoft/ryunix-presets` | Compiles `.ryx` / JS and bundles core into the app |
-| `@unsetsoft/cra` | Scaffolds projects that declare core in `package.json` |
+| Package                      | Responsibility                                           |
+| :--------------------------- | :------------------------------------------------------- |
+| `@unsetsoft/ryunixjs`        | Browser runtime and SSR render APIs                      |
+| `@unsetsoft/ryunix-presets`  | Compiles `.ryx` / JS and bundles core into the app       |
+| `@unsetsoft/cra`             | Scaffolds projects that declare core in `package.json`   |
 | `@unsetsoft/ryunix-devtools` | Chrome debugging for Ryunix apps (does not replace core) |
 
 Core does **not** own `app/` routes, `ryunix.config.js`, or the `ryunix` CLI.
@@ -103,15 +103,15 @@ Maintainers work in the monorepo and run `build` before publish.
 
 ## Main modules (`src/lib/`)
 
-| Area | Files (`.ts` / `.js` source) | Docs |
-| :--- | :--------------------------- | :--- |
-| VDOM & tree | `createElement`, `reconciler`, `commits`, `dom` | [virtual-dom-and-reconciliation.md](./virtual-dom-and-reconciliation.md) |
-| Client render | `render`, `effects` | [rendering.md](./rendering.md) |
-| State | `hooks`, `batching`, `priority`, `memo` | [hooks.md](./hooks.md), [state-and-priority.md](./state-and-priority.md) |
-| Components | `lazy`, `portal`, `forwardRef`, `components` | [advanced-components.md](./advanced-components.md) |
-| Server | `server`, `serverActions`, `serverBoundary`, `bridge`, `workers` | [server-features.md](./server-features.md) |
-| Errors & DX | `errorBoundary`, `devOverlay`, `devtools`, `profiler` | [error-boundary.md](./error-boundary.md), [devtools-and-profiler.md](./devtools-and-profiler.md) |
-| Entry | `index.ts` | Re-exports public API |
+| Area          | Files (`.ts` / `.js` source)                                     | Docs                                                                                             |
+| :------------ | :--------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| VDOM & tree   | `createElement`, `reconciler`, `commits`, `dom`                  | [virtual-dom-and-reconciliation.md](./virtual-dom-and-reconciliation.md)                         |
+| Client render | `render`, `effects`                                              | [rendering.md](./rendering.md)                                                                   |
+| State         | `hooks`, `batching`, `priority`, `memo`                          | [hooks.md](./hooks.md), [state-and-priority.md](./state-and-priority.md)                         |
+| Components    | `lazy`, `portal`, `forwardRef`, `components`                     | [advanced-components.md](./advanced-components.md)                                               |
+| Server        | `server`, `serverActions`, `serverBoundary`, `bridge`, `workers` | [server-features.md](./server-features.md)                                                       |
+| Errors & DX   | `errorBoundary`, `devOverlay`, `devtools`, `profiler`            | [error-boundary.md](./error-boundary.md), [devtools-and-profiler.md](./devtools-and-profiler.md) |
+| Entry         | `index.ts`                                                       | Re-exports public API                                                                            |
 
 **Source migration to TypeScript is in progress**: many modules have paired
 `.ts` + `.js`; Rollup builds from `src/main.js` with
@@ -121,13 +121,13 @@ Maintainers work in the monorepo and run `build` before publish.
 
 ## Build, types, and TypeScript
 
-| Script | Command | Purpose |
-| :----- | :------ | :------ |
-| `build` | `rollup -c` | Bundles in `dist/` for publish |
-| `build:lib-ts` | `tsc -p tsconfig.emit.json` | Selective emit under `src/` (prepublish) |
-| `typecheck` | `tsc --noEmit` | `.ts` sources |
-| `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` with JSDoc in lib/utils |
-| `test` | `jest` | Tests under `src/tests/` |
+| Script              | Command                        | Purpose                                  |
+| :------------------ | :----------------------------- | :--------------------------------------- |
+| `build`             | `rollup -c`                    | Bundles in `dist/` for publish           |
+| `build:lib-ts`      | `tsc -p tsconfig.emit.json`    | Selective emit under `src/` (prepublish) |
+| `typecheck`         | `tsc --noEmit`                 | `.ts` sources                            |
+| `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` with JSDoc in lib/utils            |
+| `test`              | `jest`                         | Tests under `src/tests/`                 |
 
 `prepublishOnly` runs `build:lib-ts` then `build`.
 
@@ -169,11 +169,11 @@ flowchart TB
 
 ## Related documentation
 
-| Document | Content |
-| :------- | :------ |
-| [virtual-dom-and-reconciliation.md](./virtual-dom-and-reconciliation.md) | Fiber, work loop, commit |
-| [hooks.md](./hooks.md) | State and effects |
-| [rendering.md](./rendering.md) | Client, hydration, SSR |
-| [server-features.md](./server-features.md) | Server Actions, boundaries |
-| [ryunix-presets/package-overview.md](../ryunix-presets/package-overview.md) | How apps bundle core |
-| `packages/core/README.md` | High-level intro and API |
+| Document                                                                    | Content                    |
+| :-------------------------------------------------------------------------- | :------------------------- |
+| [virtual-dom-and-reconciliation.md](./virtual-dom-and-reconciliation.md)    | Fiber, work loop, commit   |
+| [hooks.md](./hooks.md)                                                      | State and effects          |
+| [rendering.md](./rendering.md)                                              | Client, hydration, SSR     |
+| [server-features.md](./server-features.md)                                  | Server Actions, boundaries |
+| [ryunix-presets/package-overview.md](../ryunix-presets/package-overview.md) | How apps bundle core       |
+| `packages/core/README.md`                                                   | High-level intro and API   |

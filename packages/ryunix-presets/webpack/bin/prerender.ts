@@ -33,7 +33,10 @@ const Prerender = async (directory) => {
   }
 
   const metaExist = routes.some((route) => route.meta)
-  if (metaExist && Object.keys(defaultSettings.legacy.seo.meta || {}).length > 0) {
+  if (
+    metaExist &&
+    Object.keys(defaultSettings.legacy.seo.meta || {}).length > 0
+  ) {
     console.error(
       '[Ryunix Error] You are mixing static and dynamic meta tags; you can only use one of the two. Remove legacy.seo.meta from ryunix.config.js.',
     )

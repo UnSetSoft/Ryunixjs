@@ -79,11 +79,4 @@ const cancelEffectsDeep = (fiber) => {
   if (fiber.sibling) cancelEffectsDeep(fiber.sibling)
 }
 
-export {
-  cancelEffects,
-  cancelEffectsDeep,
-  isEvent,
-  isProperty,
-  isNew,
-  isGone,
-}
+export { cancelEffects, cancelEffectsDeep, isEvent, isProperty, isNew, isGone }

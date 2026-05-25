@@ -27,10 +27,7 @@ const program = new Command(packageJson.name)
   .option('--tailwind', 'Initialize with Tailwind CSS config.')
   .option('--eslint', 'Initialize with ESLint config.')
   .option('--vscode', 'Add VS Code settings for Ryunix extension.')
-  .option(
-    '--compiler <type>',
-    'Choose compiler: swc or babel. (default: swc)',
-  )
+  .option('--compiler <type>', 'Choose compiler: swc or babel. (default: swc)')
   .action((name: string | undefined) => {
     if (name) projectPath = name
   })

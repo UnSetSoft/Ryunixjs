@@ -94,10 +94,20 @@ const generateRobotsTxt = (baseURL, options = {}) => {
     if (Array.isArray(options.rules)) {
         // Next.js-style: rules array
         for (const rule of options.rules) {
-            const agents = Array.isArray(rule.userAgent) ? rule.userAgent : [rule.userAgent || '*'];
+            const agents = Array.isArray(rule.userAgent)
+                ? rule.userAgent
+                : [rule.userAgent || '*'];
             agents.forEach((agent) => lines.push(`User-agent: ${agent}`));
-            const allows = Array.isArray(rule.allow) ? rule.allow : (rule.allow ? [rule.allow] : []);
-            const disallows = Array.isArray(rule.disallow) ? rule.disallow : (rule.disallow ? [rule.disallow] : []);
+            const allows = Array.isArray(rule.allow)
+                ? rule.allow
+                : rule.allow
+                    ? [rule.allow]
+                    : [];
+            const disallows = Array.isArray(rule.disallow)
+                ? rule.disallow
+                : rule.disallow
+                    ? [rule.disallow]
+                    : [];
             allows.forEach((p) => lines.push(`Allow: ${p}`));
             disallows.forEach((p) => lines.push(`Disallow: ${p}`));
             lines.push('');
@@ -163,9 +173,9 @@ const generateSitemapFromEntries = (entries) => {
         if (!entry.url)
             return '';
         const lastmod = entry.lastModified
-            ? (entry.lastModified instanceof Date
+            ? entry.lastModified instanceof Date
                 ? entry.lastModified.toISOString().split('T')[0]
-                : String(entry.lastModified))
+                : String(entry.lastModified)
             : new Date().toISOString().split('T')[0];
         const freq = entry.changefreq || 'weekly';
         const prio = entry.priority != null ? String(entry.priority) : '0.7';
@@ -413,7 +423,11 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
     // ─── Static Metadata Files (Priority: .js > .xml/.txt/.json) ──────────────
     const appPath = path.join(process.cwd(), config.rootDir || 'src', 'app');
     const rootAppPath = path.join(process.cwd(), 'app');
-    const finalAppPath = fs.existsSync(rootAppPath) ? rootAppPath : (fs.existsSync(appPath) ? appPath : null);
+    const finalAppPath = fs.existsSync(rootAppPath)
+        ? rootAppPath
+        : fs.existsSync(appPath)
+            ? appPath
+            : null;
     const copyStaticIfExist = (src, dest) => {
         if (!finalAppPath)
             return false;
@@ -476,8 +490,18 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
             if (typeof global.window === 'undefined') {
                 const noop = () => { };
                 global.window = {
-                    location: { pathname: '/', search: '', hash: '', href: 'http://localhost/' },
-                    history: { pushState: noop, replaceState: noop, back: noop, forward: noop },
+                    location: {
+                        pathname: '/',
+                        search: '',
+                        hash: '',
+                        href: 'http://localhost/',
+                    },
+                    history: {
+                        pushState: noop,
+                        replaceState: noop,
+                        back: noop,
+                        forward: noop,
+                    },
                     addEventListener: noop,
                     removeEventListener: noop,
                     dispatchEvent: noop,
@@ -485,11 +509,23 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
                     innerWidth: 1024,
                     innerHeight: 768,
                     navigator: { userAgent: 'ryunix-ssg' },
-                    localStorage: { getItem: () => null, setItem: noop, removeItem: noop },
-                    sessionStorage: { getItem: () => null, setItem: noop, removeItem: noop },
+                    localStorage: {
+                        getItem: () => null,
+                        setItem: noop,
+                        removeItem: noop,
+                    },
+                    sessionStorage: {
+                        getItem: () => null,
+                        setItem: noop,
+                        removeItem: noop,
+                    },
                     requestAnimationFrame: (cb) => setTimeout(cb, 0),
                     cancelAnimationFrame: (id) => clearTimeout(id),
-                    matchMedia: () => ({ matches: false, addListener: noop, removeListener: noop }),
+                    matchMedia: () => ({
+                        matches: false,
+                        addListener: noop,
+                        removeListener: noop,
+                    }),
                 };
             }
             if (typeof global.document === 'undefined') {
@@ -501,8 +537,12 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
                     getElementsByClassName: () => [],
                     getElementsByTagName: () => [],
                     createElement: (tag) => ({
-                        tagName: tag, style: {}, setAttribute: noop, appendChild: noop,
-                        addEventListener: noop, removeEventListener: noop
+                        tagName: tag,
+                        style: {},
+                        setAttribute: noop,
+                        appendChild: noop,
+                        addEventListener: noop,
+                        removeEventListener: noop,
                     }),
                     createTextNode: () => ({ nodeType: 3 }),
                     head: { querySelector: () => null, appendChild: noop },
@@ -695,7 +735,8 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
     else if (copyStaticIfExist('robots.txt', 'robots.txt')) {
         // Already copied
     }
-    else if (config.legacy?.ssg?.robots || config.legacy?.ssg?.sitemap?.baseURL) {
+    else if (config.legacy?.ssg?.robots ||
+        config.legacy?.ssg?.sitemap?.baseURL) {
         // ── Fallback: ryunix.config.js ───────────────────────────────────────
         const baseURL = config.legacy.ssg.sitemap?.baseURL;
         if (baseURL) {

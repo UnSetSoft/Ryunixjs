@@ -15,7 +15,8 @@ type MdastNode = {
 }
 
 function paragraphText(node: MdastNode | undefined): string {
-  if (!node || node.type !== 'paragraph' || !Array.isArray(node.children)) return ''
+  if (!node || node.type !== 'paragraph' || !Array.isArray(node.children))
+    return ''
   return node.children
     .filter((child) => child.type === 'text')
     .map((child) => child.value ?? '')
@@ -37,7 +38,10 @@ function setAlertClasses(node: MdastNode, alertType: string): void {
   }
 }
 
-function stripAlertMarker(paragraph: MdastNode, match: RegExpMatchArray): boolean {
+function stripAlertMarker(
+  paragraph: MdastNode,
+  match: RegExpMatchArray,
+): boolean {
   const text = paragraphText(paragraph)
   const rest = text.slice(match[0].length).trim()
   if (!rest) return false
@@ -56,7 +60,11 @@ function visit(node: MdastNode, fn: (node: MdastNode) => void): void {
 export function remarkGithubAlerts() {
   return (tree: MdastNode) => {
     visit(tree, (node) => {
-      if (node.type !== 'blockquote' || !Array.isArray(node.children) || node.children.length === 0) {
+      if (
+        node.type !== 'blockquote' ||
+        !Array.isArray(node.children) ||
+        node.children.length === 0
+      ) {
         return
       }
 

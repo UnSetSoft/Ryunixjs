@@ -6,7 +6,7 @@
 The **`@unsetsoft/ryunix-devtools`** package lives in
 `packages/ryunix-devtools/`. It is a **browser extension** (Chrome / Edge) for
 debugging Ryunix applications: component tree, props, and hook counters. It is
-not consumed as an npm library by apps; you load it *unpacked* from the
+not consumed as an npm library by apps; you load it _unpacked_ from the
 monorepo.
 
 ---
@@ -27,12 +27,12 @@ monorepo.
 
 ## Role in the monorepo
 
-| Package | Responsibility |
-| :------ | :------------- |
-| `@unsetsoft/ryunixjs` | Dev-time debugging hooks in core (`devtools` module) |
-| `@unsetsoft/ryunix-devtools` | Chrome DevTools UI that reads that state |
-| `@unsetsoft/ryunix-presets` | Serves the app where the extension runs |
-| `@unsetsoft/cra` | May recommend the VS Code Ryunix extension in workspace settings |
+| Package                      | Responsibility                                                   |
+| :--------------------------- | :--------------------------------------------------------------- |
+| `@unsetsoft/ryunixjs`        | Dev-time debugging hooks in core (`devtools` module)             |
+| `@unsetsoft/ryunix-devtools` | Chrome DevTools UI that reads that state                         |
+| `@unsetsoft/ryunix-presets`  | Serves the app where the extension runs                          |
+| `@unsetsoft/cra`             | May recommend the VS Code Ryunix extension in workspace settings |
 
 The extension does **not** run during `ryunix build` or ship in production app
 bundles. It is a maintainer and developer tool.
@@ -78,14 +78,14 @@ files come from `tsc` except static HTML.
 
 ## Extension pieces
 
-| File | Role |
-| :--- | :--- |
-| `manifest.json` | Permissions, `content_scripts`, `background`, `devtools_page` |
-| `content-script.js` | Runs at document start on configured URLs |
-| `hook.js` | Page-accessible resource; bridges to Ryunix runtime |
-| `background.js` | Service worker (MV3) |
-| `devtools.js` + `devtools.html` | Creates the custom DevTools panel |
-| `panel.js` + `panel.html` | Component tree, props, hook counter |
+| File                            | Role                                                          |
+| :------------------------------ | :------------------------------------------------------------ |
+| `manifest.json`                 | Permissions, `content_scripts`, `background`, `devtools_page` |
+| `content-script.js`             | Runs at document start on configured URLs                     |
+| `hook.js`                       | Page-accessible resource; bridges to Ryunix runtime           |
+| `background.js`                 | Service worker (MV3)                                          |
+| `devtools.js` + `devtools.html` | Creates the custom DevTools panel                             |
+| `panel.js` + `panel.html`       | Component tree, props, hook counter                           |
 
 Automatic detection depends on dev core exposing data the hook reads (see
 [devtools-and-profiler.md](../core/devtools-and-profiler.md)).
@@ -94,10 +94,10 @@ Automatic detection depends on dev core exposing data the hook reads (see
 
 ## TypeScript and build
 
-| Script | Command |
-| :----- | :------ |
+| Script      | Command                         |
+| :---------- | :------------------------------ |
 | `typecheck` | `tsc --noEmit -p tsconfig.json` |
-| `build` | `tsc -p tsconfig.emit.json` |
+| `build`     | `tsc -p tsconfig.emit.json`     |
 
 Emit includes: `background.ts`, `content-script.ts`, `devtools.ts`, `hook.ts`,
 `panel.ts`.
@@ -144,9 +144,9 @@ flowchart TB
 
 ## Related documentation
 
-| Document | Content |
-| :------- | :------ |
-| [core/devtools-and-profiler.md](../core/devtools-and-profiler.md) | Engine dev warnings and profiler |
-| [core/package-overview.md](../core/package-overview.md) | `@unsetsoft/ryunixjs` package |
-| [Local integration app](../guides/local-integration-app.md) | Test an app with the extension loaded |
-| `packages/ryunix-devtools/README.md` | Install steps and compatibility |
+| Document                                                          | Content                               |
+| :---------------------------------------------------------------- | :------------------------------------ |
+| [core/devtools-and-profiler.md](../core/devtools-and-profiler.md) | Engine dev warnings and profiler      |
+| [core/package-overview.md](../core/package-overview.md)           | `@unsetsoft/ryunixjs` package         |
+| [Local integration app](../guides/local-integration-app.md)       | Test an app with the extension loaded |
+| `packages/ryunix-devtools/README.md`                              | Install steps and compatibility       |

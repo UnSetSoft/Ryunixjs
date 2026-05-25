@@ -3,11 +3,7 @@ import WebpackDevServer from 'webpack-dev-server'
 import webpackConfig from '../webpack.config.js'
 import { configFileExist } from '../utils/settingfile.cjs'
 import envPath from '../utils/envExist.cjs'
-import {
-  getPackageVersion,
-  resolveApp,
-  cleanCacheDir,
-} from '../utils/index.js'
+import { getPackageVersion, resolveApp, cleanCacheDir } from '../utils/index.js'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import net from 'net' // Para verificar si el puerto está disponible
@@ -57,7 +53,9 @@ const StartServer = async (cliSettings) => {
     cleanCacheDir(cacheDir)
   }
 
-  const configs = webpackConfig as Webpack.Configuration | Webpack.Configuration[]
+  const configs = webpackConfig as
+    | Webpack.Configuration
+    | Webpack.Configuration[]
   const clientConfig = Array.isArray(configs)
     ? configs.find((c) => c.name === 'client') || configs[0]
     : configs
@@ -73,9 +71,11 @@ const StartServer = async (cliSettings) => {
   const compiler = Array.isArray(configs)
     ? Webpack(configs as Webpack.MultiConfiguration)
     : Webpack(configs)
-  const clientDevServer = (clientConfig as Webpack.Configuration & {
-    devServer?: WebpackDevServer.Configuration
-  }).devServer
+  const clientDevServer = (
+    clientConfig as Webpack.Configuration & {
+      devServer?: WebpackDevServer.Configuration
+    }
+  ).devServer
   let port = clientDevServer?.port || 3000
 
   // Encontrar un puerto disponible
@@ -123,7 +123,9 @@ const StartServer = async (cliSettings) => {
 
       if (devMode) {
         content.push('')
-        content.push(`${chalk.yellow('⚠️')}  ${chalk.yellow('Development mode active')}`)
+        content.push(
+          `${chalk.yellow('⚠️')}  ${chalk.yellow('Development mode active')}`,
+        )
         content.push(chalk.gray('Build for production to optimize performance'))
       }
 
@@ -136,7 +138,7 @@ const StartServer = async (cliSettings) => {
           title: chalk.bold('Dev Server'),
           titleAlignment: 'center',
           minimumWidth: 50,
-        })
+        }),
       )
     } catch (err) {
       logger.error(`[error] ${err.message}`)

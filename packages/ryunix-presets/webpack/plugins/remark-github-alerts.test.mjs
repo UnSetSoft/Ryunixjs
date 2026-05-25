@@ -24,7 +24,10 @@ describe('remarkGithubAlerts', () => {
     ])
     run(tree)
     const bq = getBlockquote(tree)
-    assert.deepEqual(bq.data.hProperties.className, ['docs-alert', 'docs-alert--warning'])
+    assert.deepEqual(bq.data.hProperties.className, [
+      'docs-alert',
+      'docs-alert--warning',
+    ])
     assert.equal(bq.data.hProperties.dataAlert, 'warning')
     assert.equal(bq.children.length, 1)
     assert.equal(bq.children[0].children[0].value, 'Deprecated API.')
@@ -35,7 +38,11 @@ describe('remarkGithubAlerts', () => {
       const tree = blockquote([paragraph(`[!${type}]`), paragraph('Body.')])
       run(tree)
       const bq = getBlockquote(tree)
-      assert.ok(bq.data.hProperties.className.includes(`docs-alert--${type.toLowerCase()}`))
+      assert.ok(
+        bq.data.hProperties.className.includes(
+          `docs-alert--${type.toLowerCase()}`,
+        ),
+      )
     }
   })
 
@@ -48,7 +55,10 @@ describe('remarkGithubAlerts', () => {
   })
 
   it('handles GFM-escaped brackets', () => {
-    const tree = blockquote([paragraph('\\[!WARNING\\]'), paragraph('Escaped marker line.')])
+    const tree = blockquote([
+      paragraph('\\[!WARNING\\]'),
+      paragraph('Escaped marker line.'),
+    ])
     run(tree)
     const bq = getBlockquote(tree)
     assert.ok(bq.data.hProperties.className.includes('docs-alert--warning'))

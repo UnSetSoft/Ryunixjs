@@ -3,7 +3,7 @@ import WebpackDevServer from 'webpack-dev-server';
 import webpackConfig from '../webpack.config.js';
 import { configFileExist } from '../utils/settingfile.cjs';
 import envPath from '../utils/envExist.cjs';
-import { getPackageVersion, resolveApp, cleanCacheDir, } from '../utils/index.js';
+import { getPackageVersion, resolveApp, cleanCacheDir } from '../utils/index.js';
 import logger from 'terminal-log';
 import chalk from 'chalk';
 import net from 'net'; // Para verificar si el puerto está disponible

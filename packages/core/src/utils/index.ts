@@ -4,9 +4,7 @@ const rICFallback = (cb: (deadline: IdleDeadline) => void): number =>
   setTimeout(() => cb({ timeRemaining: () => 1 }), 1) as unknown as number
 
 const rIC: (cb: (deadline: IdleDeadline) => void) => number =
-  typeof requestIdleCallback !== 'undefined'
-    ? requestIdleCallback
-    : rICFallback
+  typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : rICFallback
 
 const createRenderState = (): RyunixRenderState => ({
   containerRoot: null,
@@ -112,7 +110,4 @@ export function nextValidSibling(
   return next
 }
 
-export {
-  CAMEL_TO_KEBAB_REGEX,
-  rIC,
-}
+export { CAMEL_TO_KEBAB_REGEX, rIC }

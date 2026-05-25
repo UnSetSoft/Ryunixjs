@@ -25,11 +25,11 @@ folders from templates and wires the user to `@unsetsoft/ryunixjs` and
 
 ## Role in the monorepo
 
-| Package | Responsibility |
-| :------ | :------------- |
-| `@unsetsoft/cra` | Create the app skeleton (CLI + `templates/`) |
+| Package                     | Responsibility                                      |
+| :-------------------------- | :-------------------------------------------------- |
+| `@unsetsoft/cra`            | Create the app skeleton (CLI + `templates/`)        |
 | `@unsetsoft/ryunix-presets` | `ryunix dev`, `build`, `start`; Webpack and routing |
-| `@unsetsoft/ryunixjs` | Runtime: VDOM, hooks, reconciler, browser SSR |
+| `@unsetsoft/ryunixjs`       | Runtime: VDOM, hooks, reconciler, browser SSR       |
 
 After running CRA, the developer works in a **generated app** with `app/*.ryx`,
 `ryunix.config.js`, and scripts that call the preset’s `ryunix` binary. CRA is
@@ -84,12 +84,12 @@ What is **not** part of the framework runtime:
 
 ## TypeScript and published artifacts
 
-| Aspect | Detail |
-| :----- | :----- |
-| Source | `src/**/*.ts` only |
-| Check | `pnpm --filter @unsetsoft/cra typecheck` |
-| Emit | `pnpm --filter @unsetsoft/cra build` → CommonJS in `src/` |
-| Publish | `prepublishOnly` runs `build` before npm publish |
+| Aspect  | Detail                                                    |
+| :------ | :-------------------------------------------------------- |
+| Source  | `src/**/*.ts` only                                        |
+| Check   | `pnpm --filter @unsetsoft/cra typecheck`                  |
+| Emit    | `pnpm --filter @unsetsoft/cra build` → CommonJS in `src/` |
+| Publish | `prepublishOnly` runs `build` before npm publish          |
 
 CLI migration is **complete**. Templates remain JavaScript and `.ryx` because
 they describe end-user apps, not the CRA package itself.
@@ -140,10 +140,10 @@ flowchart LR
 
 ## Related documentation
 
-| Document | Content |
-| :------- | :------ |
-| [cli-and-helpers.md](./cli-and-helpers.md) | `cli.ts`, `create-app.ts`, helpers, flags |
-| [template-generation.md](./template-generation.md) | All four templates and app layout |
-| [Repository guide](../guides/repository-guide.md) | Monorepo map |
-| [Local integration app](../guides/local-integration-app.md) | Test CRA / presets with `test/` |
-| `packages/cra/README.md` | CLI usage for publishers and end users |
+| Document                                                    | Content                                   |
+| :---------------------------------------------------------- | :---------------------------------------- |
+| [cli-and-helpers.md](./cli-and-helpers.md)                  | `cli.ts`, `create-app.ts`, helpers, flags |
+| [template-generation.md](./template-generation.md)          | All four templates and app layout         |
+| [Repository guide](../guides/repository-guide.md)           | Monorepo map                              |
+| [Local integration app](../guides/local-integration-app.md) | Test CRA / presets with `test/`           |
+| `packages/cra/README.md`                                    | CLI usage for publishers and end users    |

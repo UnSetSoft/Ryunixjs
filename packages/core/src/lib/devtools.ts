@@ -49,7 +49,7 @@ const validateHookContext = (hookName = 'A hook') => {
         'Make sure you are calling hooks at the top level of your component.',
     )
   }
-  const wipFiber = /** @type {RyunixFiber} */ (state.wipFiber)
+  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
   if (!Array.isArray(wipFiber.hooks)) {
     wipFiber.hooks = []
   }

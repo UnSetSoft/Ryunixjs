@@ -26,11 +26,11 @@ resuelve vía `@unsetsoft/ryunix-presets`.
 
 ## Rol en el monorepo
 
-| Paquete | Responsabilidad |
-| :------ | :-------------- |
-| `@unsetsoft/ryunixjs` | Runtime en navegador y APIs de render SSR |
-| `@unsetsoft/ryunix-presets` | Compila `.ryx` / JS y empaqueta el core en la app |
-| `@unsetsoft/cra` | Genera proyectos que declaran el core en `package.json` |
+| Paquete                      | Responsabilidad                                          |
+| :--------------------------- | :------------------------------------------------------- |
+| `@unsetsoft/ryunixjs`        | Runtime en navegador y APIs de render SSR                |
+| `@unsetsoft/ryunix-presets`  | Compila `.ryx` / JS y empaqueta el core en la app        |
+| `@unsetsoft/cra`             | Genera proyectos que declaran el core en `package.json`  |
 | `@unsetsoft/ryunix-devtools` | Inspecciona apps Ryunix en Chrome (no sustituye al core) |
 
 El core **no** define rutas `app/`, `ryunix.config.js` ni el CLI `ryunix`. Solo
@@ -103,15 +103,15 @@ los mantenedores trabajan en el monorepo y ejecutan `build` antes de publicar.
 
 ## Módulos principales (`src/lib/`)
 
-| Área | Archivos (fuente `.ts` / `.js`) | Tema en docs |
-| :--- | :------------------------------ | :----------- |
-| VDOM y árbol | `createElement`, `reconciler`, `commits`, `dom` | [vdom-y-reconciliacion.md](./vdom-y-reconciliacion.md) |
-| Render cliente | `render`, `effects` | [renderizado.md](./renderizado.md) |
-| Estado | `hooks`, `batching`, `priority`, `memo` | [hooks.md](./hooks.md), [estado-y-prioridad.md](./estado-y-prioridad.md) |
-| Componentes | `lazy`, `portal`, `forwardRef`, `components` | [componentes-avanzados.md](./componentes-avanzados.md) |
-| Servidor | `server`, `serverActions`, `serverBoundary`, `bridge`, `workers` | [funciones-servidor.md](./funciones-servidor.md) |
-| Errores y DX | `errorBoundary`, `devOverlay`, `devtools`, `profiler` | [limites-de-error.md](./limites-de-error.md), [devtools-y-profiler.md](./devtools-y-profiler.md) |
-| Entrada | `index.ts` | Reexporta la API pública |
+| Área           | Archivos (fuente `.ts` / `.js`)                                  | Tema en docs                                                                                     |
+| :------------- | :--------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| VDOM y árbol   | `createElement`, `reconciler`, `commits`, `dom`                  | [vdom-y-reconciliacion.md](./vdom-y-reconciliacion.md)                                           |
+| Render cliente | `render`, `effects`                                              | [renderizado.md](./renderizado.md)                                                               |
+| Estado         | `hooks`, `batching`, `priority`, `memo`                          | [hooks.md](./hooks.md), [estado-y-prioridad.md](./estado-y-prioridad.md)                         |
+| Componentes    | `lazy`, `portal`, `forwardRef`, `components`                     | [componentes-avanzados.md](./componentes-avanzados.md)                                           |
+| Servidor       | `server`, `serverActions`, `serverBoundary`, `bridge`, `workers` | [funciones-servidor.md](./funciones-servidor.md)                                                 |
+| Errores y DX   | `errorBoundary`, `devOverlay`, `devtools`, `profiler`            | [limites-de-error.md](./limites-de-error.md), [devtools-y-profiler.md](./devtools-y-profiler.md) |
+| Entrada        | `index.ts`                                                       | Reexporta la API pública                                                                         |
 
 La migración del **código fuente** a TypeScript está **en curso**: muchos
 módulos tienen par `.ts` + `.js`; Rollup compila desde `src/main.js` con
@@ -121,13 +121,13 @@ módulos tienen par `.ts` + `.js`; Rollup compila desde `src/main.js` con
 
 ## Build, tipos y TypeScript
 
-| Script | Comando | Uso |
-| :----- | :------ | :-- |
-| `build` | `rollup -c` | Bundles en `dist/` para publicar |
-| `build:lib-ts` | `tsc -p tsconfig.emit.json` | Emit selectivo en `src/` (prepublish) |
-| `typecheck` | `tsc --noEmit` | Fuentes `.ts` |
-| `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` con JSDoc en lib/utils |
-| `test` | `jest` | Pruebas en `src/tests/` |
+| Script              | Comando                        | Uso                                   |
+| :------------------ | :----------------------------- | :------------------------------------ |
+| `build`             | `rollup -c`                    | Bundles en `dist/` para publicar      |
+| `build:lib-ts`      | `tsc -p tsconfig.emit.json`    | Emit selectivo en `src/` (prepublish) |
+| `typecheck`         | `tsc --noEmit`                 | Fuentes `.ts`                         |
+| `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` con JSDoc en lib/utils          |
+| `test`              | `jest`                         | Pruebas en `src/tests/`               |
 
 `prepublishOnly` ejecuta `build:lib-ts` y luego `build`.
 
@@ -169,11 +169,11 @@ flowchart TB
 
 ## Documentación relacionada
 
-| Documento | Contenido |
-| :-------- | :-------- |
-| [vdom-y-reconciliacion.md](./vdom-y-reconciliacion.md) | Fiber, work loop, commit |
-| [hooks.md](./hooks.md) | Estado y efectos |
-| [renderizado.md](./renderizado.md) | Cliente, hidratación, SSR |
-| [funciones-servidor.md](./funciones-servidor.md) | Server Actions, boundaries |
+| Documento                                                                         | Contenido                         |
+| :-------------------------------------------------------------------------------- | :-------------------------------- |
+| [vdom-y-reconciliacion.md](./vdom-y-reconciliacion.md)                            | Fiber, work loop, commit          |
+| [hooks.md](./hooks.md)                                                            | Estado y efectos                  |
+| [renderizado.md](./renderizado.md)                                                | Cliente, hidratación, SSR         |
+| [funciones-servidor.md](./funciones-servidor.md)                                  | Server Actions, boundaries        |
 | [ryunix-presets/resumen-del-paquete.md](../ryunix-presets/resumen-del-paquete.md) | Cómo se empaqueta el core en apps |
-| `packages/core/README.md` | Introducción y API de alto nivel |
+| `packages/core/README.md`                                                         | Introducción y API de alto nivel  |

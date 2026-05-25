@@ -69,10 +69,9 @@ export async function createApp({
   const packageJsonPath = path.join(root, 'package.json')
   let packageJson: Record<string, unknown> = {}
   if (fs.existsSync(packageJsonPath)) {
-    packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as Record<
-      string,
-      unknown
-    >
+    packageJson = JSON.parse(
+      fs.readFileSync(packageJsonPath, 'utf8'),
+    ) as Record<string, unknown>
   }
 
   packageJson.name = appName

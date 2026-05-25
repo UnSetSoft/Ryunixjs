@@ -91,7 +91,9 @@ const resolvePostcssPlugins = () => {
         return Object.entries(plugins).map(([name, opts]) => {
             const pluginFn = projectRequire(name);
             const fn = pluginFn.default || pluginFn;
-            return opts && typeof opts === 'object' && Object.keys(opts).length > 0 ? fn(opts) : fn();
+            return opts && typeof opts === 'object' && Object.keys(opts).length > 0
+                ? fn(opts)
+                : fn();
         });
     }
     catch (e) {
@@ -100,7 +102,8 @@ const resolvePostcssPlugins = () => {
     }
 };
 const postcssPlugins = resolvePostcssPlugins();
-const hasAppDir = fs.existsSync(resolveApp(dir, 'app')) || fs.existsSync(resolveApp(dir, `${config.rootDir}/app`));
+const hasAppDir = fs.existsSync(resolveApp(dir, 'app')) ||
+    fs.existsSync(resolveApp(dir, `${config.rootDir}/app`));
 const entryPoint = hasAppDir
     ? resolveApp(dir, `${config.buildDir}/server/app/main.ryx`)
     : './main.ryx';
@@ -134,7 +137,7 @@ const sharedWebpackConfig = {
                     minChunks: 2,
                     priority: 10,
                     reuseExistingChunk: true,
-                }
+                },
             },
         },
         minimize: config.webpack.production === true,
@@ -142,13 +145,17 @@ const sharedWebpackConfig = {
             ? [
                 new TerserPlugin({
                     parallel: true,
-                    minify: config.compiler === 'swc' ? TerserPlugin.swcMinify : TerserPlugin.terserMinify,
-                    terserOptions: config.compiler === 'swc' ? {} : {
-                        compress: {
-                            dead_code: true,
-                            passes: 2,
+                    minify: config.compiler === 'swc'
+                        ? TerserPlugin.swcMinify
+                        : TerserPlugin.terserMinify,
+                    terserOptions: config.compiler === 'swc'
+                        ? {}
+                        : {
+                            compress: {
+                                dead_code: true,
+                                passes: 2,
+                            },
                         },
-                    },
                 }),
                 new CssMinimizerPlugin(),
             ]
@@ -174,15 +181,49 @@ const sharedWebpackConfig = {
             config.mdx && {
                 test: /\.mdx?$/,
                 use: [
-                    config.compiler === 'swc' ? {
-                        loader: ryunixRequire.resolve('swc-loader'),
-                        options: {
-                            jsc: { parser: { syntax: 'ecmascript', jsx: true }, transform: { react: { pragma: 'Ryunix.createElement', pragmaFrag: 'Ryunix.Fragment' } }, target: 'es2022' },
+                    config.compiler === 'swc'
+                        ? {
+                            loader: ryunixRequire.resolve('swc-loader'),
+                            options: {
+                                jsc: {
+                                    parser: { syntax: 'ecmascript', jsx: true },
+                                    transform: {
+                                        react: {
+                                            pragma: 'Ryunix.createElement',
+                                            pragmaFrag: 'Ryunix.Fragment',
+                                        },
+                                    },
+                                    target: 'es2022',
+                                },
+                            },
+                        }
+                        : {
+                            loader: ryunixRequire.resolve('babel-loader'),
+                            options: {
+                                presets: [
+                                    [
+                                        ryunixRequire.resolve('@babel/preset-env'),
+                                        {
+                                            targets: 'defaults and not IE 11',
+                                            useBuiltIns: false,
+                                            modules: false,
+                                            bugfixes: true,
+                                        },
+                                    ],
+                                    ryunixRequire.resolve('@babel/preset-react'),
+                                ],
+                                plugins: [
+                                    [
+                                        ryunixRequire.resolve('@babel/plugin-transform-react-jsx'),
+                                        {
+                                            pragma: 'Ryunix.createElement',
+                                            pragmaFrag: 'Ryunix.Fragment',
+                                        },
+                                    ],
+                                ],
+                                cacheDirectory: resolveApp(dir, `${config.buildDir}/cache/babel-loader`),
+                            },
                         },
-                    } : {
-                        loader: ryunixRequire.resolve('babel-loader'),
-                        options: { presets: [[ryunixRequire.resolve('@babel/preset-env'), { targets: 'defaults and not IE 11', useBuiltIns: false, modules: false, bugfixes: true }], ryunixRequire.resolve('@babel/preset-react')], plugins: [[ryunixRequire.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'Ryunix.createElement', pragmaFrag: 'Ryunix.Fragment' }]], cacheDirectory: resolveApp(dir, `${config.buildDir}/cache/babel-loader`) },
-                    },
                     {
                         loader: ryunixRequire.resolve('@mdx-js/loader'),
                         options: {
@@ -204,50 +245,52 @@ const sharedWebpackConfig = {
                 test: /\.(js|jsx|ryx)$/,
                 use: [
                     config.compiler !== 'swc' && ryunixRequire.resolve('thread-loader'),
-                    config.compiler === 'swc' ? {
-                        loader: ryunixRequire.resolve('swc-loader'),
-                        options: {
-                            jsc: {
-                                parser: {
-                                    syntax: 'ecmascript',
-                                    jsx: true,
-                                },
-                                transform: {
-                                    react: {
-                                        pragma: 'Ryunix.createElement',
-                                        pragmaFrag: 'Ryunix.Fragment',
+                    config.compiler === 'swc'
+                        ? {
+                            loader: ryunixRequire.resolve('swc-loader'),
+                            options: {
+                                jsc: {
+                                    parser: {
+                                        syntax: 'ecmascript',
+                                        jsx: true,
                                     },
+                                    transform: {
+                                        react: {
+                                            pragma: 'Ryunix.createElement',
+                                            pragmaFrag: 'Ryunix.Fragment',
+                                        },
+                                    },
+                                    target: 'es2022',
                                 },
-                                target: 'es2022',
+                            },
+                        }
+                        : {
+                            loader: ryunixRequire.resolve('babel-loader'),
+                            options: {
+                                presets: [
+                                    [
+                                        ryunixRequire.resolve('@babel/preset-env'),
+                                        {
+                                            targets: 'defaults and not IE 11',
+                                            useBuiltIns: false,
+                                            modules: false,
+                                            bugfixes: true,
+                                        },
+                                    ],
+                                    ryunixRequire.resolve('@babel/preset-react'),
+                                ],
+                                cacheDirectory: resolveApp(dir, `${config.buildDir}/cache/babel-loader`),
+                                plugins: [
+                                    [
+                                        ryunixRequire.resolve('@babel/plugin-transform-react-jsx'),
+                                        {
+                                            pragma: 'Ryunix.createElement',
+                                            pragmaFrag: 'Ryunix.Fragment',
+                                        },
+                                    ],
+                                ],
                             },
                         },
-                    } : {
-                        loader: ryunixRequire.resolve('babel-loader'),
-                        options: {
-                            presets: [
-                                [
-                                    ryunixRequire.resolve('@babel/preset-env'),
-                                    {
-                                        targets: 'defaults and not IE 11',
-                                        useBuiltIns: false,
-                                        modules: false,
-                                        bugfixes: true,
-                                    },
-                                ],
-                                ryunixRequire.resolve('@babel/preset-react'),
-                            ],
-                            cacheDirectory: resolveApp(dir, `${config.buildDir}/cache/babel-loader`),
-                            plugins: [
-                                [
-                                    ryunixRequire.resolve('@babel/plugin-transform-react-jsx'),
-                                    {
-                                        pragma: 'Ryunix.createElement',
-                                        pragmaFrag: 'Ryunix.Fragment',
-                                    },
-                                ],
-                            ],
-                        },
-                    },
                     resolve(__dirname, 'loaders/ryunix-server-action-loader.js'),
                     resolve(__dirname, 'loaders/ryunix-rsc-loader.js'),
                 ].filter(Boolean),
@@ -319,7 +362,9 @@ const getPlugins = (isServer = false) => [
             pageLang: config.legacy.seo.pageLang,
             title: config.legacy.seo.title,
             favicon: config.favicon
-                ? (typeof config.favicon === 'string' ? resolveApp(dir, config.favicon) : join(dir, 'public', 'favicon.png'))
+                ? typeof config.favicon === 'string'
+                    ? resolveApp(dir, config.favicon)
+                    : join(dir, 'public', 'favicon.png')
                 : false,
             meta: config.legacy.seo.meta,
             template: config.legacy.template
@@ -330,7 +375,8 @@ const getPlugins = (isServer = false) => [
                 version,
                 mode: config.webpack.production ? 'production' : 'dev',
             },
-            ssrScript: (isSSR ? `
+            ssrScript: (isSSR
+                ? `
        <noscript
         style="background: #f4f47f;color: black;padding: 10px;width: 100%;display: block;position: fixed;bottom: 0;z-index: 99;">
       <div style="display: flex;justify-content: center;align-items: center;">
@@ -338,7 +384,8 @@ const getPlugins = (isServer = false) => [
         </p>
       </div>
     </noscript>
-      ` : `
+      `
+                : `
        <noscript
         style="background: #f57070ff;color: black;padding: 10px;width: 100%;display: block;position: fixed;bottom: 0;z-index: 99;">
       <div style="display: flex;justify-content: center;align-items: center;">
@@ -346,7 +393,9 @@ const getPlugins = (isServer = false) => [
         </p>
       </div>
     </noscript>
-      `) + ((!isServer && !config.webpack.production) ? `
+      `) +
+                (!isServer && !config.webpack.production
+                    ? `
       <script>
         (function() {
           const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -458,7 +507,8 @@ const getPlugins = (isServer = false) => [
             } catch (e) {}
           });
         })();
-      </script>` : ''),
+      </script>`
+                    : ''),
         }),
     !isServer &&
         (config.webpack.production || config.ssr) &&
@@ -472,7 +522,12 @@ const getPlugins = (isServer = false) => [
                     from: resolveApp(dir, 'public'),
                     to: resolveApp(dir, `${config.buildDir}/static`),
                     globOptions: {
-                        ignore: ['**/template.html', '**/index.html', '**/*.html', '**/favicon.png'],
+                        ignore: [
+                            '**/template.html',
+                            '**/index.html',
+                            '**/*.html',
+                            '**/favicon.png',
+                        ],
                     },
                     filter: (resourcePath) => {
                         try {
@@ -510,7 +565,7 @@ const clientConfig = {
         devMiddleware: {
             writeToDisk: (filePath) => {
                 try {
-                    return filePath.includes('/server/') || filePath.includes('\\server\\');
+                    return (filePath.includes('/server/') || filePath.includes('\\server\\'));
                 }
                 catch {
                     return false;
@@ -540,7 +595,9 @@ const clientConfig = {
                 if (req.method === 'POST' && req.url === '/_ryunix/action') {
                     try {
                         let body = '';
-                        req.on('data', chunk => { body += chunk; });
+                        req.on('data', (chunk) => {
+                            body += chunk;
+                        });
                         req.on('end', async () => {
                             try {
                                 if (req.headers['x-ryunix-action'] !== 'true') {
@@ -551,7 +608,9 @@ const clientConfig = {
                                 const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId];
                                 if (!action) {
                                     res.writeHead(404, { 'Content-Type': 'application/json' });
-                                    return res.end(JSON.stringify({ error: `Server Action ${actionId} not found` }));
+                                    return res.end(JSON.stringify({
+                                        error: `Server Action ${actionId} not found`,
+                                    }));
                                 }
                                 const result = await action(...args);
                                 res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -629,25 +688,24 @@ const clientConfig = {
     module: {
         ...sharedWebpackConfig.module,
         rules: [
-            ...sharedWebpackConfig.module.rules.map((rule) => {
+            ...sharedWebpackConfig.module.rules
+                .map((rule) => {
                 const r = rule;
                 if (r.test && r.test.toString().includes('js|jsx|ryx')) {
                     return {
                         ...r,
-                        exclude: [
-                            /node_modules/,
-                            /\.server\.(js|jsx|ryx)$/
-                        ]
+                        exclude: [/node_modules/, /\.server\.(js|jsx|ryx)$/],
                     };
                 }
                 return rule;
-            }).filter(Boolean),
+            })
+                .filter(Boolean),
             // CSS/SASS for Client
             {
                 test: /\.(s[ac]ss|css)$/i,
                 exclude: /node_modules/,
                 use: [
-                    (config.webpack.production || config.ssr)
+                    config.webpack.production || config.ssr
                         ? MiniCssExtractPlugin.loader
                         : ryunixRequire.resolve('style-loader'),
                     ryunixRequire.resolve('css-loader'),
@@ -657,12 +715,12 @@ const clientConfig = {
                             postcssOptions: {
                                 config: false, // disable auto-detect; we load plugins explicitly
                                 plugins: postcssPlugins,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 ],
             },
-        ]
+        ],
     },
     plugins: [
         new webpack.ProvidePlugin({
@@ -672,18 +730,22 @@ const clientConfig = {
         new RyunixRoutesPlugin({
             routesPath: resolveApp(dir, `${config.rootDir}/pages/routes.ryx`),
             outputPath: resolveApp(dir, `${config.buildDir}/cache/ssg/routes.json`),
-            debug: config.debug
+            debug: config.debug,
         }),
         new AppRouterPlugin({
-            appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.rootDir}/app`),
+            appDir: fs.existsSync(resolveApp(dir, 'app'))
+                ? resolveApp(dir, 'app')
+                : resolveApp(dir, `${config.rootDir}/app`),
             outputPath: resolveApp(dir, `${config.buildDir}/server/app/app-router.js`),
             ssgOutputPath: resolveApp(dir, `${config.buildDir}/cache/ssg/routes.json`),
-            debug: config.debug
+            debug: config.debug,
         }),
         new ApiRouterPlugin({
-            appDir: fs.existsSync(resolveApp(dir, 'app')) ? resolveApp(dir, 'app') : resolveApp(dir, `${config.rootDir}/app`),
+            appDir: fs.existsSync(resolveApp(dir, 'app'))
+                ? resolveApp(dir, 'app')
+                : resolveApp(dir, `${config.rootDir}/app`),
             outputPath: resolveApp(dir, `${config.buildDir}/server/api`),
-            debug: config.debug
+            debug: config.debug,
         }),
         // ESLintPlugin - excluding MDX and MD files
         new ESLintPlugin({
@@ -747,7 +809,7 @@ const serverConfig = {
                 type: 'asset/resource',
                 generator: { emit: false, filename: 'media/[name].[hash][ext]' },
             },
-        ]
+        ],
     },
     plugins: getPlugins(true),
     externals: [
@@ -756,10 +818,11 @@ const serverConfig = {
         },
         '@unsetsoft/ryunixjs',
         ...config.webpack.externals,
-    ]
+    ],
 };
 // Export dual compilers if SSR is enabled, or in production if SSG prerender is enabled
-const enableServerDualCompiler = config.ssr || (config.webpack.production && config.legacy.ssg?.prerender?.length > 0);
+const enableServerDualCompiler = config.ssr ||
+    (config.webpack.production && config.legacy.ssg?.prerender?.length > 0);
 export default enableServerDualCompiler
     ? [clientConfig, serverConfig]
     : clientConfig;

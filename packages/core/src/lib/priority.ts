@@ -34,7 +34,9 @@ export function scheduleUpdate(
   }
 }
 
-function processPendingUpdates(deadline: { timeRemaining: () => number }): void {
+function processPendingUpdates(deadline: {
+  timeRemaining: () => number
+}): void {
   pendingUpdates.sort((a, b) => a.priority - b.priority)
 
   while (pendingUpdates.length > 0 && deadline.timeRemaining() > 1) {

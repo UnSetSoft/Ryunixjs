@@ -25,11 +25,11 @@ plantillas y conecta al usuario con `@unsetsoft/ryunixjs` y
 
 ## Rol en el monorepo
 
-| Paquete | Responsabilidad |
-| :------ | :-------------- |
-| `@unsetsoft/cra` | Crear el esqueleto de la app (CLI + `templates/`) |
-| `@unsetsoft/ryunix-presets` | `ryunix dev`, `build`, `start`; Webpack y routing |
-| `@unsetsoft/ryunixjs` | Runtime: VDOM, hooks, reconciler, SSR en el navegador |
+| Paquete                     | Responsabilidad                                       |
+| :-------------------------- | :---------------------------------------------------- |
+| `@unsetsoft/cra`            | Crear el esqueleto de la app (CLI + `templates/`)     |
+| `@unsetsoft/ryunix-presets` | `ryunix dev`, `build`, `start`; Webpack y routing     |
+| `@unsetsoft/ryunixjs`       | Runtime: VDOM, hooks, reconciler, SSR en el navegador |
 
 Tras ejecutar CRA, el desarrollador trabaja en una **app generada** con
 `app/*.ryx`, `ryunix.config.js` y scripts que invocan el binario `ryunix` del
@@ -84,12 +84,12 @@ Lo que **no** forma parte del runtime del framework:
 
 ## TypeScript y artefactos publicados
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| Fuente | Solo `src/**/*.ts` |
-| Comprobación | `pnpm --filter @unsetsoft/cra typecheck` |
-| Emit | `pnpm --filter @unsetsoft/cra build` → CommonJS en `src/` |
-| Publish | `prepublishOnly` ejecuta `build` antes de subir a npm |
+| Aspecto      | Detalle                                                   |
+| :----------- | :-------------------------------------------------------- |
+| Fuente       | Solo `src/**/*.ts`                                        |
+| Comprobación | `pnpm --filter @unsetsoft/cra typecheck`                  |
+| Emit         | `pnpm --filter @unsetsoft/cra build` → CommonJS en `src/` |
+| Publish      | `prepublishOnly` ejecuta `build` antes de subir a npm     |
 
 Fase de migración **completada** para el código del CLI. Las plantillas siguen
 en JavaScript y `.ryx` porque describen apps de usuario, no el paquete CRA.
@@ -138,10 +138,10 @@ flowchart LR
 
 ## Documentación relacionada
 
-| Documento | Contenido |
-| :-------- | :-------- |
-| [cli-y-ayudantes.md](./cli-y-ayudantes.md) | `cli.ts`, `create-app.ts`, helpers, flags |
-| [generacion-de-plantillas.md](./generacion-de-plantillas.md) | Las cuatro plantillas y layout de app |
-| [Guía del repositorio](../guias/guia-del-repositorio.md) | Mapa del monorepo |
-| [App de integración local](../guias/app-de-integracion-local.md) | Probar CRA / presets con `test/` |
-| `packages/cra/README.md` | Uso orientado a quien publica o ejecuta el CLI |
+| Documento                                                        | Contenido                                      |
+| :--------------------------------------------------------------- | :--------------------------------------------- |
+| [cli-y-ayudantes.md](./cli-y-ayudantes.md)                       | `cli.ts`, `create-app.ts`, helpers, flags      |
+| [generacion-de-plantillas.md](./generacion-de-plantillas.md)     | Las cuatro plantillas y layout de app          |
+| [Guía del repositorio](../guias/guia-del-repositorio.md)         | Mapa del monorepo                              |
+| [App de integración local](../guias/app-de-integracion-local.md) | Probar CRA / presets con `test/`               |
+| `packages/cra/README.md`                                         | Uso orientado a quien publica o ejecuta el CLI |
