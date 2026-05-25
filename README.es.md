@@ -82,7 +82,7 @@ RyunixJS es un monorepo con varios paquetes especializados:
 | [`@unsetsoft/ryunix-presets`](./packages/ryunix-presets)   | Tooling unificado y configuraciones Webpack.         |
 | [`@unsetsoft/cra`](./packages/cra)                         | CLI oficial para crear proyectos Ryunix.             |
 | [`@unsetsoft/ryunix-devtools`](./packages/ryunix-devtools) | Extensión para inspeccionar el árbol de componentes. |
-| [Extensión VS Code][vscode-ext]                            | Resaltado de sintaxis y soporte para `.ryx`.         |
+| [`unsetsoft.ryunixjs`](./packages/ryunix-vscode)           | Extensión VS Code para `.ryx` (Marketplace).          |
 
 ## 🛠️ Primeros pasos
 

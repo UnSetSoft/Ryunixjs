@@ -58,15 +58,15 @@ The CLI will guide you through several choices to customize your project:
 
 For more control, you can use the following flags:
 
-| Flag            | Description                                               |
-| :-------------- | :-------------------------------------------------------- |
-| `-v, --version` | Output the current version of the CLI.                    |
-| `-h, --help`    | Display the help message.                                 |
-| `--canary`      | Use the Canary channel for Ryunix dependencies.           |
-| `--latest`      | Use the Latest channel for Ryunix dependencies (default). |
-| `--tailwind`    | Initialize with Tailwind CSS configuration.               |
-| `--eslint`      | Initialize with ESLint configuration.                     |
-| `--vscode`      | Add VS Code settings for Ryunix extension.                |
+| Flag            | Description                                                                               |
+| :-------------- | :---------------------------------------------------------------------------------------- |
+| `-v, --version` | Output the current version of the CLI.                                                    |
+| `-h, --help`    | Display the help message.                                                                 |
+| `--canary`      | Use the Canary channel for Ryunix dependencies.                                           |
+| `--latest`      | Use the Latest channel for Ryunix dependencies (default).                               |
+| `--tailwind`    | Initialize with Tailwind CSS configuration.                                               |
+| `--eslint`      | Initialize with ESLint configuration.                                                     |
+| `--vscode`      | Add VS Code settings recommending [`unsetsoft.ryunixjs`](../ryunix-vscode) (source in monorepo). |
 
 ## 🏗️ What's Inside?
 

@@ -76,7 +76,8 @@ Este proyecto es un monorepo gestionado con **pnpm** y **Turbo**.
 | `pnpm run clean`          | Limpia artefactos de build y `node_modules`.                   |
 | `pnpm run run:web`        | Ejecuta el proyecto de prueba Webpack en desarrollo.           |
 | `pnpm run release:canary` | Prepara y publica la versión Canary del core.                  |
-| `pnpm run publish:canary` | Publica paquetes (excepto tests y devtools) con tag `@canary`. |
+| `pnpm run publish:canary` | Publica paquetes (excepto tests, devtools y la extensión VS Code) con tag `@canary`. |
+| `pnpm --filter ./packages/ryunix-vscode run build` | Empaqueta la extensión VS Code como `.vsix` (ID Marketplace: `unsetsoft.ryunixjs`). |
 
 ## 🌿 Estrategia de ramas
 

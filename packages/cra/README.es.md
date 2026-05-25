@@ -64,7 +64,7 @@ Para más control, puedes usar estos flags:
 | `--latest`      | Usa el canal Latest (predeterminado).              |
 | `--tailwind`    | Inicializa con configuración de Tailwind CSS.      |
 | `--eslint`      | Inicializa con configuración de ESLint.            |
-| `--vscode`      | Añade ajustes de VS Code para la extensión Ryunix. |
+| `--vscode`      | Añade ajustes de VS Code recomendando [`unsetsoft.ryunixjs`](../ryunix-vscode) (código en el monorepo). |
 
 ## 🏗️ ¿Qué incluye?
 

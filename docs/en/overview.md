@@ -19,6 +19,7 @@ framework is built.
   - [`core/` — `packages/core`](#core--packagescore)
   - [`ryunix-presets/` — `packages/ryunix-presets`](#ryunix-presets--packagesryunix-presets)
   - [`cra/` — `packages/cra`](#cra--packagescra)
+  - [`ryunix-vscode/` — `packages/ryunix-vscode`](#ryunix-vscode--packagesryunix-vscode)
   - [Suggested reading order](#suggested-reading-order)
   - [Other languages](#other-languages)
 
@@ -36,7 +37,8 @@ docs/
 │   ├── guides/                      ← Monorepo-wide guides (not tied to one package)
 │   ├── core/                        ← packages/core — runtime engine
 │   ├── ryunix-presets/              ← packages/ryunix-presets — CLI & Webpack
-│   └── cra/                         ← packages/cra — project scaffolding
+│   ├── cra/                         ← packages/cra — project scaffolding
+│   └── ryunix-vscode/               ← packages/ryunix-vscode — VS Code extension
 └── es/                              ← Spanish (same structure)
     ├── resumen.md                   ← Index (Spanish)
     ├── guias/                       ← Guías del monorepo (nombres en español)
@@ -51,6 +53,7 @@ docs/
 | [`./core/`](./core/)                     | `packages/core`           | Reconciler, hooks, rendering, SSR, components.                       |
 | [`./ryunix-presets/`](./ryunix-presets/) | `packages/ryunix-presets` | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
 | [`./cra/`](./cra/)                       | `packages/cra`            | `create-ryunix-app` CLI and project templates.                       |
+| [`./ryunix-vscode/`](./ryunix-vscode/)   | `packages/ryunix-vscode`  | VS Code extension for `.ryx` syntax highlighting and snippets.       |
 
 ---
 
@@ -111,6 +114,17 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 | :----------------------------------------------------- | :------------------------------------------------------- |
 | [cli-and-helpers.md](./cra/cli-and-helpers.md)         | Interactive CLI, `create-app.js`, npm version resolution |
 | [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism         |
+
+---
+
+## `ryunix-vscode/` — `packages/ryunix-vscode`
+
+Visual Studio Marketplace extension (`unsetsoft.ryunixjs`) for `.ryx` syntax
+highlighting and snippets.
+
+| Document                                                     | Topic                                           |
+| :----------------------------------------------------------- | :---------------------------------------------- |
+| [package-overview.md](./ryunix-vscode/package-overview.md)   | Build `.vsix`, F5 development, and publish flow |
 
 ---
 
