@@ -2,7 +2,7 @@
 .vscode-test
 .gitignore
 node_modules
-out/
+src/
 tsconfig.json
-vsc-extension-quickstart.md
 test
+**/*.map
