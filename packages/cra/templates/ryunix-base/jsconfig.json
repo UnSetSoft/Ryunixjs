@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react",
+    "jsxFactory": "Ryunix.createElement",
+    "jsxFragmentFactory": "Ryunix.Fragment",
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@unsetsoft/ryunixjs": ["node_modules/@unsetsoft/ryunixjs"]
+    }
+  },
+  "include": ["**/*.ryx", "**/*.js", "app/**/*"],
+  "exclude": ["node_modules", ".ryunix", "dist"]
+}

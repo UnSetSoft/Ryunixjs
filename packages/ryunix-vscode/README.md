@@ -26,9 +26,10 @@ Install the recommended extensions when VS Code prompts you.
 | Supported in this extension | Not supported (use other tooling) |
 | :-------------------------- | :-------------------------------- |
 | `.ryx` as JS + JSX (TextMate) | MDX (`.mdx`) — validated at build via `@mdx-js/loader` |
-| ESLint integration via workspace `eslint.probe` / `eslint.validate` | TypeScript inside `.ryx` |
-| Emmet in `ryunix` language mode | Bundled `formatOnSave` (use Prettier in the project) |
-| Snippets + lightweight completions | API routes: templates use `router.js`; `router.ryx` snippets are optional |
+| **LSP** (diagnostics, go to definition, references, hover, rename) with `jsconfig.json` | Full strict TypeScript / complete project types |
+| ESLint integration via workspace `eslint.probe` / `eslint.validate` | Bundled `formatOnSave` (use Prettier in the project) |
+| Emmet in `ryunix` language mode | API routes: templates use `router.js`; `router.ryx` snippets are optional |
+| Snippets + completions (LSP or lightweight mode without LSP) | `@/` aliases without matching `paths` in `jsconfig` (mirror `ryunix.config.js`) |
 
 File-context completions (e.g. layout template in `layout.ryx`) and `frontmatter`
 as an alias for `Metatags` are provided by `extension.js`.
@@ -51,15 +52,26 @@ as an alias for `Metatags` are provided by `extension.js`.
 
 Type inside an `import { … }` block for completions (`useStore`, `Link`, …).
 
-## Navigation (v1.0.5+)
+## Language Server (v1.1+)
+
+With `"ryunix.languageServer.enable": true` (default), the workspace TypeScript
+service provides diagnostics, completions, go to definition, references, and
+rename in `.ryx`. Add a root `jsconfig.json` (CRA generates one with `--vscode`)
+and mirror `webpack.resolve.alias` `@/` entries in `compilerOptions.paths` when
+you use them.
+
+Disable the LSP: `"ryunix.languageServer.enable": false` (snippets and
+lightweight navigation remain).
+
+## Complementary navigation
 
 | Action | Behavior |
 | :----- | :------- |
-| **Ctrl+click** (go to definition) | On `useStore`, `Link`, … opens `@unsetsoft/ryunixjs` in `node_modules` or monorepo `packages/core` |
-| **Hover** | Docs for Ryunix exports, HTML tags (`<main>`), and tokens in `className` |
-| **Tailwind** | Install [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) for full utility docs (class priority/conflicts as in HTML+TW stacks) |
+| **Ctrl+click** (go to definition) | Local imports, `@unsetsoft/ryunixjs`, `@/` aliases (with `jsconfig`) |
+| **Hover** | Ryunix hooks, HTML tags, `className` tokens (always on) |
+| **Tailwind** | Install [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
 
-Disable: `"ryunix.enableNavigation": false` in settings.
+Disable hover/tags: `"ryunix.enableNavigation": false`.
 
 ## Optional Prettier (projects with `--eslint`)
 

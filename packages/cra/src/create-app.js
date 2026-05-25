@@ -147,6 +147,7 @@ async function createApp({
       recommendations: ['unsetsoft.ryunixjs', 'dbaeumer.vscode-eslint'],
     }
     const settingsJson = {
+      'ryunix.languageServer.enable': true,
       'files.associations': {
         '*.ryx': 'ryunix',
       },

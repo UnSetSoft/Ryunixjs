@@ -27,9 +27,10 @@ extensiones recomendadas cuando VS Code lo pida.
 | Soportado en esta extensión | No soportado (otras herramientas) |
 | :-------------------------- | :-------------------------------- |
 | `.ryx` como JS + JSX (TextMate) | MDX (`.mdx`) — validación en build con `@mdx-js/loader` |
-| ESLint vía `eslint.probe` / `eslint.validate` del workspace | TypeScript dentro de `.ryx` |
-| Emmet en modo `ryunix` | `formatOnSave` empaquetado (usa Prettier en el proyecto) |
-| Snippets + completions ligeras | Rutas API: plantillas usan `router.js`; snippets `.ryx` opcionales |
+| **LSP** (diagnósticos, ir a definición, referencias, hover, rename) con `jsconfig.json` | TypeScript estricto / tipos de proyecto completos |
+| ESLint vía `eslint.probe` / `eslint.validate` del workspace | `formatOnSave` empaquetado (usa Prettier en el proyecto) |
+| Emmet en modo `ryunix` | Rutas API: plantillas usan `router.js`; snippets `.ryx` opcionales |
+| Snippets + completions (LSP o modo ligero sin LSP) | Alias `@/` sin `paths` en `jsconfig` (copia los de `ryunix.config.js`) |
 
 Completions por nombre de archivo (p. ej. plantilla de layout en `layout.ryx`) y
 `frontmatter` como alias de `Metatags` en `extension.js`.
@@ -52,15 +53,26 @@ Completions por nombre de archivo (p. ej. plantilla de layout en `layout.ryx`) y
 
 Dentro de `import { … }` aparecen completions (`useStore`, `Link`, etc.).
 
-## Navegación (v1.0.5+)
+## Language Server (v1.1+)
+
+Con `"ryunix.languageServer.enable": true` (por defecto), el servidor TypeScript del
+workspace ofrece diagnósticos, autocompletado, ir a definición, referencias y rename
+en `.ryx`. Añade un `jsconfig.json` en la raíz del proyecto (CRA lo genera con
+`--vscode`) y, si usas alias `@/` en `ryunix.config.js`, replica los `paths` en
+`compilerOptions.paths`.
+
+Desactivar el LSP: `"ryunix.languageServer.enable": false` (quedan snippets y
+navegación ligera).
+
+## Navegación complementaria
 
 | Gestión | Qué hace |
 | :------ | :------- |
-| **Ctrl+clic** (ir a definición) | En `useStore`, `Link`, … salta a `@unsetsoft/ryunixjs` en `node_modules` o `packages/core` |
-| **Hover** | Muestra ayuda en hooks Ryunix, etiquetas `<main>`, etc. y clases en `className` |
-| **Tailwind** | Instala [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) para documentación completa de clases (prioridad y conflictos como en HTML+TW) |
+| **Ctrl+clic** (ir a definición) | Imports locales, `@unsetsoft/ryunixjs`, alias `@/` (con `jsconfig`) |
+| **Hover** | Hooks Ryunix, etiquetas HTML, clases en `className` (siempre activo) |
+| **Tailwind** | Instala [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
 
-Desactivar: `"ryunix.enableNavigation": false` en settings.
+Desactivar hover/tags: `"ryunix.enableNavigation": false`.
 
 ## Prettier opcional (proyectos con `--eslint`)
 

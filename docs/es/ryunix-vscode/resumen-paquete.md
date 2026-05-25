@@ -90,9 +90,26 @@ El campo `"name": "ryunixjs"` es **intencional**: Marketplace ID =
 | **Hover** | Tooltip en exports Ryunix, etiquetas HTML (`<main>`) y clases en `className` |
 | **Tailwind** | Defaults para [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss); con `--tailwind` CRA también la recomienda |
 
-En TypeScript/JavaScript esto lo da el **Language Server** (servidor de lenguaje). En `.ryx`
-la extensión implementa un subconjunto sin LSP completo: no hay “tipado” ni ir a definición
-de variables locales entre archivos `.ryx` todavía.
+### Language Server (LSP) — v1.1.0+
+
+Con `"ryunix.languageServer.enable": true` (por defecto) se inicia un **servidor de lenguaje**
+que usa el compilador **TypeScript** sobre tus `.ryx` (como TSX con `Ryunix.createElement`):
+
+| Capacidad LSP | Atajo / uso |
+| :------------ | :---------- |
+| Ir a definición | Ctrl+clic en símbolos, imports, tipos |
+| Buscar referencias | Panel / comando References |
+| Hover con tipos | Pasar el mouse |
+| Diagnósticos | Subrayados de error/aviso en el editor |
+| Renombrar símbolo | F2 |
+| Símbolos del documento | Outline / breadcrumbs |
+| Autocompletado | Ctrl+Espacio (semántico TS) |
+| Ayuda de firma | Al escribir `(` en llamadas |
+
+Requisitos en el proyecto: `pnpm install` y `jsconfig.json` (las plantillas CRA ya lo incluyen).
+
+Desactivar LSP y volver al modo ligero: `"ryunix.languageServer.enable": false` (usa
+`ryunix.enableNavigation` para hovers simples).
 
 ### Completions contextuales
 
