@@ -8,6 +8,10 @@ export function registerNavigationProviders(
   const config = vscode.workspace.getConfiguration('ryunix')
   if (config.get<boolean>('enableNavigation', true) === false) return
 
-  registerDefinitionProvider(context)
+  /** Hover for HTML tags / className always complements the LSP. */
   registerHoverProvider(context)
+
+  if (config.get<boolean>('languageServer.enable', true)) return
+
+  registerDefinitionProvider(context)
 }

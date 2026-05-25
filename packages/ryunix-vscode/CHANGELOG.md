@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.1]
+
+- Fix LSP "Could not find source file" on hover and file watchers
+- Sync open editor buffers with TypeScript (unsaved `.ryx` content)
+- Normalize file paths; avoid full project reset on every watch event
+
+## [1.1.0]
+
+- **Language Server (LSP)** backed by TypeScript for `.ryx` files
+  - Diagnostics (syntax + semantic)
+  - Go to definition, find references, hover with types
+  - Completions, document symbols, rename, signature help
+- Setting `ryunix.languageServer.enable` (default `true`)
+- `types/ryunix.d.ts` + `jsconfig.json` in CRA templates for editor project
+- Bundle server (~TypeScript) and client via esbuild for Marketplace `.vsix`
+
 ## [1.0.5]
 
 - Go to definition (Ctrl+click) for `@unsetsoft/ryunixjs` exports → `node_modules` or monorepo `packages/core`
@@ -10,25 +26,18 @@
 ## [Unreleased]
 
 - Restructure package: `src/` (TypeScript), `language/`, `assets/`
-- Extension logic split into `src/completion/*`; build outputs `out/extension.js`
 
 ## [1.0.4]
 
 - Snippets: `ryx-loading`, `ryx-error`, `ryx-server-page`, `ryx-api-post`
-- File-context completions (`layout.ryx`, `loading.ryx`, …) and `frontmatter` alias
-- Remove unused `semanticTokenScopes` (no semantic token provider yet)
-- TextMate regression tests (`test/grammar.test.cjs`, fixtures from `ryunix-base`)
-- CRA `--vscode`: recommend ESLint + Ryunix; Prettier when `--eslint`; file nesting
-- `ryunix-eslint` template: `.prettierrc.json` override for `*.ryx`
-- README / docs: explicit scope (MDX, TS, formatter), Prettier guide, `ROADMAP.md`
+- File-context completions and `frontmatter` alias
+- CRA `--vscode` improvements, grammar tests
 
 ## [1.0.3]
 
-- Ryunix snippets (`ryx-page`, `ryx-layout`, `ryx-errors`, `ryx-import`, …)
-- Completions for `@unsetsoft/ryunixjs` hooks and `Metatags` / `generateMetadata`
-- Remove default `formatOnSave` (no bundled formatter)
-- CRA `--vscode` writes `settings.json` (Emmet, ESLint, file associations)
-- Bilingual README (EN / ES)
+- Ryunix snippets and completions
+- Remove default `formatOnSave`
+- Bilingual README
 
 ## [1.0.2]
 

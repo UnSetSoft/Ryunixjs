@@ -1,6 +1,5 @@
 /**
  * Ambient types for .ryx files (Ryunix JSX + global Ryunix from Webpack ProvidePlugin).
- * Referenced by jsconfig.json in Ryunix apps and by the language server.
  */
 declare namespace Ryunix {
   function createElement(
@@ -17,6 +16,20 @@ declare namespace Ryunix {
 declare const Ryunix: typeof Ryunix
 
 declare module '@unsetsoft/ryunixjs' {
+  export interface LinkProps {
+    to: string
+    className?: string
+    children?: unknown
+    [key: string]: unknown
+  }
+
+  export interface NavLinkProps extends LinkProps {
+    activeClassName?: string
+  }
+
+  export function Link(props: LinkProps): unknown
+  export function NavLink(props: NavLinkProps): unknown
+
   export function useStore<T>(initial?: T): [T, (v: T | ((p: T) => T)) => void]
   export function useEffect(
     effect: () => void | (() => void),
@@ -28,11 +41,14 @@ declare module '@unsetsoft/ryunixjs' {
     deps?: unknown[],
   ): T
   export function useRef<T>(initial: T): { current: T }
-  export const Link: (props: Record<string, unknown>) => unknown
-  export const NavLink: (props: Record<string, unknown>) => unknown
-  export const RouterProvider: (props: Record<string, unknown>) => unknown
-  export const ServerBoundary: (props: Record<string, unknown>) => unknown
-  export const Suspense: (props: Record<string, unknown>) => unknown
+  export const RouterProvider: (props: {
+    children?: unknown
+  }) => unknown
+  export const ServerBoundary: (props: { children?: unknown }) => unknown
+  export const Suspense: (props: {
+    children?: unknown
+    fallback?: unknown
+  }) => unknown
   export function lazy(
     loader: () => Promise<{ default: unknown }>,
   ): unknown

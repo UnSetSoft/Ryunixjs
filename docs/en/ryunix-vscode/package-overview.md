@@ -65,8 +65,25 @@ Marketplace ID is `{publisher}.{name}` → `unsetsoft.ryunixjs` (name is intenti
 | **Hover** | Tooltips for Ryunix exports, HTML tags, `className` tokens |
 | **Tailwind** | Defaults for Tailwind CSS IntelliSense; CRA `--tailwind` recommends that extension |
 
-In TS/JS this comes from a **Language Server**. For `.ryx` the extension provides a
-subset without full LSP (no local cross-file symbol navigation yet).
+### Language Server (LSP) — v1.1.0+
+
+With `"ryunix.languageServer.enable": true` (default), a **TypeScript-backed language
+server** analyzes `.ryx` as TSX (`Ryunix.createElement`):
+
+| LSP feature | Usage |
+| :---------- | :---- |
+| Go to definition | Ctrl+click |
+| Find references | References view |
+| Hover | Types and docs |
+| Diagnostics | Squiggles in editor |
+| Rename | F2 |
+| Document symbols | Outline |
+| Completions | Ctrl+Space (semantic) |
+| Signature help | Inside `(` |
+
+Projects need `pnpm install` and `jsconfig.json` (CRA templates include it).
+
+Set `"ryunix.languageServer.enable": false` for lightweight-only mode.
 
 Contextual suggestions for `layout.ryx`, `index.ryx`, etc. `frontmatter` is
 documented as an alias for `Metatags`.

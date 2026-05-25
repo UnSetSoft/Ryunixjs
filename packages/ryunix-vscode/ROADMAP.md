@@ -1,30 +1,28 @@
 # Ryunix VS Code extension — roadmap
 
-## Shipped (1.0.5)
+## Shipped (1.1.0)
 
-- TextMate grammar for `.ryx` (JS + embedded JSX)
-- Ryunix snippets and file-context completions
-- **Go to definition** and **hover** for core exports, HTML tags, `className`
-- Tailwind IntelliSense defaults for `ryunix` language
-- CRA `--vscode` workspace (ESLint probe, Emmet, file nesting)
-- Optional Prettier via project config (`--eslint` template)
+- TextMate grammar, snippets, Emmet/Tailwind defaults
+- **Language Server (LSP)** on TypeScript `LanguageService` for `.ryx`
+  - Diagnostics, definition, references, hover, completion, symbols, rename, signature help
+- Lightweight navigation when LSP is off (`ryunix.enableNavigation`)
+- CRA `jsconfig.json` for editor project context (`paths` for `@unsetsoft/ryunixjs`)
+- LSP project root: `jsconfig` / `ryunix.config.js` / workspace folder (not “most `.ryx` in one dir”)
 
-## Not in scope (use other tools)
+## Not in scope (yet)
 
-| Topic | Where it is handled |
-| :---- | :------------------ |
-| MDX (`.mdx`) | `@mdx-js/loader` at build time |
-| TypeScript in `.ryx` | Not supported; use `.js` or future `.ts` convention |
-| Bundled formatter | Prettier + `prettier.documentSelectors` in app workspace |
+| Topic | Notes |
+| :---- | :---- |
+| MDX in editor | Build-time only |
+| Full Ryunix-specific typechecker | LSP reuses TS; some Ryunix conventions are heuristics |
+| Inlay hints server/client | Build plugin territory |
 
-## Future (high effort)
+## Future
 
 | Feature | Notes |
 | :------ | :---- |
-| Full Language Server (LSP) | Cross-file refs, types, rename — beyond import→core navigation |
-| Semantic tokens | Removed unused `semanticTokenScopes` until a provider exists |
-| Server/client inlay hints | Would duplicate `AppRouterPlugin` heuristics from build |
-| Official Ryunix formatter | Prettier `overrides` for `*.ryx` is the practical path today |
+| Dedicated `ryunix-language-server` | Ryunix-aware rules beyond TS+jsxFactory |
+| Semantic tokens for server/client boundaries | Needs router metadata or annotations |
+| Official formatter | Prettier `*.ryx` override remains the practical path |
 
-Contributions should run `pnpm --filter ./packages/ryunix-vscode run test` when
-touching `syntaxes/JavaScriptRyunix.tmLanguage.json`.
+Run `pnpm --filter ./packages/ryunix-vscode run test` when editing TextMate grammar.
