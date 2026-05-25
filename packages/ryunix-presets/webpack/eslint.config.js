@@ -1,5 +1,5 @@
-import config from './utils/config.cjs';
-import { defineConfig } from 'eslint/config';
+import config from './utils/config.cjs'
+import { defineConfig } from 'eslint/config'
 /**
  * ESLint Configuration for Ryunix
  *
@@ -13,27 +13,27 @@ import { defineConfig } from 'eslint/config';
  * which is sufficient for detecting syntax and JSX errors.
  */
 const eslintConfig = defineConfig([
-    {
-        files: ['**/*.ryx', ...(config?.eslint?.files ?? [])],
-        ignores: ['**/*.mdx', '**/*.md', '**/node_modules/**'],
-        languageOptions: {
-            ecmaVersion: 2021,
-            sourceType: 'module',
-            parserOptions: {
-                ecmaFeatures: {
-                    jsx: true,
-                },
-                extraFileExtensions: ['.ryx'],
-            },
+  {
+    files: ['**/*.ryx', ...(config?.eslint?.files ?? [])],
+    ignores: ['**/*.mdx', '**/*.md', '**/node_modules/**'],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
         },
-        settings: {
-            react: {
-                pragma: 'Ryunix.createElement',
-                fragment: 'Ryunix.Fragment',
-            },
-        },
-        plugins: config?.eslint?.plugins,
-        rules: config?.eslint?.rules,
+        extraFileExtensions: ['.ryx'],
+      },
     },
-]);
-export default eslintConfig;
+    settings: {
+      react: {
+        pragma: 'Ryunix.createElement',
+        fragment: 'Ryunix.Fragment',
+      },
+    },
+    plugins: config?.eslint?.plugins,
+    rules: config?.eslint?.rules,
+  },
+])
+export default eslintConfig
