@@ -13,6 +13,7 @@ export default [
       '**/dist/**',
       'test/**',
       '_ci/**',
+      'packages/ryunix-vscode/syntaxes/**',
     ],
   },
   {
