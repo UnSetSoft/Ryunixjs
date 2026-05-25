@@ -56,7 +56,7 @@
     "css-loader": "7.1.2",
     "css-minimizer-webpack-plugin": "8.0.0",
     "dotenv-webpack": "8.1.1",
-    "eslint": "9.39.2",
+    "eslint": "10.4.0",
     "eslint-plugin-mdx": "3.6.2",
     "eslint-plugin-react": "7.37.5",
     "eslint-webpack-plugin": "5.0.2",
