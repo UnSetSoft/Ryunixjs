@@ -5,7 +5,11 @@ yarn.lock
 .ryunix
 package-lock.json
 _cra
-test
+test/*
+!test/webpack/
+test/webpack/node_modules/
+test/webpack/.ryunix/
+test/webpack/*.vsix
 .yarn
 .pnp.loader.mjs
 .pnp.cjs

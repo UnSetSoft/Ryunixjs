@@ -37,7 +37,10 @@
     "setup:web": "node setup-test-webpack.mjs",
     "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",
     "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run build",
-    "run:web:start": "pnpm --filter ./test/webpack run start"
+    "run:web:start": "pnpm --filter ./test/webpack run start",
+    "run:web2": "pnpm --filter ./test/webpack2 run dev",
+    "run:web2:build": "pnpm --filter ./test/webpack2 run build",
+    "run:web2:start": "pnpm --filter ./test/webpack2 run start"
   },
   "devDependencies": {
     "@babel/preset-env": "7.28.5",
