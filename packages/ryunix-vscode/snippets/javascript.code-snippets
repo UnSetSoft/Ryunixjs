@@ -1,0 +1,82 @@
+{
+  "arrowFunction": {
+    "prefix": "af",
+    "isFileTemplate": true,
+    "body": [
+      "const ${1} = (props) =>{",
+      "\treturn (",
+      "\t<>",
+      "\t\t${2}",
+      "\t</>",
+      "\t)",
+      "}"
+    ],
+    "description": "Create a arrow function"
+  },
+  "div": {
+    "prefix": "div",
+    "body": "<div>${1}</div>",
+    "description": "Create a div"
+  },
+  "a": {
+    "prefix": "a",
+    "body": "<a href='${1}'>${2}</a>",
+    "description": "Create an anchor"
+  },
+  "Log to the console": {
+    "prefix": "log",
+    "body": ["console.log($1);"],
+    "description": "Log to the console"
+  },
+  "Log warning to console": {
+    "prefix": "warn",
+    "body": ["console.warn($1);"],
+    "description": "Log warning to the console"
+  },
+  "Log error to console": {
+    "prefix": "error",
+    "body": ["console.error($1);"],
+    "description": "Log error to the console"
+  },
+  "Import Statement": {
+    "prefix": "import",
+    "body": ["import { $0 } from \"${1:module}\";"],
+    "description": "Import external module"
+  },
+  "Try-Catch Statement": {
+    "prefix": "trycatch",
+    "body": [
+      "try {",
+      "\t$TM_SELECTED_TEXT$0",
+      "} catch (${1:error}) {",
+      "\t",
+      "}"
+    ],
+    "description": "Try-Catch Statement"
+  },
+  "Function Statement": {
+    "prefix": "function",
+    "body": [
+      "function ${1:name}(${2:props}) {",
+      "\treturn <>$TM_SELECTED_TEXT$0</>",
+      "}"
+    ],
+    "description": "Function Statement"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": ["if (${1:condition}) {", "\t$TM_SELECTED_TEXT$0", "}"],
+    "description": "If Statement"
+  },
+  "If-Else Statement": {
+    "prefix": "ifelse",
+    "body": [
+      "if (${1:condition}) {",
+      "\t$TM_SELECTED_TEXT$0",
+      "} else {",
+      "\t",
+      "}"
+    ],
+    "description": "If-Else Statement"
+  }
+}
