@@ -3,6 +3,9 @@
 src/**
 server/src/**
 out/**/*.map
+server/out/format-hover.js
+server/out/positions.js
+server/out/ts-program.js
 server/out/**/*.map
 server/tsconfig.json
 tsconfig.json
