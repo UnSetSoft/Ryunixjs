@@ -48,23 +48,23 @@ El CLI te guiará por varias opciones para personalizar el proyecto:
 3. **Tailwind CSS**: inicialización y configuración opcional automática de Tailwind CSS.
 
 4. **ESLint**: reglas de linting preconfiguradas para desarrollo Ryunix.
-5. **Integración VS Code**: configuración automática de la extensión Ryunix en el
-
-   workspace.
+5. **Integración VS Code**: con `--vscode` escribe `.vscode/extensions.json`
+   (Ryunix + ESLint, y Prettier si `--eslint`) y `settings.json` (Emmet,
+   asociación de archivos, probe ESLint, anidado opcional de rutas).
 
 ## 🚩 Flags de línea de comandos
 
 Para más control, puedes usar estos flags:
 
-| Flag            | Descripción                                                                                             |
-| :-------------- | :------------------------------------------------------------------------------------------------------ |
-| `-v, --version` | Muestra la versión actual del CLI.                                                                      |
-| `-h, --help`    | Muestra el mensaje de ayuda.                                                                            |
-| `--canary`      | Usa el canal Canary para las dependencias Ryunix.                                                       |
-| `--latest`      | Usa el canal Latest (predeterminado).                                                                   |
-| `--tailwind`    | Inicializa con configuración de Tailwind CSS.                                                           |
-| `--eslint`      | Inicializa con configuración de ESLint.                                                                 |
-| `--vscode`      | Añade ajustes de VS Code recomendando [`unsetsoft.ryunixjs`](../ryunix-vscode) (código en el monorepo). |
+| Flag            | Descripción                                                                                                      |
+| :-------------- | :--------------------------------------------------------------------------------------------------------------- |
+| `-v, --version` | Muestra la versión actual del CLI.                                                                               |
+| `-h, --help`    | Muestra el mensaje de ayuda.                                                                                      |
+| `--canary`      | Usa el canal Canary para las dependencias Ryunix.                                                                |
+| `--latest`      | Usa el canal Latest (predeterminado).                                                                            |
+| `--tailwind`    | Inicializa con configuración de Tailwind CSS.                                                                    |
+| `--eslint`      | Inicializa con configuración de ESLint.                                                                          |
+| `--vscode`      | Añade `.vscode/` recomendando extensiones Ryunix + ESLint (instálalas cuando VS Code lo pida).                   |
 
 ## 🏗️ ¿Qué incluye?
 

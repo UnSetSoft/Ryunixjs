@@ -1,86 +1,123 @@
+<!-- markdownlint-disable MD013 MD060 -->
+
 # `packages/ryunix-vscode` — VS Code extension
 
-Source for the **RyunixJS** editor extension published on the Visual Studio
-Marketplace as
+Source for the **RyunixJS** editor extension on Visual Studio Marketplace:
 [`unsetsoft.ryunixjs`](https://marketplace.visualstudio.com/items?itemName=unsetsoft.ryunixjs).
+Syntax highlighting, snippets, and lightweight completions for `.ryx` files
+(JS + JSX with App Router conventions). Does **not** replace the compiler or
+TypeScript LSP.
 
 ---
 
 ## Role in the monorepo
 
-| Aspect                            | Detail                                                                                                       |
-| :-------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Consumer**                      | Developers editing `.ryx` files in VS Code                                                                   |
-| **Not an npm runtime dependency** | Apps use `@unsetsoft/ryunixjs`; this package only affects the editor                                         |
-| **CRA integration**               | `create-app.js` can write `.vscode/extensions.json` recommending `unsetsoft.ryunixjs` when `--vscode` is set |
+| Aspect | Detail |
+| :----- | :----- |
+| **Consumers** | Developers editing `.ryx` in VS Code |
+| **App runtime** | Apps use `@unsetsoft/ryunixjs`; this package is editor-only |
+| **CRA** | `--vscode` recommends Ryunix + ESLint (+ Prettier with `--eslint`) |
+| **Publish** | Marketplace / `.vsix`; excluded from npm `publish:all` |
+
+```mermaid
+flowchart LR
+  Ext[ryunix-vscode]
+  RYX[*.ryx]
+  ESLint[ESLint ext]
+  Presets[ryunix build]
+  Ext --> RYX
+  ESLint --> RYX
+  Presets --> RYX
+```
 
 ---
 
-## Layout
+## Package layout
 
 ```text
 packages/ryunix-vscode/
-├── package.json              # Extension manifest (name must stay "ryunixjs" for Marketplace ID)
-├── syntaxes/                 # TextMate grammar (JavaScript + JSX-like .ryx)
+├── src/                    # TypeScript source
+│   ├── extension.ts
+│   └── completion/         # provider, imports, keywords, file-context
+├── out/                    # Compiled entry (package.json main)
+├── language/               # ryunix + ryx-tags configuration
+├── syntaxes/               # TextMate grammar (~6k lines)
 ├── snippets/
-├── language-configuration.json
-├── tags-language-configuration.json
-├── icon.png, logo-*.svg
-└── .vscode/launch.json       # F5 Extension Development Host
+├── assets/                 # icon + logos
+├── test/                   # grammar regression
+├── .vscode/                # F5 + compile task
+├── package.json            # name "ryunixjs" → unsetsoft.ryunixjs
+└── ROADMAP.md
 ```
 
-The `package.json` field `"name": "ryunixjs"` is intentional: Marketplace ID is
-`{publisher}.{name}` → `unsetsoft.ryunixjs`.
+Marketplace ID is `{publisher}.{name}` → `unsetsoft.ryunixjs` (name is intentional).
+
+---
+
+## How it works
+
+| Layer | Implementation |
+| :---- | :--------------- |
+| **Syntax** | `source.js.ryx` grammar + embedded `ryx-tags` |
+| **Snippets** | `javascript.code-snippets` |
+| **Completions** | `src/completion/provider.ts` — core exports, keywords, file-name templates |
+| **Go to definition** | Ctrl+click on `@unsetsoft/ryunixjs` exports → `node_modules` or monorepo `packages/core` |
+| **Hover** | Tooltips for Ryunix exports, HTML tags, `className` tokens |
+| **Tailwind** | Defaults for Tailwind CSS IntelliSense; CRA `--tailwind` recommends that extension |
+
+In TS/JS this comes from a **Language Server**. For `.ryx` the extension provides a
+subset without full LSP (no local cross-file symbol navigation yet).
+
+Contextual suggestions for `layout.ryx`, `index.ryx`, etc. `frontmatter` is
+documented as an alias for `Metatags`.
+
+---
+
+## Scope
+
+| Supported | Not supported |
+| :-------- | :------------ |
+| `.ryx` highlighting, snippets, completions | MDX (build-time loader) |
+| ESLint workspace integration (CRA) | TypeScript inside `.ryx` |
+| Emmet for `ryunix` | Bundled formatter (use Prettier in project) |
+| Grammar regression tests | LSP — see `ROADMAP.md` |
+
+CRA API templates use `router.js`; `.ryx` API snippets are optional.
 
 ---
 
 ## Commands
 
-From the repository root (after `pnpm install`):
-
 ```bash
-# Package a .vsix for local install or CI artifacts
+pnpm --filter ./packages/ryunix-vscode run compile
+pnpm --filter ./packages/ryunix-vscode run watch
+pnpm --filter ./packages/ryunix-vscode run test
 pnpm --filter ./packages/ryunix-vscode run build
-
-# Publish to Visual Studio Marketplace (maintainers, PAT required)
-pnpm --filter ./packages/ryunix-vscode run publish:marketplace
+code --install-extension packages/ryunix-vscode/ryunixjs-1.0.4.vsix
 ```
 
-Local install of a built `.vsix`:
-
-```bash
-code --install-extension packages/ryunix-vscode/ryunixjs-1.0.2.vsix
-```
+**F5:** open `packages/ryunix-vscode`, run **Extension** (compiles via `preLaunchTask`).
 
 ---
 
-## Development workflow
+## Related packages
 
-1. Open `packages/ryunix-vscode` in VS Code (or the full monorepo).
-2. Press **F5** (launch config **Extension**) to open a window with the
-   extension loaded.
-3. Open any `.ryx` file (e.g. from `test/webpack` after `pnpm run setup:web` on
-   branches that include it).
-4. Edit grammars or snippets; reload the Extension Development Host to test.
-
-**Snippets:** `ryx-page`, `ryx-layout`, `ryx-errors`, `ryx-import`, …
-
-**Completions:** `useStore`, `Link`, `Metatags`, etc. (see package README).
-
----
-
-## Release notes
-
-- Version and changelog live in `packages/ryunix-vscode/package.json` and
-  `CHANGELOG.md`.
-- Root `pnpm publish:all` **excludes** this package (Marketplace-only, like
-  `ryunix-devtools` on npm).
+| Package | Relationship |
+| :------ | :------------- |
+| `core` | Completion export list |
+| `cra` | `--vscode` workspace files |
+| `ryunix-presets` | ESLint `ryunix`; `app/` conventions |
+| `ryunix-devtools` | Browser debugging (separate) |
 
 ---
 
 ## Related docs
 
-| Topic                     | Document                                                              |
-| :------------------------ | :-------------------------------------------------------------------- |
-| CRA `--vscode` flag       | [../cra/cli-and-helpers.md](../cra/cli-and-helpers.md)                |
-| Chrome DevTools extension | `packages/ryunix-devtools` (browser debugging, separate from VS Code) |
+| Topic | Document |
+| :---- | :------- |
+| CRA `--vscode` | [../cra/cli-and-helpers.md](../cra/cli-and-helpers.md) |
+| App Router files | [../ryunix-presets/routing-and-ssg.md](../ryunix-presets/routing-and-ssg.md) |
+
+Spanish: [docs/es/ryunix-vscode/resumen-paquete.md](../../es/ryunix-vscode/resumen-paquete.md).
+
+Package README: `packages/ryunix-vscode/README.md`.

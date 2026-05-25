@@ -7,6 +7,8 @@ package-lock.json
 _cra
 _ci
 test
+!packages/ryunix-vscode/test/
+!packages/ryunix-vscode/test/**
 .yarn
 .pnp.loader.mjs
 .pnp.cjs

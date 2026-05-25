@@ -56,6 +56,58 @@
     ],
     "description": "Ryunix error boundary page (errors.ryx)",
   },
+  "Ryunix loading (loading.ryx)": {
+    "prefix": "ryx-loading",
+    "isFileTemplate": true,
+    "body": [
+      "export default function ${1:Loading}() {",
+      "\treturn (",
+      "\t\t<div className=\"loading\">",
+      "\t\t\t<p>${2:Loading…}</p>",
+      "\t\t</div>",
+      "\t)",
+      "}"
+    ],
+    "description": "Route loading UI (loading.ryx, Suspense boundary)",
+  },
+  "Ryunix route error (error.ryx)": {
+    "prefix": "ryx-error",
+    "isFileTemplate": true,
+    "body": [
+      "export default function ${1:RouteError}({ error, reset }) {",
+      "\treturn (",
+      "\t\t<main>",
+      "\t\t\t<h1>${2:Something went wrong}</h1>",
+      "\t\t\t<p>{error?.message}</p>",
+      "\t\t\t<button type=\"button\" onClick={reset}>${3:Try again}</button>",
+      "\t\t</main>",
+      "\t)",
+      "}"
+    ],
+    "description": "Per-route error boundary (error.ryx)",
+  },
+  "Ryunix server page (async index.ryx)": {
+    "prefix": "ryx-server-page",
+    "isFileTemplate": true,
+    "body": [
+      "export const Metatags = {",
+      "\ttitle: \"${1:Page title}\",",
+      "\tdescription: '${2:Description}',",
+      "\tviewport: 'width=device-width, initial-scale=1.0',",
+      "\tcharset: 'UTF-8',",
+      "}",
+      "",
+      "export default async function ${3:Page}() {",
+      "\t${4:// fetch data on the server}",
+      "\treturn (",
+      "\t\t<main>",
+      "\t\t\t${5}",
+      "\t\t</main>",
+      "\t)",
+      "}"
+    ],
+    "description": "Server component page with Metatags and async default export",
+  },
   "Ryunix API GET handler": {
     "prefix": "ryx-api-get",
     "body": [
@@ -67,6 +119,19 @@
       "}",
     ],
     "description": "API route GET handler (router.js / router.ryx)",
+  },
+  "Ryunix API POST handler": {
+    "prefix": "ryx-api-post",
+    "body": [
+      "export const POST = async (req) => {",
+      "\tconst body = await req.json()",
+      "\treturn new Response(JSON.stringify({ ${1:ok}: true }), {",
+      "\t\tstatus: 200,",
+      "\t\theaders: { 'Content-Type': 'application/json' },",
+      "\t})",
+      "}"
+    ],
+    "description": "API route POST handler (router.js / router.ryx)",
   },
   "Import from Ryunix core": {
     "prefix": "ryx-import",

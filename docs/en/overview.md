@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD060 -->
+
 # RyunixJS Internal Documentation
 
 > **Language / Idioma:** [English](./overview.md) · [Español](../es/resumen.md)
@@ -59,8 +61,9 @@ docs/
 | [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`   | VS Code extension for `.ryx` syntax highlighting and snippets.       |
 
 Each package folder includes a **package overview** (`package-overview.md` in
-English, `resumen-paquete.md` in Spanish) as the entry point before deep-dive
-docs.
+English, `resumen-paquete.md` in Spanish): folder layout, how the package works,
+cross-package relationships, and links to deep-dive docs. Start there when
+exploring a single package.
 
 ---
 
@@ -85,7 +88,7 @@ and built-in components.
 
 | Document                                                                      | Topic                                                   |
 | :---------------------------------------------------------------------------- | :------------------------------------------------------ |
-| [package-overview.md](./core/package-overview.md)                             | **Package entry** — role, layout, build & test commands |
+| [package-overview.md](./core/package-overview.md)                             | **Package entry** — layout, modules, render flow        |
 | [virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md) | `createElement`, work loop, reconciler, DOM commit      |
 | [hooks.md](./core/hooks.md)                                                   | `useStore`, `useEffect`, memoization, SSR hook behavior |
 | [rendering.md](./core/rendering.md)                                           | `render`, `hydrate`, `renderToString`, streaming        |
@@ -105,7 +108,7 @@ SSG, and API compilation.
 
 | Document                                                              | Topic                                              |
 | :-------------------------------------------------------------------- | :------------------------------------------------- |
-| [package-overview.md](./ryunix-presets/package-overview.md)           | **Package entry** — role, layout, `ryunix` CLI     |
+| [package-overview.md](./ryunix-presets/package-overview.md)           | **Package entry** — CLI, plugins, app conventions       |
 | [cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md) | `ryunix dev`, `build`, `start`, dev & prod servers |
 | [configuration-loading.md](./ryunix-presets/configuration-loading.md) | `ryunix.config.js` discovery and normalization     |
 | [routing-and-ssg.md](./ryunix-presets/routing-and-ssg.md)             | `AppRouterPlugin`, SSG, dev SSR handler            |
@@ -121,7 +124,7 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 
 | Document                                               | Topic                                                    |
 | :----------------------------------------------------- | :------------------------------------------------------- |
-| [package-overview.md](./cra/package-overview.md)       | **Package entry** — role, layout, `npx` usage            |
+| [package-overview.md](./cra/package-overview.md)       | **Package entry** — templates, flags, create-app        |
 | [cli-and-helpers.md](./cra/cli-and-helpers.md)         | Interactive CLI, `create-app.js`, npm version resolution |
 | [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism         |
 
@@ -134,7 +137,7 @@ Ryunix apps.
 
 | Document                                                     | Topic                                  |
 | :----------------------------------------------------------- | :------------------------------------- |
-| [package-overview.md](./ryunix-devtools/package-overview.md) | **Package entry** — load unpacked, zip |
+| [package-overview.md](./ryunix-devtools/package-overview.md) | **Package entry** — MV3, hook, DevTools panel           |
 
 ---
 
@@ -145,7 +148,7 @@ highlighting and snippets.
 
 | Document                                                   | Topic                                          |
 | :--------------------------------------------------------- | :--------------------------------------------- |
-| [package-overview.md](./ryunix-vscode/package-overview.md) | **Package entry** — build `.vsix`, F5, publish |
+| [package-overview.md](./ryunix-vscode/package-overview.md) | **Package entry** — TypeScript, grammar, F5, vsix       |
 
 ---
 

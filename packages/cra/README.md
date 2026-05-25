@@ -50,9 +50,9 @@ The CLI will guide you through several choices to customize your project:
    Tailwind CSS.
 
 4. **ESLint**: Pre-configured linting rules optimized for Ryunix development.
-5. **VS Code Integration**: Automatic configuration for the Ryunix VS Code
-
-   Extension workspace settings.
+5. **VS Code Integration**: With `--vscode`, writes `.vscode/extensions.json`
+   (Ryunix + ESLint, and Prettier when `--eslint`) and `settings.json` (Emmet,
+   file associations, ESLint probe, optional file nesting for route files).
 
 ## 🚩 Command Line Flags
 
@@ -66,7 +66,7 @@ For more control, you can use the following flags:
 | `--latest`      | Use the Latest channel for Ryunix dependencies (default).                                     |
 | `--tailwind`    | Initialize with Tailwind CSS configuration.                                                   |
 | `--eslint`      | Initialize with ESLint configuration.                                                         |
-| `--vscode`      | Add VS Code settings recommending [`unsetsoft.ryunixjs`](../ryunix-vscode) (monorepo source). |
+| `--vscode`      | Add `.vscode/` (Ryunix + ESLint; install recommended extensions when prompted).               |
 
 ## 🏗️ What's Inside?
 

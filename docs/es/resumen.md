@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD060 -->
+
 # Documentación interna de RyunixJS
 
 > **Language / Idioma:** [English](../en/overview.md) · [Español](./resumen.md)
@@ -60,8 +62,9 @@ docs/
 | [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`   | Extensión VS Code para `.ryx` (resaltado y snippets).                   |
 
 Cada carpeta de paquete incluye un **resumen de paquete** (`resumen-paquete.md`
-en español, `package-overview.md` en inglés) como punto de entrada antes de la
-documentación detallada.
+en español, `package-overview.md` en inglés): estructura de carpetas, flujo de
+funcionamiento, relación con otros paquetes y enlaces a la documentación
+detallada. Léelo primero si acabas de clonar el monorepo o un paquete concreto.
 
 ---
 
@@ -86,7 +89,7 @@ cliente/servidor y componentes integrados.
 
 | Documento                                                   | Tema                                                     |
 | :---------------------------------------------------------- | :------------------------------------------------------- |
-| [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — rol, estructura, build y tests |
+| [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — estructura, módulos, render en |
 | [vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) | `createElement`, work loop, reconciliador, commit al DOM |
 | [hooks.md](./core/hooks.md)                                 | `useStore`, `useEffect`, memoización, hooks en SSR       |
 | [renderizado.md](./core/renderizado.md)                     | `render`, `hydrate`, `renderToString`, streaming         |
@@ -106,7 +109,7 @@ archivos, SSG y compilación de APIs.
 
 | Documento                                                               | Tema                                                  |
 | :---------------------------------------------------------------------- | :---------------------------------------------------- |
-| [resumen-paquete.md](./ryunix-presets/resumen-paquete.md)               | **Entrada del paquete** — resumen                     |
+| [resumen-paquete.md](./ryunix-presets/resumen-paquete.md)               | **Entrada del paquete** — CLI, plugins, convenciones app/|
 | [cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md)                 | `ryunix dev`, `build`, `start`, servidores dev y prod |
 | [carga-de-configuracion.md](./ryunix-presets/carga-de-configuracion.md) | Descubrimiento y normalización de `ryunix.config.js`  |
 | [enrutamiento-y-ssg.md](./ryunix-presets/enrutamiento-y-ssg.md)         | `AppRouterPlugin`, SSG, handler SSR en desarrollo     |
@@ -122,7 +125,7 @@ Scaffolder oficial (`npx @unsetsoft/cra`) y plantillas de proyecto.
 
 | Documento                                                        | Tema                                                          |
 | :--------------------------------------------------------------- | :------------------------------------------------------------ |
-| [resumen-paquete.md](./cra/resumen-paquete.md)                   | **Entrada del paquete** — resumen                             |
+| [resumen-paquete.md](./cra/resumen-paquete.md)                   | **Entrada del paquete** — plantillas, flags y create-app |
 | [cli-y-ayudantes.md](./cra/cli-y-ayudantes.md)                   | CLI interactiva, `create-app.js`, resolución de versiones npm |
 | [generacion-de-plantillas.md](./cra/generacion-de-plantillas.md) | `ryunix-base`, `ryunix-tailwind`, mecanismo de copia          |
 
@@ -135,7 +138,7 @@ Ryunix en ejecución.
 
 | Documento                                                  | Tema                              |
 | :--------------------------------------------------------- | :-------------------------------- |
-| [resumen-paquete.md](./ryunix-devtools/resumen-paquete.md) | **Entrada del paquete** — resumen |
+| [resumen-paquete.md](./ryunix-devtools/resumen-paquete.md) | **Entrada del paquete** — MV3, hook, panel DevTools      |
 
 ---
 
@@ -146,7 +149,7 @@ sintaxis y snippets en archivos `.ryx`.
 
 | Documento                                                | Tema                                                  |
 | :------------------------------------------------------- | :---------------------------------------------------- |
-| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md) | **Entrada del paquete** — build `.vsix`, F5, publicar |
+| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md) | **Entrada del paquete** — TypeScript, gramática, F5, vsix|
 
 ---
 

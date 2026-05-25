@@ -143,13 +143,19 @@ async function createApp({
   if (vscode) {
     const vscodeDir = path.join(root, '.vscode')
     if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir)
-    const extensionsJson = { recommendations: ['unsetsoft.ryunixjs'] }
+    const extensionsJson = {
+      recommendations: ['unsetsoft.ryunixjs', 'dbaeumer.vscode-eslint'],
+    }
     const settingsJson = {
       'files.associations': {
         '*.ryx': 'ryunix',
       },
       'emmet.includeLanguages': {
         ryunix: 'html',
+      },
+      'javascript.validate.enable': true,
+      'editor.quickSuggestions': {
+        strings: true,
       },
       'eslint.validate': ['javascript', 'javascriptreact', 'ryunix'],
       'eslint.probe': [
@@ -159,6 +165,23 @@ async function createApp({
         'typescriptreact',
         'ryunix',
       ],
+      'explorer.fileNesting.patterns': {
+        'index.ryx': 'layout.ryx, loading.ryx, error.ryx, errors.ryx',
+      },
+    }
+    if (tailwind) {
+      extensionsJson.recommendations.push('bradlc.vscode-tailwindcss')
+      settingsJson['tailwindCSS.includeLanguages'] = { ryunix: 'html' }
+      settingsJson['tailwindCSS.experimental.classRegex'] = [
+        ['className\\s*=\\s*["\'`]([^"\'`]*)["\'`]', '([^\\s]+)'],
+      ]
+    }
+    if (eslint) {
+      extensionsJson.recommendations.push('esbenp.prettier-vscode')
+      settingsJson['[ryunix]'] = {
+        'editor.defaultFormatter': 'esbenp.prettier-vscode',
+      }
+      settingsJson['prettier.documentSelectors'] = ['**/*.ryx']
     }
     fs.writeFileSync(
       path.join(vscodeDir, 'extensions.json'),

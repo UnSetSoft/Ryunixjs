@@ -1,51 +1,101 @@
-# `packages/ryunix-devtools` — `@unsetsoft/ryunix-devtools`
+<!-- markdownlint-disable MD013 MD060 -->
 
-Chrome (and Chromium-based) extension for inspecting Ryunix component trees,
-props, and hook usage at runtime. Complements in-core dev warnings and the
-profiler documented under `core/`.
+# `packages/ryunix-devtools` — Chrome extension
+
+**Manifest V3** Chromium extension to inspect running Ryunix apps: component
+list, sanitized props, and render timing in a custom DevTools panel. Complements
+core dev utilities (`devtools.js`, `profiler.js`) but does not replace them.
+
+**Not an npm dependency** of apps. Load unpacked or distribute a zip build.
 
 ---
 
 ## Role in the monorepo
 
-| Aspect                        | Detail                                                                  |
-| :---------------------------- | :---------------------------------------------------------------------- |
-| **Consumer**                  | Developers debugging Ryunix apps in the browser                         |
-| **Not an npm app dependency** | Loaded as an unpacked extension or store build                          |
-| **Publish**                   | Excluded from root `pnpm publish:all` (extension distribution, not npm) |
+| Aspect | Detail |
+| :----- | :----- |
+| **Consumers** | Developers debugging in the browser |
+| **Page requirement** | `window.Ryunix` from the client bundle |
+| **Publish** | Excluded from `pnpm publish:all` |
+| **Core integration** | External monkey-patch; no official reconciler bridge |
+
+```mermaid
+sequenceDiagram
+  participant Page as hook.js page context
+  participant CS as content-script.js
+  participant Panel as panel.js
+
+  Page->>Page: Patch Ryunix.createElement
+  Page->>CS: postMessage
+  CS->>Panel: runtime message
+```
 
 ---
 
-## Layout
+## Package layout
 
 ```text
 packages/ryunix-devtools/
 ├── manifest.json
-├── panel.html / panel.js    # DevTools panel UI
-├── content/                 # Content scripts & bridge to the page
+├── background.js           # Service worker
+├── content-script.js       # Bridge; injects hook.js
+├── hook.js                 # Patches window.Ryunix
+├── devtools.html / devtools.js
+├── panel.html / panel.js   # Components + Performance tabs
 └── README.md
 ```
 
+| File | Role |
+| :--- | :--- |
+| **hook.js** | Waits for `Ryunix`, sends fiber/render events via `postMessage` |
+| **content-script.js** | Forwards page messages to the extension |
+| **panel.js** | DevTools UI |
+
+### vs `packages/core`
+
+| Core module | Used by extension? |
+| :---------- | :----------------- |
+| `window.Ryunix` (`main.js`) | **Yes** |
+| `devtools.js` (hook warnings) | **No** |
+| `profiler.js` | **No** |
+
+The extension does not read reconciler fibers; it infers data from patched
+`createElement`. Treat it as an inspection prototype, not a stable runtime API.
+
 ---
 
-## Commands
+## Usage
 
-Load unpacked in Chrome: `chrome://extensions/` → **Load unpacked** → select
-`packages/ryunix-devtools`.
+1. Chrome → `chrome://extensions/` → Developer mode → **Load unpacked** →
+   `packages/ryunix-devtools`.
+2. Run a Ryunix app (`pnpm run dev`).
+3. Open DevTools → **Ryunix** panel.
 
-Optional zip for distribution (from package README):
-
-```bash
-npm run build   # creates devtools.zip (when run inside the package)
-```
-
-Use the **Ryunix** panel in DevTools (F12) on a running Ryunix app.
+Optional: `npm run build` in the package for a zip (see package README).
 
 ---
 
-## Related docs
+## Known limitations
 
-| Topic                        | Document                                                                     |
-| :--------------------------- | :--------------------------------------------------------------------------- |
-| Core profiler & dev warnings | [../core/devtools-and-profiler.md](../core/devtools-and-profiler.md)         |
-| VS Code extension (editor)   | [../ryunix-vscode/package-overview.md](../ryunix-vscode/package-overview.md) |
+| Topic | Detail |
+| :---- | :----- |
+| Panel icons | Referenced paths may be missing in the tree |
+| Data model | Flat fiber list, not full reconciler tree |
+| Highlight | Page overlay from hook; not wired to panel selection |
+| Stability | Depends on `Ryunix.createElement` shape |
+
+Future work could add official hooks in core; see
+[../core/devtools-and-profiler.md](../core/devtools-and-profiler.md).
+
+---
+
+## Related packages
+
+| Package | Relationship |
+| :------ | :------------- |
+| `core` | Provides `window.Ryunix` |
+| `ryunix-presets` | Serves the app under debug |
+| `ryunix-vscode` | Editor support; separate from browser debugging |
+| `cra` | Does not install the extension |
+
+Spanish: [docs/es/ryunix-devtools/resumen-paquete.md](../../es/ryunix-devtools/resumen-paquete.md).
