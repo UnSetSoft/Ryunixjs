@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD060 -->
+
 # RyunixJS Internal Documentation
 
 > **Language / Idioma:** [English](./overview.md) · [Español](../es/resumen.md)
@@ -19,6 +21,8 @@ framework is built.
   - [`core/` — `packages/core`](#core--packagescore)
   - [`ryunix-presets/` — `packages/ryunix-presets`](#ryunix-presets--packagesryunix-presets)
   - [`cra/` — `packages/cra`](#cra--packagescra)
+  - [`ryunix-devtools/` — `packages/ryunix-devtools`](#ryunix-devtools--packagesryunix-devtools)
+  - [`ryunix-vscode/` — `packages/ryunix-vscode`](#ryunix-vscode--packagesryunix-vscode)
   - [Suggested reading order](#suggested-reading-order)
   - [Other languages](#other-languages)
 
@@ -36,7 +40,9 @@ docs/
 │   ├── guides/                      ← Monorepo-wide guides (not tied to one package)
 │   ├── core/                        ← packages/core — runtime engine
 │   ├── ryunix-presets/              ← packages/ryunix-presets — CLI & Webpack
-│   └── cra/                         ← packages/cra — project scaffolding
+│   ├── cra/                         ← packages/cra — project scaffolding
+│   ├── ryunix-devtools/             ← packages/ryunix-devtools — Chrome extension
+│   └── ryunix-vscode/               ← packages/ryunix-vscode — VS Code extension
 └── es/                              ← Spanish (same structure)
     ├── resumen.md                   ← Index (Spanish)
     ├── guias/                       ← Guías del monorepo (nombres en español)
@@ -45,12 +51,19 @@ docs/
     └── cra/
 ```
 
-| Path (from `docs/en/`)                   | Package in repo           | What you will find                                                   |
-| :--------------------------------------- | :------------------------ | :------------------------------------------------------------------- |
-| [`./guides/`](./guides/)                 | _(monorepo root)_         | Onboarding, testing, tech stack and root scripts (see guides below). |
-| [`./core/`](./core/)                     | `packages/core`           | Reconciler, hooks, rendering, SSR, components.                       |
-| [`./ryunix-presets/`](./ryunix-presets/) | `packages/ryunix-presets` | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
-| [`./cra/`](./cra/)                       | `packages/cra`            | `create-ryunix-app` CLI and project templates.                       |
+| Path (from `docs/en/`)                     | Package in repo            | What you will find                                                   |
+| :----------------------------------------- | :------------------------- | :------------------------------------------------------------------- |
+| [`./guides/`](./guides/)                   | _(monorepo root)_          | Onboarding, testing, tech stack and root scripts (see guides below). |
+| [`./core/`](./core/)                       | `packages/core`            | Reconciler, hooks, rendering, SSR, components.                       |
+| [`./ryunix-presets/`](./ryunix-presets/)   | `packages/ryunix-presets`  | `ryunix` CLI, Webpack, routing, SSG, API routes, loaders.            |
+| [`./cra/`](./cra/)                         | `packages/cra`             | `create-ryunix-app` CLI and project templates.                       |
+| [`./ryunix-devtools/`](./ryunix-devtools/) | `packages/ryunix-devtools` | Chrome extension for runtime component inspection.                   |
+| [`./ryunix-vscode/`](./ryunix-vscode/)     | `packages/ryunix-vscode`   | VS Code extension for `.ryx` syntax highlighting and snippets.       |
+
+Each package folder includes a **package overview** (`package-overview.md` in
+English, `resumen-paquete.md` in Spanish): folder layout, how the package works,
+cross-package relationships, and links to deep-dive docs. Start there when
+exploring a single package.
 
 ---
 
@@ -75,6 +88,7 @@ and built-in components.
 
 | Document                                                                      | Topic                                                   |
 | :---------------------------------------------------------------------------- | :------------------------------------------------------ |
+| [package-overview.md](./core/package-overview.md)                             | **Package entry** — layout, modules, render flow        |
 | [virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md) | `createElement`, work loop, reconciler, DOM commit      |
 | [hooks.md](./core/hooks.md)                                                   | `useStore`, `useEffect`, memoization, SSR hook behavior |
 | [rendering.md](./core/rendering.md)                                           | `render`, `hydrate`, `renderToString`, streaming        |
@@ -94,6 +108,7 @@ SSG, and API compilation.
 
 | Document                                                              | Topic                                              |
 | :-------------------------------------------------------------------- | :------------------------------------------------- |
+| [package-overview.md](./ryunix-presets/package-overview.md)           | **Package entry** — CLI, plugins, app conventions  |
 | [cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md) | `ryunix dev`, `build`, `start`, dev & prod servers |
 | [configuration-loading.md](./ryunix-presets/configuration-loading.md) | `ryunix.config.js` discovery and normalization     |
 | [routing-and-ssg.md](./ryunix-presets/routing-and-ssg.md)             | `AppRouterPlugin`, SSG, dev SSR handler            |
@@ -109,8 +124,31 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 
 | Document                                               | Topic                                                    |
 | :----------------------------------------------------- | :------------------------------------------------------- |
+| [package-overview.md](./cra/package-overview.md)       | **Package entry** — templates, flags, create-app         |
 | [cli-and-helpers.md](./cra/cli-and-helpers.md)         | Interactive CLI, `create-app.js`, npm version resolution |
 | [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism         |
+
+---
+
+## `ryunix-devtools/` — `packages/ryunix-devtools`
+
+Chrome extension for inspecting component trees, props, and hooks in running
+Ryunix apps.
+
+| Document                                                     | Topic                                         |
+| :----------------------------------------------------------- | :-------------------------------------------- |
+| [package-overview.md](./ryunix-devtools/package-overview.md) | **Package entry** — MV3, hook, DevTools panel |
+
+---
+
+## `ryunix-vscode/` — `packages/ryunix-vscode`
+
+Visual Studio Marketplace extension (`unsetsoft.ryunixjs`) for `.ryx` syntax
+highlighting and snippets.
+
+| Document                                                   | Topic                                             |
+| :--------------------------------------------------------- | :------------------------------------------------ |
+| [package-overview.md](./ryunix-vscode/package-overview.md) | **Package entry** — TypeScript, grammar, F5, vsix |
 
 ---
 

@@ -25,6 +25,7 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
     else {
         fs_1.default.mkdirSync(root, { recursive: true });
     }
+<<<<<<< HEAD
     console.log(`\nCreating a new Ryunix app in ${picocolors_1.default.green(root)}.\n`);
     process.chdir(root);
     let templateName = 'ryunix-base';
@@ -125,4 +126,84 @@ async function createApp({ appPath, appName, channel, compiler, tailwind, eslint
     console.log(picocolors_1.default.cyan('  cd'), appName);
     console.log(picocolors_1.default.cyan(`  ${pkgManager} install`));
     console.log(picocolors_1.default.cyan(`  ${pkgManager} run dev\n`));
+=======
+    fs.writeFileSync(configPath, configContent)
+  }
+
+  // Create vscode workspace settings if requested
+  if (vscode) {
+    const vscodeDir = path.join(root, '.vscode')
+    if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir)
+    const extensionsJson = {
+      recommendations: ['unsetsoft.ryunixjs', 'dbaeumer.vscode-eslint'],
+    }
+    const settingsJson = {
+      'ryunix.languageServer.enable': true,
+      'files.associations': {
+        '*.ryx': 'ryunix',
+      },
+      'emmet.includeLanguages': {
+        ryunix: 'html',
+      },
+      'javascript.validate.enable': true,
+      'editor.quickSuggestions': {
+        strings: true,
+      },
+      'eslint.validate': ['javascript', 'javascriptreact', 'ryunix'],
+      'eslint.probe': [
+        'javascript',
+        'javascriptreact',
+        'typescript',
+        'typescriptreact',
+        'ryunix',
+      ],
+      'explorer.fileNesting.patterns': {
+        'index.ryx': 'layout.ryx, loading.ryx, error.ryx, errors.ryx',
+      },
+    }
+    if (tailwind) {
+      extensionsJson.recommendations.push('bradlc.vscode-tailwindcss')
+      settingsJson['tailwindCSS.includeLanguages'] = { ryunix: 'html' }
+      settingsJson['tailwindCSS.experimental.classRegex'] = [
+        ['className\\s*=\\s*["\'`]([^"\'`]*)["\'`]', '([^\\s]+)'],
+      ]
+    }
+    if (eslint) {
+      extensionsJson.recommendations.push('esbenp.prettier-vscode')
+      settingsJson['[ryunix]'] = {
+        'editor.defaultFormatter': 'esbenp.prettier-vscode',
+      }
+      settingsJson['prettier.documentSelectors'] = ['**/*.ryx']
+    }
+    fs.writeFileSync(
+      path.join(vscodeDir, 'extensions.json'),
+      JSON.stringify(extensionsJson, null, 2),
+    )
+    fs.writeFileSync(
+      path.join(vscodeDir, 'settings.json'),
+      JSON.stringify(settingsJson, null, 2),
+    )
+  }
+
+  // 4. Install Dependencies
+
+  // 5. Initialize Git
+  if (tryGitInit(root)) {
+    console.log(`\n${pc.green('Initialized a git repository.')}`)
+  }
+
+  // 6. Print Success Message
+  console.log(`\n${pc.green('Success!')} Created ${appName}`)
+  console.log('Inside that directory, you can run several commands:\\n')
+  console.log(pc.cyan(`  ${pkgManager} run dev`))
+  console.log('    Starts the development server.\\n')
+  console.log(pc.cyan(`  ${pkgManager} run build`))
+  console.log('    Builds the app for production.\\n')
+  console.log(pc.cyan(`  ${pkgManager} start`))
+  console.log('    Runs the built app in production mode.\\n')
+  console.log('We suggest that you begin by typing:\\n')
+  console.log(pc.cyan('  cd'), appName)
+  console.log(pc.cyan(`  ${pkgManager} install`))
+  console.log(pc.cyan(`  ${pkgManager} run dev\n`))
+>>>>>>> upstream/canary
 }

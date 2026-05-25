@@ -11,6 +11,8 @@ test/*
 test/webpack/node_modules/
 test/webpack/.ryunix/
 test/webpack/*.vsix
+!packages/ryunix-vscode/test/
+!packages/ryunix-vscode/test/**
 .yarn
 .pnp.loader.mjs
 .pnp.cjs

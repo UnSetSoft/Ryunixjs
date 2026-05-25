@@ -1,0 +1,143 @@
+{
+  "name": "ryunixjs",
+  "displayName": "RyunixJS",
+  "description": "Ryunix language support for .ryx files",
+  "publisher": "unsetsoft",
+  "version": "1.1.2",
+  "license": "MIT",
+  "private": true,
+  "homepage": "https://github.com/UnSetSoft/Ryunixjs",
+  "bugs": {
+    "url": "https://github.com/UnSetSoft/Ryunixjs/issues/new/choose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UnSetSoft/Ryunixjs",
+    "directory": "packages/ryunix-vscode"
+  },
+  "icon": "assets/icon.png",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:ryunix",
+    "workspaceContains:**/*.ryx"
+  ],
+  "scripts": {
+    "compile:server": "tsc -p server/tsconfig.json --noEmit",
+    "compile:client": "tsc -p ./ --noEmit",
+    "bundle:server": "esbuild server/src/server.ts --bundle --platform=node --format=cjs --outfile=server/out/server.js",
+    "bundle:client": "esbuild src/extension.ts --bundle --platform=node --format=cjs --outfile=out/extension.js --external:vscode --packages=bundle",
+    "compile": "node scripts/prepare-out-dirs.mjs && pnpm run bundle:server && pnpm run bundle:client",
+    "watch": "tsc -watch -p ./ --noEmit",
+    "prebuild": "pnpm run compile",
+    "build": "vsce package --no-dependencies",
+    "publish:marketplace": "vsce publish --no-dependencies",
+    "publish:openvsx": "ovsx publish --no-dependencies",
+    "test": "tsc -p server/tsconfig.json && node test/grammar.test.cjs && node test/resolve-root.test.cjs"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "Ryunix",
+      "properties": {
+        "ryunix.languageServer.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run the Ryunix language server (TypeScript-backed LSP) for .ryx files: diagnostics, go to definition, references, rename, symbols."
+        },
+        "ryunix.enableNavigation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Lightweight go to definition/hover when the language server is disabled."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[ryunix]": {
+        "editor.maxTokenizationLineLength": 2500
+      },
+      "tailwindCSS.includeLanguages": {
+        "ryunix": "html"
+      },
+      "tailwindCSS.experimental.classRegex": [
+        [
+          "className\\s*=\\s*[\"'`]([^\"'`]*)[\"'`]",
+          "([^\\s]+)"
+        ]
+      ]
+    },
+    "languages": [
+      {
+        "id": "ryunix",
+        "aliases": [
+          "JavaScript RYX",
+          "JavaScript Ryunix",
+          "ryx"
+        ],
+        "extensions": [
+          ".ryx"
+        ],
+        "configuration": "./language/ryunix.language-configuration.json",
+        "firstLine": "^#!\\s*/?.*\\bryunix\\b",
+        "icon": {
+          "light": "./assets/logo-light.svg",
+          "dark": "./assets/logo-dark.svg"
+        }
+      },
+      {
+        "id": "ryx-tags",
+        "aliases": [],
+        "configuration": "./language/ryx-tags.language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ryunix",
+        "scopeName": "source.js.ryx",
+        "path": "./syntaxes/JavaScriptRyunix.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.tag.js": "ryx-tags",
+          "meta.tag.without-attributes.js": "ryx-tags",
+          "meta.tag.attributes.js.ryx": "ryunix",
+          "meta.embedded.expression.js": "ryunix"
+        },
+        "tokenTypes": {
+          "meta.template.expression": "other",
+          "meta.template.expression string": "string",
+          "meta.template.expression comment": "comment",
+          "entity.name.type.instance.jsdoc": "other",
+          "entity.name.function.tagged-template": "other",
+          "meta.import string.quoted": "other",
+          "variable.other.jsdoc": "other"
+        },
+        "injectTo": [
+          "source.js"
+        ]
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ryunix",
+        "path": "./snippets/javascript.code-snippets"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.75.0",
+    "ovsx": "^0.10.12",
+    "@vscode/vsce": "^3.9.1",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.7.0",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.1.0"
+  }
+}
