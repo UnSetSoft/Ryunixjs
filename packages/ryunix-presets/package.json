@@ -59,7 +59,7 @@
     "eslint": "9.39.2",
     "eslint-plugin-mdx": "3.6.2",
     "eslint-plugin-react": "7.37.5",
-    "eslint-webpack-plugin": "5.0.2",
+    "eslint-webpack-plugin": "6.0.0",
     "glob": "13.0.6",
     "globals": "17.4.0",
     "html-loader": "5.1.0",
