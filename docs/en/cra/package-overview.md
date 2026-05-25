@@ -14,12 +14,12 @@ of existing apps.
 
 ## Role in the monorepo
 
-| Aspect | Detail |
-| :----- | :----- |
-| **Consumers** | Developers creating new Ryunix projects |
-| **Output** | App folder with `app/`, `ryunix.config.js`, `package.json` |
-| **Injects** | `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` (+ optional Tailwind/ESLint) |
-| **Publish** | npm; included in root `pnpm publish:all` |
+| Aspect        | Detail                                                                          |
+| :------------ | :------------------------------------------------------------------------------ |
+| **Consumers** | Developers creating new Ryunix projects                                         |
+| **Output**    | App folder with `app/`, `ryunix.config.js`, `package.json`                      |
+| **Injects**   | `@unsetsoft/ryunixjs`, `@unsetsoft/ryunix-presets` (+ optional Tailwind/ESLint) |
+| **Publish**   | npm; included in root `pnpm publish:all`                                        |
 
 ```mermaid
 flowchart LR
@@ -51,12 +51,12 @@ packages/cra/
 
 ### Template selection
 
-| Condition | Template |
-| :-------- | :------- |
-| `--tailwind` + `--eslint` | `ryunix-all` |
-| `--tailwind` only | `ryunix-tailwind` |
-| `--eslint` only | `ryunix-eslint` |
-| neither | `ryunix-base` |
+| Condition                 | Template          |
+| :------------------------ | :---------------- |
+| `--tailwind` + `--eslint` | `ryunix-all`      |
+| `--tailwind` only         | `ryunix-tailwind` |
+| `--eslint` only           | `ryunix-eslint`   |
+| neither                   | `ryunix-base`     |
 
 Flags `--no-tailwind`, `--no-eslint`, `--no-vscode` skip interactive prompts.
 
@@ -92,13 +92,13 @@ Templates ship `gitignore` (no leading dot) for npm publish; CRA renames to
 
 ## CLI flags
 
-| Flag | Effect |
-| :--- | :----- |
-| `[directory]` | Project path/name |
-| `--latest` / `--canary` | Ryunix package channel |
-| `--tailwind` / `--eslint` / `--vscode` | Skip prompts; enable feature |
-| `--compiler swc\|babel` | Written to `ryunix.config.js` |
-| `--no-*` | Disable optional features via argv |
+| Flag                                   | Effect                             |
+| :------------------------------------- | :--------------------------------- |
+| `[directory]`                          | Project path/name                  |
+| `--latest` / `--canary`                | Ryunix package channel             |
+| `--tailwind` / `--eslint` / `--vscode` | Skip prompts; enable feature       |
+| `--compiler swc\|babel`                | Written to `ryunix.config.js`      |
+| `--no-*`                               | Disable optional features via argv |
 
 ### `--vscode` workspace
 
@@ -121,19 +121,19 @@ Maintainers: `pnpm run cra:release` or `pnpm run cra:nightly` at repo root.
 
 ## Related packages
 
-| Package | Relationship |
-| :------ | :------------- |
+| Package                   | Relationship                               |
+| :------------------------ | :----------------------------------------- |
 | `core` / `ryunix-presets` | Versions added to generated `package.json` |
-| `ryunix-vscode` | Recommended via `--vscode` |
-| `ryunix-devtools` | Not installed by CRA |
+| `ryunix-vscode`           | Recommended via `--vscode`                 |
+| `ryunix-devtools`         | Not installed by CRA                       |
 
 ---
 
 ## Docs in `docs/en/cra/`
 
-| Document | Topic |
-| :------- | :---- |
-| [cli-and-helpers.md](./cli-and-helpers.md) | CLI and helpers |
+| Document                                           | Topic                 |
+| :------------------------------------------------- | :-------------------- |
+| [cli-and-helpers.md](./cli-and-helpers.md)         | CLI and helpers       |
 | [template-generation.md](./template-generation.md) | Maintaining templates |
 
 Spanish: [docs/es/cra/resumen-paquete.md](../../es/cra/resumen-paquete.md).

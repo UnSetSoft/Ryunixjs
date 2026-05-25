@@ -107,15 +107,15 @@ cliente/servidor y componentes integrados.
 Tooling de build: CLI `ryunix`, Webpack dual (cliente + servidor), routing por
 archivos, SSG y compilación de APIs.
 
-| Documento                                                               | Tema                                                  |
-| :---------------------------------------------------------------------- | :---------------------------------------------------- |
-| [resumen-paquete.md](./ryunix-presets/resumen-paquete.md)               | **Entrada del paquete** — CLI, plugins, convenciones app/|
-| [cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md)                 | `ryunix dev`, `build`, `start`, servidores dev y prod |
-| [carga-de-configuracion.md](./ryunix-presets/carga-de-configuracion.md) | Descubrimiento y normalización de `ryunix.config.js`  |
-| [enrutamiento-y-ssg.md](./ryunix-presets/enrutamiento-y-ssg.md)         | `AppRouterPlugin`, SSG, handler SSR en desarrollo     |
-| [enrutador-api.md](./ryunix-presets/enrutador-api.md)                   | Rutas API, compilación SWC, hot reload                |
-| [loaders-webpack.md](./ryunix-presets/loaders-webpack.md)               | Loader RSC, loader de Server Actions                  |
-| [errores-por-archivo.md](./ryunix-presets/errores-por-archivo.md)       | `error.ryx`, overlay global de desarrollo             |
+| Documento                                                               | Tema                                                      |
+| :---------------------------------------------------------------------- | :-------------------------------------------------------- |
+| [resumen-paquete.md](./ryunix-presets/resumen-paquete.md)               | **Entrada del paquete** — CLI, plugins, convenciones app/ |
+| [cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md)                 | `ryunix dev`, `build`, `start`, servidores dev y prod     |
+| [carga-de-configuracion.md](./ryunix-presets/carga-de-configuracion.md) | Descubrimiento y normalización de `ryunix.config.js`      |
+| [enrutamiento-y-ssg.md](./ryunix-presets/enrutamiento-y-ssg.md)         | `AppRouterPlugin`, SSG, handler SSR en desarrollo         |
+| [enrutador-api.md](./ryunix-presets/enrutador-api.md)                   | Rutas API, compilación SWC, hot reload                    |
+| [loaders-webpack.md](./ryunix-presets/loaders-webpack.md)               | Loader RSC, loader de Server Actions                      |
+| [errores-por-archivo.md](./ryunix-presets/errores-por-archivo.md)       | `error.ryx`, overlay global de desarrollo                 |
 
 ---
 
@@ -125,7 +125,7 @@ Scaffolder oficial (`npx @unsetsoft/cra`) y plantillas de proyecto.
 
 | Documento                                                        | Tema                                                          |
 | :--------------------------------------------------------------- | :------------------------------------------------------------ |
-| [resumen-paquete.md](./cra/resumen-paquete.md)                   | **Entrada del paquete** — plantillas, flags y create-app |
+| [resumen-paquete.md](./cra/resumen-paquete.md)                   | **Entrada del paquete** — plantillas, flags y create-app      |
 | [cli-y-ayudantes.md](./cra/cli-y-ayudantes.md)                   | CLI interactiva, `create-app.js`, resolución de versiones npm |
 | [generacion-de-plantillas.md](./cra/generacion-de-plantillas.md) | `ryunix-base`, `ryunix-tailwind`, mecanismo de copia          |
 
@@ -136,9 +136,9 @@ Scaffolder oficial (`npx @unsetsoft/cra`) y plantillas de proyecto.
 Extensión Chrome para inspeccionar árboles de componentes, props y hooks en apps
 Ryunix en ejecución.
 
-| Documento                                                  | Tema                              |
-| :--------------------------------------------------------- | :-------------------------------- |
-| [resumen-paquete.md](./ryunix-devtools/resumen-paquete.md) | **Entrada del paquete** — MV3, hook, panel DevTools      |
+| Documento                                                  | Tema                                                |
+| :--------------------------------------------------------- | :-------------------------------------------------- |
+| [resumen-paquete.md](./ryunix-devtools/resumen-paquete.md) | **Entrada del paquete** — MV3, hook, panel DevTools |
 
 ---
 
@@ -147,9 +147,9 @@ Ryunix en ejecución.
 Extensión de Visual Studio Marketplace (`unsetsoft.ryunixjs`) para resaltado de
 sintaxis y snippets en archivos `.ryx`.
 
-| Documento                                                | Tema                                                  |
-| :------------------------------------------------------- | :---------------------------------------------------- |
-| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md) | **Entrada del paquete** — TypeScript, gramática, F5, vsix|
+| Documento                                                | Tema                                                      |
+| :------------------------------------------------------- | :-------------------------------------------------------- |
+| [resumen-paquete.md](./ryunix-vscode/resumen-paquete.md) | **Entrada del paquete** — TypeScript, gramática, F5, vsix |
 
 ---
 

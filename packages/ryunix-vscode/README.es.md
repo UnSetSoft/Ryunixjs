@@ -24,32 +24,32 @@ extensiones recomendadas cuando VS Code lo pida.
 
 ## Alcance
 
-| Soportado en esta extensión | No soportado (otras herramientas) |
-| :-------------------------- | :-------------------------------- |
-| `.ryx` como JS + JSX (TextMate) | MDX (`.mdx`) — validación en build con `@mdx-js/loader` |
-| **LSP** (diagnósticos, ir a definición, referencias, hover, rename) con `jsconfig.json` | TypeScript estricto / tipos de proyecto completos |
-| ESLint vía `eslint.probe` / `eslint.validate` del workspace | `formatOnSave` empaquetado (usa Prettier en el proyecto) |
-| Emmet en modo `ryunix` | Rutas API: plantillas usan `router.js`; snippets `.ryx` opcionales |
-| Snippets + completions (LSP o modo ligero sin LSP) | Alias `@/` sin `paths` en `jsconfig` (copia los de `ryunix.config.js`) |
+| Soportado en esta extensión                                                             | No soportado (otras herramientas)                                      |
+| :-------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
+| `.ryx` como JS + JSX (TextMate)                                                         | MDX (`.mdx`) — validación en build con `@mdx-js/loader`                |
+| **LSP** (diagnósticos, ir a definición, referencias, hover, rename) con `jsconfig.json` | TypeScript estricto / tipos de proyecto completos                      |
+| ESLint vía `eslint.probe` / `eslint.validate` del workspace                             | `formatOnSave` empaquetado (usa Prettier en el proyecto)               |
+| Emmet en modo `ryunix`                                                                  | Rutas API: plantillas usan `router.js`; snippets `.ryx` opcionales     |
+| Snippets + completions (LSP o modo ligero sin LSP)                                      | Alias `@/` sin `paths` en `jsconfig` (copia los de `ryunix.config.js`) |
 
 Completions por nombre de archivo (p. ej. plantilla de layout en `layout.ryx`) y
 `frontmatter` como alias de `Metatags` en `extension.js`.
 
 ## Snippets (prefijos)
 
-| Prefijo                    | Uso                                          |
-| :------------------------- | :------------------------------------------- |
-| `ryx-page`                 | Página cliente (`Metatags` + export default) |
-| `ryx-server-page`          | `index.ryx` servidor (`async` + `Metatags`)  |
-| `ryx-layout`               | Layout raíz con `children`                   |
-| `ryx-loading`              | `loading.ryx` (UI de carga)                  |
-| `ryx-error`                | `error.ryx` (error boundary de ruta)         |
-| `ryx-errors`               | `errors.ryx` global / 404                    |
-| `ryx-metatags`             | Solo `export const Metatags`                 |
-| `ryx-import`               | `import { … } from '@unsetsoft/ryunixjs'`    |
-| `ryx-link` / `ryx-navlink` | Navegación cliente                           |
-| `ryx-api-get` / `ryx-api-post` | Handlers API `GET` / `POST`              |
-| `ryx-component`            | Componente genérico                          |
+| Prefijo                        | Uso                                          |
+| :----------------------------- | :------------------------------------------- |
+| `ryx-page`                     | Página cliente (`Metatags` + export default) |
+| `ryx-server-page`              | `index.ryx` servidor (`async` + `Metatags`)  |
+| `ryx-layout`                   | Layout raíz con `children`                   |
+| `ryx-loading`                  | `loading.ryx` (UI de carga)                  |
+| `ryx-error`                    | `error.ryx` (error boundary de ruta)         |
+| `ryx-errors`                   | `errors.ryx` global / 404                    |
+| `ryx-metatags`                 | Solo `export const Metatags`                 |
+| `ryx-import`                   | `import { … } from '@unsetsoft/ryunixjs'`    |
+| `ryx-link` / `ryx-navlink`     | Navegación cliente                           |
+| `ryx-api-get` / `ryx-api-post` | Handlers API `GET` / `POST`                  |
+| `ryx-component`                | Componente genérico                          |
 
 Dentro de `import { … }` aparecen completions (`useStore`, `Link`, etc.).
 
@@ -66,11 +66,11 @@ navegación ligera).
 
 ## Navegación complementaria
 
-| Gestión | Qué hace |
-| :------ | :------- |
-| **Ctrl+clic** (ir a definición) | Imports locales, `@unsetsoft/ryunixjs`, alias `@/` (con `jsconfig`) |
-| **Hover** | Hooks Ryunix, etiquetas HTML, clases en `className` (siempre activo) |
-| **Tailwind** | Instala [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
+| Gestión                         | Qué hace                                                                                                           |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------------------- |
+| **Ctrl+clic** (ir a definición) | Imports locales, `@unsetsoft/ryunixjs`, alias `@/` (con `jsconfig`)                                                |
+| **Hover**                       | Hooks Ryunix, etiquetas HTML, clases en `className` (siempre activo)                                               |
+| **Tailwind**                    | Instala [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
 
 Desactivar hover/tags: `"ryunix.enableNavigation": false`.
 

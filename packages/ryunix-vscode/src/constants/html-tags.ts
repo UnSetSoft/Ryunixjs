@@ -19,7 +19,8 @@ export const HTML_TAG_DOCS: Record<string, string> = {
   a: 'Hipervuelo. En apps Ryunix suele preferirse `Link` del core para rutas internas.',
   button: 'Botón. Usa `type="button"` si no envía formulario.',
   form: 'Formulario. Server Actions pueden usarse con `action` en build.',
-  input: 'Campo de entrada. Especifica `type`, `name`, accesibilidad (`label`).',
+  input:
+    'Campo de entrada. Especifica `type`, `name`, accesibilidad (`label`).',
   img: 'Imagen. Incluye `alt` descriptivo.',
   label: 'Etiqueta asociada a un control de formulario.',
 }

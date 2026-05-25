@@ -56,15 +56,15 @@ El CLI te guiará por varias opciones para personalizar el proyecto:
 
 Para más control, puedes usar estos flags:
 
-| Flag            | Descripción                                                                                                      |
-| :-------------- | :--------------------------------------------------------------------------------------------------------------- |
-| `-v, --version` | Muestra la versión actual del CLI.                                                                               |
-| `-h, --help`    | Muestra el mensaje de ayuda.                                                                                      |
-| `--canary`      | Usa el canal Canary para las dependencias Ryunix.                                                                |
-| `--latest`      | Usa el canal Latest (predeterminado).                                                                            |
-| `--tailwind`    | Inicializa con configuración de Tailwind CSS.                                                                    |
-| `--eslint`      | Inicializa con configuración de ESLint.                                                                          |
-| `--vscode`      | Añade `.vscode/` recomendando extensiones Ryunix + ESLint (instálalas cuando VS Code lo pida).                   |
+| Flag            | Descripción                                                                                    |
+| :-------------- | :--------------------------------------------------------------------------------------------- |
+| `-v, --version` | Muestra la versión actual del CLI.                                                             |
+| `-h, --help`    | Muestra el mensaje de ayuda.                                                                   |
+| `--canary`      | Usa el canal Canary para las dependencias Ryunix.                                              |
+| `--latest`      | Usa el canal Latest (predeterminado).                                                          |
+| `--tailwind`    | Inicializa con configuración de Tailwind CSS.                                                  |
+| `--eslint`      | Inicializa con configuración de ESLint.                                                        |
+| `--vscode`      | Añade `.vscode/` recomendando extensiones Ryunix + ESLint (instálalas cuando VS Code lo pida). |
 
 ## 🏗️ ¿Qué incluye?
 

@@ -15,12 +15,12 @@ scripts `package.json`.
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Quién lo usa** | Apps generadas por CRA, plantillas y `test/webpack` |
-| **Peer** | `@unsetsoft/ryunixjs` — runtime que Webpack empaqueta o externaliza |
-| **Distribución** | Código fuente en `webpack/` (sin bundle previo del preset en CI) |
-| **Binario** | `ryunix` → `webpack/bin/index.mjs` |
+| Aspecto          | Detalle                                                             |
+| :--------------- | :------------------------------------------------------------------ |
+| **Quién lo usa** | Apps generadas por CRA, plantillas y `test/webpack`                 |
+| **Peer**         | `@unsetsoft/ryunixjs` — runtime que Webpack empaqueta o externaliza |
+| **Distribución** | Código fuente en `webpack/` (sin bundle previo del preset en CI)    |
+| **Binario**      | `ryunix` → `webpack/bin/index.mjs`                                  |
 
 ```mermaid
 flowchart LR
@@ -69,30 +69,30 @@ packages/ryunix-presets/
 
 ### Plugins Ryunix (`utils/`)
 
-| Módulo | Cuándo actúa | Qué genera o hace |
-| :----- | :----------- | :---------------- |
-| **AppRouterPlugin** | `beforeCompile` si existe `app/` | Escanea `app/**/*.ryx`, detecta server/client, escribe `.ryunix/server/app/app-router.js`, `app-router-server.js`, `main.ryx`, `cache/ssg/routes.json` |
-| **ApiRouterPlugin** | Compilación API | `app/api/**` → `.ryunix/server/api/**` (SWC) |
-| **RyunixRoutesPlugin** | Legacy SSG | `pages/routes.ryx` → manifest SSG (si no hay solo App Router) |
-| **ssrDevHandler** | `ryunix dev` | SSR de rutas HTML en desarrollo |
-| **apiHandler** | dev y prod | Resuelve `/api/*` contra bundles API |
+| Módulo                 | Cuándo actúa                     | Qué genera o hace                                                                                                                                      |
+| :--------------------- | :------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AppRouterPlugin**    | `beforeCompile` si existe `app/` | Escanea `app/**/*.ryx`, detecta server/client, escribe `.ryunix/server/app/app-router.js`, `app-router-server.js`, `main.ryx`, `cache/ssg/routes.json` |
+| **ApiRouterPlugin**    | Compilación API                  | `app/api/**` → `.ryunix/server/api/**` (SWC)                                                                                                           |
+| **RyunixRoutesPlugin** | Legacy SSG                       | `pages/routes.ryx` → manifest SSG (si no hay solo App Router)                                                                                          |
+| **ssrDevHandler**      | `ryunix dev`                     | SSR de rutas HTML en desarrollo                                                                                                                        |
+| **apiHandler**         | dev y prod                       | Resuelve `/api/*` contra bundles API                                                                                                                   |
 
 ### Loaders
 
-| Loader | Función |
-| :----- | :------ |
-| **ryunix-rsc-loader** | Filtra bloques `// @server` / `// @client` según target web vs node |
+| Loader                          | Función                                                               |
+| :------------------------------ | :-------------------------------------------------------------------- |
+| **ryunix-rsc-loader**           | Filtra bloques `// @server` / `// @client` según target web vs node   |
 | **ryunix-server-action-loader** | Registra acciones en servidor; proxies `createActionProxy` en cliente |
 
 ### CLI `ryunix`
 
-| Comando | Modo | Resumen |
-| :------ | :--- | :------ |
-| `dev` | `RYUNIX_MODE=development` | Webpack dev server, HMR, middleware SSR/API/actions |
-| `build` | `production` | Limpia salidas, compila, prerender SSG si hay rutas |
-| `start` | `production` | Sirve `.ryunix/static` (requiere build previo) |
-| `lint` | — | ESLint sobre `**/*.ryx` y configs |
-| `customHtml` | — | Copia plantilla HTML legacy a `public/` |
+| Comando      | Modo                      | Resumen                                             |
+| :----------- | :------------------------ | :-------------------------------------------------- |
+| `dev`        | `RYUNIX_MODE=development` | Webpack dev server, HMR, middleware SSR/API/actions |
+| `build`      | `production`              | Limpia salidas, compila, prerender SSG si hay rutas |
+| `start`      | `production`              | Sirve `.ryunix/static` (requiere build previo)      |
+| `lint`       | —                         | ESLint sobre `**/*.ryx` y configs                   |
+| `customHtml` | —                         | Copia plantilla HTML legacy a `public/`             |
 
 ---
 
@@ -102,14 +102,14 @@ packages/ryunix-presets/
 
 Cada **carpeta** es un segmento de URL. Archivos reservados por segmento:
 
-| Archivo | Rol |
-| :------ | :-- |
-| `index.ryx` | Página del segmento |
-| `layout.ryx` | Layout anidado (`children`) |
-| `loading.ryx` | UI de carga (Suspense) |
-| `error.ryx` | Error boundary de ruta (el plugin busca `error.ryx`, no `errors.ryx`) |
-| `*.server.ryx` / `*.client.ryx` | Convención de nombre para límite server/client |
-| `// @server` / `// @client` | Directivas en el fuente |
+| Archivo                         | Rol                                                                   |
+| :------------------------------ | :-------------------------------------------------------------------- |
+| `index.ryx`                     | Página del segmento                                                   |
+| `layout.ryx`                    | Layout anidado (`children`)                                           |
+| `loading.ryx`                   | UI de carga (Suspense)                                                |
+| `error.ryx`                     | Error boundary de ruta (el plugin busca `error.ryx`, no `errors.ryx`) |
+| `*.server.ryx` / `*.client.ryx` | Convención de nombre para límite server/client                        |
+| `// @server` / `// @client`     | Directivas en el fuente                                               |
 
 **Heurísticas server vs client:** `export async default` → servidor; hooks
 (`useStore`, `useEffect`, …) → cliente.
@@ -122,12 +122,12 @@ Cada **carpeta** es un segmento de URL. Archivos reservados por segmento:
 
 ### Salida de build (`.ryunix/` por defecto)
 
-| Ruta | Contenido |
-| :--- | :-------- |
-| `.ryunix/static/` | Bundle cliente, `index.html`, CSS, assets |
-| `.ryunix/server/app/` | Routers generados, bundle servidor |
-| `.ryunix/server/api/` | Handlers API compilados |
-| `.ryunix/cache/` | Cache Webpack, manifest SSG |
+| Ruta                  | Contenido                                 |
+| :-------------------- | :---------------------------------------- |
+| `.ryunix/static/`     | Bundle cliente, `index.html`, CSS, assets |
+| `.ryunix/server/app/` | Routers generados, bundle servidor        |
+| `.ryunix/server/api/` | Handlers API compilados                   |
+| `.ryunix/cache/`      | Cache Webpack, manifest SSG               |
 
 **No editar a mano:** `app-router.js`, `main.ryx` generados.
 
@@ -170,23 +170,23 @@ pnpm --filter @unsetsoft/ryunix-presets exec eslint webpack --max-warnings=0 --c
 
 ## Relación con otros paquetes
 
-| Paquete | Relación |
-| :------ | :------- |
-| `core` | Runtime empaquetado o external; global `Ryunix` en cliente |
-| `cra` | Instala `@unsetsoft/ryunix-presets` y scripts que invocan `ryunix` |
-| `ryunix-vscode` | ESLint del preset valida `.ryx`; no dependencia del preset |
+| Paquete         | Relación                                                           |
+| :-------------- | :----------------------------------------------------------------- |
+| `core`          | Runtime empaquetado o external; global `Ryunix` en cliente         |
+| `cra`           | Instala `@unsetsoft/ryunix-presets` y scripts que invocan `ryunix` |
+| `ryunix-vscode` | ESLint del preset valida `.ryx`; no dependencia del preset         |
 
 ---
 
 ## Documentación en `docs/es/ryunix-presets/`
 
-| Documento | Tema |
-| :-------- | :--- |
-| [cli-y-arranque.md](./cli-y-arranque.md) | Servidores dev/prod, variables de entorno |
-| [carga-de-configuracion.md](./carga-de-configuracion.md) | `ryunix.config.js` |
-| [enrutamiento-y-ssg.md](./enrutamiento-y-ssg.md) | App Router, SSG, SSR en dev |
-| [enrutador-api.md](./enrutador-api.md) | Rutas `app/api/` |
-| [loaders-webpack.md](./loaders-webpack.md) | RSC y Server Actions |
-| [errores-por-archivo.md](./errores-por-archivo.md) | `error.ryx` y overlay |
+| Documento                                                | Tema                                      |
+| :------------------------------------------------------- | :---------------------------------------- |
+| [cli-y-arranque.md](./cli-y-arranque.md)                 | Servidores dev/prod, variables de entorno |
+| [carga-de-configuracion.md](./carga-de-configuracion.md) | `ryunix.config.js`                        |
+| [enrutamiento-y-ssg.md](./enrutamiento-y-ssg.md)         | App Router, SSG, SSR en dev               |
+| [enrutador-api.md](./enrutador-api.md)                   | Rutas `app/api/`                          |
+| [loaders-webpack.md](./loaders-webpack.md)               | RSC y Server Actions                      |
+| [errores-por-archivo.md](./errores-por-archivo.md)       | `error.ryx` y overlay                     |
 
 Par en inglés: [docs/en/ryunix-presets/package-overview.md](../../en/ryunix-presets/package-overview.md).

@@ -108,7 +108,7 @@ SSG, and API compilation.
 
 | Document                                                              | Topic                                              |
 | :-------------------------------------------------------------------- | :------------------------------------------------- |
-| [package-overview.md](./ryunix-presets/package-overview.md)           | **Package entry** — CLI, plugins, app conventions       |
+| [package-overview.md](./ryunix-presets/package-overview.md)           | **Package entry** — CLI, plugins, app conventions  |
 | [cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md) | `ryunix dev`, `build`, `start`, dev & prod servers |
 | [configuration-loading.md](./ryunix-presets/configuration-loading.md) | `ryunix.config.js` discovery and normalization     |
 | [routing-and-ssg.md](./ryunix-presets/routing-and-ssg.md)             | `AppRouterPlugin`, SSG, dev SSR handler            |
@@ -124,7 +124,7 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 
 | Document                                               | Topic                                                    |
 | :----------------------------------------------------- | :------------------------------------------------------- |
-| [package-overview.md](./cra/package-overview.md)       | **Package entry** — templates, flags, create-app        |
+| [package-overview.md](./cra/package-overview.md)       | **Package entry** — templates, flags, create-app         |
 | [cli-and-helpers.md](./cra/cli-and-helpers.md)         | Interactive CLI, `create-app.js`, npm version resolution |
 | [template-generation.md](./cra/template-generation.md) | `ryunix-base`, `ryunix-tailwind`, copy mechanism         |
 
@@ -135,9 +135,9 @@ Official scaffolder (`npx @unsetsoft/cra`) and template projects.
 Chrome extension for inspecting component trees, props, and hooks in running
 Ryunix apps.
 
-| Document                                                     | Topic                                  |
-| :----------------------------------------------------------- | :------------------------------------- |
-| [package-overview.md](./ryunix-devtools/package-overview.md) | **Package entry** — MV3, hook, DevTools panel           |
+| Document                                                     | Topic                                         |
+| :----------------------------------------------------------- | :-------------------------------------------- |
+| [package-overview.md](./ryunix-devtools/package-overview.md) | **Package entry** — MV3, hook, DevTools panel |
 
 ---
 
@@ -146,9 +146,9 @@ Ryunix apps.
 Visual Studio Marketplace extension (`unsetsoft.ryunixjs`) for `.ryx` syntax
 highlighting and snippets.
 
-| Document                                                   | Topic                                          |
-| :--------------------------------------------------------- | :--------------------------------------------- |
-| [package-overview.md](./ryunix-vscode/package-overview.md) | **Package entry** — TypeScript, grammar, F5, vsix       |
+| Document                                                   | Topic                                             |
+| :--------------------------------------------------------- | :------------------------------------------------ |
+| [package-overview.md](./ryunix-vscode/package-overview.md) | **Package entry** — TypeScript, grammar, F5, vsix |
 
 ---
 

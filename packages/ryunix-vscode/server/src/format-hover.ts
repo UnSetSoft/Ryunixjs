@@ -66,17 +66,13 @@ export function importLineFromDefinition(
   }
 
   const defaultImport = lineText.match(
-    new RegExp(
-      `import\\s+${symbolName}\\s+from\\s*['"]([^'"]+)['"]`,
-    ),
+    new RegExp(`import\\s+${symbolName}\\s+from\\s*['"]([^'"]+)['"]`),
   )
   if (defaultImport) {
     return `import ${symbolName} from '${defaultImport[1]}'`
   }
 
-  const reExport = lineText.match(
-    /export\s+(?:function|const|class)\s+(\w+)/,
-  )
+  const reExport = lineText.match(/export\s+(?:function|const|class)\s+(\w+)/)
   if (reExport?.[1] === symbolName) {
     const rel = source.fileName.split(/[/\\]/).pop()
     return rel ? `Defined in \`${rel}\`` : undefined

@@ -12,12 +12,12 @@ import { getRyunixEntryFile, resolveRyunixPackageRoot } from './package-resolve'
 
 function tailwindClassHover(className: string): vscode.Hover {
   const md = new vscode.MarkdownString(
-        `**Clase CSS:** \`${className}\`\n\n` +
-          'Para documentación completa de utilidades Tailwind (orden, variantes, ' +
-          'conflictos), instala la extensión [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) ' +
-          'y usa un proyecto con `--tailwind` de CRA.\n\n' +
-          `[Buscar en Tailwind docs](https://tailwindcss.com/docs)`,
-      )
+    `**Clase CSS:** \`${className}\`\n\n` +
+      'Para documentación completa de utilidades Tailwind (orden, variantes, ' +
+      'conflictos), instala la extensión [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) ' +
+      'y usa un proyecto con `--tailwind` de CRA.\n\n' +
+      `[Buscar en Tailwind docs](https://tailwindcss.com/docs)`,
+  )
   md.isTrusted = true
   return new vscode.Hover(md)
 }

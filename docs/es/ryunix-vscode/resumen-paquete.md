@@ -13,12 +13,12 @@ compilador ni al LSP de TypeScript.
 
 ## Rol en el monorepo
 
-| Aspecto | Detalle |
-| :------ | :------ |
-| **Quién lo usa** | Desarrolladores que editan `.ryx` en VS Code |
+| Aspecto             | Detalle                                                                   |
+| :------------------ | :------------------------------------------------------------------------ |
+| **Quién lo usa**    | Desarrolladores que editan `.ryx` en VS Code                              |
 | **Runtime de apps** | Las apps usan `@unsetsoft/ryunixjs`; esta extensión solo afecta al editor |
-| **Integración CRA** | `--vscode` recomienda Ryunix + ESLint (+ Prettier con `--eslint`) |
-| **Publicación** | Marketplace / `.vsix`; excluida de `pnpm publish:all` npm |
+| **Integración CRA** | `--vscode` recomienda Ryunix + ESLint (+ Prettier con `--eslint`)         |
+| **Publicación**     | Marketplace / `.vsix`; excluida de `pnpm publish:all` npm                 |
 
 ```mermaid
 flowchart LR
@@ -81,30 +81,30 @@ El campo `"name": "ryunixjs"` es **intencional**: Marketplace ID =
 
 ### Qué aporta al editor
 
-| Capa | Implementación |
-| :--- | :------------- |
-| **Sintaxis** | Gramática TextMate `source.js.ryx` + lenguaje embebido `ryx-tags` para JSX |
-| **Snippets** | `snippets/javascript.code-snippets` (`ryx-page`, `ryx-layout`, …) |
-| **Completions** | `src/completion/provider.ts`: imports del core, keywords, sugerencias por nombre de archivo |
-| **Ir a definición** | Ctrl+clic en `useStore`, `Link`, … → `node_modules/@unsetsoft/ryunixjs` o `packages/core` (`src/navigation/`) |
-| **Hover** | Tooltip en exports Ryunix, etiquetas HTML (`<main>`) y clases en `className` |
-| **Tailwind** | Defaults para [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss); con `--tailwind` CRA también la recomienda |
+| Capa                | Implementación                                                                                                                                                       |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sintaxis**        | Gramática TextMate `source.js.ryx` + lenguaje embebido `ryx-tags` para JSX                                                                                           |
+| **Snippets**        | `snippets/javascript.code-snippets` (`ryx-page`, `ryx-layout`, …)                                                                                                    |
+| **Completions**     | `src/completion/provider.ts`: imports del core, keywords, sugerencias por nombre de archivo                                                                          |
+| **Ir a definición** | Ctrl+clic en `useStore`, `Link`, … → `node_modules/@unsetsoft/ryunixjs` o `packages/core` (`src/navigation/`)                                                        |
+| **Hover**           | Tooltip en exports Ryunix, etiquetas HTML (`<main>`) y clases en `className`                                                                                         |
+| **Tailwind**        | Defaults para [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss); con `--tailwind` CRA también la recomienda |
 
 ### Language Server (LSP) — v1.1.0+
 
 Con `"ryunix.languageServer.enable": true` (por defecto) se inicia un **servidor de lenguaje**
 que usa el compilador **TypeScript** sobre tus `.ryx` (como TSX con `Ryunix.createElement`):
 
-| Capacidad LSP | Atajo / uso |
-| :------------ | :---------- |
-| Ir a definición | Ctrl+clic en símbolos, imports, tipos |
-| Buscar referencias | Panel / comando References |
-| Hover con tipos | Pasar el mouse |
-| Diagnósticos | Subrayados de error/aviso en el editor |
-| Renombrar símbolo | F2 |
-| Símbolos del documento | Outline / breadcrumbs |
-| Autocompletado | Ctrl+Espacio (semántico TS) |
-| Ayuda de firma | Al escribir `(` en llamadas |
+| Capacidad LSP          | Atajo / uso                            |
+| :--------------------- | :------------------------------------- |
+| Ir a definición        | Ctrl+clic en símbolos, imports, tipos  |
+| Buscar referencias     | Panel / comando References             |
+| Hover con tipos        | Pasar el mouse                         |
+| Diagnósticos           | Subrayados de error/aviso en el editor |
+| Renombrar símbolo      | F2                                     |
+| Símbolos del documento | Outline / breadcrumbs                  |
+| Autocompletado         | Ctrl+Espacio (semántico TS)            |
+| Ayuda de firma         | Al escribir `(` en llamadas            |
 
 Requisitos en el proyecto: `pnpm install` y `jsconfig.json` (las plantillas CRA ya lo incluyen).
 
@@ -124,12 +124,12 @@ preset también lo contempla en build).
 
 ## Alcance explícito
 
-| Soportado | No soportado (usar otra herramienta) |
-| :-------- | :----------------------------------- |
+| Soportado                               | No soportado (usar otra herramienta)             |
+| :-------------------------------------- | :----------------------------------------------- |
 | Resaltado `.ryx`, snippets, completions | **MDX** — validación en build (`@mdx-js/loader`) |
-| Integración ESLint vía workspace (CRA) | **TypeScript** dentro de `.ryx` |
-| Emmet en modo `ryunix` | **Formatter empaquetado** — Prettier en proyecto |
-| Tests de regresión de gramática | **LSP** — ver `ROADMAP.md` |
+| Integración ESLint vía workspace (CRA)  | **TypeScript** dentro de `.ryx`                  |
+| Emmet en modo `ryunix`                  | **Formatter empaquetado** — Prettier en proyecto |
+| Tests de regresión de gramática         | **LSP** — ver `ROADMAP.md`                       |
 
 Rutas API en plantillas CRA: `router.js`; snippets para `router.ryx` son
 opcionales.
@@ -170,22 +170,22 @@ Tras cambiar `src/` o gramática: recompilar o recargar la ventana del host.
 
 ## Relación con otros paquetes
 
-| Paquete | Relación |
-| :------ | :------- |
-| `core` | Lista de exports para completions |
-| `cra` | `--vscode` escribe settings y extensiones recomendadas |
-| `ryunix-presets` | ESLint `ryunix` language; convenciones `app/*.ryx` |
-| `ryunix-devtools` | Depuración en navegador, independiente del editor |
+| Paquete           | Relación                                               |
+| :---------------- | :----------------------------------------------------- |
+| `core`            | Lista de exports para completions                      |
+| `cra`             | `--vscode` escribe settings y extensiones recomendadas |
+| `ryunix-presets`  | ESLint `ryunix` language; convenciones `app/*.ryx`     |
+| `ryunix-devtools` | Depuración en navegador, independiente del editor      |
 
 ---
 
 ## Documentación relacionada
 
-| Tema | Documento |
-| :--- | :-------- |
-| Flag `--vscode` en CRA | [../cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md) |
-| Convenciones `app/` | [../ryunix-presets/enrutamiento-y-ssg.md](../ryunix-presets/enrutamiento-y-ssg.md) |
-| Roadmap LSP | `packages/ryunix-vscode/ROADMAP.md` |
+| Tema                   | Documento                                                                          |
+| :--------------------- | :--------------------------------------------------------------------------------- |
+| Flag `--vscode` en CRA | [../cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md)                             |
+| Convenciones `app/`    | [../ryunix-presets/enrutamiento-y-ssg.md](../ryunix-presets/enrutamiento-y-ssg.md) |
+| Roadmap LSP            | `packages/ryunix-vscode/ROADMAP.md`                                                |
 
 Par en inglés: [docs/en/ryunix-vscode/package-overview.md](../../en/ryunix-vscode/package-overview.md).
 
