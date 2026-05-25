@@ -4,27 +4,35 @@ const assert = require('assert')
 const path = require('path')
 const { resolveProjectRoot } = require('../server/out/ts-program')
 
-const pkgRoot = path.resolve(__dirname, '..')
-const ryunixDoc = path.resolve(pkgRoot, '../../../ryunix-doc')
-const monoRoot = path.resolve(pkgRoot, '../../..')
+const fixtures = path.join(__dirname, 'fixtures', 'resolve-root')
 
-assert.ok(
-  require('fs').existsSync(path.join(ryunixDoc, 'ryunix.config.js')),
-  'ryunix-doc fixture missing',
+const withJsconfig = path.join(fixtures, 'with-jsconfig')
+const withRyunixConfig = path.join(fixtures, 'with-ryunix-config')
+const workspace = path.join(fixtures, 'workspace')
+const nestedApp = path.join(workspace, 'apps', 'docs')
+
+assert.strictEqual(
+  resolveProjectRoot(withJsconfig),
+  withJsconfig,
+  'jsconfig at project root',
 )
 
-const docRoot = resolveProjectRoot(ryunixDoc)
 assert.strictEqual(
-  docRoot,
-  ryunixDoc,
-  `ryunix-doc: expected project root, got ${docRoot}`,
+  resolveProjectRoot(withRyunixConfig),
+  withRyunixConfig,
+  'ryunix.config.js must win over src/app heuristic',
 )
 
-const fromMono = resolveProjectRoot(monoRoot)
 assert.strictEqual(
-  fromMono,
-  ryunixDoc,
-  `monorepo ryx/: expected ryunix-doc, got ${fromMono}`,
+  resolveProjectRoot(workspace),
+  nestedApp,
+  'workspace should resolve shallowest ryunix.config.js',
+)
+
+assert.strictEqual(
+  resolveProjectRoot(path.join(withRyunixConfig, 'src', 'app')),
+  withRyunixConfig,
+  'opening src/app should still use project root',
 )
 
 console.log('resolve-root.test.cjs: OK')
