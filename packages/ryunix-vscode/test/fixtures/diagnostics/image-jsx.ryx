@@ -1,0 +1,9 @@
+import Image from '@/components/ui/Image.ryx'
+
+export default function Page() {
+  return (
+    <main>
+      <Image src="/logo.svg" alt="Logo" />
+    </main>
+  )
+}

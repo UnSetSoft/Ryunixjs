@@ -1,0 +1,9 @@
+import logo from '@/resources/logo.svg'
+
+export default function Page() {
+  return (
+    <main>
+      <img src={logo} alt="Logo" />
+    </main>
+  )
+}

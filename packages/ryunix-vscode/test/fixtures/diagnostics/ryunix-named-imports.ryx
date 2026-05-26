@@ -1,0 +1,14 @@
+import { useRouter, useStore, Link } from '@unsetsoft/ryunixjs'
+
+export default function Page() {
+  const router = useRouter()
+  const [count, setCount] = useStore(0)
+
+  return (
+    <main>
+      <p>{router.location}</p>
+      <p>{count}</p>
+      <Link to="/">Home</Link>
+    </main>
+  )
+}
