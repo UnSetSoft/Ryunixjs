@@ -20,8 +20,15 @@ export { Priority } from './priority.js'
 export { profiler, useProfiler, withProfiler } from './profiler.js'
 export { forwardRef } from './forwardRef.js'
 export { createPortal } from './portal.js'
-export { ServerBoundary } from './serverBoundary.js'
+export { ServerBoundary, HydrationBoundary } from './serverBoundary.js'
 export { ErrorBoundary } from './errorBoundary.js'
+export {
+  logHydrationInfo,
+  logHydrationRecoverable,
+  logHydrationBoundaryMismatch,
+  logHydrationBoundaryRecovery,
+  logHydrationFatal,
+} from './hydrationLog.js'
 export { getState } from '../utils/index.js'
 export { createActionProxy } from './serverActions.js'
 export { RyunixDevOverlay } from './devOverlay.js'

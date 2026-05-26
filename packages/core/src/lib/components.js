@@ -8,6 +8,19 @@ import {
 } from '../utils/index.js'
 import { createElement } from './createElement.js'
 import { createContext } from './hooks.js'
+import {
+  logHydrationBoundaryMismatch,
+  logHydrationFatal,
+  logHydrationMismatch,
+  logHydrationRecoverable,
+} from './hydrationLog.js'
+import {
+  enqueueScopedRecovery,
+  findNearestHydrationBoundary,
+  getBoundaryDom,
+  getHydrationPolicy,
+  skipHydrationSubtree,
+} from './hydration.js'
 const updateFunctionComponent = (fiber) => {
   const state = getState()
   state.wipFiber = fiber
@@ -37,6 +50,14 @@ const updateFunctionComponent = (fiber) => {
   }
   reconcileChildren(fiber, children)
 }
+const isUnderClientOnlyBoundary = (fiber) => {
+  let current = fiber?.parent || null
+  while (current) {
+    if (current._hydrateClientOnly) return true
+    current = current.parent || null
+  }
+  return false
+}
 const updateHostComponent = (fiber) => {
   const state = getState()
   if (fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
@@ -49,6 +70,11 @@ const updateHostComponent = (fiber) => {
     fiber.type === Symbol.for('ryunix.portal')
   if (state.isHydrating && isPassthrough) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
+  } else if (state.isHydrating && isUnderClientOnlyBoundary(fiber)) {
+    if (!fiber.dom) {
+      fiber.dom = createDom(fiber)
+      fiber.effectTag = EFFECT_TAGS.PLACEMENT
+    }
   } else if (!fiber.dom) {
     if (state.isHydrating && state.hydrateCursor) {
       const domNode = state.hydrateCursor
@@ -61,18 +87,50 @@ const updateHostComponent = (fiber) => {
       if (isText || isElement) {
         fiber.dom = domNode
         fiber.effectTag = EFFECT_TAGS.HYDRATE
+        if (
+          isText &&
+          fiber.props?.nodeValue != null &&
+          domNode.nodeValue !== String(fiber.props.nodeValue)
+        ) {
+          domNode.nodeValue = String(fiber.props.nodeValue)
+          logHydrationRecoverable('text')
+        }
+        if (isElement && domNode.hasAttribute('data-ryunix-hydrate-boundary')) {
+          fiber._hydrateClientOnly = true
+        }
         state.hydrateCursor = nextValidSibling(domNode.firstChild)
       } else {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn(
-            `[Hydration] Mismatch at ${getTypeLabel(fiber.type)}. Expected ${domNode.nodeType === 1 ? domNode.tagName : 'text'} but got ${String(fiber.type)}. Falling back to CSR.`,
+        const policy = getHydrationPolicy()
+        const detail = `Mismatch at ${getTypeLabel(fiber.type)}. Expected ${domNode.nodeType === 1 ? domNode.tagName : 'text'} but got ${String(fiber.type)}.`
+        const boundaryFiber = findNearestHydrationBoundary(fiber)
+        const boundaryDom = boundaryFiber ? getBoundaryDom(boundaryFiber) : null
+        if (policy.recover === 'boundary' && boundaryFiber && boundaryDom) {
+          logHydrationBoundaryMismatch(detail)
+          enqueueScopedRecovery(
+            boundaryFiber,
+            boundaryDom,
+            state.hydrateCursor ?? null,
           )
+          state.hydrateCursor = skipHydrationSubtree(
+            state.hydrateCursor ?? null,
+            boundaryDom,
+          )
+          fiber.dom = createDom(fiber)
+          fiber.effectTag = EFFECT_TAGS.PLACEMENT
+        } else if (policy.recover === 'none') {
+          logHydrationFatal(detail)
+          state.isHydrating = false
+          state.hydrateCursor = null
+          fiber.dom = createDom(fiber)
+          fiber.effectTag = EFFECT_TAGS.PLACEMENT
+        } else {
+          logHydrationMismatch(detail)
+          state.isHydrating = false
+          state.hydrationFailed = true
+          state.hydrateCursor = null
+          fiber.dom = createDom(fiber)
+          fiber.effectTag = EFFECT_TAGS.PLACEMENT
         }
-        state.isHydrating = false
-        state.hydrationFailed = true
-        state.hydrateCursor = null
-        fiber.dom = createDom(fiber)
-        fiber.effectTag = EFFECT_TAGS.PLACEMENT
       }
     } else {
       fiber.dom = createDom(fiber)

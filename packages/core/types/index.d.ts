@@ -51,7 +51,9 @@ export function cloneElement<P extends Record<string, unknown>>(
   ...children: RyunixNode[]
 ): RyunixElement<P>
 
-export function isValidElement(object: unknown): object is RyunixElement
+export function isValidElement(
+  object: unknown,
+): object is RyunixElement
 
 // ---------------------------------------------------------------------------
 // Client rendering
@@ -171,7 +173,10 @@ export function useLayoutEffect(
 
 export function useRef<T>(initialValue: T): { current: T }
 
-export function useMemo<T>(compute: () => T, deps?: readonly unknown[]): T
+export function useMemo<T>(
+  compute: () => T,
+  deps?: readonly unknown[],
+): T
 
 export function useCallback<T extends (...args: never[]) => unknown>(
   callback: T,
@@ -274,7 +279,8 @@ export function usePathname(): string
 
 export function useSearchParams(): URLSearchParams
 
-export interface RyunixLinkProps extends Record<string, unknown> {
+export interface RyunixLinkProps
+  extends Record<string, unknown> {
   to: string
   prefetch?: boolean
   className?: string
@@ -340,6 +346,17 @@ export function ServerBoundary(props: {
   children?: RyunixNode
   id?: string
 }): RyunixNode
+
+export function HydrationBoundary(props: {
+  children?: RyunixNode
+  id?: string
+}): RyunixNode
+
+export function logHydrationInfo(message: string): void
+export function logHydrationRecoverable(detail: string): void
+export function logHydrationBoundaryMismatch(detail: string): void
+export function logHydrationBoundaryRecovery(): void
+export function logHydrationFatal(reason: string): void
 
 export function Image(
   props: { src: string } & Record<string, unknown>,

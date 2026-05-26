@@ -66,13 +66,28 @@ export interface RyunixFiber {
   _isMemo?: boolean
   _isLazy?: boolean
   _isForwardRef?: boolean
-  _arePropsEqual?: (
-    prev: Record<string, unknown>,
-    next: Record<string, unknown>,
-  ) => boolean
+  _arePropsEqual?: (prev: Record<string, unknown>, next: Record<string, unknown>) => boolean
   containerInfo?: Element | DocumentFragment
   _isPortal?: boolean
   __devtoolsId?: string
+  _hydrateClientOnly?: boolean
+}
+
+export type HydrationRecoverMode = 'none' | 'boundary' | 'root'
+
+export type HydrationBoundariesMode = 'route' | 'server-only' | 'all-layouts'
+
+export interface HydrationPolicy {
+  recover: HydrationRecoverMode
+  boundaries: HydrationBoundariesMode
+  strict: boolean
+}
+
+export interface ScopedRecovery {
+  boundaryFiber: RyunixFiber
+  boundaryDom: Element
+  resumeCursor: ChildNode | null
+  element: RyunixNode
 }
 
 export interface RyunixRootFiber extends RyunixFiber {
@@ -118,7 +133,10 @@ export interface RyunixRouterContextValue {
   route: RyunixRoute | null
 }
 
-export type ScheduleWorkFn = (root: RyunixRootFiber, priority?: number) => void
+export type ScheduleWorkFn = (
+  root: RyunixRootFiber,
+  priority?: number,
+) => void
 
 export interface IdleDeadline {
   timeRemaining: () => number
@@ -141,6 +159,15 @@ export interface RyunixRenderState {
   ssrContexts?: Record<string | symbol, unknown>
   isSuspenseBackground?: boolean
   hydrationFailed?: boolean
+  hydrationRecover?: boolean
+  hydrationPolicy?: HydrationPolicy
+  scopedRecoveryQueue?: ScopedRecovery[]
+  hydrationMismatchReported?: boolean
+  hydrationBoundaryMismatchReported?: boolean
+  hydrationFailureReported?: boolean
+  hydrationUnmatchedReported?: boolean
+  hydrationRecoveryReported?: boolean
+  hydrationBoundaryRecoveryReported?: boolean
 }
 
 export interface RyunixDomElement extends HTMLElement {

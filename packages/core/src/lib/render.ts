@@ -1,7 +1,8 @@
 import { clearContainer } from './dom.js'
 import { getState } from '../utils/index.js'
 import { scheduleWork } from './workers.js'
-import { createElement } from './createElement.js'
+import { resetHydrationLogFlags } from './hydrationLog.js'
+import { getHydrationPolicy } from './hydration.js'
 
 /**
  * @typedef {import('./createElement.js').RyunixNode} RyunixNode
@@ -20,19 +21,17 @@ const render = (element, container) => {
   const state = getState()
 
   // Clear container before CSR render to avoid duplication
-  clearContainer(/** @type {HTMLElement} */ container)
+  clearContainer(/** @type {HTMLElement} */ (container))
 
   /** @type {RyunixRootFiber} */
   const root = {
     dom: container,
     props: {
-      children: [
-        /** @type {import('../types/internal.js').RyunixNode} */ element,
-      ],
+      children: [/** @type {import('../types/internal.js').RyunixNode} */ (element)],
     },
     alternate: state.currentRoot,
     isHydrating: false,
-    hydrateCursor: /** @type {ChildNode | null} */ null,
+    hydrateCursor: /** @type {ChildNode | null} */ (null),
   }
 
   scheduleWork(root)
@@ -50,7 +49,7 @@ const nextValidSibling = (node) => {
     ((next.nodeType === 3 && !next.nodeValue.trim()) ||
       next.nodeType === 8 ||
       (next.nodeType === 1 &&
-        /** @type {Element} */ next.hasAttribute('data-ryunix-ssr')))
+        /** @type {Element} */ (next).hasAttribute('data-ryunix-ssr')))
   ) {
     next = next.nextSibling
   }
@@ -74,9 +73,7 @@ const hydrate = (element, container) => {
   const root = {
     dom: container,
     props: {
-      children: [
-        /** @type {import('../types/internal.js').RyunixNode} */ element,
-      ],
+      children: [/** @type {import('../types/internal.js').RyunixNode} */ (element)],
     },
     alternate: state.currentRoot,
     isHydrating: true,
@@ -97,18 +94,20 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
 
+  resetHydrationLogFlags()
+  state.hydrationPolicy = getHydrationPolicy()
+  state.scopedRecoveryQueue = []
+  state.hydrationRecover = false
+
   // Reset any stale hydration flags
   state.isHydrating = false
   state.hydrationFailed = false
 
   // Auto-detect SSR based on child nodes - no need to manually set process.env.RYUNIX_SSR
-  const hasChildNodes =
-    state.containerRoot && state.containerRoot.hasChildNodes()
+  const hasChildNodes = state.containerRoot && state.containerRoot.hasChildNodes()
 
   if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-    console.log(
-      `[Ryunix Debug] init: hasChildNodes=${hasChildNodes}, has SSR content detected.`,
-    )
+    console.log(`[Ryunix Debug] init: hasChildNodes=${hasChildNodes}, has SSR content detected.`);
   }
 
   // Auto-detect: if there's existing content, try to hydrate (SSR)
@@ -116,18 +115,14 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   const ssrEnabled = process.env.RYUNIX_SSR !== 'false'
   if (hasChildNodes && ssrEnabled) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-      console.log(
-        `[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`,
-      )
+      console.log(`[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`);
     }
     const res = hydrate(MainElement, state.containerRoot)
     return res
   }
 
   if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-    console.log(
-      `[Ryunix Debug] init: No SSR content or SSR disabled. Starting normal render on #${root}`,
-    )
+    console.log(`[Ryunix Debug] init: No SSR content or SSR disabled. Starting normal render on #${root}`);
   }
   const res = render(MainElement, state.containerRoot)
   return res
@@ -141,8 +136,8 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
  */
 const safeRender = (component, props, onError) => {
   try {
-    return /** @type {RyunixNode} */ /** @type {(props: Record<string, unknown>) => RyunixNode} */ component(
-      props,
+    return /** @type {RyunixNode} */ (
+      /** @type {(props: Record<string, unknown>) => RyunixNode} */ (component)(props)
     )
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
@@ -153,4 +148,16 @@ const safeRender = (component, props, onError) => {
   }
 }
 
-export { init, render, safeRender, hydrate, clearContainer }
+export {
+  init,
+  render,
+  safeRender,
+  hydrate,
+  clearContainer,
+}
+export {
+  renderSubtree,
+  recoverScopedHydrationFailures,
+  recoverHydrationFailureIfNeeded,
+  runHydrationRecovery,
+} from './hydrationRecover.js'
