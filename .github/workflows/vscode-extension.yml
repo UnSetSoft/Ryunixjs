@@ -108,7 +108,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
 
       - name: Install dependencies
         run: pnpm install --filter ./packages/ryunix-vscode...
@@ -130,4 +130,14 @@ jobs:
           fi
           VSIX=$(ls -1 *.vsix | head -1)
           echo "Publishing $VSIX to Visual Studio Marketplace"
-          pnpm exec vsce publish -i "$VSIX" --no-dependencies
+          for i in 1 2 3 4; do
+            pnpm exec vsce publish -i "$VSIX" --no-dependencies && break || {
+              if [ $i -lt 4 ]; then
+                echo "Publish failed, retrying in 10 seconds..."
+                sleep 10
+              else
+                echo "Publish failed after 4 attempts."
+                exit 1
+              fi
+            }
+          done
