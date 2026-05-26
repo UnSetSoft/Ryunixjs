@@ -37,7 +37,6 @@ jobs:
     timeout-minutes: 35
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout
@@ -52,7 +51,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: pnpm install
@@ -71,11 +69,11 @@ jobs:
 
       - name: Publish dry-run (canary)
         if: github.event_name == 'workflow_dispatch' && inputs.dry_run && inputs.channel == 'canary'
-        run: pnpm run publish:canary -- --dry-run
+        run: pnpm -r --filter "!./test/**" --filter "!@unsetsoft/ryunix-devtools" --filter "!ryunixjs" publish --no-git-checks --access public --tag canary --dry-run
 
       - name: Publish dry-run (latest)
         if: github.event_name == 'workflow_dispatch' && inputs.dry_run && inputs.channel == 'latest'
-        run: pnpm run publish:all -- --dry-run
+        run: pnpm -r --filter "!./test/**" --filter "!@unsetsoft/ryunix-devtools" --filter "!ryunixjs" publish --access public --dry-run
 
   publish:
     name: Publish to npm (OIDC)
