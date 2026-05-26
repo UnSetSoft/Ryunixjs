@@ -2,6 +2,11 @@
   "name": "@unsetsoft/ryunixjs",
   "version": "1.2.5-canary.9",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UnSetSoft/Ryunixjs.git",
+    "directory": "packages/core"
+  },
   "main": "./dist/Ryunix.umd.js",
   "module": "./dist/Ryunix.esm.js",
   "exports": {
