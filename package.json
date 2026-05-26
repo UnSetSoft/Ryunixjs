@@ -32,7 +32,7 @@
     "cra:release": "pnpm --parallel --filter @unsetsoft/cra run release",
     "cra:nightly": "pnpm --parallel --filter @unsetsoft/cra run nightly:release",
     "publish:all": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" --filter \"!ryunixjs\" publish --provenance --access public",
-    "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" --filter \"!ryunixjs\" publish --provenance --access public --tag canary",
+    "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" --filter \"!ryunixjs\" publish --no-git-checks --provenance --access public --tag canary",
     "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
     "setup:web": "node setup-test-webpack.mjs",
