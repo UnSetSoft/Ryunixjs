@@ -1,0 +1,26 @@
+{
+  "Ryunix Link (inline JSX)": {
+    "prefix": "link",
+    "body": ["<Link to=\"${1:/}\">${2:Home}</Link>"],
+    "description": "Inline Link component (import Link separately with ryx-import)",
+  },
+  "Ryunix Link (deprecated alias)": {
+    "prefix": "ryx-link",
+    "body": ["<Link to=\"${1:/}\">${2:Home}</Link>"],
+    "description": "Deprecated alias for link — use ryx-import + link snippet",
+  },
+  "Ryunix NavLink (inline JSX)": {
+    "prefix": "navlink",
+    "body": [
+      "<NavLink to=\"${1:/}\" className=\"${2:}\" exact={${3:false}}>${4:Link}</NavLink>",
+    ],
+    "description": "Inline NavLink (import NavLink separately with ryx-import)",
+  },
+  "Ryunix NavLink (deprecated alias)": {
+    "prefix": "ryx-navlink",
+    "body": [
+      "<NavLink to=\"${1:/}\" className=\"${2:}\" exact={${3:false}}>${4:Link}</NavLink>",
+    ],
+    "description": "Deprecated alias for navlink — use ryx-import + navlink snippet",
+  },
+}

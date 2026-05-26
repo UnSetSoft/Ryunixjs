@@ -1,0 +1,9 @@
+import Icon from '@/components/ui/Icon'
+
+export default function Page() {
+  return (
+    <main>
+      <Icon name="home" />
+    </main>
+  )
+}

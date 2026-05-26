@@ -1,0 +1,27 @@
+{
+  "Ryunix API GET handler": {
+    "prefix": "ryx-api-get",
+    "body": [
+      "export const GET = async (req) => {",
+      "\treturn new Response(JSON.stringify({ ${1:message}: '${2:Hello}' } }), {",
+      "\t\tstatus: 200,",
+      "\t\theaders: { 'Content-Type': 'application/json' },",
+      "\t})",
+      "}",
+    ],
+    "description": "API route GET handler for router.js",
+  },
+  "Ryunix API POST handler": {
+    "prefix": "ryx-api-post",
+    "body": [
+      "export const POST = async (req) => {",
+      "\tconst body = await req.json()",
+      "\treturn new Response(JSON.stringify({ ${1:ok}: true }), {",
+      "\t\tstatus: 200,",
+      "\t\theaders: { 'Content-Type': 'application/json' },",
+      "\t})",
+      "}",
+    ],
+    "description": "API route POST handler for router.js",
+  },
+}

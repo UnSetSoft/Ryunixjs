@@ -1,0 +1,19 @@
+{
+  "Import from Ryunix core": {
+    "prefix": "ryx-import",
+    "body": ["import { ${1:useStore} } from '@unsetsoft/ryunixjs'"],
+    "description": "Import hooks or components from @unsetsoft/ryunixjs",
+  },
+  "Ryunix Metatags export": {
+    "prefix": "ryx-metatags",
+    "body": [
+      "export const Metatags = {",
+      "\ttitle: \"${1:Page title}\",",
+      "\tdescription: '${2:Description}',",
+      "\tviewport: 'width=device-width, initial-scale=1.0',",
+      "\tcharset: 'UTF-8',",
+      "}",
+    ],
+    "description": "SEO Metatags object for a route",
+  },
+}
