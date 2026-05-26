@@ -11,6 +11,7 @@ export default [
       '**/.turbo/**',
       '**/.ryunix/**',
       '**/dist/**',
+      '**/out/**',
       'test/**',
       '_ci/**',
       'packages/ryunix-vscode/syntaxes/**',
