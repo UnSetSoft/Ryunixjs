@@ -47,7 +47,7 @@
     "@babel/core": "7.28.5",
     "@babel/eslint-parser": "7.28.5",
     "@babel/preset-env": "7.28.5",
-    "@babel/preset-react": "7.28.5",
+    "@babel/preset-react": "7.29.7",
     "@eslint/compat": "2.0.0",
     "@kagarisoft/gmvu-cli": "1.0.5",
     "@rollup/plugin-terser": "1.0.0",
