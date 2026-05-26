@@ -14,7 +14,7 @@ import type { RyunixNode, RyunixRootFiber } from '../types/internal.js'
  * @param {Element | DocumentFragment} container
  */
 export const renderSubtree = (element, container) => {
-  clearContainer(/** @type {HTMLElement} */ (container))
+  clearContainer(/** @type {HTMLElement} */ container)
 
   /** @type {RyunixRootFiber} */
   const root = {
@@ -54,7 +54,7 @@ export const recoverHydrationFailureIfNeeded = () => {
   state.hydrationFailed = false
   logHydrationFailure('')
   logHydrationRecovery()
-  renderSubtree(/** @type {RyunixNode} */ (element), container)
+  renderSubtree(/** @type {RyunixNode} */ element, container)
 }
 
 export const runHydrationRecovery = () => {

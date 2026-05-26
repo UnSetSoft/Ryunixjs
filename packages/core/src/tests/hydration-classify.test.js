@@ -29,4 +29,3 @@ describe('hydration classification', () => {
     expect(Boolean(getState().hydrationRecover)).toBe(false)
   })
 })
-

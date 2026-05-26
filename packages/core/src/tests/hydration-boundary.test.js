@@ -25,4 +25,3 @@ describe('hydration boundary recovery', () => {
     expect(skipHydrationSubtree(inside, boundary)).toBe(sibling)
   })
 })
-

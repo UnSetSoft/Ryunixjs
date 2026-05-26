@@ -33,7 +33,10 @@ export const findNearestHydrationBoundary = (
     const props = current.props
     if (
       props &&
-      Object.prototype.hasOwnProperty.call(props, 'data-ryunix-hydrate-boundary')
+      Object.prototype.hasOwnProperty.call(
+        props,
+        'data-ryunix-hydrate-boundary',
+      )
     ) {
       return current
     }
@@ -106,4 +109,3 @@ export const enqueueScopedRecovery = (
   })
   state.scopedRecoveryQueue = queue
 }
-

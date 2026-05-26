@@ -34,22 +34,22 @@ function performUnitOfWork(fiber) {
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('[Ryunix ErrorBoundary] Caught error during render:', error)
-      
+
       try {
         // Attempt to attach original JSX source map for DevOverlay lookup
-        const src = fiber.props && fiber.props.__source;
+        const src = fiber.props && fiber.props.__source
         if (src && error && typeof error === 'object') {
-          error.__ryunix_source = src;
+          error.__ryunix_source = src
         }
-        
-        let targetFiber = fiber;
+
+        let targetFiber = fiber
         while (!error.__ryunix_source && targetFiber) {
-           if (targetFiber.props && targetFiber.props.__source) {
-             error.__ryunix_source = targetFiber.props.__source;
-           }
-           targetFiber = targetFiber.parent;
+          if (targetFiber.props && targetFiber.props.__source) {
+            error.__ryunix_source = targetFiber.props.__source
+          }
+          targetFiber = targetFiber.parent
         }
-      } catch(e) {}
+      } catch (e) {}
     }
 
     // Traverse upwards to find nearest ErrorBoundary
@@ -59,8 +59,8 @@ function performUnitOfWork(fiber) {
     while (boundaryFiber) {
       if (
         boundaryFiber.type &&
-        /** @type {{ ryunix_type?: string }} */ (boundaryFiber.type).ryunix_type ===
-          'RYUNIX_ERROR_BOUNDARY'
+        /** @type {{ ryunix_type?: string }} */ boundaryFiber.type
+          .ryunix_type === 'RYUNIX_ERROR_BOUNDARY'
       ) {
         foundBoundary = true
         break
@@ -99,7 +99,7 @@ function performUnitOfWork(fiber) {
 
   let nextFiber = fiber
   while (nextFiber) {
-    // If we just finished a Host node during hydration, 
+    // If we just finished a Host node during hydration,
     // the next fiber (sibling) should start at the next DOM sibling.
     if (state.isHydrating && nextFiber.dom) {
       state.hydrateCursor = nextValidSibling(nextFiber.dom.nextSibling)
@@ -114,7 +114,6 @@ function performUnitOfWork(fiber) {
     // the loop will handle the parent's sibling or end.
   }
 }
-
 
 /**
  * @param {{ timeRemaining: () => number, didTimeout?: boolean }} deadline
@@ -156,8 +155,6 @@ const workLoop = (deadline) => {
   }
 }
 
-
-
 /**
  * @param {RyunixRootFiber} root
  * @param {number} [priority]
@@ -196,7 +193,6 @@ const scheduleWork = (root, priority = getCurrentPriority()) => {
     }
   }
 }
-
 
 setScheduleWork(scheduleWork)
 

@@ -60,7 +60,10 @@ export const logHydrationBoundaryMismatch = (detail) => {
  */
 export const logHydrationRecoverable = (detail) => {
   if (!shouldReportStrict()) return
-  emit('warn', `Recovered a hydration mismatch (${detail}) without root fallback.`)
+  emit(
+    'warn',
+    `Recovered a hydration mismatch (${detail}) without root fallback.`,
+  )
 }
 
 /**
@@ -79,10 +82,7 @@ export const logHydrationFailure = (reason = '') => {
       : 'Hydration could not attach to the server HTML. '
 
   const level = process.env.NODE_ENV === 'production' ? 'error' : 'warn'
-  emit(
-    level,
-    `${detail}Clearing #__ryunix and remounting on the client.`,
-  )
+  emit(level, `${detail}Clearing #__ryunix and remounting on the client.`)
 }
 
 /**
