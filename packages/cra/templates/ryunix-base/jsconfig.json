@@ -7,12 +7,15 @@
     "jsxFactory": "Ryunix.createElement",
     "jsxFragmentFactory": "Ryunix.Fragment",
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "skipLibCheck": true,
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@unsetsoft/ryunixjs": ["node_modules/@unsetsoft/ryunixjs"]
+      "@unsetsoft/ryunixjs": [
+        "node_modules/@unsetsoft/ryunixjs/types/index.d.ts"
+      ],
+      "@/*": ["./*"]
     }
   },
   "include": ["**/*.ryx", "**/*.js", "app/**/*"],
