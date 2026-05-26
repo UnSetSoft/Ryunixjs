@@ -12,7 +12,9 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@unsetsoft/ryunixjs": ["node_modules/@unsetsoft/ryunixjs/types/index.d.ts"],
+      "@unsetsoft/ryunixjs": [
+        "node_modules/@unsetsoft/ryunixjs/types/index.d.ts"
+      ],
       "@/*": ["./*"]
     }
   },
