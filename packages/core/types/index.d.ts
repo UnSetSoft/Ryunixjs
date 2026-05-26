@@ -341,6 +341,17 @@ export function ServerBoundary(props: {
   id?: string
 }): RyunixNode
 
+export function HydrationBoundary(props: {
+  children?: RyunixNode
+  id?: string
+}): RyunixNode
+
+export function logHydrationInfo(message: string): void
+export function logHydrationRecoverable(detail: string): void
+export function logHydrationBoundaryMismatch(detail: string): void
+export function logHydrationBoundaryRecovery(): void
+export function logHydrationFatal(reason: string): void
+
 export function Image(
   props: { src: string } & Record<string, unknown>,
 ): RyunixElement

@@ -129,6 +129,11 @@ const DEFAULT_SSG_SITEMAP_SETTINGS = {
 const defaultSettings = {
   // Modern / First-Class Configuration
   ssr: getConfigValue('ssr', getConfigValue('experimental.ssr', true)),
+  hydration: {
+    recover: getConfigValue('hydration.recover', 'boundary'),
+    boundaries: getConfigValue('hydration.boundaries', 'route'),
+    strict: getConfigValue('hydration.strict', false),
+  },
   mdx: getConfigValue('mdx', getConfigValue('experimental.mdx', false)),
   env: getConfigValue('env', getConfigValue('experimental.env', {})),
   rootDir: getConfigValue('rootDir', getConfigValue('webpack.root', 'src')),
@@ -219,6 +224,10 @@ const defaultSettings = {
 
 // Deprecation warnings for old paths
 warnDeprecated('experimental.ssr', 'Use the root "ssr" option instead.')
+warnDeprecated(
+  'hydrate',
+  'This option is deprecated. Remove it and use "hydration.recover" plus debug env/CLI flags when needed.',
+)
 warnDeprecated('experimental.mdx', 'Use the root "mdx" option instead.')
 warnDeprecated('experimental.env', 'Use the root "env" option instead.')
 warnDeprecated('webpack.root', 'Use the root "rootDir" option instead.')

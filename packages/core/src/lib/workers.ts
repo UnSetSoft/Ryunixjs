@@ -1,5 +1,6 @@
 import { commitRoot } from './commits.js'
 import { updateFunctionComponent, updateHostComponent } from './components.js'
+import { runHydrationRecovery } from './hydrationRecover.js'
 import { getState, rIC, nextValidSibling } from '../utils/index.js'
 import { getCurrentPriority, Priority } from './priority.js'
 import { profiler } from './profiler.js'
@@ -144,6 +145,7 @@ const workLoop = (deadline) => {
 
   if (!state.nextUnitOfWork && state.wipRoot) {
     commitRoot()
+    runHydrationRecovery()
   }
 
   if (state.nextUnitOfWork || workQueue.length > 0) {

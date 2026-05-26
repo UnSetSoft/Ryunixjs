@@ -1,5 +1,5 @@
 /**
- * Typings for the project-root `ryunix.config.js` / `ryunix.config.cjs`.
+ * Typings for the project-root `ryunix.config.(ts|mts|js|cjs)`.
  *
  * In JS projects, annotate the default export with
  * `import('@unsetsoft/ryunix-presets').RyunixUserConfig` via JSDoc `@type`.
@@ -65,6 +65,15 @@ export interface RyunixWebpackConfig {
   experiments?: RyunixWebpackExperimentsConfig
 }
 
+export interface RyunixHydrationConfig {
+  /** Recovery strategy for hydration mismatches (default: `"boundary"`). */
+  recover?: 'boundary' | 'root' | 'none'
+  /** Boundary placement strategy for route wrapping (default: `"route"`). */
+  boundaries?: 'route' | 'server-only' | 'all-layouts'
+  /** Emit more verbose mismatch warnings in development. */
+  strict?: boolean
+}
+
 export interface RyunixSitemapSettings {
   changefreq?: string
   priority?: string
@@ -101,6 +110,8 @@ export interface RyunixLegacyConfig {
 export interface RyunixConfig {
   /** Server-side rendering (default: `true`). */
   ssr?: boolean
+  /** Hydration behavior and mismatch recovery policy. */
+  hydration?: RyunixHydrationConfig
   /** MDX pages and loaders (default: `false`). */
   mdx?: boolean
   /** `DefinePlugin` env map exposed as `ryunix.config.env`. */
@@ -129,6 +140,11 @@ export interface RyunixConfig {
  * Deprecated keys still accepted by the config loader (warnings in the terminal).
  */
 export interface RyunixDeprecatedConfig {
+  /**
+   * @deprecated `hydrate` was removed from public config.
+   * Use `hydration.recover` and CLI/env debug flags instead.
+   */
+  hydrate?: boolean
   experimental?: {
     /** @deprecated Use root `ssr`. */
     ssr?: boolean

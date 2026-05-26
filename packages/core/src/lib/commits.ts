@@ -2,6 +2,7 @@ import { updateDom } from './dom.js'
 import { cancelEffects, cancelEffectsDeep } from './effects.js'
 import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../utils/index.js'
 import { RYUNIX_PORTAL } from './portal.js'
+import { logHydrationUnmatchedNodes } from './hydrationLog.js'
 
 /**
  * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
@@ -131,6 +132,7 @@ function commitRoot() {
       // If there is a cursor left, it means these are SSR nodes that weren't matched
       // by any client fiber. We must remove them to avoid duplication.
       let cursor = state.hydrateCursor
+      let removed = 0
       if (
         cursor &&
         process.env.NODE_ENV !== 'production' &&
@@ -142,9 +144,11 @@ function commitRoot() {
         const next = cursor.nextSibling
         if (cursor.parentNode) {
           cursor.parentNode.removeChild(cursor)
+          removed++
         }
         cursor = next
       }
+      logHydrationUnmatchedNodes(removed)
     }
 
     state.isHydrating = false

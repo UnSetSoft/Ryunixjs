@@ -1,7 +1,8 @@
 import { clearContainer } from './dom.js'
 import { getState } from '../utils/index.js'
 import { scheduleWork } from './workers.js'
-import { createElement } from './createElement.js'
+import { resetHydrationLogFlags } from './hydrationLog.js'
+import { getHydrationPolicy } from './hydration.js'
 
 /**
  * @typedef {import('./createElement.js').RyunixNode} RyunixNode
@@ -97,6 +98,11 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
 
+  resetHydrationLogFlags()
+  state.hydrationPolicy = getHydrationPolicy()
+  state.scopedRecoveryQueue = []
+  state.hydrationRecover = false
+
   // Reset any stale hydration flags
   state.isHydrating = false
   state.hydrationFailed = false
@@ -154,3 +160,9 @@ const safeRender = (component, props, onError) => {
 }
 
 export { init, render, safeRender, hydrate, clearContainer }
+export {
+  renderSubtree,
+  recoverScopedHydrationFailures,
+  recoverHydrationFailureIfNeeded,
+  runHydrationRecovery,
+} from './hydrationRecover.js'

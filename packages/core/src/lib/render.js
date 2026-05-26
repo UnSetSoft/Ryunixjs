@@ -1,6 +1,8 @@
 import { clearContainer } from './dom.js'
 import { getState } from '../utils/index.js'
 import { scheduleWork } from './workers.js'
+import { resetHydrationLogFlags } from './hydrationLog.js'
+import { getHydrationPolicy } from './hydration.js'
 const render = (element, container) => {
   const state = getState()
   clearContainer(container)
@@ -46,6 +48,10 @@ const hydrate = (element, container) => {
 const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
   state.containerRoot = document.getElementById(root)
+  resetHydrationLogFlags()
+  state.hydrationPolicy = getHydrationPolicy()
+  state.scopedRecoveryQueue = []
+  state.hydrationRecover = false
   state.isHydrating = false
   state.hydrationFailed = false
   const hasChildNodes =
@@ -85,3 +91,9 @@ const safeRender = (component, props, onError) => {
   }
 }
 export { init, render, safeRender, hydrate, clearContainer }
+export {
+  renderSubtree,
+  recoverScopedHydrationFailures,
+  recoverHydrationFailureIfNeeded,
+  runHydrationRecovery,
+} from './hydrationRecover.js'
