@@ -133,9 +133,7 @@ export function resolveModuleSpecifier(
   }
 
   if (moduleSpecifier.startsWith('.')) {
-    const fromDir = fromFile
-      ? path.dirname(normalizePath(fromFile))
-      : baseUrl
+    const fromDir = fromFile ? path.dirname(normalizePath(fromFile)) : baseUrl
     return tryResolveFile(path.join(fromDir, moduleSpecifier))
   }
 
@@ -144,7 +142,11 @@ export function resolveModuleSpecifier(
 
 export function isBundlerResolvedImport(spec: string): boolean {
   if (ASSET_MODULE.test(spec)) return true
-  if (spec.startsWith('@/') || spec.startsWith('./') || spec.startsWith('../')) {
+  if (
+    spec.startsWith('@/') ||
+    spec.startsWith('./') ||
+    spec.startsWith('../')
+  ) {
     return true
   }
   return RESOLVE_EXTENSIONS.some((ext) => spec.endsWith(ext))

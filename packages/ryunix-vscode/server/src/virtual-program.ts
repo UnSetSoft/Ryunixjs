@@ -79,7 +79,8 @@ export function buildVirtualRyxProgramSources(
         options,
         current.ryxPath,
       )
-      if (!resolved || !RYX_EXT.test(resolved) || seenRyx.has(resolved)) continue
+      if (!resolved || !RYX_EXT.test(resolved) || seenRyx.has(resolved))
+        continue
       queue.push({
         ryxPath: resolved,
         content: readFile(resolved),

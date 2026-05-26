@@ -7,9 +7,9 @@
       "\t\tstatus: 200,",
       "\t\theaders: { 'Content-Type': 'application/json' },",
       "\t})",
-      "}"
+      "}",
     ],
-    "description": "API route GET handler for router.js"
+    "description": "API route GET handler for router.js",
   },
   "Ryunix API POST handler": {
     "prefix": "ryx-api-post",
@@ -20,8 +20,8 @@
       "\t\tstatus: 200,",
       "\t\theaders: { 'Content-Type': 'application/json' },",
       "\t})",
-      "}"
+      "}",
     ],
-    "description": "API route POST handler for router.js"
-  }
+    "description": "API route POST handler for router.js",
+  },
 }

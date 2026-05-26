@@ -16,9 +16,9 @@
       "\t\t\t${4}",
       "\t\t</main>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Full route page template for index.ryx (Metatags + default export)"
+    "description": "Full route page template for index.ryx (Metatags + default export)",
   },
   "Ryunix layout (layout.ryx)": {
     "prefix": "ryx-layout",
@@ -36,9 +36,9 @@
       "",
       "export default function ${3:RootLayout}({ children }) {",
       "\treturn children",
-      "}"
+      "}",
     ],
-    "description": "Root layout template for layout.ryx"
+    "description": "Root layout template for layout.ryx",
   },
   "Ryunix errors (errors.ryx)": {
     "prefix": "ryx-errors",
@@ -52,9 +52,9 @@
       "\t\t\t<a href=\"/\">${4:Go back home}</a>",
       "\t\t</main>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Global not-found template for errors.ryx"
+    "description": "Global not-found template for errors.ryx",
   },
   "Ryunix loading (loading.ryx)": {
     "prefix": "ryx-loading",
@@ -66,9 +66,9 @@
       "\t\t\t<p>${2:Loading…}</p>",
       "\t\t</div>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Route loading UI template for loading.ryx"
+    "description": "Route loading UI template for loading.ryx",
   },
   "Ryunix route error (error.ryx)": {
     "prefix": "ryx-error",
@@ -82,9 +82,9 @@
       "\t\t\t<button type=\"button\" onClick={reset}>${3:Try again}</button>",
       "\t\t</main>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Per-route error boundary template for error.ryx"
+    "description": "Per-route error boundary template for error.ryx",
   },
   "Ryunix server page (async index.ryx)": {
     "prefix": "ryx-server-page",
@@ -104,8 +104,8 @@
       "\t\t\t${5}",
       "\t\t</main>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Async server page template for index.ryx"
-  }
+    "description": "Async server page template for index.ryx",
+  },
 }

@@ -5,7 +5,9 @@ const RYUNIX_PKG = '@unsetsoft/ryunixjs'
 
 function readPackageName(pkgPath: string): string | undefined {
   try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as { name?: string }
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as {
+      name?: string
+    }
     return pkg.name
   } catch {
     return undefined
@@ -13,7 +15,9 @@ function readPackageName(pkgPath: string): string | undefined {
 }
 
 /** Absolute path to `types/index.d.ts` for @unsetsoft/ryunixjs (node_modules or monorepo core). */
-export function resolveRyunixTypesEntry(projectRoot: string): string | undefined {
+export function resolveRyunixTypesEntry(
+  projectRoot: string,
+): string | undefined {
   const searchRoots = new Set<string>()
   let dir = path.resolve(projectRoot)
 
@@ -51,7 +55,9 @@ export function ryunixTypesPathEntries(
   const entry = resolveRyunixTypesEntry(projectRoot)
   if (!entry) return undefined
 
-  const rel = path.relative(path.resolve(projectRoot), entry).replace(/\\/g, '/')
+  const rel = path
+    .relative(path.resolve(projectRoot), entry)
+    .replace(/\\/g, '/')
   if (!rel || rel.startsWith('..')) return [entry]
   return [rel.startsWith('.') ? rel : `./${rel}`]
 }

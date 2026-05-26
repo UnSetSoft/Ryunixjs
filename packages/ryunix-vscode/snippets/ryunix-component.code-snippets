@@ -8,8 +8,8 @@
       "\t\t\t${3}",
       "\t\t</>",
       "\t)",
-      "}"
+      "}",
     ],
-    "description": "Default export component with JSX return"
-  }
+    "description": "Default export component with JSX return",
+  },
 }
