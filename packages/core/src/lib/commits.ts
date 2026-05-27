@@ -121,13 +121,7 @@ function commitRoot() {
       )
     }
     if (state.hydrationFailed) {
-      if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-        console.log('[Ryunix Debug] Hydration failed. Clearing container.')
-      }
-      const container = state.containerRoot || finishedWork.dom
-      if (container) {
-        container.textContent = ''
-      }
+      // Defer clearing to recoverHydrationFailureIfNeeded → renderSubtree.
     } else {
       // If there is a cursor left, it means these are SSR nodes that weren't matched
       // by any client fiber. We must remove them to avoid duplication.

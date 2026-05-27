@@ -188,7 +188,7 @@ class AppRouterPlugin {
   }
   generateRouterFile(routeNode, outputPath) {
     const generate = (isServerBuild) => {
-      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`
+      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, HydrationBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`
       let componentIdCounter = 0
       const getNextId = () => componentIdCounter++
       const flattenedRoutes = []
@@ -272,7 +272,7 @@ class AppRouterPlugin {
             flattenedRoutes.push(`
     {
       path: '${node.path}',
-      component: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={${errorPropStr}} loading={${loadingConfigStr}} error={${errorConfigStr}} props={props} />
+      component: (props) => <RouteWrapper routePath="${node.path}" layouts={${layoutsArrayStr}} index={${errorPropStr}} loading={${loadingConfigStr}} error={${errorConfigStr}} props={props} />
     }`)
             if (isServerBuild) {
               ssgRoutes.push({ path: node.path, meta: {} })
@@ -289,7 +289,7 @@ class AppRouterPlugin {
         flattenedRoutes.push(`
     {
       path: '*',
-      NotFound: (props) => <RouteWrapper layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
+      NotFound: (props) => <RouteWrapper routePath="*" layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
     }`)
       }
       return {
@@ -366,6 +366,16 @@ const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => 
   }
 };
 
+const wrapRouteHydrationBoundary = (element, routePath) => {
+  const mode = process.env.RYUNIX_HYDRATION_BOUNDARIES || 'route';
+  if (!element || mode === 'server-only') return element;
+  if (mode === 'route' || mode === 'all-layouts') {
+    const id = routePath || 'route';
+    return <HydrationBoundary id={id}>{element}</HydrationBoundary>;
+  }
+  return element;
+};
+
 const RouteWrapper = (props) => {
   const isServer = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';
   if (isServer) {
@@ -374,7 +384,7 @@ const RouteWrapper = (props) => {
   return RouteWrapperClient(props);
 };
 
-const RouteWrapperServer = async ({ layouts, index, props, loading, error }) => {
+const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, error }) => {
   let combinedMeta = {};
   if (layouts) {
     for (const l of layouts) {
@@ -398,10 +408,10 @@ const RouteWrapperServer = async ({ layouts, index, props, loading, error }) => 
   }
   useMetadata(combinedMeta);
 
-  return <RouteWrapperRender layouts={layouts} index={index} props={props} loading={loading} error={error} />;
+  return <RouteWrapperRender routePath={routePath} layouts={layouts} index={index} props={props} loading={loading} error={error} />;
 };
 
-const RouteWrapperClient = ({ layouts, index, props, loading, error }) => {
+const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }) => {
   const getStaticMeta = () => {
     let meta = {};
     if (layouts) {
@@ -442,10 +452,10 @@ const RouteWrapperClient = ({ layouts, index, props, loading, error }) => {
     runMetadata();
   }, [JSON.stringify(props.params), JSON.stringify(props.query), props.location]);
 
-  return <RouteWrapperRender layouts={layouts} index={index} props={props} loading={loading} error={error} />;
+  return <RouteWrapperRender routePath={routePath} layouts={layouts} index={index} props={props} loading={loading} error={error} />;
 };
 
-const RouteWrapperRender = ({ layouts, index, props, loading, error }) => {
+const RouteWrapperRender = ({ routePath, layouts, index, props, loading, error }) => {
 
   let content = null;
   const isServerRender = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';
@@ -517,7 +527,7 @@ const RouteWrapperRender = ({ layouts, index, props, loading, error }) => {
     }
   }
 
-  return content;
+  return wrapRouteHydrationBoundary(content, routePath);
 };
 
 const routes = [${flattenedRoutes.join(',\n')}];
