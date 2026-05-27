@@ -7,9 +7,10 @@ import type {
 } from '../types/internal.js'
 
 export const getHydrationPolicy = (): HydrationPolicy => {
-  const recoverRaw = process.env.RYUNIX_HYDRATION_RECOVER || 'boundary'
-  const boundariesRaw = process.env.RYUNIX_HYDRATION_BOUNDARIES || 'route'
-  const strict = process.env.RYUNIX_HYDRATION_STRICT === 'true'
+  const env = typeof process !== 'undefined' && process.env ? process.env : {}
+  const recoverRaw = env.RYUNIX_HYDRATION_RECOVER || 'boundary'
+  const boundariesRaw = env.RYUNIX_HYDRATION_BOUNDARIES || 'route'
+  const strict = env.RYUNIX_HYDRATION_STRICT === 'true'
   const recover: HydrationPolicy['recover'] =
     recoverRaw === 'none' || recoverRaw === 'root' ? recoverRaw : 'boundary'
   const boundaries: HydrationPolicy['boundaries'] =

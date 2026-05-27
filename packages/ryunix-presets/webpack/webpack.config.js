@@ -370,20 +370,24 @@ const getPlugins = (isServer = false) =>
       }),
     new webpack.DefinePlugin({
       'ryunix.config.env': JSON.stringify(config.env),
+      'process.env.NODE_ENV': JSON.stringify(
+        process.env.NODE_ENV ||
+          (config.webpack.production ? 'production' : 'development'),
+      ),
       'process.env.RYUNIX_SSR': JSON.stringify(
         config.ssr || (config.legacy.ssg?.prerender?.length ?? 0) > 0,
       ),
-      'process.env.RYUNIX_HYDRATION_RECOVER': JSON.stringify(
-        config.hydration?.recover || 'boundary',
-      ),
-      'process.env.RYUNIX_HYDRATION_BOUNDARIES': JSON.stringify(
-        config.hydration?.boundaries || 'route',
-      ),
-      'process.env.RYUNIX_HYDRATION_STRICT': JSON.stringify(
-        Boolean(config.hydration?.strict),
-      ),
       'process.env.RYUNIX_DEBUG': JSON.stringify(config.debug),
       'process.env.RYUNIX_IS_SERVER': JSON.stringify(isServer),
+      'process.env.RYUNIX_HYDRATION_RECOVER': JSON.stringify(
+        config.hydration?.recover ?? 'boundary',
+      ),
+      'process.env.RYUNIX_HYDRATION_BOUNDARIES': JSON.stringify(
+        config.hydration?.boundaries ?? 'route',
+      ),
+      'process.env.RYUNIX_HYDRATION_STRICT': JSON.stringify(
+        config.hydration?.strict ?? false,
+      ),
     }),
     // Only inject HTML for the client build
     !isServer &&

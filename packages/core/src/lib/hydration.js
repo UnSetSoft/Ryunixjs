@@ -1,8 +1,9 @@
 import { getState } from '../utils/index.js'
 export const getHydrationPolicy = () => {
-  const recoverRaw = process.env.RYUNIX_HYDRATION_RECOVER || 'boundary'
-  const boundariesRaw = process.env.RYUNIX_HYDRATION_BOUNDARIES || 'route'
-  const strict = process.env.RYUNIX_HYDRATION_STRICT === 'true'
+  const env = typeof process !== 'undefined' && process.env ? process.env : {}
+  const recoverRaw = env.RYUNIX_HYDRATION_RECOVER || 'boundary'
+  const boundariesRaw = env.RYUNIX_HYDRATION_BOUNDARIES || 'route'
+  const strict = env.RYUNIX_HYDRATION_STRICT === 'true'
   const recover =
     recoverRaw === 'none' || recoverRaw === 'root' ? recoverRaw : 'boundary'
   const boundaries =
