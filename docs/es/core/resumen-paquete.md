@@ -40,7 +40,7 @@ flowchart TB
 ```text
 packages/core/
 ├── src/
-│   ├── main.js                 # Entrada Rollup; expone Ryunix en window (browser)
+│   ├── main.ts                 # Entrada TypeScript → emit `.generated/main.js` → Rollup
 │   ├── lib/                    # Motor (ver tabla abajo)
 │   ├── tests/                  # Tests Jest
 │   └── utils/

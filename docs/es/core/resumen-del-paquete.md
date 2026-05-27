@@ -113,9 +113,9 @@ los mantenedores trabajan en el monorepo y ejecutan `build` antes de publicar.
 | Errores y DX   | `errorBoundary`, `devOverlay`, `devtools`, `profiler`            | [limites-de-error.md](./limites-de-error.md), [devtools-y-profiler.md](./devtools-y-profiler.md) |
 | Entrada        | `index.ts`                                                       | Reexporta la API pública                                                                         |
 
-La migración del **código fuente** a TypeScript está **en curso**: muchos
-módulos tienen par `.ts` + `.js`; Rollup compila desde `src/main.js` con
-`@rollup/plugin-typescript` sobre `src/**/*.ts`.
+La migración del **código fuente** a TypeScript está **hecha**: `src/` solo
+contiene `.ts`; `build:lib-ts` emite `.js` en `.generated/` (gitignore) y Rollup
+empaqueta desde `.generated/main.js` hacia `dist/`.
 
 ---
 
@@ -123,13 +123,13 @@ módulos tienen par `.ts` + `.js`; Rollup compila desde `src/main.js` con
 
 | Script              | Comando                        | Uso                                   |
 | :------------------ | :----------------------------- | :------------------------------------ |
-| `build`             | `rollup -c`                    | Bundles en `dist/` para publicar      |
-| `build:lib-ts`      | `tsc -p tsconfig.emit.json`    | Emit selectivo en `src/` (prepublish) |
+| `build`             | `build:lib-ts` + `rollup -c`   | Bundles en `dist/` para publicar      |
+| `build:lib-ts`      | `tsc -p tsconfig.emit.json`    | Emit en `.generated/` (prepublish)    |
 | `typecheck`         | `tsc --noEmit`                 | Fuentes `.ts`                         |
 | `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` con JSDoc en lib/utils          |
 | `test`              | `jest`                         | Pruebas en `src/tests/`               |
 
-`prepublishOnly` ejecuta `build:lib-ts` y luego `build`.
+`prepublishOnly` ejecuta `build`.
 
 Detalle de fases: [TypeScript en el monorepo](../guias/typescript-en-el-monorepo.md).
 

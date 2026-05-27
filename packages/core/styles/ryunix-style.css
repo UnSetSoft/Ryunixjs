@@ -42,6 +42,9 @@ html:not(.dark) {
   --ryx-radius-md: 0.375rem;
   --ryx-radius-lg: 0.5rem;
   --ryx-radius-xl: 0.75rem;
+  --ryx-page-padding: 1.5rem;
+  --ryx-content-max-width: 72rem;
+  --ryx-tracking: 0.012em;
 }
 
 /* --- Design tokens: dark --- */
@@ -67,6 +70,9 @@ html.dark {
   --ryx-pre-bg: #0f0f11;
   --ryx-pre-border: #3f3f46;
   --ryx-focus-ring: #60a5fa;
+  --ryx-page-padding: 1.5rem;
+  --ryx-content-max-width: 72rem;
+  --ryx-tracking: 0.012em;
 }
 
 /* --- Opt-out: revert framework styles inside unstyled subtrees --- */
@@ -79,14 +85,54 @@ html.dark [data-ryx-unstyled] * {
 }
 
 /* --- Base document --- */
+html:not(.dark),
+html.dark {
+  min-height: 100%;
+  background-color: var(--ryx-bg);
+}
+
 html:not(.dark) body,
 html.dark body {
   font-family: var(--ryx-font-sans);
   background-color: var(--ryx-bg);
   color: var(--ryx-text);
-  line-height: 1.6;
+  line-height: 1.65;
+  letter-spacing: var(--ryx-tracking);
+  font-kerning: normal;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Page padding lives on Main (`.ryx-main-inner`), not on body */
+html:not(.dark) body:not(:has(.ryx-main)),
+html.dark body:not(:has(.ryx-main)) {
+  padding: var(--ryx-page-padding);
+}
+
+html:not(.dark) #__ryunix,
+html.dark #__ryunix {
+  min-height: 100%;
+}
+
+html:not(.dark) main:not(.ryx-main),
+html.dark main:not(.ryx-main) {
+  max-width: var(--ryx-content-max-width);
+  margin-inline: auto;
+}
+
+html:not(.dark) .ryx-page-toolbar,
+html.dark .ryx-page-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--ryx-space-4);
+  max-width: var(--ryx-content-max-width);
+  margin-inline: auto;
+  margin-block-end: var(--ryx-space-6);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -106,7 +152,7 @@ html.dark h1 {
   line-height: 1.2;
   color: var(--ryx-text);
   margin-block: 0 1.5rem;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   scroll-margin-block-start: 5rem;
 }
@@ -210,6 +256,89 @@ html:not(.dark) i,
 html.dark em,
 html.dark i {
   font-style: italic;
+}
+
+html:not(.dark) mark,
+html.dark mark {
+  background: color-mix(in srgb, var(--ryx-warning) 35%, transparent);
+  color: var(--ryx-text);
+  padding: 0.1em 0.25em;
+  border-radius: var(--ryx-radius-sm);
+}
+
+html:not(.dark) kbd,
+html.dark kbd {
+  font-family: var(--ryx-font-mono);
+  font-size: 0.85em;
+  padding: 0.15em 0.45em;
+  border: 1px solid var(--ryx-border-strong);
+  border-block-end-width: 2px;
+  border-radius: var(--ryx-radius-sm);
+  background: var(--ryx-surface-elevated);
+  color: var(--ryx-text);
+}
+
+html:not(.dark) samp,
+html:not(.dark) var,
+html.dark samp,
+html.dark var {
+  font-family: var(--ryx-font-mono);
+  font-size: 0.9em;
+  color: var(--ryx-code-text);
+}
+
+html:not(.dark) abbr[title],
+html.dark abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+html:not(.dark) address,
+html.dark address {
+  font-style: normal;
+  color: var(--ryx-text-muted);
+  margin-block: 1rem;
+}
+
+/* --- Navigation --- */
+html:not(.dark) nav ul,
+html.dark nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ryx-space-4);
+  list-style: none;
+  padding: 0;
+  margin-block: 1rem;
+}
+
+html:not(.dark) nav li,
+html.dark nav li {
+  margin: 0;
+}
+
+html:not(.dark) nav li::marker,
+html.dark nav li::marker {
+  content: none;
+}
+
+/* --- Definition lists --- */
+html:not(.dark) dl,
+html.dark dl {
+  margin-block: 1rem;
+  color: var(--ryx-text-muted);
+}
+
+html:not(.dark) dt,
+html.dark dt {
+  font-weight: 600;
+  color: var(--ryx-text);
+  margin-block-start: 0.75rem;
+}
+
+html:not(.dark) dd,
+html.dark dd {
+  margin-inline-start: 1rem;
+  margin-block: 0.25rem 0.5rem;
 }
 
 /* --- Lists --- */
@@ -411,7 +540,28 @@ html.dark tbody tr:hover {
   background: var(--ryx-surface-elevated);
 }
 
+html:not(.dark) caption,
+html.dark caption {
+  caption-side: bottom;
+  padding-block-start: 0.5rem;
+  color: var(--ryx-text-subtle);
+  font-size: 0.875rem;
+  text-align: start;
+}
+
 /* --- Media --- */
+html:not(.dark) figure,
+html.dark figure {
+  margin-block: 1.5rem;
+}
+
+html:not(.dark) figcaption,
+html.dark figcaption {
+  margin-block-start: 0.5rem;
+  color: var(--ryx-text-subtle);
+  font-size: 0.875rem;
+}
+
 html:not(.dark) img,
 html.dark img {
   max-inline-size: 100%;
@@ -419,7 +569,54 @@ html.dark img {
   border-radius: var(--ryx-radius-md);
 }
 
+html:not(.dark) audio,
+html:not(.dark) video,
+html.dark audio,
+html.dark video {
+  max-inline-size: 100%;
+  margin-block: 1rem;
+  border-radius: var(--ryx-radius-md);
+}
+
+/* --- Details --- */
+html:not(.dark) details,
+html.dark details {
+  margin-block: 1rem;
+  padding: var(--ryx-space-4);
+  border: 1px solid var(--ryx-border);
+  border-radius: var(--ryx-radius-lg);
+  background: var(--ryx-surface);
+}
+
+html:not(.dark) summary,
+html.dark summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ryx-text);
+}
+
+html:not(.dark) details[open] summary,
+html.dark details[open] summary {
+  margin-block-end: var(--ryx-space-3);
+}
+
 /* --- Forms (native elements only) --- */
+html:not(.dark) fieldset,
+html.dark fieldset {
+  margin-block: 1.5rem;
+  padding: var(--ryx-space-4);
+  border: 1px solid var(--ryx-border);
+  border-radius: var(--ryx-radius-lg);
+  background: var(--ryx-surface);
+}
+
+html:not(.dark) legend,
+html.dark legend {
+  font-weight: 600;
+  color: var(--ryx-text);
+  padding-inline: 0.35rem;
+}
+
 html:not(.dark) label,
 html.dark label {
   display: block;
@@ -427,6 +624,43 @@ html.dark label {
   font-weight: 500;
   color: var(--ryx-text);
   margin-block-end: 0.35rem;
+}
+
+html:not(.dark) label:has(input[type='checkbox']),
+html:not(.dark) label:has(input[type='radio']),
+html.dark label:has(input[type='checkbox']),
+html.dark label:has(input[type='radio']) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-end: 1rem;
+  margin-block-end: 0;
+  cursor: pointer;
+}
+
+html:not(.dark) input[type='checkbox'],
+html:not(.dark) input[type='radio'],
+html.dark input[type='checkbox'],
+html.dark input[type='radio'] {
+  inline-size: auto;
+  min-block-size: auto;
+  accent-color: var(--ryx-link);
+}
+
+html:not(.dark) input[type='range'],
+html.dark input[type='range'] {
+  padding: 0;
+}
+
+html:not(.dark) progress,
+html:not(.dark) meter,
+html.dark progress,
+html.dark meter {
+  inline-size: 100%;
+  max-inline-size: 20rem;
+  block-size: 0.75rem;
+  margin-block: 0.5rem;
+  accent-color: var(--ryx-link);
 }
 
 html:not(.dark) input:not([type='checkbox']):not([type='radio']):not([type='hidden']),

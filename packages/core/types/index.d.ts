@@ -3,7 +3,7 @@
  *
  * Runtime remains JavaScript (Rollup bundles in `dist/`). These declarations
  * cover the package entry, hooks, components, and SSR helpers exported from
- * `src/main.js`.
+ * `src/main.ts` → emitido como `.generated/main.js` antes de Rollup.
  */
 
 // ---------------------------------------------------------------------------
@@ -560,6 +560,41 @@ export function ThemeInitScript(
   props?: ThemeInitScriptProps,
 ): RyunixElement
 
+export interface HeaderProps {
+  image?: string
+  title: string
+  href?: string
+  imageAlt?: string
+  sticky?: boolean
+  className?: string
+  children?: RyunixNode
+}
+
+export interface FooterProps {
+  image?: string
+  title?: string
+  description?: string
+  href?: string
+  imageAlt?: string
+  className?: string
+  children?: RyunixNode
+  bottomStart?: RyunixNode
+  bottomEnd?: RyunixNode
+}
+
+export function Header(props: HeaderProps): RyunixElement
+
+export function Footer(props: FooterProps): RyunixElement
+
+export interface MainProps {
+  maxWidth?: string
+  className?: string
+  innerClassName?: string
+  children?: RyunixNode
+}
+
+export function Main(props: MainProps): RyunixElement
+
 declare const Ryunix: {
   createElement: typeof createElement
   Fragment: typeof Fragment
@@ -622,6 +657,9 @@ declare const Ryunix: {
   RyunixDevOverlay: typeof RyunixDevOverlay
   ThemeToggle: typeof ThemeToggle
   ThemeInitScript: typeof ThemeInitScript
+  Header: typeof Header
+  Footer: typeof Footer
+  Main: typeof Main
   createThemeController: typeof createThemeController
   themeController: typeof themeController
   applyTheme: typeof applyTheme

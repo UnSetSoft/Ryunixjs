@@ -9,11 +9,13 @@ import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
  */
 const isEvent = (key) => key.startsWith('on')
 
+const RESERVED_DOM_PROPS = new Set(['key', 'ref', STRINGS.CHILDREN])
+
 /**
  * @param {string} key
  * @returns {boolean}
  */
-const isProperty = (key) => key !== STRINGS.CHILDREN && !isEvent(key)
+const isProperty = (key) => !RESERVED_DOM_PROPS.has(key) && !isEvent(key)
 
 /**
  * @param {Record<string, unknown>} prev

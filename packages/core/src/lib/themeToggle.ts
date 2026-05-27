@@ -118,7 +118,7 @@ export function ThemeToggle({
           key: id,
           type: 'button',
           role: 'radio',
-          'aria-checked': active,
+          'aria-checked': active ? 'true' : 'false',
           title: labels[id],
           className: `ryx-theme-segment-btn${active ? ' ryx-theme-segment-btn--active' : ''}`,
           onClick: () => selectTheme(id),

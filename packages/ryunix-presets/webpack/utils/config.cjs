@@ -59,9 +59,7 @@ if (hasAppDir) {
     'Custom templates are replaced by the root layout.ryx when using the App Router.',
   )
 }
-// ============================================================================
-// Helpers
-// ============================================================================
+const { normalizeStyleConfig } = require('./styleConfig.cjs')
 
 /**
  * Get nested config value with fallback
@@ -135,7 +133,7 @@ const defaultSettings = {
     strict: getConfigValue('hydration.strict', false),
   },
   mdx: getConfigValue('mdx', getConfigValue('experimental.mdx', false)),
-  style: getConfigValue('style', true),
+  style: normalizeStyleConfig(getConfigValue('style', true)),
   env: getConfigValue('env', getConfigValue('experimental.env', {})),
   rootDir: getConfigValue('rootDir', getConfigValue('webpack.root', 'src')),
   buildDir: getConfigValue(

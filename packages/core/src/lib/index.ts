@@ -54,3 +54,4 @@ export {
   themeInitScript,
 } from './theme.js'
 export { ThemeToggle, ThemeInitScript } from './themeToggle.js'
+export { Header, Footer, Main } from './layout.js'

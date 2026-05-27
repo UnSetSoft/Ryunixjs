@@ -69,7 +69,7 @@ Plan interno (fases 0–7). Estado a 2026-05-24:
 | **4** | CRA en TS                    | Hecha  | Todo `src/` en `.ts`; `build` emite `.js` en `src/`                               |
 | **5** | DevTools en TS               | Hecha  | Todos los scripts de extensión en `.ts`; `build` emite `.js`                      |
 | **6** | Presets en TS                | Hecha  | Todo `webpack/**/*.ts`; `build` emite `.js` junto a la fuente                     |
-| **7** | Core en TS                   | Hecha  | `src/lib/**`, `src/utils/**`, `src/main.ts`; `build:lib-ts` emite `.js` en `src/` |
+| **7** | Core en TS                   | Hecha  | `src/lib/**`, `src/utils/**`, `src/main.ts`; `build:lib-ts` emite `.js` en `.generated/` |
 
 ---
 
@@ -84,8 +84,9 @@ Plan interno (fases 0–7). Estado a 2026-05-24:
 | `packages/cra/templates/**`                                             | Apps generadas para usuarios finales                                     |
 | Raíz `eslint.config.mjs`                                                | Config ESLint del workspace                                              |
 
-Los `.js` emitidos por `tsc` en `core`, `presets`, `cra` y `devtools` **sí se
-commitean**; Node y Webpack los consumen directamente.
+Los `.js` emitidos por `tsc` en `core` viven en **`.generated/`** (gitignore) y se
+regeneran con `build:lib-ts`. En `presets`, `cra` y `devtools` los emitidos **sí se
+commitean** junto a la fuente; Node y Webpack los consumen directamente.
 
 ---
 
@@ -142,9 +143,9 @@ Ver también [packages/core/README.es.md](../../packages/core/README.es.md)
 | `src/utils/**/*.ts`, `src/main.ts` | Utilidades y entrada Rollup                               |
 | `src/types/internal.d.ts`          | Tipos internos fiber/hook/DOM (no publicados)             |
 | `tsconfig.json`                    | Typecheck: `src/**/*.ts`, `jsx/**/*.js`, `types/`         |
-| `tsconfig.emit.json`               | Emite `.js` en `src/` (misma carpeta que la fuente `.ts`) |
+| `tsconfig.emit.json`               | Emite `.js` en `.generated/` (gitignore; refleja `src/`) |
 | `tsconfig.checkjs.json`            | Comprobación opcional del runtime JSX (`jsx/**/*.js`)     |
-| `rollup.config.js`                 | Bundle desde `src/main.js` (emitido) hacia `dist/`        |
+| `rollup.config.js`                 | Bundle desde `.generated/main.js` hacia `dist/`           |
 
 #### Scripts
 
@@ -152,9 +153,9 @@ Ver también [packages/core/README.es.md](../../packages/core/README.es.md)
 | :------------------ | :--------------------------------------------------------- |
 | `typecheck`         | `tsc --noEmit -p tsconfig.json`                            |
 | `typecheck:checkjs` | `tsc --noEmit -p tsconfig.checkjs.json` (solo JSX runtime) |
-| `build:lib-ts`      | `tsc -p tsconfig.emit.json` — regenera `.js` en `src/`     |
-| `build`             | Rollup → artefactos en `dist/`                             |
-| `prepublishOnly`    | `build:lib-ts` + `build`                                   |
+| `build:lib-ts`      | `tsc -p tsconfig.emit.json` — regenera `.js` en `.generated/` |
+| `build`             | `build:lib-ts` + Rollup → artefactos en `dist/`               |
+| `prepublishOnly`    | `build`                                                       |
 
 Tras editar cualquier `.ts` bajo `src/lib/`, `src/utils/` o `src/main.ts`,
 ejecuta `build:lib-ts` antes de probar Rollup o la app de integración local.

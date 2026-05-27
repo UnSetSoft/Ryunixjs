@@ -16,6 +16,7 @@ import {
 } from './utils/index.js'
 import fs from 'fs'
 import config from './utils/config.cjs'
+import { buildStyleVarsCss, buildFontHeadLinks } from './utils/styleConfig.ts'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.js'
 import RyunixRoutesPlugin from './utils/ssgPlugin.js'
@@ -121,23 +122,24 @@ const postcssPlugins = resolvePostcssPlugins()
 const hasAppDir =
   fs.existsSync(resolveApp(dir, 'app')) ||
   fs.existsSync(resolveApp(dir, `${config.rootDir}/app`))
-const styleEntry =
-  config.style !== false
-    ? (() => {
-        try {
-          return ryunixRequire.resolve('@unsetsoft/ryunixjs/style.css')
-        } catch {
-          return join(
-            dirname(fileURLToPath(import.meta.url)),
-            '../../core/styles/ryunix-style.css',
-          )
-        }
-      })()
-    : null
+const resolveRyunixStylePath = () => {
+  try {
+    return ryunixRequire.resolve('@unsetsoft/ryunixjs/style.css')
+  } catch {
+    return join(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../core/styles/ryunix-style.css',
+    )
+  }
+}
+const styleEntries = config.style?.enabled ? [resolveRyunixStylePath()] : []
 const mainEntry = hasAppDir
   ? resolveApp(dir, `${config.buildDir}/server/app/main.ryx`)
   : './main.ryx'
-const entryPoint = styleEntry ? [styleEntry, mainEntry] : mainEntry
+const entryPoint =
+  styleEntries.length > 0 ? [...styleEntries, mainEntry] : mainEntry
+const styleVarsCss = buildStyleVarsCss(config.style)
+const styleFontLinks = buildFontHeadLinks(config.style?.font)
 
 const sharedWebpackConfig = {
   experiments: {
@@ -417,7 +419,7 @@ const getPlugins = (isServer = false) =>
       'process.env.RYUNIX_HYDRATION_STRICT': JSON.stringify(
         config.hydration?.strict ?? false,
       ),
-      'process.env.RYUNIX_STYLE': JSON.stringify(config.style !== false),
+      'process.env.RYUNIX_STYLE': JSON.stringify(config.style?.enabled !== false),
     }),
     // Only inject HTML for the client build
     !isServer &&
@@ -438,6 +440,8 @@ const getPlugins = (isServer = false) =>
           version,
           mode: config.webpack.production ? 'production' : 'dev',
         },
+        styleVars: styleVarsCss,
+        styleFontLinks,
         ssrScript:
           (isSSR
             ? `

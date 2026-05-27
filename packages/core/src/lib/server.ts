@@ -161,6 +161,8 @@ const renderToStringImpl = (element) => {
       }
     } else if (
       !key.startsWith('on') &&
+      key !== 'key' &&
+      key !== 'ref' &&
       key !== '__source' &&
       key !== '__self'
     ) {
@@ -366,6 +368,8 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
       }
     } else if (
       !key.startsWith('on') &&
+      key !== 'key' &&
+      key !== 'ref' &&
       key !== '__source' &&
       key !== '__self'
     ) {

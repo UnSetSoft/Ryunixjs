@@ -42,7 +42,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "tsc -p tsconfig.emit.json && prettier -w \"webpack/**/*.js\"",
     "prepublishOnly": "npm run build",
-    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs webpack/utils/ssgStaticParams.test.mjs webpack/utils/appRouterFlatMdx.test.mjs"
+    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs webpack/utils/ssgStaticParams.test.mjs webpack/utils/appRouterFlatMdx.test.mjs webpack/utils/styleConfig.test.mjs webpack/utils/styleFonts.test.mjs"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

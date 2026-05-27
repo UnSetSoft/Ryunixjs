@@ -1,0 +1,63 @@
+---
+description: Dónde investigar RyunixJS — workspace, docs internas, código fuente y sitio público
+alwaysApply: true
+---
+
+# Fuentes de información (RyunixJS)
+
+Este workspace puede abrirse de dos formas. Antes de leer o citar rutas, fija el prefijo del monorepo:
+
+| Condición en la raíz del workspace | Prefijo `MONO` |
+| :--- | :--- |
+| Existe `Ryunixjs/docs/es/` | `Ryunixjs/` |
+| Existe `docs/es/` en la raíz | `` (vacío) |
+
+Todas las rutas siguientes del **monorepo** se resuelven como `{MONO}…` (p. ej. `{MONO}packages/core/`, `{MONO}docs/es/`).
+
+## Qué hay en cada carpeta
+
+| Carpeta | Qué es | Cuándo usarla |
+| :--- | :--- | :--- |
+| **`Ryunixjs/`** (o la raíz si el workspace es solo el monorepo) | Código fuente del framework y **documentación interna** para mantenedores | Comportamiento real, APIs, arquitectura, contribución |
+| **`ryunix-doc/`** | Sitio público de documentación (MDX, guías de usuario) | UX del docs site, redacción orientada a desarrolladores de apps |
+| **`.cursor/rules/`** (workspace `ryx/`) | Reglas para el agente (`component-scope`, esta regla, git) | Dónde colocar cambios; no sustituye la documentación técnica |
+
+**Fuente de verdad:** si un doc contradice el código, prevalece el código en `{MONO}packages/`. Actualiza docs solo cuando el usuario lo pida o al sincronizar con `/update-docs`.
+
+## Orden de investigación
+
+1. **Índice interno** — `{MONO}docs/es/resumen.md` o `{MONO}docs/en/overview.md` (mapa por paquete: `core/`, `ryunix-presets/`, `cra/`, `guias/`).
+2. **Guía del repositorio** — `{MONO}docs/es/guias/guia-del-repositorio.md` o `{MONO}docs/en/guides/repository-guide.md` (onboarding, comandos `pnpm`, estructura).
+3. **Doc del área** — p. ej. hooks → `{MONO}docs/es/core/hooks.md`; CLI/Webpack → `{MONO}docs/es/ryunix-presets/`.
+4. **Código** — implementación en `{MONO}packages/` (ver regla `component-scope` para la carpeta exacta).
+5. **Docs públicas** — `ryunix-doc/app/es/docs/` o `ryunix-doc/app/en/docs/` solo si la pregunta es de redacción del sitio o de contenido orientado a usuarios finales.
+
+No inventes APIs ni flags de `ryunix.config.js`: búscalos en `{MONO}packages/ryunix-presets/`, plantillas `{MONO}packages/cra/templates/` o en la doc interna del preset.
+
+## Mapa rápido pregunta → ruta
+
+| Tema | Doc interna (ES) | Código principal |
+| :--- | :--- | :--- |
+| VDOM, reconciler, fibers | `{MONO}docs/es/core/vdom-y-reconciliacion.md` | `{MONO}packages/core/src/lib/` |
+| Hooks, estado | `{MONO}docs/es/core/hooks.md` | `{MONO}packages/core/src/lib/` |
+| SSR, render | `{MONO}docs/es/core/renderizado.md` | `{MONO}packages/core/src/lib/` |
+| CLI `ryunix`, dev/build | `{MONO}docs/es/ryunix-presets/cli-y-arranque.md` | `{MONO}packages/ryunix-presets/webpack/` |
+| Routing, SSG | `{MONO}docs/es/ryunix-presets/enrutamiento-y-ssg.md` | `{MONO}packages/ryunix-presets/webpack/` |
+| `create-ryunix-app`, plantillas | `{MONO}docs/es/cra/` | `{MONO}packages/cra/` |
+| Tests, lint del monorepo | `{MONO}docs/es/guias/tests-automatizados.md` | `{MONO}packages/core/src/tests/` |
+| App de integración local | `{MONO}docs/es/guias/app-de-integracion-local.md` | `{MONO}test/` (gitignored) |
+| Apps generadas (`.ryx`, layout) | plantilla `{MONO}packages/cra/templates/ryunix-base/` | — |
+
+Para **ubicar un cambio de código**, usa la regla `component-scope` (árbol de decisión por paquete).
+
+## Bilingüe y comandos
+
+- Pares EN ↔ ES bajo `{MONO}docs/en/` y `{MONO}docs/es/`; en español los nombres de archivo suelen estar en español.
+- Traducir o mantener paridad: comando `/update-docs` (ver `.cursor/commands/update-docs.md`).
+- Contribución y PRs: `{MONO}CONTRIBUTING.md`, `{MONO}CLAUDE.md`.
+
+## Qué evitar
+
+- Asumir que `docs/` o `packages/` están en la raíz del workspace si solo existe `Ryunixjs/docs/` — aplicar siempre `MONO`.
+- Copiar convenciones de Next.js/React sin comprobar en `{MONO}packages/core` o en la doc de diferencias (`ryunix-doc` o docs internas).
+- Mezclar cambios del framework (`Ryunixjs/`) con el sitio de docs (`ryunix-doc/`) en un mismo commit sin que el usuario lo pida.
