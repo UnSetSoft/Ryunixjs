@@ -7,7 +7,7 @@ const {
 } = require('./styleFonts.cjs')
 
 const DEFAULT_STYLE = {
-  enabled: true,
+  enabled: false,
   padding: '1.5rem',
   maxWidth: '72rem',
   font: FONT_PRESETS.system,
@@ -18,19 +18,23 @@ const DEFAULT_STYLE = {
  * @returns {typeof DEFAULT_STYLE}
  */
 function normalizeStyleConfig(raw) {
-  if (raw === false) {
-    return { ...DEFAULT_STYLE, enabled: false }
+  if (raw === false || raw == null) {
+    return { ...DEFAULT_STYLE, enabled: false, font: { ...FONT_PRESETS.system } }
   }
 
-  if (raw === true || raw == null) {
-    return { ...DEFAULT_STYLE, font: { ...FONT_PRESETS.system } }
+  if (raw === true) {
+    return { ...DEFAULT_STYLE, enabled: true, font: { ...FONT_PRESETS.system } }
   }
 
   if (typeof raw !== 'object') {
-    return { ...DEFAULT_STYLE, font: { ...FONT_PRESETS.system } }
+    return { ...DEFAULT_STYLE, enabled: false, font: { ...FONT_PRESETS.system } }
   }
 
-  const enabled = raw.enabled !== false
+  const hasStyleOptions =
+    raw.font !== undefined ||
+    raw.padding !== undefined ||
+    raw.maxWidth !== undefined
+  const enabled = raw.enabled === true || (raw.enabled !== false && hasStyleOptions)
 
   let padding = DEFAULT_STYLE.padding
   if (raw.padding === false) padding = null

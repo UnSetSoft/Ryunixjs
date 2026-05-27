@@ -88,5 +88,11 @@ jobs:
       - name: Build @unsetsoft/ryunixjs
         run: pnpm run build:core
 
+      - name: Build @unsetsoft/cra
+        run: pnpm --filter @unsetsoft/cra run build
+
+      - name: Build @unsetsoft/ryunix-presets
+        run: pnpm --filter @unsetsoft/ryunix-presets run build
+
       - name: Build smoke app from template
         run: node scripts/ci-smoke-build.mjs

@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import AppRouterPlugin from './appRouterPlugin.js'
+import AppRouterPlugin from '../../.generated/webpack/utils/appRouterPlugin.js'
 
 const findRoute = (node, targetPath) => {
   if (!node) return null

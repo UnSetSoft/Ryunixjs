@@ -151,7 +151,7 @@ export interface RyunixStyleFontResolved {
 }
 
 export interface RyunixStyleConfig {
-  /** Enable semantic styles (default: `true`). */
+  /** Enable semantic styles (default: `false`; use `style: true` to opt in). */
   enabled?: boolean
   /** Page padding around app content. `false` disables. Default: `1.5rem`. */
   padding?: string | false
@@ -184,7 +184,7 @@ export interface RyunixConfig {
   mdx?: boolean
   /**
    * Global semantic HTML styles (typography, tables, forms, MDX alerts).
-   * Theme toggles via `class="dark"` on `<html>`. Default: `true`.
+   * Theme toggles via `class="dark"` on `<html>`. Default: `false` (`style: true` to enable).
    */
   style?: boolean | RyunixStyleConfig
   /** `DefinePlugin` env map exposed as `ryunix.config.env`. */

@@ -40,6 +40,8 @@ const render = (element, container) => {
   return root
 }
 
+const SSR_ROOT_ATTR = 'data-ryunix-ssr-root'
+
 /**
  * @param {ChildNode | null} node
  * @returns {ChildNode | null}
@@ -96,7 +98,15 @@ const hydrate = (element, container) => {
  */
 const init = (MainElement, root = '__ryunix', components = {}) => {
   const state = getState()
-  state.containerRoot = document.getElementById(root)
+  const container = document.getElementById(root)
+  state.containerRoot = container
+
+  if (!container) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`[Ryunix] init: container #${root} not found.`)
+    }
+    return undefined
+  }
 
   resetHydrationLogFlags()
   state.hydrationPolicy = getHydrationPolicy()
@@ -107,36 +117,36 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   state.isHydrating = false
   state.hydrationFailed = false
 
-  // Auto-detect SSR based on child nodes - no need to manually set process.env.RYUNIX_SSR
-  const hasChildNodes =
-    state.containerRoot && state.containerRoot.hasChildNodes()
-
-  if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-    console.log(
-      `[Ryunix Debug] init: hasChildNodes=${hasChildNodes}, has SSR content detected.`,
-    )
-  }
-
-  // Auto-detect: if there's existing content, try to hydrate (SSR)
-  // If explicitly disabled via RYUNIX_SSR=false, skip hydration
-  const ssrEnabled = process.env.RYUNIX_SSR !== 'false'
-  if (hasChildNodes && ssrEnabled) {
+  // HMR / re-init: replace the existing client tree instead of hydrating again.
+  if (state.currentRoot) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-      console.log(
-        `[Ryunix Debug] init: SSR content detected. Starting hydration on #${root}`,
-      )
+      console.log(`[Ryunix Debug] init: existing root detected. Client render on #${root}`)
     }
-    const res = hydrate(MainElement, state.containerRoot)
-    return res
+    return render(MainElement, container)
   }
+
+  const ssrEnabled = process.env.RYUNIX_SSR !== 'false'
+  const isSsrPayload =
+    ssrEnabled && container.hasAttribute(SSR_ROOT_ATTR) && container.hasChildNodes()
 
   if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
     console.log(
-      `[Ryunix Debug] init: No SSR content or SSR disabled. Starting normal render on #${root}`,
+      `[Ryunix Debug] init: isSsrPayload=${isSsrPayload}, hasChildNodes=${container.hasChildNodes()}`,
     )
   }
-  const res = render(MainElement, state.containerRoot)
-  return res
+
+  if (isSsrPayload) {
+    if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
+      console.log(`[Ryunix Debug] init: hydrating SSR markup on #${root}`)
+    }
+    container.removeAttribute(SSR_ROOT_ATTR)
+    return hydrate(MainElement, container)
+  }
+
+  if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
+    console.log(`[Ryunix Debug] init: client render on #${root}`)
+  }
+  return render(MainElement, container)
 }
 
 /**

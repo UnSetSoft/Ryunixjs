@@ -17,6 +17,7 @@ import {
 import {
   enqueueScopedRecovery,
   findNearestHydrationBoundary,
+  findBoundaryDomFromNode,
   getBoundaryDom,
   getHydrationPolicy,
   skipHydrationSubtree,
@@ -146,7 +147,9 @@ const updateHostComponent = (fiber) => {
           domNode.nodeType === 1 ? (domNode as Element).tagName : 'text'
         } but got ${String(fiber.type)}.`
         const boundaryFiber = findNearestHydrationBoundary(fiber)
-        const boundaryDom = boundaryFiber ? getBoundaryDom(boundaryFiber) : null
+        const boundaryDom =
+          (boundaryFiber ? getBoundaryDom(boundaryFiber) : null) ??
+          findBoundaryDomFromNode(state.hydrateCursor)
 
         if (policy.recover === 'boundary' && boundaryFiber && boundaryDom) {
           logHydrationBoundaryMismatch(detail)
@@ -231,7 +234,7 @@ const getMDXComponents = (components) => {
 }
 
 const RYUNIX_STYLE_ENABLED =
-  globalThis.process && String(globalThis.process.env?.RYUNIX_STYLE) !== 'false'
+  globalThis.process && String(globalThis.process.env?.RYUNIX_STYLE) === 'true'
 
 /**
  * Maps `unstyled` prop to `data-ryx-unstyled` for global style opt-out.

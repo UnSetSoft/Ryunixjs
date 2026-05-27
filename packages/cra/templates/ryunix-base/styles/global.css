@@ -115,7 +115,7 @@ body {
   }
 }
 
-/* Hero title: use class to avoid conflicting with Ryunix global h1 styles (style: true default) */
+/* Hero title: use class to avoid conflicting with Ryunix global h1 styles when style: true is enabled */
 .hero-title {
   font-size: 4rem;
   font-weight: 800;

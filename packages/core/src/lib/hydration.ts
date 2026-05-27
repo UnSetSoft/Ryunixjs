@@ -57,6 +57,22 @@ export const findNearestHydrationBoundary = (
   return null
 }
 
+export const findBoundaryDomFromNode = (
+  node: ChildNode | null | undefined,
+): Element | null => {
+  let current: Node | null = node ?? null
+  while (current) {
+    if (
+      current.nodeType === 1 &&
+      (current as Element).hasAttribute('data-ryunix-hydrate-boundary')
+    ) {
+      return current as Element
+    }
+    current = current.parentNode
+  }
+  return null
+}
+
 /**
  */
 export const getBoundaryDom = (fiber: RyunixFiber | null): Element | null => {

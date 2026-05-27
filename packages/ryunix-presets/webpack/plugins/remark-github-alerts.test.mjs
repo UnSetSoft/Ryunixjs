@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { remarkGithubAlerts } from './remark-github-alerts.js'
+import { remarkGithubAlerts } from '../../.generated/webpack/plugins/remark-github-alerts.js'
 
 const run = remarkGithubAlerts()
 

@@ -9,6 +9,13 @@ import {
   normalizeFontConfig,
 } from './styleFonts.cjs'
 
+test('normalizeStyleConfig disables styles by default', () => {
+  assert.equal(normalizeStyleConfig(undefined).enabled, false)
+  assert.equal(normalizeStyleConfig(null).enabled, false)
+  assert.equal(normalizeStyleConfig(false).enabled, false)
+  assert.equal(normalizeStyleConfig({}).enabled, false)
+})
+
 test('normalizeStyleConfig keeps defaults for style: true', () => {
   const style = normalizeStyleConfig(true)
   assert.equal(style.enabled, true)
@@ -17,6 +24,7 @@ test('normalizeStyleConfig keeps defaults for style: true', () => {
 
 test('normalizeStyleConfig merges font preset', () => {
   const style = normalizeStyleConfig({ font: 'inter' })
+  assert.equal(style.enabled, true)
   assert.equal(style.font.id, 'inter')
   assert.match(style.font.sans, /Inter/)
 })

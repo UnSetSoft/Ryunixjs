@@ -4,7 +4,7 @@ import {
   buildPathFromParams,
   generateResolveSSGPathsCode,
   parseDynamicSegment,
-} from './ssgStaticParams.js'
+} from '../../.generated/webpack/utils/ssgStaticParams.js'
 
 test('parseDynamicSegment recognizes single and catch-all params', () => {
   assert.deepEqual(parseDynamicSegment('[locale]'), {

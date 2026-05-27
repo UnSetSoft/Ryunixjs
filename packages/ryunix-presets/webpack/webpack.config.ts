@@ -16,7 +16,7 @@ import {
 } from './utils/index.js'
 import fs from 'fs'
 import config from './utils/config.cjs'
-import { buildStyleVarsCss, buildFontHeadLinks } from './utils/styleConfig.ts'
+import { buildStyleVarsCss, buildFontHeadLinks } from './utils/styleConfig.js'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.js'
 import RyunixRoutesPlugin from './utils/ssgPlugin.js'
@@ -419,7 +419,7 @@ const getPlugins = (isServer = false) =>
       'process.env.RYUNIX_HYDRATION_STRICT': JSON.stringify(
         config.hydration?.strict ?? false,
       ),
-      'process.env.RYUNIX_STYLE': JSON.stringify(config.style?.enabled !== false),
+      'process.env.RYUNIX_STYLE': JSON.stringify(config.style?.enabled === true),
     }),
     // Only inject HTML for the client build
     !isServer &&

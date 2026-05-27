@@ -11,7 +11,7 @@ import {
 } from './styleFonts.cjs'
 
 export const DEFAULT_STYLE: RyunixStyleResolvedConfig = {
-  enabled: true,
+  enabled: false,
   padding: '1.5rem',
   maxWidth: '72rem',
   font: FONT_PRESETS.system,
@@ -20,19 +20,23 @@ export const DEFAULT_STYLE: RyunixStyleResolvedConfig = {
 export function normalizeStyleConfig(
   raw: boolean | RyunixStyleConfig | undefined | null,
 ): RyunixStyleResolvedConfig {
-  if (raw === false) {
-    return { ...DEFAULT_STYLE, enabled: false }
+  if (raw === false || raw == null) {
+    return { ...DEFAULT_STYLE, enabled: false, font: { ...FONT_PRESETS.system } }
   }
 
-  if (raw === true || raw == null) {
-    return { ...DEFAULT_STYLE, font: { ...FONT_PRESETS.system } }
+  if (raw === true) {
+    return { ...DEFAULT_STYLE, enabled: true, font: { ...FONT_PRESETS.system } }
   }
 
   if (typeof raw !== 'object') {
-    return { ...DEFAULT_STYLE, font: { ...FONT_PRESETS.system } }
+    return { ...DEFAULT_STYLE, enabled: false, font: { ...FONT_PRESETS.system } }
   }
 
-  const enabled = raw.enabled !== false
+  const hasStyleOptions =
+    raw.font !== undefined ||
+    raw.padding !== undefined ||
+    raw.maxWidth !== undefined
+  const enabled = raw.enabled === true || (raw.enabled !== false && hasStyleOptions)
 
   let padding: string | null = DEFAULT_STYLE.padding
   if (raw.padding === false) padding = null

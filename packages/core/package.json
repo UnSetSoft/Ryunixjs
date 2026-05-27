@@ -31,7 +31,9 @@
     },
     "./style.css": "./styles/ryunix-style.css",
     "./theme-toggle.css": "./styles/theme-toggle.css",
-    "./layout.css": "./styles/layout.css"
+    "./layout.css": "./styles/layout.css",
+    "./layout-header.css": "./styles/layout-header.css",
+    "./layout-footer.css": "./styles/layout-footer.css"
   },
   "types": "./types/index.d.ts",
   "files": [

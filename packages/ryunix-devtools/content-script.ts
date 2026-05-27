@@ -26,7 +26,7 @@ window.addEventListener('message', (event: MessageEvent<PageHookMessage>) => {
 function injectHook(): void {
   try {
     const script = document.createElement('script')
-    script.src = chrome.runtime.getURL('hook.js')
+    script.src = chrome.runtime.getURL('.generated/hook.js')
     script.onload = () => {
       script.remove()
       console.log('[Ryunix DevTools] Hook injected')

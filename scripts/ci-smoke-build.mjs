@@ -11,7 +11,7 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const {
   ensurePublicFavicon,
-} = require('../packages/cra/src/helpers/ensure-public-favicon.js')
+} = require('../packages/cra/.generated/helpers/ensure-public-favicon.js')
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const smokeDir = path.join(root, '_ci', 'smoke-app')

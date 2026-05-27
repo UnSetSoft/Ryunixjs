@@ -6,7 +6,7 @@
     "noEmitOnError": false,
     "noImplicitAny": false,
     "strictPropertyInitialization": false,
-    "outDir": "webpack",
+    "outDir": ".generated/webpack",
     "rootDir": "webpack",
     "declaration": false,
     "module": "ESNext",
