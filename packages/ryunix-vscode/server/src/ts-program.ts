@@ -6,10 +6,11 @@ import {
   mergeCompilerPaths,
   pathsFromRyunixConfig,
 } from './ryunix-config-paths'
+import { filterFalsePositiveModuleDiagnostics } from './diagnostic-filters'
 import {
-  filterFalsePositiveModuleDiagnostics,
-} from './diagnostic-filters'
-import { ryunixTypesPathEntries, resolveRyunixTypesEntry } from './ryunix-types-resolve'
+  ryunixTypesPathEntries,
+  resolveRyunixTypesEntry,
+} from './ryunix-types-resolve'
 
 const RYX_EXT = /\.ryx$/i
 const SCRIPT_EXTS = ['.ryx', '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx']
@@ -332,9 +333,7 @@ export class RyunixTsProgram {
         String(this.versions.get(normalizePath(fileName)) ?? 0),
       getScriptSnapshot: (fileName) => {
         const disk = toDiskPath(fileName)
-        return ts.ScriptSnapshot.fromString(
-          readDiskContent(disk, openContents),
-        )
+        return ts.ScriptSnapshot.fromString(readDiskContent(disk, openContents))
       },
       getCurrentDirectory: () => root,
       getCompilationSettings: () => options,
@@ -443,7 +442,12 @@ export class RyunixTsProgram {
           entrySource,
         )
         return filtered.map((d) =>
-          d.file ? { ...d, file: { ...d.file, fileName: toDiskPath(d.file.fileName) } } : d,
+          d.file
+            ? {
+                ...d,
+                file: { ...d.file, fileName: toDiskPath(d.file.fileName) },
+              }
+            : d,
         )
       }) ?? []
     )
