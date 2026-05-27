@@ -1,6 +1,6 @@
 {
   "name": "@unsetsoft/ryunixjs",
-  "version": "1.2.5-canary.11",
+  "version": "1.2.5-canary.12",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,25 +28,32 @@
       "import": "./jsx/jsx-dev-runtime.js",
       "require": "./jsx/jsx-dev-runtime.js",
       "default": "./jsx/jsx-dev-runtime.js"
-    }
+    },
+    "./style.css": "./styles/ryunix-style.css",
+    "./theme-toggle.css": "./styles/theme-toggle.css",
+    "./layout.css": "./styles/layout.css",
+    "./layout-header.css": "./styles/layout-header.css",
+    "./layout-footer.css": "./styles/layout-footer.css"
   },
   "types": "./types/index.d.ts",
   "files": [
     "dist",
     "jsx",
-    "types"
+    "types",
+    "styles"
   ],
   "type": "module",
   "scripts": {
-    "build": "rollup -c",
-    "build:lib-ts": "tsc -p tsconfig.emit.json && prettier -w \"src/lib/**/*.js\" \"src/utils/**/*.js\" \"src/main.js\"",
-    "prepublishOnly": "npm run build:lib-ts && npm run build",
+    "build": "pnpm run build:lib-ts && rollup -c",
+    "build:lib-ts": "tsc -p tsconfig.emit.json && prettier -w \".generated/lib/**/*.js\" \".generated/utils/**/*.js\" \".generated/main.js\"",
+    "prepublishOnly": "npm run build",
     "canary:release": "npm publish --tag canary",
     "release": "npm publish",
     "lint": "eslint src jsx --max-warnings=0 --config ../../eslint.config.mjs",
     "prettier-check": "prettier -c .",
     "prettier-fix": "prettier -w .",
     "test": "jest --testPathPatterns=src",
+    "pretest": "pnpm run build:lib-ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "typecheck:checkjs": "tsc --noEmit -p tsconfig.checkjs.json"
   },

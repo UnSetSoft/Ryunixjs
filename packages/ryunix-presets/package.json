@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.26-canary.41",
+  "version": "1.0.26-canary.42",
   "author": "Neyunse",
   "type": "module",
   "repository": {
@@ -14,7 +14,9 @@
     "ryunixjs"
   ],
   "files": [
-    "webpack/"
+    ".generated/webpack",
+    "webpack/config.d.ts",
+    "webpack/utils/config.cjs.d.ts"
   ],
   "peerDependencies": {
     "@unsetsoft/ryunixjs": "^1.2.5-canary.0 || ^1.2.4"
@@ -30,19 +32,22 @@
     },
     "./webpack": {
       "types": "./webpack/config.d.ts",
-      "import": "./webpack/index.js",
-      "default": "./webpack/index.js"
+      "import": "./.generated/webpack/index.js",
+      "default": "./.generated/webpack/index.js"
     }
   },
   "types": "./webpack/config.d.ts",
   "bin": {
-    "ryunix": "./webpack/bin/index.js"
+    "ryunix": "./.generated/webpack/bin/index.js"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "tsc -p tsconfig.emit.json && prettier -w \"webpack/**/*.js\"",
+    "build": "pnpm run build:lib-ts && pnpm run build:assets",
+    "build:lib-ts": "tsc -p tsconfig.emit.json && prettier -w \".generated/webpack/**/*.js\"",
+    "build:assets": "node scripts/sync-webpack-assets.mjs",
     "prepublishOnly": "npm run build",
-    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs"
+    "pretest": "pnpm run build",
+    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs webpack/utils/ssgStaticParams.test.mjs webpack/utils/appRouterFlatMdx.test.mjs webpack/utils/styleConfig.test.mjs webpack/utils/styleFonts.test.mjs"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

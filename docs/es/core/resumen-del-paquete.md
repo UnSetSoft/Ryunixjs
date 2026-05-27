@@ -103,33 +103,36 @@ los mantenedores trabajan en el monorepo y ejecutan `build` antes de publicar.
 
 ## Módulos principales (`src/lib/`)
 
-| Área           | Archivos (fuente `.ts` / `.js`)                                  | Tema en docs                                                                                     |
-| :------------- | :--------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| VDOM y árbol   | `createElement`, `reconciler`, `commits`, `dom`                  | [vdom-y-reconciliacion.md](./vdom-y-reconciliacion.md)                                           |
-| Render cliente | `render`, `effects`                                              | [renderizado.md](./renderizado.md)                                                               |
-| Estado         | `hooks`, `batching`, `priority`, `memo`                          | [hooks.md](./hooks.md), [estado-y-prioridad.md](./estado-y-prioridad.md)                         |
-| Componentes    | `lazy`, `portal`, `forwardRef`, `components`                     | [componentes-avanzados.md](./componentes-avanzados.md)                                           |
-| Servidor       | `server`, `serverActions`, `serverBoundary`, `bridge`, `workers` | [funciones-servidor.md](./funciones-servidor.md)                                                 |
-| Errores y DX   | `errorBoundary`, `devOverlay`, `devtools`, `profiler`            | [limites-de-error.md](./limites-de-error.md), [devtools-y-profiler.md](./devtools-y-profiler.md) |
-| Entrada        | `index.ts`                                                       | Reexporta la API pública                                                                         |
+Estructura por carpetas (desde la reorganización del runtime):
 
-La migración del **código fuente** a TypeScript está **en curso**: muchos
-módulos tienen par `.ts` + `.js`; Rollup compila desde `src/main.js` con
-`@rollup/plugin-typescript` sobre `src/**/*.ts`.
+| Carpeta       | Contenido principal                                           | Tema en docs                                                                         |
+| :------------ | :------------------------------------------------------------ | :----------------------------------------------------------------------------------- |
+| `reconciler/` | `createElement`, `reconciler`, `commits`, `dom`, `workers`, … | [vdom-y-reconciliacion.md](./vdom-y-reconciliacion.md)                               |
+| `hooks/`      | `hooks`, `memo`, `forwardRef`, `lazy`                         | [hooks.md](./hooks.md), [estado-y-prioridad.md](./estado-y-prioridad.md)             |
+| `render/`     | `render`, `portal`                                            | [renderizado.md](./renderizado.md)                                                   |
+| `hydration/`  | `policy`, `recover`, `log`, `boundaries`                      | [renderizado.md](./renderizado.md), [funciones-servidor.md](./funciones-servidor.md) |
+| `server/`     | `ssr`, `actions`                                              | [funciones-servidor.md](./funciones-servidor.md)                                     |
+| `ui/`         | `layout`, `theme`, `mdx`, `error-boundary`, `dev-overlay`     | [componentes.md](./componentes.md), [limites-de-error.md](./limites-de-error.md)     |
+| `devtools/`   | `runtime`, `profiler`                                         | [devtools-y-profiler.md](./devtools-y-profiler.md)                                   |
+| Entrada       | `index.ts`                                                    | Reexporta la API pública                                                             |
+
+La migración del **código fuente** a TypeScript está **hecha**: `src/` solo
+contiene `.ts`; `build:lib-ts` emite `.js` en `.generated/` (gitignore) y Rollup
+empaqueta desde `.generated/main.js` hacia `dist/`.
 
 ---
 
 ## Build, tipos y TypeScript
 
-| Script              | Comando                        | Uso                                   |
-| :------------------ | :----------------------------- | :------------------------------------ |
-| `build`             | `rollup -c`                    | Bundles en `dist/` para publicar      |
-| `build:lib-ts`      | `tsc -p tsconfig.emit.json`    | Emit selectivo en `src/` (prepublish) |
-| `typecheck`         | `tsc --noEmit`                 | Fuentes `.ts`                         |
-| `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` con JSDoc en lib/utils          |
-| `test`              | `jest`                         | Pruebas en `src/tests/`               |
+| Script              | Comando                        | Uso                                |
+| :------------------ | :----------------------------- | :--------------------------------- |
+| `build`             | `build:lib-ts` + `rollup -c`   | Bundles en `dist/` para publicar   |
+| `build:lib-ts`      | `tsc -p tsconfig.emit.json`    | Emit en `.generated/` (prepublish) |
+| `typecheck`         | `tsc --noEmit`                 | Fuentes `.ts`                      |
+| `typecheck:checkjs` | `tsc -p tsconfig.checkjs.json` | `.js` con JSDoc en lib/utils       |
+| `test`              | `jest`                         | Pruebas en `src/tests/`            |
 
-`prepublishOnly` ejecuta `build:lib-ts` y luego `build`.
+`prepublishOnly` ejecuta `build`.
 
 Detalle de fases: [TypeScript en el monorepo](../guias/typescript-en-el-monorepo.md).
 

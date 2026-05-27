@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { remarkGithubAlerts } from './remark-github-alerts.js'
+import { remarkGithubAlerts } from '../../.generated/webpack/plugins/remark-github-alerts.js'
 
 const run = remarkGithubAlerts()
 
@@ -17,7 +17,7 @@ function getBlockquote(tree) {
 }
 
 describe('remarkGithubAlerts', () => {
-  it('adds docs-alert--warning and removes marker line', () => {
+  it('adds ryx-alert--warning and removes marker line', () => {
     const tree = blockquote([
       paragraph('[!WARNING]'),
       paragraph('Deprecated API.'),
@@ -25,8 +25,8 @@ describe('remarkGithubAlerts', () => {
     run(tree)
     const bq = getBlockquote(tree)
     assert.deepEqual(bq.data.hProperties.className, [
-      'docs-alert',
-      'docs-alert--warning',
+      'ryx-alert',
+      'ryx-alert--warning',
     ])
     assert.equal(bq.data.hProperties.dataAlert, 'warning')
     assert.equal(bq.children.length, 1)
@@ -40,7 +40,7 @@ describe('remarkGithubAlerts', () => {
       const bq = getBlockquote(tree)
       assert.ok(
         bq.data.hProperties.className.includes(
-          `docs-alert--${type.toLowerCase()}`,
+          `ryx-alert--${type.toLowerCase()}`,
         ),
       )
     }
@@ -50,7 +50,7 @@ describe('remarkGithubAlerts', () => {
     const tree = blockquote([paragraph('[!NOTE] Inline note text.')])
     run(tree)
     const bq = getBlockquote(tree)
-    assert.ok(bq.data.hProperties.className.includes('docs-alert--note'))
+    assert.ok(bq.data.hProperties.className.includes('ryx-alert--note'))
     assert.equal(bq.children[0].children[0].value, 'Inline note text.')
   })
 
@@ -61,7 +61,7 @@ describe('remarkGithubAlerts', () => {
     ])
     run(tree)
     const bq = getBlockquote(tree)
-    assert.ok(bq.data.hProperties.className.includes('docs-alert--warning'))
+    assert.ok(bq.data.hProperties.className.includes('ryx-alert--warning'))
   })
 
   it('leaves plain blockquotes unchanged', () => {

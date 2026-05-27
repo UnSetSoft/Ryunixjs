@@ -2,6 +2,15 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 import ts from 'typescript'
+import {
+  mergeCompilerPaths,
+  pathsFromRyunixConfig,
+} from './ryunix-config-paths'
+import { filterFalsePositiveModuleDiagnostics } from './diagnostic-filters'
+import {
+  ryunixTypesPathEntries,
+  resolveRyunixTypesEntry,
+} from './ryunix-types-resolve'
 
 const RYX_EXT = /\.ryx$/i
 const SCRIPT_EXTS = ['.ryx', '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx']
@@ -104,6 +113,31 @@ export function normalizePath(filePath: string): string {
   }
 }
 
+/** TypeScript only tracks standard script extensions; map `.ryx` → `.tsx`. */
+function toServicePath(filePath: string): string {
+  const n = normalizePath(filePath)
+  return RYX_EXT.test(n) ? n.replace(RYX_EXT, '.tsx') : n
+}
+
+function toDiskPath(filePath: string): string {
+  const n = normalizePath(filePath)
+  if (/\.tsx$/i.test(n)) {
+    const ryx = n.replace(/\.tsx$/i, '.ryx')
+    if (fs.existsSync(ryx)) return ryx
+  }
+  return n
+}
+
+function readDiskContent(
+  diskPath: string,
+  openContents: Map<string, string>,
+): string {
+  const n = normalizePath(diskPath)
+  if (openContents.has(n)) return openContents.get(n)!
+  if (fs.existsSync(n)) return fs.readFileSync(n, 'utf8')
+  return ''
+}
+
 function scriptKindFor(fileName: string): ts.ScriptKind {
   const ext = path.extname(fileName).toLowerCase()
   if (ext === '.ryx' || ext === '.tsx' || ext === '.jsx')
@@ -162,42 +196,88 @@ function defaultCompilerOptions(root: string): ts.CompilerOptions {
   }
 }
 
-function loadCompilerOptions(root: string): ts.CompilerOptions {
-  const base = defaultCompilerOptions(root)
-  const configNames = ['jsconfig.json', 'tsconfig.json']
-  for (const name of configNames) {
-    const configPath = path.join(root, name)
-    if (!fs.existsSync(configPath)) continue
-    const parsed = ts.parseConfigFileTextToJson(
-      configPath,
-      fs.readFileSync(configPath, 'utf8'),
-    )
-    if (parsed.error) continue
-    const cfg = ts.parseJsonConfigFileContent(
-      parsed.config,
-      ts.sys,
-      root,
-      base,
-      configPath,
-    )
-    return { ...base, ...cfg.options }
-  }
-  return base
+export interface LoadCompilerOptionsConfig {
+  preferTsconfig?: boolean
+  checkJsOverride?: boolean
 }
+
+export interface RyunixTsProgramOptions {
+  checkJsOverride?: boolean
+  preferTsconfig?: boolean
+}
+
+function loadCompilerOptions(
+  root: string,
+  config: LoadCompilerOptionsConfig = {},
+): ts.CompilerOptions {
+  const preferTsconfig = config.preferTsconfig !== false
+  const base = defaultCompilerOptions(root)
+  let options = { ...base }
+  if (preferTsconfig) {
+    const configNames = ['jsconfig.json', 'tsconfig.json']
+    for (const name of configNames) {
+      const configPath = path.join(root, name)
+      if (!fs.existsSync(configPath)) continue
+      const parsed = ts.parseConfigFileTextToJson(
+        configPath,
+        fs.readFileSync(configPath, 'utf8'),
+      )
+      if (parsed.error) continue
+      // Do not pass `base.paths` here — TS skips jsconfig paths when existingOptions.paths is set.
+      const cfg = ts.parseJsonConfigFileContent(
+        parsed.config,
+        ts.sys,
+        root,
+        {},
+        configPath,
+      )
+      options = { ...base, ...cfg.options }
+      break
+    }
+  }
+
+  if (config.checkJsOverride !== undefined) {
+    options.checkJs = config.checkJsOverride
+  }
+
+  const paths = mergeCompilerPaths(
+    { ...(options.paths ?? {}) },
+    pathsFromRyunixConfig(root),
+  )
+  const typesEntry = ryunixTypesPathEntries(root)
+  if (typesEntry) {
+    paths['@unsetsoft/ryunixjs'] = typesEntry
+  }
+  options.paths = paths
+  return options
+}
+
+export { loadCompilerOptions }
 
 /** TypeScript LanguageService backed project for Ryunix workspaces. */
 export class RyunixTsProgram {
   private readonly root: string
   private readonly typesPath: string
+  private readonly programOptions: RyunixTsProgramOptions
+  private compilerOptions: ts.CompilerOptions
   private fileNames: string[] = []
   private versions = new Map<string, number>()
   /** In-memory buffers for open editors (avoids stale/missing disk reads). */
   private openContents = new Map<string, string>()
   private service: ts.LanguageService | undefined
 
-  constructor(workspaceRoot: string, extensionTypesDir: string) {
+  constructor(
+    workspaceRoot: string,
+    extensionTypesDir: string,
+    options: RyunixTsProgramOptions = {},
+  ) {
     this.root = normalizePath(workspaceRoot)
     this.typesPath = path.join(extensionTypesDir, 'types', 'ryunix.d.ts')
+    this.programOptions = options
+    this.compilerOptions = loadCompilerOptions(this.root, {
+      preferTsconfig: options.preferTsconfig,
+      checkJsOverride: options.checkJsOverride,
+    })
     this.refreshFileList()
     this.rebuildService()
   }
@@ -205,34 +285,41 @@ export class RyunixTsProgram {
   refreshFileList(): void {
     const files: string[] = []
     walkProjectFiles(this.root, files)
-    if (fs.existsSync(this.typesPath)) files.push(normalizePath(this.typesPath))
+    const hasFullRyunixTypes = Boolean(resolveRyunixTypesEntry(this.root))
+    if (fs.existsSync(this.typesPath) && !hasFullRyunixTypes) {
+      files.push(normalizePath(this.typesPath))
+    }
     for (const open of this.openContents.keys()) {
       if (!files.includes(open)) files.push(open)
     }
-    this.fileNames = [...new Set(files)].sort()
+    this.fileNames = [...new Set(files.map(toServicePath))].sort()
   }
 
   /** Track an open document with latest editor text. */
   syncOpenDocument(filePath: string, content: string): void {
-    const n = normalizePath(filePath)
-    this.openContents.set(n, content)
-    const ver = (this.versions.get(n) ?? 0) + 1
-    this.versions.set(n, ver)
-    if (!this.fileNames.includes(n)) {
-      this.fileNames.push(n)
+    const disk = normalizePath(filePath)
+    const service = toServicePath(disk)
+    this.openContents.set(disk, content)
+    const ver = (this.versions.get(service) ?? 0) + 1
+    this.versions.set(service, ver)
+    if (!this.fileNames.includes(service)) {
+      this.fileNames.push(service)
       this.fileNames.sort()
       this.rebuildService()
     }
   }
 
   closeDocument(filePath: string): void {
-    const n = normalizePath(filePath)
-    this.openContents.delete(n)
+    const disk = normalizePath(filePath)
+    this.openContents.delete(disk)
   }
 
   private rebuildService(): void {
-    const options = loadCompilerOptions(this.root)
-    const host = this.createHost(options)
+    this.compilerOptions = loadCompilerOptions(this.root, {
+      preferTsconfig: this.programOptions.preferTsconfig,
+      checkJsOverride: this.programOptions.checkJsOverride,
+    })
+    const host = this.createHost(this.compilerOptions)
     this.service = ts.createLanguageService(host, ts.createDocumentRegistry())
   }
 
@@ -245,24 +332,20 @@ export class RyunixTsProgram {
       getScriptVersion: (fileName) =>
         String(this.versions.get(normalizePath(fileName)) ?? 0),
       getScriptSnapshot: (fileName) => {
-        const n = normalizePath(fileName)
-        if (openContents.has(n)) {
-          return ts.ScriptSnapshot.fromString(openContents.get(n)!)
-        }
-        if (!fs.existsSync(n)) {
-          return ts.ScriptSnapshot.fromString('')
-        }
-        return ts.ScriptSnapshot.fromString(fs.readFileSync(n, 'utf8'))
+        const disk = toDiskPath(fileName)
+        return ts.ScriptSnapshot.fromString(readDiskContent(disk, openContents))
       },
       getCurrentDirectory: () => root,
       getCompilationSettings: () => options,
       getDefaultLibFileName: (opts) => ts.getDefaultLibFilePath(opts),
       fileExists: (fileName) => {
-        const n = normalizePath(fileName)
+        const disk = toDiskPath(fileName)
+        const n = normalizePath(disk)
         return openContents.has(n) || fs.existsSync(n)
       },
       readFile: (fileName) => {
-        const n = normalizePath(fileName)
+        const disk = toDiskPath(fileName)
+        const n = normalizePath(disk)
         if (openContents.has(n)) return openContents.get(n)!
         return fs.existsSync(n) ? fs.readFileSync(n, 'utf8') : undefined
       },
@@ -276,21 +359,26 @@ export class RyunixTsProgram {
   }
 
   onFileChanged(filePath: string, content?: string): void {
-    const n = normalizePath(filePath)
-    if (content !== undefined) this.openContents.set(n, content)
-    this.versions.set(n, (this.versions.get(n) ?? 0) + 1)
-    if (SCRIPT_EXTS.some((e) => n.endsWith(e)) && !this.fileNames.includes(n)) {
-      this.fileNames.push(n)
+    const disk = normalizePath(filePath)
+    const service = toServicePath(disk)
+    if (content !== undefined) this.openContents.set(disk, content)
+    this.versions.set(service, (this.versions.get(service) ?? 0) + 1)
+    if (
+      SCRIPT_EXTS.some((e) => disk.endsWith(e)) &&
+      !this.fileNames.includes(service)
+    ) {
+      this.fileNames.push(service)
       this.fileNames.sort()
       this.rebuildService()
     }
   }
 
   onFileDeleted(filePath: string): void {
-    const n = normalizePath(filePath)
-    this.fileNames = this.fileNames.filter((f) => f !== n)
-    this.openContents.delete(n)
-    this.versions.delete(n)
+    const disk = normalizePath(filePath)
+    const service = toServicePath(disk)
+    this.fileNames = this.fileNames.filter((f) => f !== service)
+    this.openContents.delete(disk)
+    this.versions.delete(service)
     this.rebuildService()
   }
 
@@ -306,13 +394,14 @@ export class RyunixTsProgram {
   }
 
   private ensureInProgram(filePath: string): string {
-    const n = normalizePath(filePath)
-    if (!this.fileNames.includes(n)) {
-      this.fileNames.push(n)
+    const disk = normalizePath(filePath)
+    const service = toServicePath(disk)
+    if (!this.fileNames.includes(service)) {
+      this.fileNames.push(service)
       this.fileNames.sort()
       this.rebuildService()
     }
-    return n
+    return service
   }
 
   private safe<T>(
@@ -331,23 +420,58 @@ export class RyunixTsProgram {
 
   getDiagnostics(filePath: string): ts.Diagnostic[] {
     return (
-      this.safe(filePath, (n) => {
+      this.safe(filePath, (servicePath) => {
         const s = this.svc()
-        return [...s.getSyntacticDiagnostics(n), ...s.getSemanticDiagnostics(n)]
+        const raw = [
+          ...s.getSyntacticDiagnostics(servicePath),
+          ...s.getSemanticDiagnostics(servicePath),
+        ]
+        const disk = toDiskPath(servicePath)
+        const content = readDiskContent(disk, this.openContents)
+        const entrySource = ts.createSourceFile(
+          servicePath,
+          content,
+          ts.ScriptTarget.Latest,
+          true,
+          ts.ScriptKind.TSX,
+        )
+        const filtered = filterFalsePositiveModuleDiagnostics(
+          raw,
+          this.root,
+          this.compilerOptions,
+          entrySource,
+        )
+        return filtered.map((d) =>
+          d.file
+            ? {
+                ...d,
+                file: { ...d.file, fileName: toDiskPath(d.file.fileName) },
+              }
+            : d,
+        )
       }) ?? []
     )
   }
 
   getDefinition(filePath: string, position: number) {
-    return this.safe(filePath, (n) =>
-      this.svc().getDefinitionAndBoundSpan(n, position),
+    const result = this.safe(filePath, (servicePath) =>
+      this.svc().getDefinitionAndBoundSpan(servicePath, position),
     )
+    if (!result?.definitions) return result
+    return {
+      ...result,
+      definitions: result.definitions.map((d) => ({
+        ...d,
+        fileName: toDiskPath(d.fileName),
+      })),
+    }
   }
 
   getReferences(filePath: string, position: number) {
-    return this.safe(filePath, (n) =>
-      this.svc().getReferencesAtPosition(n, position),
+    const refs = this.safe(filePath, (servicePath) =>
+      this.svc().getReferencesAtPosition(servicePath, position),
     )
+    return refs?.map((r) => ({ ...r, fileName: toDiskPath(r.fileName) }))
   }
 
   getHover(filePath: string, position: number) {
@@ -367,9 +491,10 @@ export class RyunixTsProgram {
   }
 
   getRename(filePath: string, position: number) {
-    return this.safe(filePath, (n) =>
-      this.svc().findRenameLocations(n, position, false, false),
+    const locs = this.safe(filePath, (servicePath) =>
+      this.svc().findRenameLocations(servicePath, position, false, false),
     )
+    return locs?.map((r) => ({ ...r, fileName: toDiskPath(r.fileName) }))
   }
 
   getSignatureHelp(filePath: string, position: number) {
@@ -394,3 +519,9 @@ export function uriToPath(uri: string): string {
 export function pathToFileUri(filePath: string): string {
   return pathToFileURL(normalizePath(filePath)).href
 }
+
+export {
+  buildVirtualRyxProgramSources,
+  collectModuleSpecifiers,
+} from './virtual-program'
+export { resolveModuleSpecifier } from './diagnostic-filters'

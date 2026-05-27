@@ -1,0 +1,76 @@
+/**
+ * Header / Main / Footer layout shell — import alongside app styles.
+ * Expects Ryunix semantic tokens (`style: true`) for colors and spacing.
+ */
+
+@import './layout-header.css';
+@import './layout-footer.css';
+
+html:not(.dark):has(.ryx-header),
+html.dark:has(.ryx-header),
+html:not(.dark):has(.ryx-footer),
+html.dark:has(.ryx-footer),
+html:not(.dark):has(.ryx-main),
+html.dark:has(.ryx-main) {
+  width: 100%;
+  max-width: none;
+}
+
+/* --- Shell tokens (webpack1 / ryunix-doc palette) --- */
+
+html:not(.dark) {
+  --ryx-shell-bg: var(--ryx-bg, #fafafa);
+  --ryx-shell-main-bg: var(--ryx-bg, #fafafa);
+  --ryx-shell-container: 80rem;
+  --ryx-shell-gutter: var(--ryx-page-padding, 1.5rem);
+}
+
+html.dark {
+  --ryx-shell-bg: #111112;
+  --ryx-shell-main-bg: #111112;
+  --ryx-shell-container: 80rem;
+  --ryx-shell-gutter: var(--ryx-page-padding, 1.5rem);
+}
+
+/* Shell: body sin padding; header/footer a ancho completo */
+html:not(.dark) body:has(.ryx-header),
+html.dark body:has(.ryx-header),
+html:not(.dark) body:has(.ryx-footer),
+html.dark body:has(.ryx-footer),
+html:not(.dark) body:has(.ryx-main),
+html.dark body:has(.ryx-main) {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  background-color: var(--ryx-shell-bg);
+}
+
+html:not(.dark) #__ryunix,
+html.dark #__ryunix {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  background-color: var(--ryx-shell-bg);
+}
+
+/* --- Main --- */
+
+.ryx-main {
+  flex: 1 1 auto;
+  align-self: stretch;
+  inline-size: 100%;
+  max-inline-size: none;
+  background: var(--ryx-shell-main-bg);
+  color: var(--ryx-text);
+}
+
+.ryx-main-inner {
+  width: 100%;
+  max-width: var(--ryx-shell-container);
+  margin-inline: auto;
+  padding: var(--ryx-page-padding, 1.5rem);
+}

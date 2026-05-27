@@ -91,8 +91,8 @@ missing).
 
   browser-specific error stack layouts (V8 Chrome, SpiderMonkey Firefox). It
   explicitly filters out internal framework noise routines
-  (`packages/core/src/lib/workers.js`) so the developer only inspects tracing
-  matching their own application code paths.
+  (`packages/core/src/lib/reconciler/workers.js`) so the developer only
+  inspects tracing matching their own application code paths.
 
 - **Physical Source Locating**: Taking advantage of the precise
 

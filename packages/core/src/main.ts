@@ -8,7 +8,8 @@ export {
   useMDXComponents,
   getMDXComponents,
   defaultComponents,
-} from './lib/components.js'
+  ryxProps,
+} from './lib/ui/mdx.js'
 
 if (typeof window !== 'undefined') window.Ryunix = Ryunix
 export default Ryunix

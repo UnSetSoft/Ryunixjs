@@ -1,0 +1,313 @@
+/**
+ * Footer chrome — import via layout.css or standalone.
+ * Expects Ryunix semantic tokens (`style: true`) for colors and spacing.
+ */
+
+html:not(.dark) {
+  --ryx-footer-bg: var(--ryx-surface-elevated, #f4f4f5);
+  --ryx-footer-border: var(--ryx-border, #e4e4e7);
+  --ryx-footer-accent: color-mix(
+    in srgb,
+    var(--ryx-link, #2563eb) 30%,
+    transparent
+  );
+  --ryx-footer-glow: color-mix(
+    in srgb,
+    var(--ryx-link, #2563eb) 6%,
+    transparent
+  );
+  --ryx-footer-bottom-border: var(--ryx-border, #e4e4e7);
+  --ryx-footer-link: var(--ryx-text-muted, #52525b);
+  --ryx-footer-link-hover: var(--ryx-text, #18181b);
+}
+
+html.dark {
+  --ryx-footer-bg: #0a0a0b;
+  --ryx-footer-border: #2e2e30;
+  --ryx-footer-accent: rgb(59 130 246 / 0.38);
+  --ryx-footer-glow: rgb(37 99 235 / 0.12);
+  --ryx-footer-bottom-border: #1e1e1e;
+  --ryx-footer-link: #9ca3af;
+  --ryx-footer-link-hover: #ffffff;
+}
+
+.ryx-footer a,
+.ryx-footer-column a,
+.ryx-footer-bottom a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ryx-footer nav ul,
+.ryx-footer-column ul {
+  margin-block: 0;
+}
+
+.ryx-footer-description,
+.ryx-footer-bottom p,
+.ryx-footer-bottom-end p {
+  max-inline-size: none;
+}
+
+.ryx-footer {
+  position: relative;
+  align-self: stretch;
+  inline-size: 100%;
+  max-inline-size: none;
+  box-sizing: border-box;
+  margin-block-start: auto;
+  border-block-start: 1px solid var(--ryx-footer-border);
+  background: var(--ryx-footer-bg);
+  color: var(--ryx-footer-link);
+  overflow: hidden;
+}
+
+.ryx-footer-accent {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ryx-footer-accent),
+    transparent
+  );
+}
+
+.ryx-footer-glow {
+  pointer-events: none;
+  position: absolute;
+  inset-block-start: -6rem;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  inline-size: min(100%, 36rem);
+  block-size: 12rem;
+  border-radius: 9999px;
+  background: var(--ryx-footer-glow);
+  filter: blur(80px);
+}
+
+.ryx-footer-inner {
+  position: relative;
+  width: 100%;
+  max-width: var(--ryx-shell-container);
+  margin-inline: auto;
+  padding: clamp(3rem, 6vw, 4rem) var(--ryx-shell-gutter);
+}
+
+.ryx-footer-grid {
+  display: grid;
+  gap: clamp(2rem, 4vw, 2.5rem);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.ryx-footer-column h3 {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+html:not(.dark) .ryx-footer-column h3 {
+  color: var(--ryx-text-subtle, #71717a);
+}
+
+.ryx-footer-column ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ryx-footer-column a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-decoration: none;
+  color: var(--ryx-footer-link);
+  transition: color 180ms ease;
+}
+
+.ryx-footer-column a:hover {
+  color: var(--ryx-footer-link-hover);
+}
+
+.ryx-footer-brand-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.ryx-footer-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.ryx-footer-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: fit-content;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+  min-width: 0;
+  transition: opacity 200ms ease;
+}
+
+.ryx-footer-brand-link:hover {
+  opacity: 1;
+}
+
+.ryx-footer-brand-image {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: var(--ryx-radius-md, 0.375rem);
+  opacity: 0.92;
+}
+
+.ryx-footer-brand-link:hover .ryx-footer-brand-image {
+  opacity: 1;
+}
+
+.ryx-footer-brand-title {
+  font-size: 1.125rem;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html:not(.dark) .ryx-footer-brand-title {
+  background: linear-gradient(
+    90deg,
+    var(--ryx-link, #2563eb),
+    var(--ryx-accent, #7c3aed)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.ryx-footer-description {
+  margin: 0;
+  max-inline-size: 28rem;
+  font-size: 0.875rem;
+  line-height: 1.625;
+  color: #6b7280;
+  text-wrap: pretty;
+}
+
+html:not(.dark) .ryx-footer-description {
+  color: var(--ryx-text-subtle, #71717a);
+}
+
+.ryx-footer-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-block-start: clamp(2rem, 4vw, 3rem);
+  padding-block-start: clamp(1.5rem, 3vw, 2rem);
+  border-block-start: 1px solid var(--ryx-footer-bottom-border);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+html:not(.dark) .ryx-footer-bottom {
+  color: var(--ryx-text-subtle, #71717a);
+}
+
+.ryx-footer-bottom-start,
+.ryx-footer-bottom-end {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.ryx-footer-bottom-end {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.ryx-footer-bottom-end p {
+  margin: 0;
+  max-inline-size: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+.ryx-footer-bottom-end code {
+  font-size: 0.85em;
+}
+
+@media (min-width: 640px) {
+  .ryx-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ryx-footer-brand-column {
+    grid-column: 1 / -1;
+  }
+
+  .ryx-footer-bottom {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ryx-footer-bottom-end {
+    align-items: flex-end;
+    text-align: end;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ryx-footer-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .ryx-footer-brand-column {
+    grid-column: span 5;
+  }
+
+  .ryx-footer-column:nth-child(2) {
+    grid-column: 7 / span 3;
+  }
+
+  .ryx-footer-column:nth-child(3) {
+    grid-column: span 2;
+  }
+
+  .ryx-footer-column:nth-child(n + 4) {
+    grid-column: span 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ryx-footer-brand-link,
+  .ryx-footer-column a {
+    transition: none;
+  }
+}

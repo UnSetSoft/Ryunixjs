@@ -350,10 +350,15 @@ const prerenderRoute = async (route, template, config, renderedString = '') => {
 
   if (renderedString) {
     // Find the Ryunix root and inject the rendered HTML.
-    // Improved regex to handle whitespace or existing content inside the div.
+    // Mark the container so client init hydrates only real SSR payloads (not HMR leftovers).
     html = html.replace(
-      /(<div[^>]*id="__ryunix"[^>]*>)([\s\S]*?)(<\/div>)/i,
-      `$1${renderedString}$3`,
+      /(<div)([^>]*\bid=["']__ryunix["'][^>]*)(>)([\s\S]*?)(<\/div>)/i,
+      (_, open, attrs, close, _content, end) => {
+        const markedAttrs = attrs.includes('data-ryunix-ssr-root')
+          ? attrs
+          : `${attrs} data-ryunix-ssr-root`.replace(/\s+/g, ' ').trim()
+        return `${open} ${markedAttrs}${close}${renderedString}${end}`
+      },
     )
   }
 

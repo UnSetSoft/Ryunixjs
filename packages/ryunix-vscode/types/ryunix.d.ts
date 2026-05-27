@@ -31,6 +31,11 @@ declare module '@unsetsoft/ryunixjs' {
   export function NavLink(props: NavLinkProps): unknown
 
   export function useStore<T>(initial?: T): [T, (v: T | ((p: T) => T)) => void]
+  export function useRouter(): {
+    location: string
+    navigate: (path: string) => void
+    route: unknown
+  }
   export function useEffect(
     effect: () => void | (() => void),
     deps?: unknown[],

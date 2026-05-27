@@ -104,6 +104,76 @@ export interface RyunixLegacyConfig {
   ssg?: RyunixLegacySsgConfig
 }
 
+/** Options for global semantic HTML styles (`style: true` or object). */
+export interface RyunixStyleFontFaceSource {
+  /** Path or URL to the font file (e.g. `/assets/fonts/brand.woff2`). */
+  url: string
+  format?: 'woff2' | 'woff' | 'truetype' | 'opentype'
+}
+
+/** Custom or third-party font configuration. */
+export interface RyunixStyleFontConfig {
+  /** CSS `font-family` name used in `--ryx-font-sans`. */
+  family: string
+  /**
+   * Self-hosted files for `@font-face`.
+   * String paths or `{ url, format }` objects (woff2 recommended).
+   */
+  src?: string | Array<string | RyunixStyleFontFaceSource>
+  /** Fallback stack after `family`. */
+  fallback?: string
+  /** Letter-spacing applied to body text (default varies by preset). */
+  tracking?: string
+  weight?: string | number
+  style?: 'normal' | 'italic'
+  /**
+   * Load from Google Fonts instead of self-hosting.
+   * Example: `"Inter:wght@400;500;600;700"`.
+   */
+  google?: string
+}
+
+/** Built-in readable presets (via [fonts.bunny.net](https://fonts.bunny.net)). */
+export type RyunixStyleFontPreset =
+  | 'system'
+  | 'inter'
+  | 'source-sans'
+  | 'nunito'
+
+export type RyunixStyleFontInput = RyunixStyleFontPreset | RyunixStyleFontConfig
+
+/** Normalized font config used by the preset at build time. */
+export interface RyunixStyleFontResolved {
+  id: string
+  family: string | null
+  links: string[]
+  sans: string
+  tracking: string
+  fontFace: string
+}
+
+export interface RyunixStyleConfig {
+  /** Enable semantic styles (default: `false`; use `style: true` to opt in). */
+  enabled?: boolean
+  /** Page padding around app content. `false` disables. Default: `1.5rem`. */
+  padding?: string | false
+  /** Max width for `main`. `false` disables. Default: `72rem`. */
+  maxWidth?: string | false
+  /**
+   * Typography: preset name, custom `@font-face`, or Google Fonts spec.
+   * Default: `"system"` (native stack, slightly softened tracking).
+   */
+  font?: RyunixStyleFontInput
+}
+
+/** Normalized `style` config after preset defaults are applied. */
+export interface RyunixStyleResolvedConfig {
+  enabled: boolean
+  padding: string | null
+  maxWidth: string | null
+  font: RyunixStyleFontResolved
+}
+
 /**
  * Modern options for `ryunix.config.js` (merged with defaults in `config.cjs`).
  */
@@ -114,6 +184,11 @@ export interface RyunixConfig {
   hydration?: RyunixHydrationConfig
   /** MDX pages and loaders (default: `false`). */
   mdx?: boolean
+  /**
+   * Global semantic HTML styles (typography, tables, forms, MDX alerts).
+   * Theme toggles via `class="dark"` on `<html>`. Default: `false` (`style: true` to enable).
+   */
+  style?: boolean | RyunixStyleConfig
   /** `DefinePlugin` env map exposed as `ryunix.config.env`. */
   env?: RyunixEnv
   /** Source root when not using `/app` at project root (default: `"src"`). */

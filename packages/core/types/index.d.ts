@@ -3,7 +3,7 @@
  *
  * Runtime remains JavaScript (Rollup bundles in `dist/`). These declarations
  * cover the package entry, hooks, components, and SSR helpers exported from
- * `src/main.js`.
+ * `src/main.ts` → emitido como `.generated/main.js` antes de Rollup.
  */
 
 // ---------------------------------------------------------------------------
@@ -376,6 +376,11 @@ export function getMDXComponents(
 
 export const defaultComponents: RyunixMDXComponents
 
+/** Maps `unstyled` to `data-ryx-unstyled` for global style opt-out. */
+export function ryxProps(
+  props: Record<string, unknown> & { unstyled?: boolean },
+): Record<string, unknown>
+
 export function RyunixDevOverlay(propsOrError?: unknown): RyunixNode
 
 // ---------------------------------------------------------------------------
@@ -475,6 +480,117 @@ export namespace Hooks {
   export const useSearchParams: typeof useSearchParams
 }
 
+// ---------------------------------------------------------------------------
+// Theme toggle & cookie persistence
+// ---------------------------------------------------------------------------
+
+export interface ThemeToggleLabels {
+  title: string
+  light: string
+  system: string
+  dark: string
+}
+
+export type ThemePreference = 'light' | 'system' | 'dark'
+
+export interface ThemeControllerOptions {
+  cookieName?: string
+  defaultTheme?: ThemePreference
+  darkClass?: string
+  maxAgeSeconds?: number
+}
+
+export interface ThemeController {
+  cookieName: string
+  defaultTheme: ThemePreference
+  themes: readonly ThemePreference[]
+  getThemeCookie: () => ThemePreference | null
+  setThemeCookie: (theme: ThemePreference) => void
+  resolveThemeFromCookie: () => ThemePreference
+  getSystemColorScheme: () => 'light' | 'dark'
+  resolveEffectiveTheme: (
+    theme: ThemePreference | string | null | undefined,
+  ) => 'light' | 'dark'
+  applyTheme: (theme: ThemePreference | string | null | undefined) => void
+  getInitScript: () => string
+  watchSystemTheme: (onChange: (scheme: 'light' | 'dark') => void) => () => void
+}
+
+export const DEFAULT_THEME_COOKIE_NAME: string
+export const THEME_PREFERENCES: readonly ThemePreference[]
+export const themeController: ThemeController
+export const THEME_COOKIE_NAME: string
+export const defaultTheme: ThemePreference
+export const themes: readonly ThemePreference[]
+export const themeInitScript: string
+
+export function createThemeController(
+  options?: ThemeControllerOptions,
+): ThemeController
+
+export function getThemeCookie(): ThemePreference | null
+export function setThemeCookie(theme: ThemePreference): void
+export function resolveThemeFromCookie(): ThemePreference
+export function getSystemColorScheme(): 'light' | 'dark'
+export function resolveEffectiveTheme(
+  theme: ThemePreference | string | null | undefined,
+): 'light' | 'dark'
+export function applyTheme(
+  theme: ThemePreference | string | null | undefined,
+): void
+export function watchSystemTheme(
+  onChange: (scheme: 'light' | 'dark') => void,
+): () => void
+
+export interface ThemeToggleProps {
+  labels: ThemeToggleLabels
+  className?: string
+  controller?: ThemeController
+}
+
+export function ThemeToggle(props: ThemeToggleProps): RyunixElement
+
+export interface ThemeInitScriptProps {
+  controller?: ThemeController
+}
+
+export function ThemeInitScript(props?: ThemeInitScriptProps): RyunixElement
+
+export interface HeaderProps {
+  image?: string
+  title: string
+  href?: string
+  imageAlt?: string
+  sticky?: boolean
+  className?: string
+  children?: RyunixNode
+}
+
+export interface FooterProps {
+  image?: string
+  title?: string
+  description?: string
+  href?: string
+  imageAlt?: string
+  className?: string
+  children?: RyunixNode
+  bottomStart?: RyunixNode
+  bottomEnd?: RyunixNode
+}
+
+export function Header(props: HeaderProps): RyunixElement
+
+export function Footer(props: FooterProps): RyunixElement
+
+export interface MainProps {
+  maxWidth?: string
+  className?: string
+  innerClassName?: string
+  children?: RyunixNode
+}
+
+export function Main(props: MainProps): RyunixElement
+
 declare const Ryunix: {
   createElement: typeof createElement
   Fragment: typeof Fragment
@@ -535,6 +651,15 @@ declare const Ryunix: {
   getState: typeof getState
   createActionProxy: typeof createActionProxy
   RyunixDevOverlay: typeof RyunixDevOverlay
+  ThemeToggle: typeof ThemeToggle
+  ThemeInitScript: typeof ThemeInitScript
+  Header: typeof Header
+  Footer: typeof Footer
+  Main: typeof Main
+  createThemeController: typeof createThemeController
+  themeController: typeof themeController
+  applyTheme: typeof applyTheme
+  themeInitScript: typeof themeInitScript
 }
 
 export default Ryunix

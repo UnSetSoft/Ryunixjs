@@ -1,28 +1,19 @@
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import terser from '@rollup/plugin-terser'
-import typescript from '@rollup/plugin-typescript'
-
-const tsPlugin = typescript({
-  include: ['src/**/*.ts'],
-  compilerOptions: {
-    allowJs: false,
-    declaration: false,
-  },
-})
 
 const Ryunix = [
   {
-    input: 'src/main.js',
+    input: '.generated/main.js',
     output: {
       file: 'dist/Ryunix.esm.js',
       format: 'esm',
       sourcemap: true,
     },
-    plugins: [tsPlugin, resolve({ extensions: ['.js', '.ts'] }), commonjs()],
+    plugins: [resolve({ extensions: ['.js'] }), commonjs()],
   },
   {
-    input: 'src/main.js',
+    input: '.generated/main.js',
     output: [
       {
         file: 'dist/Ryunix.umd.js',
@@ -40,11 +31,7 @@ const Ryunix = [
         sourcemap: true,
       },
     ],
-    plugins: [
-      tsPlugin,
-      resolve({ browser: true, extensions: ['.js', '.ts'] }),
-      commonjs(),
-    ],
+    plugins: [resolve({ browser: true, extensions: ['.js'] }), commonjs()],
   },
 ]
 

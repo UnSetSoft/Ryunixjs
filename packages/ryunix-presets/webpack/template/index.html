@@ -9,6 +9,13 @@
       version="<%= htmlWebpackPlugin.options.info.version %>"
     />
     <meta name="mode" content="<%= htmlWebpackPlugin.options.info.mode %>" />
+    <% if (htmlWebpackPlugin.options.styleFontLinks) { %> <%=
+    htmlWebpackPlugin.options.styleFontLinks %> <% } %> <% if
+    (htmlWebpackPlugin.options.styleVars) { %>
+    <style>
+      <%= htmlWebpackPlugin.options.styleVars %>
+    </style>
+    <% } %>
     <link rel="icon" href="/favicon.png" />
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>

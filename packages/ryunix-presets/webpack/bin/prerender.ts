@@ -8,6 +8,42 @@ import { resolveApp } from '../utils/index.js'
 import fs from 'fs'
 import path from 'path'
 
+const loadResolvedSSGRoutes = async (buildDirectory) => {
+  const serverBundleCandidates = [
+    path.join(buildDirectory, 'server', 'app-router-server.bundle.js'),
+    path.join(buildDirectory, 'server', 'app-router-server.bundle.mjs'),
+  ]
+  const serverBundlePath = serverBundleCandidates.find((candidate) =>
+    fs.existsSync(candidate),
+  )
+
+  if (!serverBundlePath) return null
+
+  try {
+    const serverModule = await import(
+      `file://${serverBundlePath}?update=${Date.now()}`
+    )
+    if (typeof serverModule.resolveSSGPaths === 'function') {
+      return await serverModule.resolveSSGPaths()
+    }
+  } catch (error) {
+    console.warn(
+      '[SSG] Could not resolve dynamic routes from server bundle:',
+      error.message,
+    )
+  }
+
+  return null
+}
+
+const normalizeManifestRoutes = (routes) =>
+  routes
+    .filter((route) => route && route.path && !route.path.includes(':'))
+    .map((route) => ({
+      path: route.path,
+      meta: route.meta || {},
+    }))
+
 const Prerender = async (directory) => {
   const buildDirectory = resolveApp(process.cwd(), directory)
 
@@ -32,6 +68,18 @@ const Prerender = async (directory) => {
     }
   }
 
+  const resolvedRoutes = await loadResolvedSSGRoutes(buildDirectory)
+  if (resolvedRoutes) {
+    routes = resolvedRoutes
+    if (defaultSettings.debug) {
+      console.log(
+        `[SSG] Resolved ${routes.length} routes via generateStaticParams`,
+      )
+    }
+  } else {
+    routes = normalizeManifestRoutes(routes)
+  }
+
   const metaExist = routes.some((route) => route.meta)
   if (
     metaExist &&
@@ -44,7 +92,10 @@ const Prerender = async (directory) => {
   }
 
   if (routes.length === 0) {
-    routes = defaultSettings.legacy?.ssg?.prerender || []
+    const legacyRoutes = defaultSettings.legacy?.ssg?.prerender || []
+    routes = legacyRoutes.map((route) =>
+      typeof route === 'string' ? { path: route, meta: {} } : route,
+    )
     if (routes.length > 0) {
       console.log(`[SSG] Using ${routes.length} routes from config`)
     }

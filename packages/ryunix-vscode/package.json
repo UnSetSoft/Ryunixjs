@@ -35,7 +35,7 @@
     "build": "vsce package --no-dependencies",
     "publish:marketplace": "vsce publish --no-dependencies",
     "publish:openvsx": "ovsx publish --no-dependencies",
-    "test": "tsc -p server/tsconfig.json && node test/grammar.test.cjs && node test/resolve-root.test.cjs"
+    "test": "tsc -p server/tsconfig.json && node test/grammar.test.cjs && node test/resolve-root.test.cjs && node test/diagnostics.test.cjs && node test/tsconfig-paths.test.cjs"
   },
   "categories": [
     "Programming Languages",
@@ -53,13 +53,19 @@
         "ryunix.enableNavigation": {
           "type": "boolean",
           "default": true,
-          "description": "Lightweight go to definition/hover when the language server is disabled."
+          "description": "Lightweight hover and local component go-to-definition (complements the language server when enabled)."
         }
       }
     },
     "configurationDefaults": {
       "[ryunix]": {
-        "editor.maxTokenizationLineLength": 2500
+        "editor.maxTokenizationLineLength": 2500,
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "emmet.includeLanguages": {
+        "ryunix": "html"
       },
       "tailwindCSS.includeLanguages": {
         "ryunix": "html"
@@ -124,6 +130,26 @@
       {
         "language": "ryunix",
         "path": "./snippets/javascript.code-snippets"
+      },
+      {
+        "language": "ryunix",
+        "path": "./snippets/ryunix-jsx.code-snippets"
+      },
+      {
+        "language": "ryunix",
+        "path": "./snippets/ryunix-component.code-snippets"
+      },
+      {
+        "language": "ryunix",
+        "path": "./snippets/ryunix-imports.code-snippets"
+      },
+      {
+        "language": "ryunix",
+        "path": "./snippets/ryunix-api.code-snippets"
+      },
+      {
+        "language": "ryunix",
+        "path": "./snippets/file-templates.code-snippets"
       }
     ]
   },

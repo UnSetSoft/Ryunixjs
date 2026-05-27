@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "outDir": "src",
+    "outDir": ".generated",
     "rootDir": "src",
     "declaration": false,
     "module": "CommonJS",

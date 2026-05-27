@@ -103,15 +103,18 @@ Maintainers work in the monorepo and run `build` before publish.
 
 ## Main modules (`src/lib/`)
 
-| Area          | Files (`.ts` / `.js` source)                                     | Docs                                                                                             |
-| :------------ | :--------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| VDOM & tree   | `createElement`, `reconciler`, `commits`, `dom`                  | [virtual-dom-and-reconciliation.md](./virtual-dom-and-reconciliation.md)                         |
-| Client render | `render`, `effects`                                              | [rendering.md](./rendering.md)                                                                   |
-| State         | `hooks`, `batching`, `priority`, `memo`                          | [hooks.md](./hooks.md), [state-and-priority.md](./state-and-priority.md)                         |
-| Components    | `lazy`, `portal`, `forwardRef`, `components`                     | [advanced-components.md](./advanced-components.md)                                               |
-| Server        | `server`, `serverActions`, `serverBoundary`, `bridge`, `workers` | [server-features.md](./server-features.md)                                                       |
-| Errors & DX   | `errorBoundary`, `devOverlay`, `devtools`, `profiler`            | [error-boundary.md](./error-boundary.md), [devtools-and-profiler.md](./devtools-and-profiler.md) |
-| Entry         | `index.ts`                                                       | Re-exports public API                                                                            |
+Folder layout (runtime reorganization):
+
+| Folder        | Main contents                                                 | Docs                                                                       |
+| :------------ | :------------------------------------------------------------ | :------------------------------------------------------------------------- |
+| `reconciler/` | `createElement`, `reconciler`, `commits`, `dom`, `workers`, … | [virtual-dom-and-reconciliation.md](./virtual-dom-and-reconciliation.md)   |
+| `hooks/`      | `hooks`, `memo`, `forwardRef`, `lazy`                         | [hooks.md](./hooks.md), [state-and-priority.md](./state-and-priority.md)   |
+| `render/`     | `render`, `portal`                                            | [rendering.md](./rendering.md)                                             |
+| `hydration/`  | `policy`, `recover`, `log`, `boundaries`                      | [rendering.md](./rendering.md), [server-features.md](./server-features.md) |
+| `server/`     | `ssr`, `actions`                                              | [server-features.md](./server-features.md)                                 |
+| `ui/`         | `layout`, `theme`, `mdx`, `error-boundary`, `dev-overlay`     | [components.md](./components.md), [error-boundary.md](./error-boundary.md) |
+| `devtools/`   | `runtime`, `profiler`                                         | [devtools-and-profiler.md](./devtools-and-profiler.md)                     |
+| Entry         | `index.ts`                                                    | Re-exports public API                                                      |
 
 **Source migration to TypeScript is in progress**: many modules have paired
 `.ts` + `.js`; Rollup builds from `src/main.js` with

@@ -1,0 +1,239 @@
+/**
+ * Header chrome — import via layout.css or standalone.
+ * Expects Ryunix semantic tokens (`style: true`) for colors and spacing.
+ */
+
+html:not(.dark) {
+  --ryx-header-height: 4rem;
+  --ryx-header-bg: color-mix(
+    in srgb,
+    var(--ryx-surface, #ffffff) 92%,
+    transparent
+  );
+  --ryx-header-border: var(--ryx-border, #e4e4e7);
+  --ryx-header-shadow: 0 1px 0 rgb(15 23 42 / 0.04);
+  --ryx-header-nav-text: var(--ryx-text-muted, #52525b);
+  --ryx-header-nav-hover-bg: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 10%,
+    transparent
+  );
+  --ryx-header-nav-hover-border: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 24%,
+    transparent
+  );
+  --ryx-header-nav-hover-text: var(--ryx-text, #18181b);
+  --ryx-header-brand-hover-bg: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 8%,
+    transparent
+  );
+  --ryx-header-brand-hover-border: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 18%,
+    transparent
+  );
+}
+
+html.dark {
+  --ryx-header-height: 4rem;
+  --ryx-header-bg: rgb(17 17 18 / 0.82);
+  --ryx-header-border: #2e2e30;
+  --ryx-header-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
+  --ryx-header-nav-text: #d4d4d8;
+  --ryx-header-nav-hover-bg: rgb(139 92 246 / 0.18);
+  --ryx-header-nav-hover-border: rgb(167 139 250 / 0.32);
+  --ryx-header-nav-hover-text: #ffffff;
+  --ryx-header-brand-hover-bg: rgb(139 92 246 / 0.14);
+  --ryx-header-brand-hover-border: rgb(167 139 250 / 0.22);
+}
+
+.ryx-header a,
+.ryx-header-end a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ryx-header nav ul {
+  margin-block: 0;
+}
+
+.ryx-header {
+  position: relative;
+  z-index: 100;
+  align-self: stretch;
+  inline-size: 100%;
+  max-inline-size: none;
+  box-sizing: border-box;
+  border-block-end: 1px solid var(--ryx-header-border);
+  background: var(--ryx-header-bg);
+  color: var(--ryx-text);
+  box-shadow: var(--ryx-header-shadow);
+}
+
+.ryx-header--sticky {
+  position: sticky;
+  inset-block-start: 0;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+.ryx-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ryx-space-4, 1rem);
+  width: 100%;
+  max-width: var(--ryx-shell-container);
+  height: var(--ryx-header-height);
+  margin-inline: auto;
+  padding-inline: var(--ryx-shell-gutter);
+}
+
+.ryx-header-start {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.ryx-header-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.ryx-header-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: var(--ryx-space-4, 1rem);
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.ryx-header-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+  min-width: 0;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+.ryx-header-brand-link:hover {
+  background: var(--ryx-header-brand-hover-bg);
+  border-color: var(--ryx-header-brand-hover-border);
+}
+
+.ryx-header-brand-image {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: var(--ryx-radius-md, 0.375rem);
+}
+
+.ryx-header-brand-title {
+  font-size: 1.25rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html:not(.dark) .ryx-header-brand-title {
+  background: linear-gradient(
+    90deg,
+    var(--ryx-link, #2563eb),
+    var(--ryx-accent, #7c3aed)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.ryx-header-end nav ul {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ryx-header-end nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+  color: var(--ryx-header-nav-text);
+  white-space: nowrap;
+  transition:
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.ryx-header-end nav a:hover {
+  color: var(--ryx-header-nav-hover-text);
+  background: var(--ryx-header-nav-hover-bg);
+  border-color: var(--ryx-header-nav-hover-border);
+  box-shadow: 0 0 20px rgb(139 92 246 / 0.18);
+}
+
+.ryx-header-end > .ryx-theme-segment {
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .ryx-header-inner {
+    height: auto;
+    min-height: var(--ryx-header-height);
+    padding-block: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .ryx-header-start,
+  .ryx-header-end {
+    flex: 1 1 100%;
+  }
+
+  .ryx-header-end {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .ryx-header-end nav ul {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ryx-header-brand-link,
+  .ryx-header-end nav a {
+    transition: none;
+  }
+}

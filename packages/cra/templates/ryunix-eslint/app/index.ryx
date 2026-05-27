@@ -12,7 +12,7 @@ export default function Index() {
   return (
     <main className="main">
       <img src={logo} alt="Ryunix Logo" className="logo" />
-      <h1>Welcome to Ryunix</h1>
+      <h1 className="hero-title">Welcome to Ryunix</h1>
       <p className="subtitle">
         A fast, modern, and flexible JavaScript framework for building user
         interfaces.

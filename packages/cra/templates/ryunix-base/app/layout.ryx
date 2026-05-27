@@ -11,5 +11,6 @@ export const Metatags = {
 }
 
 export default function RootLayout({ children }) {
+  // Toggle theme: document.documentElement.classList.toggle('dark')
   return children
 }

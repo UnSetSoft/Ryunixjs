@@ -9,6 +9,7 @@ type PresetRuntimeConfig = RyunixUserConfig & {
   ssr: boolean
   rootDir: string
   mdx: boolean
+  style: import('../config.d.ts').RyunixStyleResolvedConfig
   favicon: boolean | string
   eslint: NonNullable<RyunixUserConfig['eslint']> & { files: string[] }
   webpack: NonNullable<RyunixUserConfig['webpack']> & {

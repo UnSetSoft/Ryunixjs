@@ -12,15 +12,16 @@
   "keywords": [
     "ryunixjs"
   ],
-  "main": "src/cli.js",
-  "bin": "src/cli.js",
+  "main": ".generated/cli.js",
+  "bin": ".generated/cli.js",
   "files": [
-    "src",
+    ".generated",
     "templates"
   ],
   "scripts": {
-    "dev": "node ./src/cli.js",
-    "build": "tsc -p tsconfig.emit.json && prettier -w \"src/**/*.js\"",
+    "dev": "node ./.generated/cli.js",
+    "build": "pnpm run build:lib-ts",
+    "build:lib-ts": "tsc -p tsconfig.emit.json && prettier -w \".generated/**/*.js\"",
     "prepublishOnly": "npm run build",
     "nightly:release": "npm publish --tag nightly",
     "release": "npm publish",

@@ -95,9 +95,10 @@ documented as an alias for `Metatags`.
 | Supported                                  | Not supported                               |
 | :----------------------------------------- | :------------------------------------------ |
 | `.ryx` highlighting, snippets, completions | MDX (build-time loader)                     |
-| ESLint workspace integration (CRA)         | TypeScript inside `.ryx`                    |
-| Emmet for `ryunix`                         | Bundled formatter (use Prettier in project) |
-| Grammar regression tests                   | LSP — see `ROADMAP.md`                      |
+| TypeScript LSP (diagnostics, go to def)    | Bundled formatter (use Prettier in project) |
+| ESLint workspace integration (CRA)         |                                             |
+| Emmet for `ryunix`                         |                                             |
+| Grammar + LSP regression tests             |                                             |
 
 CRA API templates use `router.js`; `.ryx` API snippets are optional.
 

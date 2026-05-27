@@ -58,6 +58,6 @@ export function ryunixTypesPathEntries(
   const rel = path
     .relative(path.resolve(projectRoot), entry)
     .replace(/\\/g, '/')
-  if (!rel || rel.startsWith('..')) return [entry]
+  if (!rel || rel.startsWith('/')) return undefined
   return [rel.startsWith('.') ? rel : `./${rel}`]
 }

@@ -10,17 +10,17 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content-script.js"],
+      "js": [".generated/content-script.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["hook.js"],
+      "resources": [".generated/hook.js"],
       "matches": ["<all_urls>"]
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": ".generated/background.js"
   }
 }

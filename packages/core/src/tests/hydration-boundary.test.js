@@ -1,7 +1,8 @@
 import {
   findNearestHydrationBoundary,
+  findBoundaryDomFromNode,
   skipHydrationSubtree,
-} from '../lib/hydration.js'
+} from '../lib/hydration/policy.js'
 
 describe('hydration boundary recovery', () => {
   test('finds nearest boundary from nested fiber', () => {
@@ -11,6 +12,17 @@ describe('hydration boundary recovery', () => {
     const nested = { type: 'p', parent: { type: 'span', parent: boundary } }
 
     expect(findNearestHydrationBoundary(nested)).toBe(boundary)
+  })
+
+  test('finds boundary dom from hydrated node', () => {
+    const root = document.createElement('div')
+    const boundary = document.createElement('div')
+    boundary.setAttribute('data-ryunix-hydrate-boundary', 'route')
+    const inside = document.createElement('span')
+    root.appendChild(boundary)
+    boundary.appendChild(inside)
+
+    expect(findBoundaryDomFromNode(inside)).toBe(boundary)
   })
 
   test('skips cursor subtree to boundary sibling', () => {
