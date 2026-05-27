@@ -294,7 +294,8 @@ class AppRouterPlugin {
 
       const traverse = (node, parentLayouts = [], dynamicSegments = []) => {
         if (Array.isArray(node)) {
-          for (const child of node) traverse(child, parentLayouts, dynamicSegments)
+          for (const child of node)
+            traverse(child, parentLayouts, dynamicSegments)
           return
         }
 
@@ -348,11 +349,7 @@ class AppRouterPlugin {
         let segments = dynamicSegments
 
         if (node.index) {
-          indexInfo = processComponent(
-            'Index',
-            node.index,
-            !!node.indexIsAsync,
-          )
+          indexInfo = processComponent('Index', node.index, !!node.indexIsAsync)
           const loadingInfo = processComponent('Loading', node.loading, false)
           const errorFileInfo = processComponent('Error', node.error, false)
 
@@ -451,12 +448,14 @@ class AppRouterPlugin {
     )
     const ssgManifestRoutes = [
       ...serverResult.staticSsgRoutes,
-      ...serverResult.dynamicSsgRoutes.map(({ path: routePath, meta, segments }) => ({
-        path: routePath,
-        meta,
-        dynamic: true,
-        segments,
-      })),
+      ...serverResult.dynamicSsgRoutes.map(
+        ({ path: routePath, meta, segments }) => ({
+          path: routePath,
+          meta,
+          dynamic: true,
+          segments,
+        }),
+      ),
     ]
     const resolveSSGPathsCode =
       serverResult.dynamicSsgRoutes.length > 0

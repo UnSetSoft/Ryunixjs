@@ -60,16 +60,16 @@ Ambos objetivos están **completados** en los cuatro paquetes publicados
 
 Plan interno (fases 0–7). Estado a 2026-05-24:
 
-| Fase  | Nombre                       | Estado | Entregable                                                                        |
-| :---: | :--------------------------- | :----- | :-------------------------------------------------------------------------------- |
-| **0** | Infra compartida             | Hecha  | `tsconfig.base.json`, `tsconfig.json` por paquete, `pnpm run typecheck`, CI       |
-| **1** | Tipos presets (consumidores) | Hecha  | `webpack/config.d.ts`, `RyunixUserConfig`, JSDoc en plantillas CRA                |
-| **2** | Tipos core (consumidores)    | Hecha  | `types/index.d.ts`, JSX runtime `.d.ts`, `"types"` en `@unsetsoft/ryunixjs`       |
-| **3** | `checkJs` + JSDoc (core)     | Hecha  | `tsconfig.checkjs.json` sobre `jsx/**/*.js` (runtime JSX)                         |
-| **4** | CRA en TS                    | Hecha  | Todo `src/` en `.ts`; `build:lib-ts` emite CommonJS en `.generated/`                  |
-| **5** | DevTools en TS               | Hecha  | Todos los scripts de extensión en `.ts`; `build:lib-ts` emite en `.generated/`       |
-| **6** | Presets en TS                | Hecha  | Todo `webpack/**/*.ts`; `build:lib-ts` emite en `.generated/webpack/` + sync assets   |
-| **7** | Core en TS                   | Hecha  | `src/lib/**`, `src/utils/**`, `src/main.ts`; `build:lib-ts` emite en `.generated/`   |
+| Fase  | Nombre                       | Estado | Entregable                                                                  |
+| :---: | :--------------------------- | :----- | :-------------------------------------------------------------------------- |
+| **0** | Infra compartida             | Hecha  | `tsconfig.base.json`, `tsconfig.json` por paquete, `pnpm run typecheck`, CI |
+| **1** | Tipos presets (consumidores) | Hecha  | `webpack/config.d.ts`, `RyunixUserConfig`, JSDoc en plantillas CRA          |
+| **2** | Tipos core (consumidores)    | Hecha  | `types/index.d.ts`, JSX runtime `.d.ts`, `"types"` en `@unsetsoft/ryunixjs` |
+| **3** | `checkJs` + JSDoc (core)     | Hecha  | `tsconfig.checkjs.json` sobre `jsx/**/*.js` (runtime JSX)                   |
+| **4** | CRA en TS                    | Hecha  | `src/` en `.ts`; `build:lib-ts` → CommonJS en `.generated/`                 |
+| **5** | DevTools en TS               | Hecha  | Scripts extensión en `.ts`; `build:lib-ts` → `.generated/`                  |
+| **6** | Presets en TS                | Hecha  | `webpack/**/*.ts`; emit en `.generated/webpack/` + sync assets              |
+| **7** | Core en TS                   | Hecha  | `src/lib/**`, `src/utils/**`, `main.ts`; emit en `.generated/`              |
 
 ---
 
@@ -137,15 +137,15 @@ Ver también [packages/core/README.es.md](../../packages/core/README.es.md)
 
 #### Código fuente mantenedor (objetivo B)
 
-| Archivo                            | Función                                                   |
-| :--------------------------------- | :-------------------------------------------------------- |
-| `src/lib/**/*.ts`                  | Runtime completo (hooks, reconciler, DOM, SSR, …)         |
-| `src/utils/**/*.ts`, `src/main.ts` | Utilidades y entrada Rollup                               |
-| `src/types/internal.d.ts`          | Tipos internos fiber/hook/DOM (no publicados)             |
-| `tsconfig.json`                    | Typecheck: `src/**/*.ts`, `jsx/**/*.js`, `types/`         |
+| Archivo                            | Función                                                  |
+| :--------------------------------- | :------------------------------------------------------- |
+| `src/lib/**/*.ts`                  | Runtime completo (hooks, reconciler, DOM, SSR, …)        |
+| `src/utils/**/*.ts`, `src/main.ts` | Utilidades y entrada Rollup                              |
+| `src/types/internal.d.ts`          | Tipos internos fiber/hook/DOM (no publicados)            |
+| `tsconfig.json`                    | Typecheck: `src/**/*.ts`, `jsx/**/*.js`, `types/`        |
 | `tsconfig.emit.json`               | Emite `.js` en `.generated/` (gitignore; refleja `src/`) |
-| `tsconfig.checkjs.json`            | Comprobación opcional del runtime JSX (`jsx/**/*.js`)     |
-| `rollup.config.js`                 | Bundle desde `.generated/main.js` hacia `dist/`           |
+| `tsconfig.checkjs.json`            | Comprobación opcional del runtime JSX (`jsx/**/*.js`)    |
+| `rollup.config.js`                 | Bundle desde `.generated/main.js` hacia `dist/`          |
 
 #### Scripts
 
@@ -153,9 +153,9 @@ Ver también [packages/core/README.es.md](../../packages/core/README.es.md)
 | :------------------ | :--------------------------------------------------------- |
 | `typecheck`         | `tsc --noEmit -p tsconfig.json`                            |
 | `typecheck:checkjs` | `tsc --noEmit -p tsconfig.checkjs.json` (solo JSX runtime) |
-| `build:lib-ts`      | `tsc -p tsconfig.emit.json` — regenera `.js` en `.generated/` |
-| `build`             | `build:lib-ts` + Rollup → artefactos en `dist/`               |
-| `prepublishOnly`    | `build`                                                       |
+| `build:lib-ts`      | `tsc -p tsconfig.emit.json` → `.generated/`                |
+| `build`             | `build:lib-ts` + Rollup → artefactos en `dist/`            |
+| `prepublishOnly`    | `build`                                                    |
 
 Tras editar cualquier `.ts` bajo `src/lib/`, `src/utils/` o `src/main.ts`,
 ejecuta `build:lib-ts` antes de probar Rollup o la app de integración local.
@@ -177,13 +177,14 @@ y README del paquete.
 
 #### Código fuente mantenedor (objetivo B)
 
-| Archivo                            | Función                                                  |
-| :--------------------------------- | :------------------------------------------------------- |
-| `webpack/**/*.ts`                  | Webpack config, CLI (`bin/`), loaders, plugins, utils    |
-| `webpack/types/presets-shims.d.ts` | Stubs para módulos sin tipos                             |
-| `webpack/utils/config.cjs.d.ts`    | Tipos del config legacy CJS                              |
-| `webpack/**/*.cjs`, `webpack/template/` | Assets estáticos copiados por `build:assets` a `.generated/webpack/` |
-| `tsconfig.emit.json`               | Emite `.js` ESM en `.generated/webpack/` (gitignore)      |
+| Archivo                            | Función                                                |
+| :--------------------------------- | :----------------------------------------------------- |
+| `webpack/**/*.ts`                  | Webpack config, CLI (`bin/`), loaders, plugins, utils  |
+| `webpack/types/presets-shims.d.ts` | Stubs para módulos sin tipos                           |
+| `webpack/utils/config.cjs.d.ts`    | Tipos del config legacy CJS                            |
+| `webpack/**/*.cjs`                 | Assets CJS copiados por `build:assets` a `.generated/` |
+| `webpack/template/`                | Plantillas HTML copiadas por `build:assets`            |
+| `tsconfig.emit.json`               | Emite `.js` ESM en `.generated/webpack/` (gitignore)   |
 
 Los imports en el código fuente usan extensión **`.js`** (resolución ESM hacia
 el artefacto emitido). El binario publicado es `.generated/webpack/bin/index.js`
@@ -192,15 +193,15 @@ el artefacto emitido). El binario publicado es `.generated/webpack/bin/index.js`
 
 #### Scripts
 
-| Script           | Comando                                                       |
-| :--------------- | :------------------------------------------------------------ |
-| `typecheck`      | `tsc --noEmit -p tsconfig.json`                               |
-| `build:lib-ts`   | `tsc -p tsconfig.emit.json` → `.generated/webpack/`           |
-| `build:assets`   | Copia `.cjs` y `template/` a `.generated/webpack/`            |
-| `build`          | `build:lib-ts` + `build:assets`                               |
-| `pretest`        | `build`                                                       |
-| `test`           | Tests Node (`.mjs`; imports emitidos bajo `.generated/`)      |
-| `prepublishOnly` | `build`                                                       |
+| Script           | Comando                                                  |
+| :--------------- | :------------------------------------------------------- |
+| `typecheck`      | `tsc --noEmit -p tsconfig.json`                          |
+| `build:lib-ts`   | `tsc -p tsconfig.emit.json` → `.generated/webpack/`      |
+| `build:assets`   | Copia `.cjs` y `template/` a `.generated/webpack/`       |
+| `build`          | `build:lib-ts` + `build:assets`                          |
+| `pretest`        | `build`                                                  |
+| `test`           | Tests Node (`.mjs`; imports emitidos bajo `.generated/`) |
+| `prepublishOnly` | `build`                                                  |
 
 ---
 
@@ -216,12 +217,12 @@ el artefacto emitido). El binario publicado es `.generated/webpack/bin/index.js`
 
 #### Scripts
 
-| Script           | Comando                                      |
-| :--------------- | :------------------------------------------- |
-| `typecheck`      | `tsc --noEmit -p tsconfig.json`              |
-| `build:lib-ts`   | `tsc -p tsconfig.emit.json` → `.generated/`  |
-| `build`          | `build:lib-ts`                               |
-| `prepublishOnly` | `build`                                      |
+| Script           | Comando                                     |
+| :--------------- | :------------------------------------------ |
+| `typecheck`      | `tsc --noEmit -p tsconfig.json`             |
+| `build:lib-ts`   | `tsc -p tsconfig.emit.json` → `.generated/` |
+| `build`          | `build:lib-ts`                              |
+| `prepublishOnly` | `build`                                     |
 
 Documentación del paquete: [docs/es/cra/resumen-del-paquete.md](../cra/resumen-del-paquete.md).
 Ejecuta `build` tras editar cualquier `.ts` en `src/` antes de probar

@@ -1,6 +1,6 @@
 import Ryunix from '../main.js'
-import { workLoop } from '../lib/workers.js'
-import { useStore } from '../lib/hooks.js'
+import { workLoop } from '../lib/reconciler/workers.js'
+import { useStore } from '../lib/hooks/index.js'
 
 describe('useStore Hook', () => {
   let container

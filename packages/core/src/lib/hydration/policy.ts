@@ -1,10 +1,10 @@
-import { getState } from '../utils/index.js'
+import { getState } from '../../utils/index.js'
 import type {
   HydrationPolicy,
   RyunixFiber,
   RyunixNode,
   ScopedRecovery,
-} from '../types/internal.js'
+} from '../../types/internal.js'
 
 export const getHydrationPolicy = (): HydrationPolicy => {
   const env = (globalThis.process && globalThis.process.env) || {}

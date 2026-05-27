@@ -1,4 +1,4 @@
-import type { RyunixComponent } from '../types/internal.js'
+import type { RyunixComponent } from '../../types/internal.js'
 
 type PropsEqual = (
   prev: Record<string, unknown>,

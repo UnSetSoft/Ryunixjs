@@ -73,7 +73,9 @@ function normalizeFontConfig(raw) {
 
   const fallback = raw.fallback || SYSTEM_SANS
   const tracking =
-    typeof raw.tracking === 'string' ? raw.tracking : FONT_PRESETS.system.tracking
+    typeof raw.tracking === 'string'
+      ? raw.tracking
+      : FONT_PRESETS.system.tracking
 
   if (typeof raw.google === 'string' && raw.google.trim()) {
     const family =

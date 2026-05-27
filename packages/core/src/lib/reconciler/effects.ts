@@ -1,7 +1,7 @@
-import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
+import { RYUNIX_TYPES, STRINGS, is } from '../../utils/index.js'
 
-/** @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber */
-/** @typedef {import('../types/internal.js').RyunixHook} RyunixHook */
+/** @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber */
+/** @typedef {import('../../types/internal.js').RyunixHook} RyunixHook */
 
 /**
  * @param {string} key

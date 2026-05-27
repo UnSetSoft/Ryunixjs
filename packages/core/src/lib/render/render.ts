@@ -1,13 +1,13 @@
-import { clearContainer } from './dom.js'
-import { getState } from '../utils/index.js'
-import { scheduleWork } from './workers.js'
-import { resetHydrationLogFlags } from './hydrationLog.js'
-import { getHydrationPolicy } from './hydration.js'
+import { clearContainer } from '../reconciler/dom.js'
+import { getState } from '../../utils/index.js'
+import { scheduleWork } from '../reconciler/workers.js'
+import { resetHydrationLogFlags } from '../hydration/log.js'
+import { getHydrationPolicy } from '../hydration/policy.js'
 
 /**
  * @typedef {import('./createElement.js').RyunixNode} RyunixNode
- * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
- * @typedef {import('../types/internal.js').RyunixComponent} RyunixComponent
+ * @typedef {import('../../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ * @typedef {import('../../types/internal.js').RyunixComponent} RyunixComponent
  */
 
 /**
@@ -28,7 +28,7 @@ const render = (element, container) => {
     dom: container,
     props: {
       children: [
-        /** @type {import('../types/internal.js').RyunixNode} */ element,
+        /** @type {import('../../types/internal.js').RyunixNode} */ element,
       ],
     },
     alternate: state.currentRoot,
@@ -78,7 +78,7 @@ const hydrate = (element, container) => {
     dom: container,
     props: {
       children: [
-        /** @type {import('../types/internal.js').RyunixNode} */ element,
+        /** @type {import('../../types/internal.js').RyunixNode} */ element,
       ],
     },
     alternate: state.currentRoot,
@@ -120,14 +120,18 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   // HMR / re-init: replace the existing client tree instead of hydrating again.
   if (state.currentRoot) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
-      console.log(`[Ryunix Debug] init: existing root detected. Client render on #${root}`)
+      console.log(
+        `[Ryunix Debug] init: existing root detected. Client render on #${root}`,
+      )
     }
     return render(MainElement, container)
   }
 
   const ssrEnabled = process.env.RYUNIX_SSR !== 'false'
   const isSsrPayload =
-    ssrEnabled && container.hasAttribute(SSR_ROOT_ATTR) && container.hasChildNodes()
+    ssrEnabled &&
+    container.hasAttribute(SSR_ROOT_ATTR) &&
+    container.hasChildNodes()
 
   if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
     console.log(
@@ -175,4 +179,4 @@ export {
   recoverScopedHydrationFailures,
   recoverHydrationFailureIfNeeded,
   runHydrationRecovery,
-} from './hydrationRecover.js'
+} from '../hydration/recover.js'

@@ -419,7 +419,9 @@ const getPlugins = (isServer = false) =>
       'process.env.RYUNIX_HYDRATION_STRICT': JSON.stringify(
         config.hydration?.strict ?? false,
       ),
-      'process.env.RYUNIX_STYLE': JSON.stringify(config.style?.enabled === true),
+      'process.env.RYUNIX_STYLE': JSON.stringify(
+        config.style?.enabled === true,
+      ),
     }),
     // Only inject HTML for the client build
     !isServer &&

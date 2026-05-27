@@ -1,4 +1,4 @@
-import { rIC } from '../utils/index.js'
+import { rIC } from '../../utils/index.js'
 
 export const Priority = {
   IMMEDIATE: 1,

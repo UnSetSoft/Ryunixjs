@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 
 import Ryunix from '../main.js'
-import { workLoop } from '../lib/workers.js'
+import { workLoop } from '../lib/reconciler/workers.js'
 import { ThemeToggle, createThemeController } from '../lib/index.js'
 
 const flush = async () => {

@@ -1,8 +1,8 @@
-import { getState } from '../utils/index.js'
+import { getState } from '../../utils/index.js'
 
 /**
- * @typedef {import('../types/internal.js').RyunixComponent} RyunixComponent
- * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../../types/internal.js').RyunixComponent} RyunixComponent
+ * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
  */
 
 /**

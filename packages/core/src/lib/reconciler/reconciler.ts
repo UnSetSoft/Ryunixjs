@@ -1,9 +1,9 @@
-import { EFFECT_TAGS, getState } from '../utils/index.js'
+import { EFFECT_TAGS, getState } from '../../utils/index.js'
 import type {
   RyunixElement,
   RyunixFiber,
   RyunixNode,
-} from '../types/internal.js'
+} from '../../types/internal.js'
 
 const reconcileChildren = (wipFiber: RyunixFiber, elements: RyunixNode[]) => {
   const state = getState()

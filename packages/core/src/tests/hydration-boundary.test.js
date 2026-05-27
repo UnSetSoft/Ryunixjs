@@ -2,7 +2,7 @@ import {
   findNearestHydrationBoundary,
   findBoundaryDomFromNode,
   skipHydrationSubtree,
-} from '../lib/hydration.js'
+} from '../lib/hydration/policy.js'
 
 describe('hydration boundary recovery', () => {
   test('finds nearest boundary from nested fiber', () => {

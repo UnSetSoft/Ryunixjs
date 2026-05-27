@@ -11,7 +11,6 @@ export function registerNavigationProviders(
   /** Hover for HTML tags / className always complements the LSP. */
   registerHoverProvider(context)
 
-  if (config.get<boolean>('languageServer.enable', true)) return
-
+  /** Local .ryx component navigation (Ctrl+click) complements the LSP. */
   registerDefinitionProvider(context)
 }

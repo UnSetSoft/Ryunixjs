@@ -27,10 +27,7 @@ test('buildPathFromParams substitutes regular and catch-all params', () => {
     '/en/docs/introduction/getting-started',
   )
 
-  assert.equal(
-    buildPathFromParams('/:locale', { locale: 'es' }),
-    '/es',
-  )
+  assert.equal(buildPathFromParams('/:locale', { locale: 'es' }), '/es')
 })
 
 test('generateResolveSSGPathsCode emits expanders for dynamic routes', () => {

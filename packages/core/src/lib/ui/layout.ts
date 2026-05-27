@@ -1,5 +1,5 @@
-import { createElement } from './createElement.js'
-import { flattenArray } from '../utils/index.js'
+import { createElement } from '../reconciler/createElement.js'
+import { flattenArray } from '../../utils/index.js'
 
 export interface HeaderProps {
   /** Brand image URL or imported asset. */
@@ -72,9 +72,7 @@ const renderBrand = ({
           className: imageClass,
         })
       : null,
-    title
-      ? createElement('span', { className: titleClass }, title)
-      : null,
+    title ? createElement('span', { className: titleClass }, title) : null,
   ].filter(Boolean)
 
   return createElement(
@@ -133,7 +131,11 @@ export function Header({
   className = '',
   children,
 }: HeaderProps) {
-  const headerClass = ['ryx-header', sticky !== false ? 'ryx-header--sticky' : '', className]
+  const headerClass = [
+    'ryx-header',
+    sticky !== false ? 'ryx-header--sticky' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 
@@ -193,7 +195,11 @@ export function Footer({
           { className: 'ryx-footer-brand-column' },
           brand,
           description
-            ? createElement('p', { className: 'ryx-footer-description' }, description)
+            ? createElement(
+                'p',
+                { className: 'ryx-footer-description' },
+                description,
+              )
             : null,
         )
       : null
@@ -206,7 +212,12 @@ export function Footer({
   const bottomEndSlot = renderSlot('ryx-footer-bottom-end', bottomEnd)
   const bottomBar =
     bottomStartSlot || bottomEndSlot
-      ? createElement('div', { className: 'ryx-footer-bottom' }, bottomStartSlot, bottomEndSlot)
+      ? createElement(
+          'div',
+          { className: 'ryx-footer-bottom' },
+          bottomStartSlot,
+          bottomEndSlot,
+        )
       : null
 
   return createElement(
@@ -214,13 +225,24 @@ export function Footer({
     {
       className: `ryx-footer ${className}`.trim(),
     },
-    createElement('div', { className: 'ryx-footer-accent', 'aria-hidden': 'true' }),
-    createElement('div', { className: 'ryx-footer-glow', 'aria-hidden': 'true' }),
+    createElement('div', {
+      className: 'ryx-footer-accent',
+      'aria-hidden': 'true',
+    }),
+    createElement('div', {
+      className: 'ryx-footer-glow',
+      'aria-hidden': 'true',
+    }),
     createElement(
       'div',
       { className: 'ryx-footer-inner' },
       brandColumn || columns.length > 0
-        ? createElement('div', { className: 'ryx-footer-grid' }, brandColumn, ...columns)
+        ? createElement(
+            'div',
+            { className: 'ryx-footer-grid' },
+            brandColumn,
+            ...columns,
+          )
         : null,
       bottomBar,
     ),

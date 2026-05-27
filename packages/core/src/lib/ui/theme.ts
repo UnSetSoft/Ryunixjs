@@ -56,9 +56,7 @@ export function createThemeController(options: ThemeControllerOptions = {}) {
     return choice
   }
 
-  const applyTheme = (
-    theme: ThemePreference | string | null | undefined,
-  ) => {
+  const applyTheme = (theme: ThemePreference | string | null | undefined) => {
     if (typeof document === 'undefined') return
     const preference = isThemePreference(theme) ? theme : defaultTheme
     const effective = resolveEffectiveTheme(preference)

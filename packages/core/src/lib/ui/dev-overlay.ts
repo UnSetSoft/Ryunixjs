@@ -1,5 +1,5 @@
-import { createElement } from './createElement.js'
-import { useStore, useEffect } from './hooks.js'
+import { createElement } from '../reconciler/createElement.js'
+import { useStore, useEffect } from '../hooks/hooks.js'
 
 /**
  * @typedef {object} OverlayError
@@ -71,15 +71,19 @@ export function RyunixDevOverlay(propsOrError) {
             if (trimmed.includes('node_modules')) return false
             // Filter out internal Ryunix core framework files to isolate user code
             const isInternal = [
-              'components.js',
+              'fiber-update.js',
               'workers.js',
               'reconciler.js',
               'commits.js',
+              'hooks/hooks.js',
               'hooks.js',
+              'error-boundary.js',
               'errorBoundary.js',
+              'boundaries.js',
               'serverBoundary.js',
               'app-router.js',
               'app-router-server.js',
+              'render/render.js',
               'render.js',
               'createElement.js',
               'index.js',

@@ -513,9 +513,7 @@ export interface ThemeController {
   ) => 'light' | 'dark'
   applyTheme: (theme: ThemePreference | string | null | undefined) => void
   getInitScript: () => string
-  watchSystemTheme: (
-    onChange: (scheme: 'light' | 'dark') => void,
-  ) => () => void
+  watchSystemTheme: (onChange: (scheme: 'light' | 'dark') => void) => () => void
 }
 
 export const DEFAULT_THEME_COOKIE_NAME: string
@@ -556,9 +554,7 @@ export interface ThemeInitScriptProps {
   controller?: ThemeController
 }
 
-export function ThemeInitScript(
-  props?: ThemeInitScriptProps,
-): RyunixElement
+export function ThemeInitScript(props?: ThemeInitScriptProps): RyunixElement
 
 export interface HeaderProps {
   image?: string

@@ -1,4 +1,4 @@
-import { getState } from '../utils/index.js'
+import { getState } from '../../utils/index.js'
 
 const PREFIX = '[Ryunix Hydration]'
 

@@ -9,12 +9,16 @@ import {
   getRyunixEntryFile,
   resolveRyunixPackageRoot,
 } from './package-resolve'
+import { resolveLocalComponentLocation } from './local-resolve'
 
 export function registerDefinitionProvider(
   context: vscode.ExtensionContext,
 ): void {
   const provider = vscode.languages.registerDefinitionProvider('ryunix', {
     provideDefinition(document, position) {
+      const local = resolveLocalComponentLocation(document, position)
+      if (local) return local
+
       const pkgRoot = resolveRyunixPackageRoot(document.uri)
       if (!pkgRoot) return null
 

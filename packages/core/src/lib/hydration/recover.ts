@@ -1,13 +1,13 @@
-import { clearContainer } from './dom.js'
-import { getState } from '../utils/index.js'
-import { scheduleWork } from './bridge.js'
+import { clearContainer } from '../reconciler/dom.js'
+import { getState } from '../../utils/index.js'
+import { scheduleWork } from '../reconciler/bridge.js'
 import {
   logHydrationBoundaryRecovery,
   logHydrationFailure,
   logHydrationRecovery,
-} from './hydrationLog.js'
-import { getHydrationPolicy } from './hydration.js'
-import type { RyunixNode, RyunixRootFiber } from '../types/internal.js'
+} from './log.js'
+import { getHydrationPolicy } from './policy.js'
+import type { RyunixNode, RyunixRootFiber } from '../../types/internal.js'
 
 /**
  * @param {RyunixNode} element

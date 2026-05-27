@@ -90,8 +90,10 @@ export function generateResolveSSGPathsCode(staticRoutes, dynamicRoutes) {
     const fnName = `expandSSG_${index}`
     const resolveFn = (layoutId, indexId) => {
       const parts = []
-      if (indexId) parts.push(`getOptExport(${indexId}, 'generateStaticParams')`)
-      if (layoutId) parts.push(`getOptExport(${layoutId}, 'generateStaticParams')`)
+      if (indexId)
+        parts.push(`getOptExport(${indexId}, 'generateStaticParams')`)
+      if (layoutId)
+        parts.push(`getOptExport(${layoutId}, 'generateStaticParams')`)
       return parts.length ? parts.join(' || ') : 'null'
     }
 

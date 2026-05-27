@@ -1,4 +1,4 @@
-import type { RyunixComponent, RyunixNode } from '../types/internal.js'
+import type { RyunixComponent, RyunixNode } from '../../types/internal.js'
 
 type ForwardRefRender = (
   props: Record<string, unknown>,

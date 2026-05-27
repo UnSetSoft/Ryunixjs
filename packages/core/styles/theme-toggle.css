@@ -7,7 +7,11 @@ html:not(.dark) {
   --ryx-theme-segment-bg: var(--ryx-surface-elevated, #f4f4f5);
   --ryx-theme-segment-border: var(--ryx-border-strong, #d4d4d8);
   --ryx-theme-chip-active: var(--ryx-surface, #ffffff);
-  --ryx-theme-chip-active-border: color-mix(in srgb, var(--ryx-text, #18181b) 8%, transparent);
+  --ryx-theme-chip-active-border: color-mix(
+    in srgb,
+    var(--ryx-text, #18181b) 8%,
+    transparent
+  );
   --ryx-theme-chip-active-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
   --ryx-theme-icon: var(--ryx-text-subtle, #71717a);
   --ryx-theme-icon-hover: var(--ryx-text, #18181b);
@@ -18,10 +22,13 @@ html.dark {
   --ryx-theme-segment-bg: var(--ryx-surface-elevated, #1c1c1f);
   --ryx-theme-segment-border: var(--ryx-border-strong, #3f3f46);
   --ryx-theme-chip-active: var(--ryx-surface, #111113);
-  --ryx-theme-chip-active-border: color-mix(in srgb, var(--ryx-text, #fafafa) 12%, transparent);
+  --ryx-theme-chip-active-border: color-mix(
+    in srgb,
+    var(--ryx-text, #fafafa) 12%,
+    transparent
+  );
   --ryx-theme-chip-active-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.08),
-    inset 0 1px 0 rgb(255 255 255 / 0.04);
+    0 0 0 1px rgb(255 255 255 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.04);
   --ryx-theme-icon: var(--ryx-text-muted, #a1a1aa);
   --ryx-theme-icon-hover: var(--ryx-text, #fafafa);
   --ryx-theme-icon-active: var(--ryx-link, #60a5fa);

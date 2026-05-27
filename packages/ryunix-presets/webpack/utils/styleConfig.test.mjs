@@ -1,13 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {
-  buildStyleVarsCss,
-  normalizeStyleConfig,
-} from './styleConfig.cjs'
-import {
-  buildFontHeadLinks,
-  normalizeFontConfig,
-} from './styleFonts.cjs'
+import { buildStyleVarsCss, normalizeStyleConfig } from './styleConfig.cjs'
+import { buildFontHeadLinks, normalizeFontConfig } from './styleFonts.cjs'
 
 test('normalizeStyleConfig disables styles by default', () => {
   assert.equal(normalizeStyleConfig(undefined).enabled, false)

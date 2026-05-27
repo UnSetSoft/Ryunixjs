@@ -5,15 +5,35 @@
 
 html:not(.dark) {
   --ryx-header-height: 4rem;
-  --ryx-header-bg: color-mix(in srgb, var(--ryx-surface, #ffffff) 92%, transparent);
+  --ryx-header-bg: color-mix(
+    in srgb,
+    var(--ryx-surface, #ffffff) 92%,
+    transparent
+  );
   --ryx-header-border: var(--ryx-border, #e4e4e7);
   --ryx-header-shadow: 0 1px 0 rgb(15 23 42 / 0.04);
   --ryx-header-nav-text: var(--ryx-text-muted, #52525b);
-  --ryx-header-nav-hover-bg: color-mix(in srgb, var(--ryx-accent, #7c3aed) 10%, transparent);
-  --ryx-header-nav-hover-border: color-mix(in srgb, var(--ryx-accent, #7c3aed) 24%, transparent);
+  --ryx-header-nav-hover-bg: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 10%,
+    transparent
+  );
+  --ryx-header-nav-hover-border: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 24%,
+    transparent
+  );
   --ryx-header-nav-hover-text: var(--ryx-text, #18181b);
-  --ryx-header-brand-hover-bg: color-mix(in srgb, var(--ryx-accent, #7c3aed) 8%, transparent);
-  --ryx-header-brand-hover-border: color-mix(in srgb, var(--ryx-accent, #7c3aed) 18%, transparent);
+  --ryx-header-brand-hover-bg: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 8%,
+    transparent
+  );
+  --ryx-header-brand-hover-border: color-mix(
+    in srgb,
+    var(--ryx-accent, #7c3aed) 18%,
+    transparent
+  );
 }
 
 html.dark {
@@ -138,7 +158,11 @@ html.dark {
 }
 
 html:not(.dark) .ryx-header-brand-title {
-  background: linear-gradient(90deg, var(--ryx-link, #2563eb), var(--ryx-accent, #7c3aed));
+  background: linear-gradient(
+    90deg,
+    var(--ryx-link, #2563eb),
+    var(--ryx-accent, #7c3aed)
+  );
   -webkit-background-clip: text;
   background-clip: text;
 }

@@ -59,7 +59,13 @@
     },
     "configurationDefaults": {
       "[ryunix]": {
-        "editor.maxTokenizationLineLength": 2500
+        "editor.maxTokenizationLineLength": 2500,
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "emmet.includeLanguages": {
+        "ryunix": "html"
       },
       "tailwindCSS.includeLanguages": {
         "ryunix": "html"

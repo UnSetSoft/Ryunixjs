@@ -1,11 +1,11 @@
-import { RYUNIX_TYPES, getState } from '../utils/index.js'
-import { createElement, Fragment } from './createElement.js'
+import { RYUNIX_TYPES, getState } from '../../utils/index.js'
+import { createElement, Fragment } from '../reconciler/createElement.js'
 import { useStore, useEffect } from './hooks.js'
 import type {
   RyunixComponent,
   RyunixElement,
   RyunixNode,
-} from '../types/internal.js'
+} from '../../types/internal.js'
 
 export const SUSPENSE_STATUS = {
   PENDING: 'pending',

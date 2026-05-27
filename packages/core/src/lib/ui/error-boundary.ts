@@ -1,6 +1,6 @@
-import { createElement } from './createElement.js'
-import { getState } from '../utils/index.js'
-import type { RyunixFiber, RyunixNode } from '../types/internal.js'
+import { createElement } from '../reconciler/createElement.js'
+import { getState } from '../../utils/index.js'
+import type { RyunixFiber, RyunixNode } from '../../types/internal.js'
 
 interface ErrorBoundaryProps {
   children?: RyunixNode

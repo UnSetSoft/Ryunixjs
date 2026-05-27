@@ -6,8 +6,16 @@
 html:not(.dark) {
   --ryx-footer-bg: var(--ryx-surface-elevated, #f4f4f5);
   --ryx-footer-border: var(--ryx-border, #e4e4e7);
-  --ryx-footer-accent: color-mix(in srgb, var(--ryx-link, #2563eb) 30%, transparent);
-  --ryx-footer-glow: color-mix(in srgb, var(--ryx-link, #2563eb) 6%, transparent);
+  --ryx-footer-accent: color-mix(
+    in srgb,
+    var(--ryx-link, #2563eb) 30%,
+    transparent
+  );
+  --ryx-footer-glow: color-mix(
+    in srgb,
+    var(--ryx-link, #2563eb) 6%,
+    transparent
+  );
   --ryx-footer-bottom-border: var(--ryx-border, #e4e4e7);
   --ryx-footer-link: var(--ryx-text-muted, #52525b);
   --ryx-footer-link-hover: var(--ryx-text, #18181b);
@@ -189,7 +197,11 @@ html:not(.dark) .ryx-footer-column h3 {
 }
 
 html:not(.dark) .ryx-footer-brand-title {
-  background: linear-gradient(90deg, var(--ryx-link, #2563eb), var(--ryx-accent, #7c3aed));
+  background: linear-gradient(
+    90deg,
+    var(--ryx-link, #2563eb),
+    var(--ryx-accent, #7c3aed)
+  );
   -webkit-background-clip: text;
   background-clip: text;
 }

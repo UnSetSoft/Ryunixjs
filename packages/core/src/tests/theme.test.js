@@ -1,7 +1,7 @@
 import {
   createThemeController,
   resolveEffectiveTheme,
-} from '../lib/theme.js'
+} from '../lib/ui/theme.js'
 
 describe('theme controller', () => {
   beforeEach(() => {

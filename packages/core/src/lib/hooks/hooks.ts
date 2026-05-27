@@ -1,25 +1,25 @@
-import { RYUNIX_TYPES, getState, is, flattenArray } from '../utils/index.js'
-import { createElement, Fragment } from './createElement.js'
-import { scheduleWork } from './bridge.js'
+import { RYUNIX_TYPES, getState, is, flattenArray } from '../../utils/index.js'
+import { createElement, Fragment } from '../reconciler/createElement.js'
+import { scheduleWork } from '../reconciler/bridge.js'
 import {
   Priority,
   scheduleUpdate,
   runWithPriority,
   getCurrentPriority,
-} from './priority.js'
-import { RYUNIX_PORTAL } from './portal.js'
-import { queueUpdate } from './batching.js'
-import { validateHookContext as validateHookCall } from './devtools.js'
+} from '../reconciler/priority.js'
+import { RYUNIX_PORTAL } from '../render/portal.js'
+import { queueUpdate } from '../reconciler/batching.js'
+import { validateHookContext as validateHookCall } from '../devtools/runtime.js'
 
 /**
- * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../types/internal.js').RyunixHook} RyunixHook
- * @typedef {import('../types/internal.js').RyunixRoute} RyunixRoute
- * @typedef {import('../types/internal.js').RyunixRouterContextValue} RyunixRouterContextValue
- * @typedef {import('../types/internal.js').RyunixMetadataTags} RyunixMetadataTags
- * @typedef {import('../types/internal.js').RyunixMetadataOptions} RyunixMetadataOptions
- * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
- * @typedef {import('../types/internal.js').RyunixComponent} RyunixComponent
+ * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../../types/internal.js').RyunixHook} RyunixHook
+ * @typedef {import('../../types/internal.js').RyunixRoute} RyunixRoute
+ * @typedef {import('../../types/internal.js').RyunixRouterContextValue} RyunixRouterContextValue
+ * @typedef {import('../../types/internal.js').RyunixMetadataTags} RyunixMetadataTags
+ * @typedef {import('../../types/internal.js').RyunixMetadataOptions} RyunixMetadataOptions
+ * @typedef {import('../../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ * @typedef {import('../../types/internal.js').RyunixComponent} RyunixComponent
  */
 
 /**
@@ -149,7 +149,8 @@ const useReducer = (
     queueUpdate(() => scheduleWork(newRoot, priority))
   }
 
-  wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
+  wipFiber.hooks[hookIndex] =
+    hook as import('../../types/internal.js').RyunixHook
   state.hookIndex++
   return [hook.state, dispatch]
 }
@@ -200,7 +201,8 @@ const useEffect = (callback, deps) => {
     cancel: oldHook?.cancel,
   }
 
-  wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
+  wipFiber.hooks[hookIndex] =
+    hook as import('../../types/internal.js').RyunixHook
   state.hookIndex++
 }
 
@@ -237,7 +239,8 @@ const useRef = (initialValue) => {
       : { current: initialValue },
   }
 
-  wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
+  wipFiber.hooks[hookIndex] =
+    hook as import('../../types/internal.js').RyunixHook
   state.hookIndex++
   return /** @type {{ current: unknown }} */ hook.value
 }
@@ -301,7 +304,8 @@ const useMemo = (compute, deps) => {
     deps,
   }
 
-  wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
+  wipFiber.hooks[hookIndex] =
+    hook as import('../../types/internal.js').RyunixHook
   state.hookIndex++
   return value
 }
@@ -345,7 +349,7 @@ const createContext = (
   contextId: string | symbol = RYUNIX_TYPES.RYUNIX_CONTEXT,
   defaultValue: unknown = {},
 ) => {
-  /** @param {{ value?: unknown, children?: import('../types/internal.js').RyunixNode }} props */
+  /** @param {{ value?: unknown, children?: import('../../types/internal.js').RyunixNode }} props */
   const Provider = ({ value, children }) => {
     return createElement(
       RYUNIX_TYPES.RYUNIX_CONTEXT,
@@ -377,7 +381,7 @@ const createContext = (
         return fiber._contextValue
       }
       const fiberType = fiber.type as
-        | import('../types/internal.js').RyunixComponent
+        | import('../../types/internal.js').RyunixComponent
         | undefined
       if (fiberType?._contextId === ctxID && fiber.props?.value !== undefined) {
         return fiber.props.value
@@ -447,8 +451,8 @@ const useHash = () => {
  */
 
 const useMetadata = (
-  tags: import('../types/internal.js').RyunixMetadataTags = {},
-  options: import('../types/internal.js').RyunixMetadataOptions = {},
+  tags: import('../../types/internal.js').RyunixMetadataTags = {},
+  options: import('../../types/internal.js').RyunixMetadataOptions = {},
 ) => {
   const state = getState()
   if (state.isServerRendering) {
@@ -582,7 +586,7 @@ const getSsrPathname = () => {
 /**
  * The `RouterProvider` component manages routing in a Ryunix application by updating the location based
  * on window events and providing context for the current route.
- * @param {{ routes: RyunixRoute[], children?: import('../types/internal.js').RyunixNode }} props
+ * @param {{ routes: RyunixRoute[], children?: import('../../types/internal.js').RyunixNode }} props
  * @returns {import('./createElement.js').RyunixElement}
  */
 const RouterProvider = ({ routes, children }) => {
@@ -654,10 +658,10 @@ const RouterProvider = ({ routes, children }) => {
  * @returns {RyunixRouterContextValue}
  */
 const useRouter =
-  (): import('../types/internal.js').RyunixRouterContextValue => {
+  (): import('../../types/internal.js').RyunixRouterContextValue => {
     return RouterContext.useContext(
       'ryunix.navigation',
-    ) as import('../types/internal.js').RyunixRouterContextValue
+    ) as import('../../types/internal.js').RyunixRouterContextValue
   }
 
 /**
@@ -711,7 +715,7 @@ const useSearchParams = () => {
 /**
  * Link - Base link component for SPA navigation
  * Supports optional prefetching of lazy components.
- * @param {{ to: string, prefetch?: boolean, children?: import('../types/internal.js').RyunixNode } & Record<string, unknown>} props
+ * @param {{ to: string, prefetch?: boolean, children?: import('../../types/internal.js').RyunixNode } & Record<string, unknown>} props
  * @returns {import('./createElement.js').RyunixElement}
  */
 const Link = ({ to, prefetch = true, ...props }) => {
@@ -751,7 +755,7 @@ const Link = ({ to, prefetch = true, ...props }) => {
 /**
  * The NavLink function in JavaScript is a component that generates a link element with customizable
  * classes and active state based on the current location.
- * @param {{ to: string, exact?: boolean, children?: import('../types/internal.js').RyunixNode } & Record<string, unknown>} props
+ * @param {{ to: string, exact?: boolean, children?: import('../../types/internal.js').RyunixNode } & Record<string, unknown>} props
  * @returns {import('./createElement.js').RyunixElement}
  */
 const NavLink = ({ to, exact = false, ...props }) => {
@@ -973,7 +977,8 @@ const useLayoutEffect = (callback, deps) => {
     isLayout: true, // Flag to run synchronously during commit
   }
 
-  wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
+  wipFiber.hooks[hookIndex] =
+    hook as import('../../types/internal.js').RyunixHook
   state.hookIndex++
 }
 
@@ -1015,7 +1020,8 @@ const useId = () => {
       : `:r${idCounter++}:`,
   }
 
-  wipFiber.hooks[hookIndex] = hook as import('../types/internal.js').RyunixHook
+  wipFiber.hooks[hookIndex] =
+    hook as import('../../types/internal.js').RyunixHook
   state.hookIndex++
   return /** @type {string} */ /** @type {{ value: string }} */ hook.value
 }

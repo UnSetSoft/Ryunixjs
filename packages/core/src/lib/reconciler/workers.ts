@@ -1,14 +1,14 @@
 import { commitRoot } from './commits.js'
-import { updateFunctionComponent, updateHostComponent } from './components.js'
-import { runHydrationRecovery } from './hydrationRecover.js'
-import { getState, rIC, nextValidSibling } from '../utils/index.js'
+import { updateFunctionComponent, updateHostComponent } from './fiber-update.js'
+import { runHydrationRecovery } from '../hydration/recover.js'
+import { getState, rIC, nextValidSibling } from '../../utils/index.js'
 import { getCurrentPriority, Priority } from './priority.js'
-import { profiler } from './profiler.js'
+import { profiler } from '../devtools/profiler.js'
 import { setScheduleWork } from './bridge.js'
 
 /**
- * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../../types/internal.js').RyunixRootFiber} RyunixRootFiber
  */
 
 /** @type {RyunixRootFiber[]} */

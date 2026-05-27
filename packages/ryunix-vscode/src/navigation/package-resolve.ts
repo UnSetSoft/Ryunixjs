@@ -62,14 +62,13 @@ export function getRyunixEntryFile(packageRoot: string): string | undefined {
   }
 }
 
-function listJsFiles(dir: string): string[] {
+function listSourceFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) return []
   const out: string[] = []
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) out.push(...listJsFiles(full))
-    else if (entry.name.endsWith('.js') || entry.name.endsWith('.mjs'))
-      out.push(full)
+    if (entry.isDirectory()) out.push(...listSourceFiles(full))
+    else if (/\.(js|mjs|ts|tsx?)$/.test(entry.name)) out.push(full)
   }
   return out
 }
@@ -103,7 +102,7 @@ export function findRyunixSymbolLocation(
   if (fs.existsSync(dist)) searchDirs.push(dist)
 
   for (const dir of searchDirs) {
-    for (const file of listJsFiles(dir)) {
+    for (const file of listSourceFiles(dir)) {
       const content = fs.readFileSync(file, 'utf8')
       for (const re of SYMBOL_PATTERNS(symbol)) {
         const m = re.exec(content)

@@ -1,12 +1,12 @@
 import { updateDom, clearContainer } from './dom.js'
 import { cancelEffects, cancelEffectsDeep } from './effects.js'
-import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../utils/index.js'
-import { RYUNIX_PORTAL } from './portal.js'
-import { logHydrationUnmatchedNodes } from './hydrationLog.js'
+import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../../utils/index.js'
+import { RYUNIX_PORTAL } from '../render/portal.js'
+import { logHydrationUnmatchedNodes } from '../hydration/log.js'
 
 /**
- * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../types/internal.js').RyunixRootFiber} RyunixRootFiber
+ * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../../types/internal.js').RyunixRootFiber} RyunixRootFiber
  */
 
 /**
@@ -18,7 +18,7 @@ const runLayoutEffects = (fiber) => {
   if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
-    /** @type {import('../types/internal.js').RyunixHook & { isLayout?: boolean }} */
+    /** @type {import('../../types/internal.js').RyunixHook & { isLayout?: boolean }} */
     const hook = fiber.hooks[i]
 
     if (
@@ -63,7 +63,7 @@ const runNormalEffects = (fiber) => {
   if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
-    /** @type {import('../types/internal.js').RyunixHook & { isLayout?: boolean }} */
+    /** @type {import('../../types/internal.js').RyunixHook & { isLayout?: boolean }} */
     const hook = fiber.hooks[i]
 
     if (

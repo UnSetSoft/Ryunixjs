@@ -93,8 +93,8 @@ automáticamente por el ecosistema interno Webpack `AppRouterPlugin` si falta
 
   contra layouts de pila de error específicos del navegador (V8 Chrome,
   SpiderMonkey Firefox). Filtra explícitamente rutinas de ruido interno del
-  framework (`packages/core/src/lib/workers.js`) para que el desarrollador solo
-  inspeccione trazas que coincidan con sus propias rutas de código de
+  framework (`packages/core/src/lib/reconciler/workers.js`) para que el
+  desarrollador solo inspeccione trazas que coincidan con sus propias rutas de
   aplicación.
 
 - **Localización física del código fuente**: Aprovechando el

@@ -6,9 +6,11 @@
 
 /* --- Design tokens: shared (both themes) --- */
 html {
-  --ryx-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+  --ryx-font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
-  --ryx-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+  --ryx-font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
   --ryx-space-1: 0.25rem;
   --ryx-space-2: 0.5rem;
@@ -100,7 +102,10 @@ html.dark body {
   line-height: 1.65;
   letter-spacing: var(--ryx-tracking);
   font-kerning: normal;
-  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  font-feature-settings:
+    'kern' 1,
+    'liga' 1,
+    'calt' 1;
   min-height: 100%;
   margin: 0;
   padding: 0;
@@ -394,10 +399,18 @@ html.dark blockquote.ryx-alert {
   margin-block: 1rem;
   padding: 0.875rem 1rem;
   border: 1px solid
-    color-mix(in srgb, var(--ryx-alert-accent) var(--ryx-alert-border-mix), var(--ryx-border));
+    color-mix(
+      in srgb,
+      var(--ryx-alert-accent) var(--ryx-alert-border-mix),
+      var(--ryx-border)
+    );
   border-inline-start: 4px solid var(--ryx-alert-accent);
   border-radius: var(--ryx-radius-lg);
-  background: color-mix(in srgb, var(--ryx-alert-accent) var(--ryx-alert-tint), var(--ryx-surface));
+  background: color-mix(
+    in srgb,
+    var(--ryx-alert-accent) var(--ryx-alert-tint),
+    var(--ryx-surface)
+  );
   font-style: normal;
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
 }
@@ -492,7 +505,12 @@ html:not(.dark) hr,
 html.dark hr {
   border: none;
   block-size: 1px;
-  background: linear-gradient(to right, transparent, var(--ryx-border-strong), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--ryx-border-strong),
+    transparent
+  );
   margin-block: 2rem;
 }
 
@@ -561,7 +579,11 @@ html.dark caption {
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--ryx-text);
-  background: color-mix(in srgb, var(--ryx-accent) 6%, var(--ryx-surface-elevated));
+  background: color-mix(
+    in srgb,
+    var(--ryx-accent) 6%,
+    var(--ryx-surface-elevated)
+  );
   border-block-end: 1px solid var(--ryx-border);
 }
 
@@ -603,7 +625,11 @@ html.dark tbody tr:nth-child(even) {
 
 html:not(.dark) tbody tr:hover,
 html.dark tbody tr:hover {
-  background: color-mix(in srgb, var(--ryx-accent) 7%, var(--ryx-surface-elevated));
+  background: color-mix(
+    in srgb,
+    var(--ryx-accent) 7%,
+    var(--ryx-surface-elevated)
+  );
 }
 
 html:not(.dark) tbody td:first-child,
@@ -619,7 +645,11 @@ html.dark tbody td code {
 
 html:not(.dark) tfoot,
 html.dark tfoot {
-  background: color-mix(in srgb, var(--ryx-surface-elevated) 80%, var(--ryx-surface));
+  background: color-mix(
+    in srgb,
+    var(--ryx-surface-elevated) 80%,
+    var(--ryx-surface)
+  );
 }
 
 html:not(.dark) tfoot td,
@@ -759,7 +789,8 @@ html.dark meter {
   accent-color: var(--ryx-link);
 }
 
-html:not(.dark) input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+html:not(.dark)
+  input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
 html:not(.dark) textarea,
 html:not(.dark) select,
 html.dark input:not([type='checkbox']):not([type='radio']):not([type='hidden']),

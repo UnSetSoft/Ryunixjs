@@ -2,6 +2,11 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 import ts from 'typescript'
+import {
+  mergeCompilerPaths,
+  pathsFromRyunixConfig,
+} from './ryunix-config-paths'
+import { ryunixTypesPathEntries } from './ryunix-types-resolve'
 
 const RYX_EXT = /\.ryx$/i
 const SCRIPT_EXTS = ['.ryx', '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx']
@@ -164,6 +169,7 @@ function defaultCompilerOptions(root: string): ts.CompilerOptions {
 
 function loadCompilerOptions(root: string): ts.CompilerOptions {
   const base = defaultCompilerOptions(root)
+  let options = { ...base }
   const configNames = ['jsconfig.json', 'tsconfig.json']
   for (const name of configNames) {
     const configPath = path.join(root, name)
@@ -180,9 +186,20 @@ function loadCompilerOptions(root: string): ts.CompilerOptions {
       base,
       configPath,
     )
-    return { ...base, ...cfg.options }
+    options = { ...base, ...cfg.options }
+    break
   }
-  return base
+
+  const paths = mergeCompilerPaths(
+    { ...(options.paths ?? {}) },
+    pathsFromRyunixConfig(root),
+  )
+  const typesEntry = ryunixTypesPathEntries(root)
+  if (typesEntry) {
+    paths['@unsetsoft/ryunixjs'] = typesEntry
+  }
+  options.paths = paths
+  return options
 }
 
 /** TypeScript LanguageService backed project for Ryunix workspaces. */

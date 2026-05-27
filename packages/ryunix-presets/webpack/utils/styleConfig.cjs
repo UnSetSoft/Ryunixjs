@@ -19,7 +19,11 @@ const DEFAULT_STYLE = {
  */
 function normalizeStyleConfig(raw) {
   if (raw === false || raw == null) {
-    return { ...DEFAULT_STYLE, enabled: false, font: { ...FONT_PRESETS.system } }
+    return {
+      ...DEFAULT_STYLE,
+      enabled: false,
+      font: { ...FONT_PRESETS.system },
+    }
   }
 
   if (raw === true) {
@@ -27,14 +31,19 @@ function normalizeStyleConfig(raw) {
   }
 
   if (typeof raw !== 'object') {
-    return { ...DEFAULT_STYLE, enabled: false, font: { ...FONT_PRESETS.system } }
+    return {
+      ...DEFAULT_STYLE,
+      enabled: false,
+      font: { ...FONT_PRESETS.system },
+    }
   }
 
   const hasStyleOptions =
     raw.font !== undefined ||
     raw.padding !== undefined ||
     raw.maxWidth !== undefined
-  const enabled = raw.enabled === true || (raw.enabled !== false && hasStyleOptions)
+  const enabled =
+    raw.enabled === true || (raw.enabled !== false && hasStyleOptions)
 
   let padding = DEFAULT_STYLE.padding
   if (raw.padding === false) padding = null

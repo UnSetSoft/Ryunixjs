@@ -4,15 +4,15 @@ import {
   OLD_STRINGS,
   is,
   getState,
-} from '../utils/index.js'
-import { camelToKebab, validateUri } from './dom.js'
-import { toSvgAttrName } from '../utils/svgAttributes.js'
-import { resetIdCounter } from './hooks.js'
+} from '../../utils/index.js'
+import { camelToKebab, validateUri } from '../reconciler/dom.js'
+import { toSvgAttrName } from '../../utils/svgAttributes.js'
+import { resetIdCounter } from '../hooks/hooks.js'
 
 /**
  * @typedef {import('./createElement.js').RyunixNode} RyunixNode
  * @typedef {import('./createElement.js').RyunixElement} RyunixElement
- * @typedef {import('../types/internal.js').RyunixRenderToStringOptions} RyunixRenderToStringOptions
+ * @typedef {import('../../types/internal.js').RyunixRenderToStringOptions} RyunixRenderToStringOptions
  * @typedef {Promise<{ success: boolean, id: string, content: string, error?: unknown }>} RyunixSuspenseTask
  */
 
@@ -408,8 +408,8 @@ const renderToStreamImpl = async (element, push, suspenseTasks = []) => {
  * @returns {ReadableStream<Uint8Array>}
  */
 export const renderToReadableStream = (
-  element: import('../types/internal.js').RyunixNode,
-  options: import('../types/internal.js').RyunixRenderToStringOptions = {},
+  element: import('../../types/internal.js').RyunixNode,
+  options: import('../../types/internal.js').RyunixRenderToStringOptions = {},
 ) => {
   const state = getState()
   const encoder = new TextEncoder()
@@ -468,8 +468,8 @@ export const renderToReadableStream = (
  * @returns {string}
  */
 export const renderToString = (
-  element: import('../types/internal.js').RyunixNode,
-  options: import('../types/internal.js').RyunixRenderToStringOptions = {},
+  element: import('../../types/internal.js').RyunixNode,
+  options: import('../../types/internal.js').RyunixRenderToStringOptions = {},
 ) => {
   const state = getState()
   const wasServerRendering = state.isServerRendering
@@ -492,8 +492,8 @@ export const renderToString = (
  * @returns {Promise<string>}
  */
 export const renderToStringAsync = async (
-  element: import('../types/internal.js').RyunixNode,
-  options: import('../types/internal.js').RyunixRenderToStringOptions = {},
+  element: import('../../types/internal.js').RyunixNode,
+  options: import('../../types/internal.js').RyunixRenderToStringOptions = {},
 ) => {
   const stream = renderToReadableStream(element, options)
   const reader = stream.getReader()

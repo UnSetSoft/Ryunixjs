@@ -1,4 +1,4 @@
-import { createElement } from './createElement.js'
+import { createElement } from '../reconciler/createElement.js'
 
 /**
  * Wraps content rendered exclusively on the server. During hydration Ryunix

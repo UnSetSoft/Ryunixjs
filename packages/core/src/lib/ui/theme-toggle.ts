@@ -1,5 +1,5 @@
-import { createElement } from './createElement.js'
-import { useEffect, useStore } from './hooks.js'
+import { createElement } from '../reconciler/createElement.js'
+import { useEffect, useStore } from '../hooks/hooks.js'
 import {
   createThemeController,
   themeController,
@@ -124,7 +124,11 @@ export function ThemeToggle({
           onClick: () => selectTheme(id),
         },
         Icon({ className: 'ryx-theme-segment-icon' }),
-        createElement('span', { className: 'ryx-theme-segment-sr-only' }, labels[id]),
+        createElement(
+          'span',
+          { className: 'ryx-theme-segment-sr-only' },
+          labels[id],
+        ),
       )
     }),
   )
@@ -134,7 +138,9 @@ export interface ThemeInitScriptProps {
   controller?: ThemeController
 }
 
-export function ThemeInitScript({ controller = themeController }: ThemeInitScriptProps = {}) {
+export function ThemeInitScript({
+  controller = themeController,
+}: ThemeInitScriptProps = {}) {
   return createElement('script', {
     dangerouslySetInnerHTML: { __html: controller.getInitScript() },
   })

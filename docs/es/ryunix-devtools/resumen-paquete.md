@@ -60,8 +60,8 @@ packages/ryunix-devtools/
 | Capa en el core                 | ¿Usada por la extensión?                        |
 | :------------------------------ | :---------------------------------------------- |
 | `src/main.js` → `window.Ryunix` | **Sí** — punto de enganche                      |
-| `src/lib/devtools.js`           | **No** — avisos de hooks en consola (build dev) |
-| `src/lib/profiler.js`           | **No** — profiler en memoria del core           |
+| `src/lib/devtools/runtime.js`   | **No** — avisos de hooks en consola (build dev) |
+| `src/lib/devtools/profiler.js`  | **No** — profiler en memoria del core           |
 
 La extensión **no lee fibers del reconciler**; infiere metadata al interceptar
 `createElement`. Es un prototipo de inspección, no un bridge oficial del runtime.

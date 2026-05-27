@@ -1,5 +1,5 @@
 import Ryunix from '../main.js'
-import { workLoop } from '../lib/workers.js'
+import { workLoop } from '../lib/reconciler/workers.js'
 import { getState } from '../utils/index.js'
 
 describe('hydration classification', () => {

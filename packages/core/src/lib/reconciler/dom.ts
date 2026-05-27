@@ -5,13 +5,13 @@ import {
   OLD_STRINGS,
   CAMEL_TO_KEBAB_REGEX,
   is,
-} from '../utils/index.js'
-import { toSvgAttrName } from '../utils/svgAttributes.js'
+} from '../../utils/index.js'
+import { toSvgAttrName } from '../../utils/svgAttributes.js'
 import { Priority, runWithPriority } from './priority.js'
 
 /**
- * @typedef {import('../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../types/internal.js').RyunixDomElement} RyunixDomElement
+ * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
+ * @typedef {import('../../types/internal.js').RyunixDomElement} RyunixDomElement
  */
 
 /**
@@ -224,7 +224,7 @@ const updateDom = (
     return
   }
   const el = dom as HTMLElement
-  const domEl = el as import('../types/internal.js').RyunixDomElement
+  const domEl = el as import('../../types/internal.js').RyunixDomElement
   const handlerMap = domEl._ryunixHandlers
   // Remove old event listeners
   Object.keys(prevProps)

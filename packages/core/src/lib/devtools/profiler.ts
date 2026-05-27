@@ -1,4 +1,4 @@
-import type { RyunixComponent, RyunixNode } from '../types/internal.js'
+import type { RyunixComponent, RyunixNode } from '../../types/internal.js'
 
 const perfNow = (): number =>
   typeof performance !== 'undefined' ? performance.now() : Date.now()

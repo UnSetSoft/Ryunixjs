@@ -1,9 +1,9 @@
-import { RYUNIX_TYPES, STRINGS, is } from '../utils/index.js'
+import { RYUNIX_TYPES, STRINGS, is } from '../../utils/index.js'
 import type {
   RyunixElement,
   RyunixNode,
   RyunixTextElement,
-} from '../types/internal.js'
+} from '../../types/internal.js'
 
 /**
  * @param {string | number | boolean} text

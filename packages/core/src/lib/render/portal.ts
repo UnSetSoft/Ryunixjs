@@ -1,4 +1,4 @@
-import type { RyunixNode } from '../types/internal.js'
+import type { RyunixNode } from '../../types/internal.js'
 
 export const RYUNIX_PORTAL = Symbol.for('ryunix.portal')
 

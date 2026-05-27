@@ -134,11 +134,13 @@ export interface RyunixStyleFontConfig {
 }
 
 /** Built-in readable presets (via [fonts.bunny.net](https://fonts.bunny.net)). */
-export type RyunixStyleFontPreset = 'system' | 'inter' | 'source-sans' | 'nunito'
+export type RyunixStyleFontPreset =
+  | 'system'
+  | 'inter'
+  | 'source-sans'
+  | 'nunito'
 
-export type RyunixStyleFontInput =
-  | RyunixStyleFontPreset
-  | RyunixStyleFontConfig
+export type RyunixStyleFontInput = RyunixStyleFontPreset | RyunixStyleFontConfig
 
 /** Normalized font config used by the preset at build time. */
 export interface RyunixStyleFontResolved {

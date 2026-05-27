@@ -1,4 +1,4 @@
-import { getHydrationPolicy } from '../lib/hydration.js'
+import { getHydrationPolicy } from '../lib/hydration/policy.js'
 
 describe('getHydrationPolicy', () => {
   const originalProcess = globalThis.process
