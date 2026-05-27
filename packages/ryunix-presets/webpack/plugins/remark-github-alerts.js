@@ -16,8 +16,8 @@ function setAlertClasses(node, alertType) {
   const existing = node.data.hProperties?.className
   const classes = [
     ...(Array.isArray(existing) ? existing : existing ? [existing] : []),
-    'docs-alert',
-    `docs-alert--${alertType}`,
+    'ryx-alert',
+    `ryx-alert--${alertType}`,
   ]
   node.data.hProperties = {
     ...(node.data.hProperties ?? {}),

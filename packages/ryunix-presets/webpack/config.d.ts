@@ -114,6 +114,11 @@ export interface RyunixConfig {
   hydration?: RyunixHydrationConfig
   /** MDX pages and loaders (default: `false`). */
   mdx?: boolean
+  /**
+   * Global semantic HTML styles (typography, tables, forms, MDX alerts).
+   * Theme toggles via `class="dark"` on `<html>`. Default: `true`.
+   */
+  style?: boolean
   /** `DefinePlugin` env map exposed as `ryunix.config.env`. */
   env?: RyunixEnv
   /** Source root when not using `/app` at project root (default: `"src"`). */

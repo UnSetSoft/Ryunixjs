@@ -376,6 +376,11 @@ export function getMDXComponents(
 
 export const defaultComponents: RyunixMDXComponents
 
+/** Maps `unstyled` to `data-ryx-unstyled` for global style opt-out. */
+export function ryxProps(
+  props: Record<string, unknown> & { unstyled?: boolean },
+): Record<string, unknown>
+
 export function RyunixDevOverlay(propsOrError?: unknown): RyunixNode
 
 // ---------------------------------------------------------------------------

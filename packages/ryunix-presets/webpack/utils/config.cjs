@@ -135,6 +135,7 @@ const defaultSettings = {
     strict: getConfigValue('hydration.strict', false),
   },
   mdx: getConfigValue('mdx', getConfigValue('experimental.mdx', false)),
+  style: getConfigValue('style', true),
   env: getConfigValue('env', getConfigValue('experimental.env', {})),
   rootDir: getConfigValue('rootDir', getConfigValue('webpack.root', 'src')),
   buildDir: getConfigValue(

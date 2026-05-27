@@ -158,32 +158,56 @@ const getMDXComponents = (components) => {
     ...components,
   }
 }
-const mdxHost = (tag, props) => createElement(tag, props)
+const RYUNIX_STYLE_ENABLED =
+  typeof process !== 'undefined' && String(process.env.RYUNIX_STYLE) !== 'false'
+const ryxProps = (props) => {
+  const { unstyled, ...rest } = props
+  if (unstyled || rest['data-ryx-unstyled']) {
+    return { ...rest, 'data-ryx-unstyled': true }
+  }
+  return rest
+}
+const mergeClassName = (existing, base) => {
+  if (!existing) return base
+  if (Array.isArray(existing)) return [...existing, base].join(' ')
+  return `${existing} ${base}`
+}
+const styledMdxHost = (tag, ryxClass, props) => {
+  const next = ryxProps(props)
+  if (!RYUNIX_STYLE_ENABLED || !ryxClass || next['data-ryx-unstyled']) {
+    return createElement(tag, next)
+  }
+  return createElement(tag, {
+    ...next,
+    className: mergeClassName(next.className, ryxClass),
+  })
+}
+const mdxHost = (tag, props) => styledMdxHost(tag, undefined, props)
 const defaultComponents = {
-  h1: (props) => mdxHost('h1', props),
-  h2: (props) => mdxHost('h2', props),
-  h3: (props) => mdxHost('h3', props),
-  h4: (props) => mdxHost('h4', props),
-  h5: (props) => mdxHost('h5', props),
-  h6: (props) => mdxHost('h6', props),
-  p: (props) => mdxHost('p', props),
-  a: (props) => mdxHost('a', props),
-  strong: (props) => mdxHost('strong', props),
-  em: (props) => mdxHost('em', props),
-  code: (props) => mdxHost('code', props),
-  ul: (props) => mdxHost('ul', props),
-  ol: (props) => mdxHost('ol', props),
-  li: (props) => mdxHost('li', props),
-  blockquote: (props) => mdxHost('blockquote', props),
-  pre: (props) => mdxHost('pre', props),
-  hr: (props) => mdxHost('hr', props),
-  table: (props) => mdxHost('table', props),
-  thead: (props) => mdxHost('thead', props),
-  tbody: (props) => mdxHost('tbody', props),
-  tr: (props) => mdxHost('tr', props),
-  th: (props) => mdxHost('th', props),
-  td: (props) => mdxHost('td', props),
-  img: (props) => mdxHost('img', props),
+  h1: (props) => styledMdxHost('h1', 'ryx-h1', props),
+  h2: (props) => styledMdxHost('h2', 'ryx-h2', props),
+  h3: (props) => styledMdxHost('h3', 'ryx-h3', props),
+  h4: (props) => styledMdxHost('h4', 'ryx-h4', props),
+  h5: (props) => styledMdxHost('h5', 'ryx-h5', props),
+  h6: (props) => styledMdxHost('h6', 'ryx-h6', props),
+  p: (props) => styledMdxHost('p', 'ryx-p', props),
+  a: (props) => styledMdxHost('a', 'ryx-a', props),
+  strong: (props) => styledMdxHost('strong', 'ryx-strong', props),
+  em: (props) => styledMdxHost('em', 'ryx-em', props),
+  code: (props) => styledMdxHost('code', 'ryx-code', props),
+  ul: (props) => styledMdxHost('ul', 'ryx-ul', props),
+  ol: (props) => styledMdxHost('ol', 'ryx-ol', props),
+  li: (props) => styledMdxHost('li', 'ryx-li', props),
+  blockquote: (props) => styledMdxHost('blockquote', 'ryx-blockquote', props),
+  pre: (props) => styledMdxHost('pre', 'ryx-pre', props),
+  hr: (props) => styledMdxHost('hr', 'ryx-hr', props),
+  table: (props) => styledMdxHost('table', 'ryx-table', props),
+  thead: (props) => styledMdxHost('thead', 'ryx-thead', props),
+  tbody: (props) => styledMdxHost('tbody', 'ryx-tbody', props),
+  tr: (props) => styledMdxHost('tr', 'ryx-tr', props),
+  th: (props) => styledMdxHost('th', 'ryx-th', props),
+  td: (props) => styledMdxHost('td', 'ryx-td', props),
+  img: (props) => styledMdxHost('img', 'ryx-img', props),
 }
 const MDXContent = ({ children, components = {} }) => {
   const mergedComponents = getMDXComponents(components)
@@ -201,5 +225,6 @@ export {
   useMDXComponents,
   getMDXComponents,
   defaultComponents,
+  ryxProps,
   Image,
 }

@@ -108,9 +108,23 @@ const postcssPlugins = resolvePostcssPlugins()
 const hasAppDir =
   fs.existsSync(resolveApp(dir, 'app')) ||
   fs.existsSync(resolveApp(dir, `${config.rootDir}/app`))
-const entryPoint = hasAppDir
+const styleEntry =
+  config.style !== false
+    ? (() => {
+        try {
+          return ryunixRequire.resolve('@unsetsoft/ryunixjs/style.css')
+        } catch {
+          return join(
+            dirname(fileURLToPath(import.meta.url)),
+            '../../core/styles/ryunix-style.css',
+          )
+        }
+      })()
+    : null
+const mainEntry = hasAppDir
   ? resolveApp(dir, `${config.buildDir}/server/app/main.ryx`)
   : './main.ryx'
+const entryPoint = styleEntry ? [styleEntry, mainEntry] : mainEntry
 const sharedWebpackConfig = {
   experiments: {
     lazyCompilation: config.webpack.experiments.lazyCompilation,
@@ -388,6 +402,7 @@ const getPlugins = (isServer = false) =>
       'process.env.RYUNIX_HYDRATION_STRICT': JSON.stringify(
         config.hydration?.strict ?? false,
       ),
+      'process.env.RYUNIX_STYLE': JSON.stringify(config.style !== false),
     }),
     // Only inject HTML for the client build
     !isServer &&
