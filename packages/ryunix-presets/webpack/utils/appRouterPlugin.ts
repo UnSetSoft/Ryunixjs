@@ -696,8 +696,6 @@ const RouteWrapperRender = ({ routePath, layouts, index, props, loading, error }
   return wrapRouteHydrationBoundary(content, routePath);
 };
 
-const routes = [${flattenedRoutes.join(',\n')}];
-
 export default function AppRouter() {
   const isDev = process.env.NODE_ENV !== 'production';
   const content = (

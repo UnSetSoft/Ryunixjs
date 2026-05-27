@@ -1,4 +1,4 @@
-import { updateDom, clearContainer } from './dom.js'
+import { updateDom } from './dom.js'
 import { cancelEffects, cancelEffectsDeep } from './effects.js'
 import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../../utils/index.js'
 import { RYUNIX_PORTAL } from '../render/portal.js'
@@ -121,11 +121,7 @@ function commitRoot() {
       )
     }
     if (state.hydrationFailed) {
-      const container = state.containerRoot || finishedWork?.dom
-      if (container) {
-        clearContainer(/** @type {HTMLElement} */ container)
-      }
-      state.hydrateCursor = null
+      // Defer clearing to recoverHydrationFailureIfNeeded → renderSubtree.
     } else {
       // If there is a cursor left, it means these are SSR nodes that weren't matched
       // by any client fiber. We must remove them to avoid duplication.
