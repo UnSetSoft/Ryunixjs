@@ -1,7 +1,7 @@
 {
   "name": "@unsetsoft/ryunix-presets",
   "description": "Package with presets for different development environments.",
-  "version": "1.0.26-canary.40",
+  "version": "1.0.26-canary.42",
   "author": "Neyunse",
   "type": "module",
   "repository": {
@@ -42,7 +42,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "tsc -p tsconfig.emit.json && prettier -w \"webpack/**/*.js\"",
     "prepublishOnly": "npm run build",
-    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs"
+    "test": "node --test webpack/plugins/remark-github-alerts.test.mjs webpack/utils/ssgStaticParams.test.mjs webpack/utils/appRouterFlatMdx.test.mjs"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

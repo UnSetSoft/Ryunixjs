@@ -1,5 +1,9 @@
 import fs from 'fs'
 import path from 'path'
+import {
+  generateResolveSSGPathsCode,
+  parseDynamicSegment,
+} from './ssgStaticParams.js'
 class AppRouterPlugin {
   appDir
   outputPath
@@ -55,13 +59,14 @@ class AppRouterPlugin {
       },
     )
   }
-  scanDirectory(dir, basePath) {
+  scanDirectory(dir, basePath, segmentAtThisLevel = null) {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
     let layout = null
     let index = null
     let errorFile = null
     let loadingFile = null
     const children = []
+    const pendingFlatMdx = []
     const isAsync = (filePath) => {
       if (!filePath) return false
       try {
@@ -139,11 +144,47 @@ class AppRouterPlugin {
         else if (name === 'index') index = assign(index, fullPath)
         else if (name === 'error') errorFile = assign(errorFile, fullPath)
         else if (name === 'loading') loadingFile = assign(loadingFile, fullPath)
+        else if (ext === '.mdx') {
+          pendingFlatMdx.push({
+            name,
+            fullPath,
+            index: assign(null, fullPath),
+          })
+        }
       }
+    }
+    const directoryNames = new Set(
+      entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name),
+    )
+    for (const flatMdx of pendingFlatMdx) {
+      if (directoryNames.has(flatMdx.name)) {
+        if (this.debug) {
+          console.warn(
+            `[AppRouter] Ignoring ${flatMdx.name}.mdx — directory "${flatMdx.name}/" takes precedence`,
+          )
+        }
+        continue
+      }
+      const routePath =
+        basePath === '' || basePath === '/'
+          ? `/${flatMdx.name}`
+          : `${basePath}/${flatMdx.name}`
+      children.push({
+        path: routePath,
+        dynamicSegment: null,
+        layout: null,
+        layoutIsAsync: false,
+        index: flatMdx.index,
+        indexIsAsync: isAsync(flatMdx.fullPath),
+        error: null,
+        loading: null,
+        children: [],
+      })
     }
     for (const entry of entries) {
       if (entry.isDirectory()) {
         const routeSegment = entry.name
+        const dynamicSegment = parseDynamicSegment(routeSegment)
         const routePath = routeSegment.replace(
           /\[(\.\.\.)?([^\]]+)\]/g,
           ':$1$2',
@@ -157,6 +198,7 @@ class AppRouterPlugin {
         const childRoutes = this.scanDirectory(
           path.join(dir, entry.name),
           newBasePath,
+          dynamicSegment,
         )
         if (childRoutes) {
           if (Array.isArray(childRoutes)) children.push(...childRoutes)
@@ -175,6 +217,7 @@ class AppRouterPlugin {
     }
     const node = {
       path: basePath === '' ? '/' : basePath,
+      dynamicSegment: segmentAtThisLevel,
       layout,
       layoutIsAsync: isAsync(getPath(layout)),
       index,
@@ -192,7 +235,8 @@ class AppRouterPlugin {
       let componentIdCounter = 0
       const getNextId = () => componentIdCounter++
       const flattenedRoutes = []
-      const ssgRoutes = []
+      const staticSsgRoutes = []
+      const dynamicSsgRoutes = []
       let rootLayouts = []
       const appDirPath = path.resolve(process.cwd(), this.appDir)
       const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx'))
@@ -203,12 +247,15 @@ class AppRouterPlugin {
         errorsId = `Errors_App`
         importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`
       }
-      const traverse = (node, parentLayouts = []) => {
+      const traverse = (node, parentLayouts = [], dynamicSegments = []) => {
         if (Array.isArray(node)) {
-          for (const child of node) traverse(child, parentLayouts)
+          for (const child of node)
+            traverse(child, parentLayouts, dynamicSegments)
           return
         }
         const currentLayouts = [...parentLayouts]
+        let layoutInfo = null
+        let indexInfo = null
         const processComponent = (prefix, componentObj, isAsync) => {
           if (!componentObj) return null
           const id = `${prefix}_${getNextId()}`
@@ -224,7 +271,7 @@ class AppRouterPlugin {
           return { id, isServerComponent: !!componentObj.serverPath, isAsync }
         }
         if (node.layout) {
-          const layoutInfo = processComponent(
+          layoutInfo = processComponent(
             'Layout',
             node.layout,
             !!node.layoutIsAsync,
@@ -247,14 +294,22 @@ class AppRouterPlugin {
             }
           }
         }
+        let segments = dynamicSegments
         if (node.index) {
-          const indexInfo = processComponent(
-            'Index',
-            node.index,
-            !!node.indexIsAsync,
-          )
+          indexInfo = processComponent('Index', node.index, !!node.indexIsAsync)
           const loadingInfo = processComponent('Loading', node.loading, false)
           const errorFileInfo = processComponent('Error', node.error, false)
+          if (node.dynamicSegment) {
+            segments = [
+              ...dynamicSegments,
+              {
+                param: node.dynamicSegment.param,
+                isCatchAll: node.dynamicSegment.isCatchAll,
+                layoutId: layoutInfo?.id || null,
+                indexId: indexInfo?.id || null,
+              },
+            ]
+          }
           if (indexInfo) {
             const formatComp = (info) => {
               if (!info) return 'null'
@@ -275,12 +330,32 @@ class AppRouterPlugin {
       component: (props) => <RouteWrapper routePath="${node.path}" layouts={${layoutsArrayStr}} index={${errorPropStr}} loading={${loadingConfigStr}} error={${errorConfigStr}} props={props} />
     }`)
             if (isServerBuild) {
-              ssgRoutes.push({ path: node.path, meta: {} })
+              if (node.path.includes(':')) {
+                dynamicSsgRoutes.push({
+                  path: node.path,
+                  meta: {},
+                  segments,
+                })
+              } else {
+                staticSsgRoutes.push({ path: node.path, meta: {} })
+              }
             }
           }
+        } else if (node.dynamicSegment) {
+          segments = [
+            ...dynamicSegments,
+            {
+              param: node.dynamicSegment.param,
+              isCatchAll: node.dynamicSegment.isCatchAll,
+              layoutId: layoutInfo?.id || null,
+              indexId: null,
+            },
+          ]
         }
         if (Array.isArray(node.children)) {
-          for (const child of node.children) traverse(child, currentLayouts)
+          for (const child of node.children) {
+            traverse(child, currentLayouts, segments)
+          }
         }
       }
       if (routeNode) traverse(routeNode)
@@ -294,7 +369,8 @@ class AppRouterPlugin {
       }
       return {
         content: this.assembleFileContent(importStatements, flattenedRoutes),
-        ssgRoutes,
+        staticSsgRoutes,
+        dynamicSsgRoutes,
       }
     }
     const clientResult = generate(false)
@@ -304,7 +380,25 @@ class AppRouterPlugin {
       path.dirname(outputPath),
       'app-router-server.js',
     )
-    const serverEntryContent = `/* AUTO-GENERATED SERVER ROUTER */\n${serverResult.content}\nexport const ssgRoutes = ${JSON.stringify(serverResult.ssgRoutes, null, 2)};\n`
+    const ssgManifestRoutes = [
+      ...serverResult.staticSsgRoutes,
+      ...serverResult.dynamicSsgRoutes.map(
+        ({ path: routePath, meta, segments }) => ({
+          path: routePath,
+          meta,
+          dynamic: true,
+          segments,
+        }),
+      ),
+    ]
+    const resolveSSGPathsCode =
+      serverResult.dynamicSsgRoutes.length > 0
+        ? generateResolveSSGPathsCode(
+            serverResult.staticSsgRoutes,
+            serverResult.dynamicSsgRoutes,
+          )
+        : ''
+    const serverEntryContent = `/* AUTO-GENERATED SERVER ROUTER */\n${serverResult.content}\nexport const ssgRoutes = ${JSON.stringify(ssgManifestRoutes, null, 2)};\n${resolveSSGPathsCode}\n`
     this.writeIfChanged(serverEntryPath, serverEntryContent)
     const mainEntryPath = path.join(path.dirname(outputPath), 'main.ryx')
     // Look for global CSS to include in the client bundle
@@ -329,7 +423,7 @@ class AppRouterPlugin {
       : path.join(path.dirname(outputPath), 'ssg', 'routes.json')
     this.writeIfChanged(
       ssgManifestPath,
-      JSON.stringify(serverResult.ssgRoutes, null, 2),
+      JSON.stringify(ssgManifestRoutes, null, 2),
     )
   }
   assembleFileContent(importStatements, flattenedRoutes) {
@@ -377,7 +471,7 @@ const wrapRouteHydrationBoundary = (element, routePath) => {
 };
 
 const RouteWrapper = (props) => {
-  const isServer = typeof process !== 'undefined' && String(process.env.RYUNIX_IS_SERVER) === 'true';
+  const isServer = globalThis.process && String(globalThis.process.env?.RYUNIX_IS_SERVER) === 'true';
   if (isServer) {
     return RouteWrapperServer(props);
   }

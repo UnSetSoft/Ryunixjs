@@ -104,7 +104,8 @@ Cada **carpeta** es un segmento de URL. Archivos reservados por segmento:
 
 | Archivo                         | Rol                                                                   |
 | :------------------------------ | :-------------------------------------------------------------------- |
-| `index.ryx`                     | Página del segmento                                                   |
+| `index.ryx` / `index.mdx`       | Página del segmento                                                   |
+| `<nombre>.mdx`                  | Página en `/nombre` (alternativa a `nombre/index.mdx`)                |
 | `layout.ryx`                    | Layout anidado (`children`)                                           |
 | `loading.ryx`                   | UI de carga (Suspense)                                                |
 | `error.ryx`                     | Error boundary de ruta (el plugin busca `error.ryx`, no `errors.ryx`) |

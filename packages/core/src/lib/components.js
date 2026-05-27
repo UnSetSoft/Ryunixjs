@@ -159,7 +159,7 @@ const getMDXComponents = (components) => {
   }
 }
 const RYUNIX_STYLE_ENABLED =
-  typeof process !== 'undefined' && String(process.env.RYUNIX_STYLE) !== 'false'
+  globalThis.process && String(globalThis.process.env?.RYUNIX_STYLE) !== 'false'
 const ryxProps = (props) => {
   const { unstyled, ...rest } = props
   if (unstyled || rest['data-ryx-unstyled']) {

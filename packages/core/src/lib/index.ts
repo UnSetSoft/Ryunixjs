@@ -39,3 +39,18 @@ export {
 export { getState } from '../utils/index.js'
 export { createActionProxy } from './serverActions.js'
 export { RyunixDevOverlay } from './devOverlay.js'
+export {
+  createThemeController,
+  themeController,
+  DEFAULT_THEME_COOKIE_NAME,
+  THEME_PREFERENCES,
+  getThemeCookie,
+  setThemeCookie,
+  resolveThemeFromCookie,
+  getSystemColorScheme,
+  resolveEffectiveTheme,
+  applyTheme,
+  watchSystemTheme,
+  themeInitScript,
+} from './theme.js'
+export { ThemeToggle, ThemeInitScript } from './themeToggle.js'

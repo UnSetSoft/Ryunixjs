@@ -480,6 +480,86 @@ export namespace Hooks {
   export const useSearchParams: typeof useSearchParams
 }
 
+// ---------------------------------------------------------------------------
+// Theme toggle & cookie persistence
+// ---------------------------------------------------------------------------
+
+export interface ThemeToggleLabels {
+  title: string
+  light: string
+  system: string
+  dark: string
+}
+
+export type ThemePreference = 'light' | 'system' | 'dark'
+
+export interface ThemeControllerOptions {
+  cookieName?: string
+  defaultTheme?: ThemePreference
+  darkClass?: string
+  maxAgeSeconds?: number
+}
+
+export interface ThemeController {
+  cookieName: string
+  defaultTheme: ThemePreference
+  themes: readonly ThemePreference[]
+  getThemeCookie: () => ThemePreference | null
+  setThemeCookie: (theme: ThemePreference) => void
+  resolveThemeFromCookie: () => ThemePreference
+  getSystemColorScheme: () => 'light' | 'dark'
+  resolveEffectiveTheme: (
+    theme: ThemePreference | string | null | undefined,
+  ) => 'light' | 'dark'
+  applyTheme: (theme: ThemePreference | string | null | undefined) => void
+  getInitScript: () => string
+  watchSystemTheme: (
+    onChange: (scheme: 'light' | 'dark') => void,
+  ) => () => void
+}
+
+export const DEFAULT_THEME_COOKIE_NAME: string
+export const THEME_PREFERENCES: readonly ThemePreference[]
+export const themeController: ThemeController
+export const THEME_COOKIE_NAME: string
+export const defaultTheme: ThemePreference
+export const themes: readonly ThemePreference[]
+export const themeInitScript: string
+
+export function createThemeController(
+  options?: ThemeControllerOptions,
+): ThemeController
+
+export function getThemeCookie(): ThemePreference | null
+export function setThemeCookie(theme: ThemePreference): void
+export function resolveThemeFromCookie(): ThemePreference
+export function getSystemColorScheme(): 'light' | 'dark'
+export function resolveEffectiveTheme(
+  theme: ThemePreference | string | null | undefined,
+): 'light' | 'dark'
+export function applyTheme(
+  theme: ThemePreference | string | null | undefined,
+): void
+export function watchSystemTheme(
+  onChange: (scheme: 'light' | 'dark') => void,
+): () => void
+
+export interface ThemeToggleProps {
+  labels: ThemeToggleLabels
+  className?: string
+  controller?: ThemeController
+}
+
+export function ThemeToggle(props: ThemeToggleProps): RyunixElement
+
+export interface ThemeInitScriptProps {
+  controller?: ThemeController
+}
+
+export function ThemeInitScript(
+  props?: ThemeInitScriptProps,
+): RyunixElement
+
 declare const Ryunix: {
   createElement: typeof createElement
   Fragment: typeof Fragment
@@ -540,6 +620,12 @@ declare const Ryunix: {
   getState: typeof getState
   createActionProxy: typeof createActionProxy
   RyunixDevOverlay: typeof RyunixDevOverlay
+  ThemeToggle: typeof ThemeToggle
+  ThemeInitScript: typeof ThemeInitScript
+  createThemeController: typeof createThemeController
+  themeController: typeof themeController
+  applyTheme: typeof applyTheme
+  themeInitScript: typeof themeInitScript
 }
 
 export default Ryunix

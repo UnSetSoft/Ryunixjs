@@ -77,8 +77,6 @@ function commitRoot() {
       )
     }
     if (state.hydrationFailed) {
-      // Do not wipe the container here. recoverHydrationFailureIfNeeded → renderSubtree
-      // clears and re-renders; clearing early leaves a blank page if recovery fails.
     } else {
       let cursor = state.hydrateCursor
       let removed = 0

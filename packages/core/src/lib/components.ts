@@ -231,8 +231,7 @@ const getMDXComponents = (components) => {
 }
 
 const RYUNIX_STYLE_ENABLED =
-  typeof process !== 'undefined' &&
-  String(process.env.RYUNIX_STYLE) !== 'false'
+  globalThis.process && String(globalThis.process.env?.RYUNIX_STYLE) !== 'false'
 
 /**
  * Maps `unstyled` prop to `data-ryx-unstyled` for global style opt-out.
