@@ -127,9 +127,10 @@ preset también lo contempla en build).
 | Soportado                               | No soportado (usar otra herramienta)             |
 | :-------------------------------------- | :----------------------------------------------- |
 | Resaltado `.ryx`, snippets, completions | **MDX** — validación en build (`@mdx-js/loader`) |
-| Integración ESLint vía workspace (CRA)  | **TypeScript** dentro de `.ryx`                  |
-| Emmet en modo `ryunix`                  | **Formatter empaquetado** — Prettier en proyecto |
-| Tests de regresión de gramática         | **LSP** — ver `ROADMAP.md`                       |
+| LSP TypeScript (diagnósticos, ir a def) | **Formatter empaquetado** — Prettier en proyecto |
+| Integración ESLint vía workspace (CRA)  |                                                  |
+| Emmet en modo `ryunix`                  |                                                  |
+| Tests de gramática + LSP                |                                                  |
 
 Rutas API en plantillas CRA: `router.js`; snippets para `router.ryx` son
 opcionales.

@@ -214,7 +214,13 @@ export function filterFalsePositiveModuleDiagnostics(
 
     const spec = moduleSpecifierFromDiagnostic(d)
     if (!spec || !isBundlerResolvedImport(spec)) return true
-    const resolved = resolveModuleSpecifier(spec, projectRoot, options)
+    const fromFile = d.file?.fileName
+    const resolved = resolveModuleSpecifier(
+      spec,
+      projectRoot,
+      options,
+      fromFile,
+    )
     return !resolved
   })
 }
