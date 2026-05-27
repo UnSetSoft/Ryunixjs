@@ -67,7 +67,7 @@
     "postcss-loader": "7.0.2",
     "prettier": "3.7.4",
     "rimraf": "6.1.2",
-    "turbo": "2.8.17",
+    "turbo": "2.9.15",
     "@types/node": "22.19.3",
     "typescript": "5.9.3"
   },
