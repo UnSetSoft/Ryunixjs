@@ -22,6 +22,15 @@ interface SuspenseTaskResult {
   error?: unknown
 }
 
+interface HostRenderProps {
+  attributes: string
+  innerHTML: string | null
+  htmlChildren: string
+}
+
+const ASYNC_RENDER_ERROR =
+  'Async components require renderToStringAsync or renderToReadableStream, not renderToString'
+
 export const escapeHtml = (unsafe: unknown): string => {
   if (typeof unsafe !== 'string') return String(unsafe)
   return unsafe
@@ -62,6 +71,82 @@ const normalizeChildren = (
 ): RyunixNode[] => {
   if (children == null) return []
   return Array.isArray(children) ? children : [children]
+}
+
+const assertSyncRenderResult = (rendered: RyunixNode): RyunixNode => {
+  if (
+    rendered != null &&
+    typeof rendered === 'object' &&
+    'then' in rendered &&
+    typeof (rendered as { then?: unknown }).then === 'function'
+  ) {
+    throw new Error(ASYNC_RENDER_ERROR)
+  }
+  return rendered
+}
+
+const buildHostProps = (
+  props: Record<string, unknown>,
+  renderChild: (child: RyunixNode) => string,
+): HostRenderProps => {
+  let attributes = ''
+  let htmlChildren = ''
+  let innerHTML: string | null = null
+
+  Object.entries(props).forEach(([key, value]) => {
+    if (key === 'children') {
+      if (Array.isArray(value)) {
+        htmlChildren = value.map((child) => renderChild(child as RyunixNode)).join('')
+      } else {
+        htmlChildren = renderChild(value as RyunixNode)
+      }
+    } else if (key === 'dangerouslySetInnerHTML') {
+      const inner = value as { __html?: string } | null | undefined
+      if (inner?.__html) {
+        innerHTML = inner.__html
+      }
+    } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
+      const styleString = renderStyle(value as Record<string, unknown>)
+      if (styleString) {
+        attributes += ` style="${escapeHtml(styleString)}"`
+      }
+    } else if (key === STRINGS.CLASS_NAME || key === OLD_STRINGS.CLASS_NAME) {
+      if (value) {
+        attributes += ` class="${escapeHtml(value)}"`
+      }
+    } else if (
+      !key.startsWith('on') &&
+      key !== 'key' &&
+      key !== 'ref' &&
+      key !== '__source' &&
+      key !== '__self'
+    ) {
+      if (typeof value === 'boolean') {
+        if (value) attributes += ` ${key}=""`
+      } else if (value != null) {
+        const attrName = toSvgAttrName(key)
+        const validatedValue = validateUri(attrName, value)
+        attributes += ` ${attrName}="${escapeHtml(validatedValue)}"`
+      }
+    }
+  })
+
+  return { attributes, innerHTML, htmlChildren }
+}
+
+const formatHostOpenTag = (hostTag: string, attributes: string): string => {
+  if (VOID_ELEMENTS.has(hostTag)) {
+    return `<${hostTag}${attributes} />`
+  }
+  return `<${hostTag}${attributes}>`
+}
+
+const beginSsrRender = (): void => {
+  const state = getState()
+  state.isServerRendering = true
+  state.ssrMetadata = {}
+  state.ssrContexts = {}
+  resetIdCounter()
 }
 
 const renderToStringImpl = (element: RyunixNode | RyunixNode[]): string => {
@@ -121,62 +206,23 @@ const renderToStringImpl = (element: RyunixNode | RyunixNode[]): string => {
   if (typeof vnode.type === 'function') {
     const type = vnode.type as (props: Record<string, unknown>) => RyunixNode
     const props = vnode.props || {}
-    const renderedElement = type(props)
+    const renderedElement = assertSyncRenderResult(type(props))
     return renderToStringImpl(renderedElement)
   }
 
   const type = String(vnode.type)
   const props = vnode.props || {}
-
-  let attributes = ''
-  let htmlChildren = ''
-  let innerHTML: string | null = null
-
-  Object.entries(props).forEach(([key, value]) => {
-    if (key === 'children') {
-      if (Array.isArray(value)) {
-        htmlChildren = value.map((child) => renderToStringImpl(child)).join('')
-      } else {
-        htmlChildren = renderToStringImpl(value as RyunixNode)
-      }
-    } else if (key === 'dangerouslySetInnerHTML') {
-      const inner = value as { __html?: string } | null | undefined
-      if (inner?.__html) {
-        innerHTML = inner.__html
-      }
-    } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
-      const styleString = renderStyle(value as Record<string, unknown>)
-      if (styleString) {
-        attributes += ` style="${escapeHtml(styleString)}"`
-      }
-    } else if (key === STRINGS.CLASS_NAME || key === OLD_STRINGS.CLASS_NAME) {
-      if (value) {
-        attributes += ` class="${escapeHtml(value)}"`
-      }
-    } else if (
-      !key.startsWith('on') &&
-      key !== 'key' &&
-      key !== 'ref' &&
-      key !== '__source' &&
-      key !== '__self'
-    ) {
-      if (typeof value === 'boolean') {
-        if (value) attributes += ` ${key}=""`
-      } else if (value != null) {
-        const attrName = toSvgAttrName(key)
-        const validatedValue = validateUri(attrName, value)
-        attributes += ` ${attrName}="${escapeHtml(validatedValue)}"`
-      }
-    }
-  })
+  const { attributes, innerHTML, htmlChildren } = buildHostProps(
+    props,
+    renderToStringImpl,
+  )
 
   if (VOID_ELEMENTS.has(type)) {
-    return `<${type}${attributes} />`
+    return formatHostOpenTag(type, attributes)
   }
 
   const finalContent = innerHTML !== null ? innerHTML : htmlChildren
-
-  return `<${type}${attributes}>${finalContent}</${type}>`
+  return `${formatHostOpenTag(type, attributes)}${finalContent}</${type}>`
 }
 
 const RC_SCRIPT = `
@@ -322,49 +368,14 @@ const renderToStreamImpl = async (
   }
 
   const hostTag = String(type)
-  let attributes = ''
-  let innerHTML: string | null = null
   const children = props.children || []
+  const { attributes, innerHTML } = buildHostProps(props, () => '')
 
-  Object.entries(props).forEach(([key, value]) => {
-    if (key === 'children') {
-      // Ignored here, handled below
-    } else if (key === 'dangerouslySetInnerHTML') {
-      const inner = value as { __html?: string } | null | undefined
-      if (inner?.__html) {
-        innerHTML = inner.__html
-      }
-    } else if (key === STRINGS.STYLE || key === OLD_STRINGS.STYLE) {
-      const styleString = renderStyle(value as Record<string, unknown>)
-      if (styleString) {
-        attributes += ` style="${escapeHtml(styleString)}"`
-      }
-    } else if (key === STRINGS.CLASS_NAME || key === OLD_STRINGS.CLASS_NAME) {
-      if (value) {
-        attributes += ` class="${escapeHtml(value)}"`
-      }
-    } else if (
-      !key.startsWith('on') &&
-      key !== 'key' &&
-      key !== 'ref' &&
-      key !== '__source' &&
-      key !== '__self'
-    ) {
-      if (typeof value === 'boolean') {
-        if (value) attributes += ` ${key}=""`
-      } else if (value != null) {
-        const attrName = toSvgAttrName(key)
-        const validatedValue = validateUri(attrName, value)
-        attributes += ` ${attrName}="${escapeHtml(validatedValue)}"`
-      }
-    }
-  })
-
-  push(`<${hostTag}${attributes}>`)
+  push(formatHostOpenTag(hostTag, attributes))
 
   if (innerHTML !== null) {
     push(innerHTML)
-  } else {
+  } else if (!VOID_ELEMENTS.has(hostTag)) {
     if (Array.isArray(children)) {
       for (const child of children) {
         await renderToStreamImpl(child, push, suspenseTasks)
@@ -372,11 +383,31 @@ const renderToStreamImpl = async (
     } else {
       await renderToStreamImpl(children as RyunixNode, push, suspenseTasks)
     }
-  }
-
-  if (!VOID_ELEMENTS.has(hostTag)) {
     push(`</${hostTag}>`)
   }
+}
+
+const handleSuspenseTaskResult = (
+  res: SuspenseTaskResult,
+  push: (text: string) => void,
+  nonceAttr: string,
+): void => {
+  if (res.success) {
+    push(
+      `<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`,
+    )
+    push(
+      `<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`,
+    )
+    return
+  }
+
+  const message =
+    res.error instanceof Error ? res.error.message : String(res.error ?? 'Unknown error')
+  if (process.env.NODE_ENV !== 'production') {
+    console.error('[Ryunix SSR] Suspense boundary failed:', res.error)
+  }
+  push(`<!-- Ryunix Suspense error: ${escapeHtml(message)} -->`)
 }
 
 export const renderToReadableStream = (
@@ -386,13 +417,10 @@ export const renderToReadableStream = (
   const state = getState()
   const encoder = new TextEncoder()
 
-  resetIdCounter()
-
   return new ReadableStream({
     async start(controller) {
       const wasServerRendering = state.isServerRendering
-      state.isServerRendering = true
-      state.ssrMetadata = {}
+      beginSsrRender()
 
       const push = (text: string) => controller.enqueue(encoder.encode(text))
       const suspenseTasks: RyunixSuspenseTask[] = []
@@ -407,14 +435,7 @@ export const renderToReadableStream = (
           const task = suspenseTasks.shift()
           if (!task) continue
           const res = await task()
-          if (res.success) {
-            push(
-              `<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`,
-            )
-            push(
-              `<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`,
-            )
-          }
+          handleSuspenseTaskResult(res, push, nonceAttr)
         }
 
         controller.close()
@@ -433,10 +454,7 @@ export const renderToString = (
 ): string => {
   const state = getState()
   const wasServerRendering = state.isServerRendering
-  state.isServerRendering = true
-  state.ssrMetadata = {}
-
-  resetIdCounter()
+  beginSsrRender()
 
   try {
     return renderToStringImpl(element)
