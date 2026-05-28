@@ -548,7 +548,9 @@ const buildSSG = async (
 
   const legacyConfig = config.legacy as Record<string, unknown> | undefined
   const legacySsg = legacyConfig?.ssg as Record<string, unknown> | undefined
-  const legacySitemap = legacySsg?.sitemap as Record<string, unknown> | undefined
+  const legacySitemap = legacySsg?.sitemap as
+    | Record<string, unknown>
+    | undefined
   const legacyRobots = legacySsg?.robots as Record<string, unknown> | undefined
 
   const appPath = path.join(
@@ -633,7 +635,9 @@ const buildSSG = async (
     )
     if (serverBundlePath) {
       // Mock global browser APIs before importing the bundle in case of top-level references
-      if (typeof (globalThis as Record<string, unknown>).window === 'undefined') {
+      if (
+        typeof (globalThis as Record<string, unknown>).window === 'undefined'
+      ) {
         const noop = () => {}
         ;(globalThis as Record<string, unknown>).window = {
           location: {
@@ -675,7 +679,9 @@ const buildSSG = async (
           }),
         }
       }
-      if (typeof (globalThis as Record<string, unknown>).document === 'undefined') {
+      if (
+        typeof (globalThis as Record<string, unknown>).document === 'undefined'
+      ) {
         const noop = () => {}
         ;(globalThis as Record<string, unknown>).document = {
           querySelector: () => null,
@@ -697,8 +703,12 @@ const buildSSG = async (
           title: '',
         }
       }
-      if (typeof (globalThis as Record<string, unknown>).navigator === 'undefined') {
-        ;(globalThis as Record<string, unknown>).navigator = { userAgent: 'ryunix-ssg' }
+      if (
+        typeof (globalThis as Record<string, unknown>).navigator === 'undefined'
+      ) {
+        ;(globalThis as Record<string, unknown>).navigator = {
+          userAgent: 'ryunix-ssg',
+        }
       }
 
       const serverModule = await import(
@@ -727,6 +737,8 @@ const buildSSG = async (
   }
 
   // Prerender each route
+  const ssrFailures: { path: string; error: unknown }[] = []
+
   for (const route of routes) {
     try {
       let renderedString = ''
@@ -744,9 +756,8 @@ const buildSSG = async (
           const element = ryunixCreateElement(AppRouterApp)
 
           if (typeof ryunixGlobal.Ryunix?.renderToStringAsync === 'function') {
-            renderedString = await ryunixGlobal.Ryunix.renderToStringAsync(
-              element,
-            )
+            renderedString =
+              await ryunixGlobal.Ryunix.renderToStringAsync(element)
           } else {
             renderedString = ryunixRenderToString(element)
           }
@@ -755,7 +766,14 @@ const buildSSG = async (
             `[SSG] Error executing SSR render for ${route.path}:`,
             err,
           )
+          ssrFailures.push({ path: route.path, error: err })
         }
+      } else if (AppRouterApp) {
+        const missing = new Error(
+          `Missing SSR APIs (renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement})`,
+        )
+        console.error(`[SSG] ${missing.message} for ${route.path}`)
+        ssrFailures.push({ path: route.path, error: missing })
       } else {
         console.warn(
           `[SSG] Missing SSR dependencies for ${route.path}. AppRouterApp: ${!!AppRouterApp}, renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement}`,
@@ -790,7 +808,20 @@ const buildSSG = async (
       prerenderRoutes.push(route.path)
     } catch (error) {
       console.error(`[SSG] ❌ Error prerendering ${route.path}:`, error)
+      ssrFailures.push({ path: route.path, error })
     }
+  }
+
+  if (ssrFailures.length > 0) {
+    const summary = ssrFailures
+      .map(({ path, error }) => {
+        const msg = error instanceof Error ? error.message : String(error)
+        return `  - ${path}: ${msg}`
+      })
+      .join('\n')
+    throw new Error(
+      `[SSG] Failed to prerender ${ssrFailures.length} route(s):\n${summary}`,
+    )
   }
 
   ;(globalThis as Record<string, unknown>).window = undefined // Cleanup

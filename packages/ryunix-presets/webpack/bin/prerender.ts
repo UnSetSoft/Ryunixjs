@@ -114,12 +114,17 @@ const Prerender = async (directory: string) => {
     return
   }
 
-  await buildSSG(
-    routes,
-    defaultSettings as Parameters<typeof buildSSG>[1],
-    buildDirectory,
-    defaultSettings.debug,
-  )
+  try {
+    await buildSSG(
+      routes,
+      defaultSettings as Parameters<typeof buildSSG>[1],
+      buildDirectory,
+      defaultSettings.debug,
+    )
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error)
+    process.exit(1)
+  }
   console.log('✅ SSG build complete')
 }
 
