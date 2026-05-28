@@ -617,22 +617,49 @@ ${importStatements}
 const getOptExport = (mod, key) => mod ? mod[key] : undefined;
 
 const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
-  const [content, setContent] = useStore(null);
-  useEffect(() => {
-    let active = true;
-    const run = async () => {
-      try {
-        const res = await Component(componentProps);
-        if (active) setContent(<Ryunix.Fragment>{res}</Ryunix.Fragment>);
-      } catch(err) {
-        console.error('Error rendering async component:', err);
-        if (active) setContent(ErrorFallback ? <ErrorFallback error={err} /> : <div style={{ padding: '2rem', color: 'red' }}>Error rendering async component</div>);
+  const [content, setContent] = useStore(() => {
+    try {
+      const res = Component(componentProps);
+      if (res != null && typeof res === 'object' && typeof res.then === 'function') {
+        return { status: 'pending', promise: res };
       }
+      return { status: 'ready', node: <Ryunix.Fragment>{res}</Ryunix.Fragment> };
+    } catch (err) {
+      return { status: 'error', err };
+    }
+  });
+
+  useEffect(() => {
+    if (!content || content.status !== 'pending') return undefined;
+    let active = true;
+    content.promise
+      .then((res) => {
+        if (!active) return;
+        setContent({ status: 'ready', node: <Ryunix.Fragment>{res}</Ryunix.Fragment> });
+      })
+      .catch((err) => {
+        console.error('Error rendering async component:', err);
+        if (!active) return;
+        setContent({
+          status: 'error',
+          err,
+        });
+      });
+    return () => {
+      active = false;
     };
-    run();
-    return () => { active = false; };
-  }, [Component]);
-  return content;
+  }, [content?.status === 'pending' ? content.promise : null]);
+
+  if (!content) return null;
+  if (content.status === 'error') {
+    return ErrorFallback ? (
+      <ErrorFallback error={content.err} />
+    ) : (
+      <div style={{ padding: '2rem', color: 'red' }}>Error rendering async component</div>
+    );
+  }
+  if (content.status === 'ready') return content.node;
+  return null;
 };
 
 const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
