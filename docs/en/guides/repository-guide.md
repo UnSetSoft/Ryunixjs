@@ -172,9 +172,9 @@ This repository root is **not an app**; it is the framework monorepo. There is
 | Exercise the create-app CLI                           | `pnpm --filter @unsetsoft/cra dev`        | Terminal wizard (not a website)                                 |
 | Root `pnpm dev`                                       | Turbo runs `dev` per package              | Today only **CRA**; **core** and **presets** have no dev server |
 
-Typical maintainer flow: `pnpm install` → create `test/webpack` once →
-`pnpm build` → **`pnpm run:web`** → rebuild core or restart dev server when
-needed.
+Typical maintainer flow: clone `ryunix-doc` next to `Ryunixjs` →
+`pnpm run setup:web` → **`pnpm run dev:doc`** → rebuild core or restart dev
+when needed.
 
 See [automated testing](./automated-testing.md) and
 [local integration app](./local-integration-app.md) for setup and checks.
@@ -183,7 +183,7 @@ See [automated testing](./automated-testing.md) and
 
 ```bash
 pnpm install
-pnpm run:web    # browser dev (test/webpack app)
+pnpm run dev:doc  # browser dev (../ryunix-doc)
 pnpm build
 pnpm test
 pnpm lint

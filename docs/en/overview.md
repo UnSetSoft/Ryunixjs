@@ -76,7 +76,7 @@ single package.
 | :-------------------------------------------------------------- | :---------------------------------------------------------------------------- |
 | [repository-guide.md](./guides/repository-guide.md)             | What RyunixJS is, repo layout, useful commands. **Start here after cloning.** |
 | [automated-testing.md](./guides/automated-testing.md)           | Jest in core, `pnpm test`, `pnpm lint`, manual CRA checks.                    |
-| [local-integration-app.md](./guides/local-integration-app.md)   | Ryunix app in `test/webpack` with `workspace:*` and `pnpm run:web`.           |
+| [local-integration-app.md](./guides/local-integration-app.md)   | Docs site `../ryunix-doc` with `workspace:*` and `pnpm run dev:doc`.          |
 | [tech-stack-and-scripts.md](./guides/tech-stack-and-scripts.md) | Technologies and root `pnpm` scripts (AI-assisted).                           |
 
 ---

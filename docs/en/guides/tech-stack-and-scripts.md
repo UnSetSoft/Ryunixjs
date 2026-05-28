@@ -34,7 +34,7 @@ under `docs/en/core/`, `docs/en/ryunix-presets/`, or `docs/en/cra/`.
 | :----------------------------------------------- | :------------------------------------------------------ |
 | Languages, runtimes, and major libraries by area | Step-by-step tutorials for each tool                    |
 | Root `package.json` scripts and Turbo tasks      | Every flag of `ryunix` or Webpack                       |
-| Per-package scripts at a summary level           | Generated apps under `test/webpack` (local, gitignored) |
+| Per-package scripts at a summary level           | `../ryunix-doc` (workspace) and local `test/*` scratch  |
 
 For onboarding and folder layout, see
 [repository-guide.md](./repository-guide.md). For how to run tests and
@@ -153,7 +153,7 @@ Commands are run from the **repository root** unless noted.
 
 | Script                   | Purpose                                                              |
 | :----------------------- | :------------------------------------------------------------------- |
-| `pnpm run run:web`       | `ryunix dev` on `test/webpack` (gitignored; must be created locally) |
+| `pnpm run run:web`       | Alias of `dev:doc` (`ryunix dev` on `../ryunix-doc`)                 |
 | `pnpm run run:web:build` | Production build of that app                                         |
 | `pnpm run run:web:start` | `ryunix start` for the built app                                     |
 

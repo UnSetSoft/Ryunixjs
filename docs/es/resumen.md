@@ -79,7 +79,7 @@ concreto.
 | :--------------------------------------------------------------------- | :----------------------------------------------------------------------- |
 | [guia-del-repositorio.md](./guias/guia-del-repositorio.md)             | Qué es RyunixJS, estructura, comandos. **Punto de entrada tras clonar.** |
 | [tests-automatizados.md](./guias/tests-automatizados.md)               | Jest en core, `pnpm test`, `pnpm lint`, CRA manual.                      |
-| [app-de-integracion-local.md](./guias/app-de-integracion-local.md)     | App Ryunix en `test/webpack` con `workspace:*` y `pnpm run:web`.         |
+| [app-de-integracion-local.md](./guias/app-de-integracion-local.md)     | Sitio `../ryunix-doc` con `workspace:*` y `pnpm run dev:doc`.            |
 | [pila-tecnologica-y-scripts.md](./guias/pila-tecnologica-y-scripts.md) | Tecnologías y scripts `pnpm` raíz (asistido por IA).                     |
 
 ---

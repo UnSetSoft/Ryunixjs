@@ -163,7 +163,7 @@ pnpm --filter ./packages/ryunix-vscode run publish:marketplace
 1. Abrir la carpeta `packages/ryunix-vscode` en VS Code.
 2. **Run and Debug** → **Extension** → F5 (compila antes con `preLaunchTask`).
 3. En la ventana Extension Development Host, abrir una app (p. ej. plantilla
-   `ryunix-base` o `test/webpack`).
+   `ryunix-base` o `ryunix-doc`).
 
 Tras cambiar `src/` o gramática: recompilar o recargar la ventana del host.
 
