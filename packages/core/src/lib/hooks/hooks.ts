@@ -9,6 +9,7 @@ import {
 } from '../reconciler/priority.js'
 import { queueUpdate } from '../reconciler/batching.js'
 import { validateHookContext as validateHookCall } from '../devtools/runtime.js'
+import { mergeRouteMetadata } from './metadata.js'
 import type {
   RyunixComponent,
   RyunixElement,
@@ -351,7 +352,10 @@ const useMetadata = (
 ): void => {
   const state = getState()
   if (state.isServerRendering) {
-    state.ssrMetadata = { ...state.ssrMetadata, ...tags }
+    state.ssrMetadata = mergeRouteMetadata(
+      (state.ssrMetadata || {}) as Record<string, unknown>,
+      tags as Record<string, unknown>,
+    )
     return
   }
 
