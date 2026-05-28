@@ -443,7 +443,9 @@ class AppRouterPlugin {
           }
 
           if (indexInfo) {
-            const formatComp = (info: ComponentInfo | null | undefined): string => {
+            const formatComp = (
+              info: ComponentInfo | null | undefined,
+            ): string => {
               if (!info) return 'null'
               if (info.isProxy)
                 return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)} }`

@@ -32,14 +32,14 @@ This does not replace Jest or `pnpm lint` — see
 
 ## Key concepts
 
-| Term | What it is |
-| :--- | :--------- |
-| **Monorepo (`Ryunixjs/`)** | Framework packages (`packages/core`, `packages/ryunix-presets`, …). |
+| Term                            | What it is                                                               |
+| :------------------------------ | :----------------------------------------------------------------------- |
+| **Monorepo (`Ryunixjs/`)**      | Framework packages (`packages/core`, `packages/ryunix-presets`, …).      |
 | **`ryunix-doc` (sibling repo)** | Canonical docs site. Listed in `pnpm-workspace.yaml` as `../ryunix-doc`. |
-| **Integration app** | That docs site with `workspace:*` on `@unsetsoft/ryunixjs` and presets. |
-| **`workspace:*`** | pnpm links `packages/*` instead of npm registry versions. |
-| **`pnpm run dev:doc`** | Builds core, then `ryunix dev` in `ryunix-doc`. |
-| **Root `pnpm dev`** | Turbo tasks (CRA, etc.). Use `dev:doc` for the browser. |
+| **Integration app**             | That docs site with `workspace:*` on `@unsetsoft/ryunixjs` and presets.  |
+| **`workspace:*`**               | pnpm links `packages/*` instead of npm registry versions.                |
+| **`pnpm run dev:doc`**          | Builds core, then `ryunix dev` in `ryunix-doc`.                          |
+| **Root `pnpm dev`**             | Turbo tasks (CRA, etc.). Use `dev:doc` for the browser.                  |
 
 ```text
 ryx/                         ← typical parent folder (not a git repo)
@@ -91,12 +91,12 @@ Open the URL from the terminal (e.g. `http://localhost:3000`).
 1. **`pnpm run dev:doc`** — leave running.
 2. Edit by scope:
 
-| You edit… | After saving |
-| :-------- | :------------- |
-| `ryunix-doc/src/**` | HMR reloads. |
-| `packages/core/src/**` | `pnpm --filter @unsetsoft/ryunixjs build`, refresh browser. |
-| `packages/ryunix-presets/**` | Restart `pnpm run dev:doc`. |
-| `packages/ryunix-devtools/**` | Reload extension at `chrome://extensions/`. |
+| You edit…                     | After saving                                                |
+| :---------------------------- | :---------------------------------------------------------- |
+| `ryunix-doc/src/**`           | HMR reloads.                                                |
+| `packages/core/src/**`        | `pnpm --filter @unsetsoft/ryunixjs build`, refresh browser. |
+| `packages/ryunix-presets/**`  | Restart `pnpm run dev:doc`.                                 |
+| `packages/ryunix-devtools/**` | Reload extension at `chrome://extensions/`.                 |
 
 Before a PR: `pnpm test`, `pnpm lint` ([automated-testing.md](./automated-testing.md)).
 
@@ -104,14 +104,14 @@ Before a PR: `pnpm test`, `pnpm lint` ([automated-testing.md](./automated-testin
 
 ## Commands from the monorepo root
 
-| Command | What it does |
-| :------ | :----------- |
-| `pnpm run setup:web` | Verify `../ryunix-doc` + workspace links |
-| `pnpm run dev:doc` | `ryunix dev` on the docs site |
-| `pnpm run build:doc` | Production build of the docs site |
-| `pnpm run run:web` | Alias of `dev:doc` (legacy name) |
-| `pnpm run run:web:build` | Alias of `build:doc` |
-| `pnpm run run:web:start` | `ryunix start` in `ryunix-doc` |
+| Command                  | What it does                             |
+| :----------------------- | :--------------------------------------- |
+| `pnpm run setup:web`     | Verify `../ryunix-doc` + workspace links |
+| `pnpm run dev:doc`       | `ryunix dev` on the docs site            |
+| `pnpm run build:doc`     | Production build of the docs site        |
+| `pnpm run run:web`       | Alias of `dev:doc` (legacy name)         |
+| `pnpm run run:web:build` | Alias of `build:doc`                     |
+| `pnpm run run:web:start` | `ryunix start` in `ryunix-doc`           |
 
 If a command fails with «no projects matched», `../ryunix-doc` is missing or not
 listed in `pnpm-workspace.yaml`.
@@ -138,11 +138,11 @@ Docs: [CLI and bootstrapping](../ryunix-presets/cli-and-bootstrapping.md),
 
 ## CI smoke vs local docs app
 
-| | Local integration | CI (`scripts/ci-smoke-build.mjs`) |
-| :--- | :---------------- | :-------------------------------- |
-| App | `../ryunix-doc` | `_ci/smoke-app` from `ryunix-base` template |
-| Purpose | Docs + `[locale]` routes | Minimal CRA scaffold build |
-| In git | `ryunix-doc` separate repo | `_ci/` gitignored; generated in CI |
+|         | Local integration          | CI (`scripts/ci-smoke-build.mjs`)           |
+| :------ | :------------------------- | :------------------------------------------ |
+| App     | `../ryunix-doc`            | `_ci/smoke-app` from `ryunix-base` template |
+| Purpose | Docs + `[locale]` routes   | Minimal CRA scaffold build                  |
+| In git  | `ryunix-doc` separate repo | `_ci/` gitignored; generated in CI          |
 
 ---
 
@@ -157,18 +157,18 @@ the shared docs site.
 
 ## Git and commits
 
-| Scope | Commits |
-| :---- | :------ |
-| `Ryunixjs/packages/*`, `Ryunixjs/docs/` | Yes → PR to `canary` |
-| `ryunix-doc/` | Yes → its own repo / deploy |
-| `test/webpack*` (any name) | Never — `.gitignore` |
+| Scope                                   | Commits                     |
+| :-------------------------------------- | :-------------------------- |
+| `Ryunixjs/packages/*`, `Ryunixjs/docs/` | Yes → PR to `canary`        |
+| `ryunix-doc/`                           | Yes → its own repo / deploy |
+| `test/webpack*` (any name)              | Never — `.gitignore`        |
 
 ---
 
 ## Related documentation
 
-| Topic | Link |
-| :---- | :--- |
-| Automated tests | [automated-testing.md](./automated-testing.md) |
-| Repository guide | [repository-guide.md](./repository-guide.md) |
-| Docs index | [overview.md](../overview.md) |
+| Topic            | Link                                           |
+| :--------------- | :--------------------------------------------- |
+| Automated tests  | [automated-testing.md](./automated-testing.md) |
+| Repository guide | [repository-guide.md](./repository-guide.md)   |
+| Docs index       | [overview.md](../overview.md)                  |

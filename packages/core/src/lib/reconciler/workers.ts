@@ -42,10 +42,7 @@ function performUnitOfWork(
         }
 
         let targetFiber: RyunixFiber | null | undefined = fiber
-        while (
-          !(error as Error).__ryunix_source &&
-          targetFiber
-        ) {
+        while (!(error as Error).__ryunix_source && targetFiber) {
           const targetProps = targetFiber.props as
             | (Record<string, unknown> & {
                 __source?: { fileName?: string; lineNumber?: number }
@@ -150,7 +147,10 @@ const workLoop = (deadline: IdleDeadline) => {
   }
 }
 
-const scheduleWork = (root: RyunixRootFiber, priority = getCurrentPriority()) => {
+const scheduleWork = (
+  root: RyunixRootFiber,
+  priority = getCurrentPriority(),
+) => {
   const state = getState()
 
   if (state.wipRoot) {

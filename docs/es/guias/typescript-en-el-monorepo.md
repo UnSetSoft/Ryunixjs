@@ -105,11 +105,11 @@ Cada paquete extiende este archivo con su `tsconfig.json`.
 
 ### Turbo y scripts raíz
 
-| Elemento             | Ubicación                      | Función                                           |
-| :------------------- | :----------------------------- | :------------------------------------------------ |
-| Tarea `typecheck`    | `turbo.json`                   | Ejecuta `typecheck` en cada paquete que lo define |
-| `pnpm run typecheck` | `package.json` raíz            | Orquestación Turbo                                |
-| CI                   | `.github/workflows/ci.yml` | Ejecuta `pnpm run typecheck` en el job `quality` |
+| Elemento             | Ubicación                  | Función                                           |
+| :------------------- | :------------------------- | :------------------------------------------------ |
+| Tarea `typecheck`    | `turbo.json`               | Ejecuta `typecheck` en cada paquete que lo define |
+| `pnpm run typecheck` | `package.json` raíz        | Orquestación Turbo                                |
+| CI                   | `.github/workflows/ci.yml` | Ejecuta `pnpm run typecheck` en el job `quality`  |
 
 ### Dependencia
 

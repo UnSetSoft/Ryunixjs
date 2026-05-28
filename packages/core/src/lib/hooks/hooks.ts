@@ -431,11 +431,7 @@ const findRoute = (routes: RyunixRoute[], path: string): RouteMatch => {
     const pattern = new RegExp(
       `^${route.path.replace(
         /:(\.\.\.)?(\w+)/g,
-        (
-          match: string,
-          isCatchAll: string | undefined,
-          key: string,
-        ) => {
+        (match: string, isCatchAll: string | undefined, key: string) => {
           keys.push({ key, isCatchAll: !!isCatchAll })
           return isCatchAll ? '(.+)' : '([^/]+)'
         },
@@ -669,9 +665,7 @@ interface PriorityAction {
   priority?: number
 }
 
-const useStorePriority = (
-  initialState: unknown,
-): [unknown, DispatchFn] => {
+const useStorePriority = (initialState: unknown): [unknown, DispatchFn] => {
   const reducer = (state: unknown, action: unknown) =>
     typeof action === 'function'
       ? (action as unknown as { value: (s: unknown) => unknown }).value(state)
@@ -747,9 +741,7 @@ const usePersistentStore = (
   return [state, setValue]
 }
 
-const useSwitch = (
-  initialState = false,
-): [boolean, () => void] => {
+const useSwitch = (initialState = false): [boolean, () => void] => {
   const [state, dispatch] = useStore(initialState)
 
   const toggle = () => {

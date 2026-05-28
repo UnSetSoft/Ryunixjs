@@ -131,7 +131,9 @@ export const Suspense: SuspenseComponent = ({
     return fallback || null
   }
 
-  return createElement(Fragment, { children: children as RyunixNode | RyunixNode[] })
+  return createElement(Fragment, {
+    children: children as RyunixNode | RyunixNode[],
+  })
 }
 
 Suspense.type = RYUNIX_TYPES.RYUNIX_SUSPENSE

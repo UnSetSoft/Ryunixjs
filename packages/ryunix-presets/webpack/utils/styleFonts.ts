@@ -51,7 +51,9 @@ const FONT_PRESETS: Record<string, RyunixStyleFontResolved> = {
   },
 }
 
-function normalizeFontConfig(raw: RyunixStyleFontInput | undefined): RyunixStyleFontResolved {
+function normalizeFontConfig(
+  raw: RyunixStyleFontInput | undefined,
+): RyunixStyleFontResolved {
   if (!raw || raw === 'system') {
     return { ...FONT_PRESETS.system }
   }
@@ -140,7 +142,10 @@ function buildFontCss(font: RyunixStyleFontResolved | undefined): string {
     return `--ryx-font-sans:${SYSTEM_SANS};--ryx-tracking:${FONT_PRESETS.system.tracking}`
   }
 
-  const vars = [`--ryx-font-sans:${font.sans}`, `--ryx-tracking:${font.tracking}`]
+  const vars = [
+    `--ryx-font-sans:${font.sans}`,
+    `--ryx-tracking:${font.tracking}`,
+  ]
 
   return `${font.fontFace || ''}:root{${vars.join(';')}}`
 }

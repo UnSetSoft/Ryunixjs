@@ -26,9 +26,7 @@ const getMDXComponents = (
 const RYUNIX_STYLE_ENABLED =
   globalThis.process && String(globalThis.process.env?.RYUNIX_STYLE) === 'true'
 
-const ryxProps = (
-  props: Record<string, unknown>,
-): Record<string, unknown> => {
+const ryxProps = (props: Record<string, unknown>): Record<string, unknown> => {
   const { unstyled, ...rest } = props
   if (unstyled || rest['data-ryx-unstyled']) {
     return { ...rest, 'data-ryx-unstyled': true }

@@ -66,7 +66,9 @@ dir = loadDir(manager)
  * @param {Object} object - Alias configuration object
  * @returns {Object} Webpack-compatible alias object
  */
-function getAlias(object: Record<string, string | false | string[] | null | undefined>) {
+function getAlias(
+  object: Record<string, string | false | string[] | null | undefined>,
+) {
   return Object.entries(object)
     .filter(([, v]) => v != null && typeof v === 'string')
     .reduce<Record<string, string>>((accum, [k, v]) => {
@@ -678,95 +680,89 @@ const clientConfig = {
         throw new Error('webpack-dev-server is not defined')
       }
 
-      devServer.app?.use(async (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => {
-        if (req.method === 'POST' && req.url === '/_ryunix/action') {
-          try {
-            let body = ''
-            req.on('data', (chunk: Buffer | string) => {
-              body += chunk
-            })
-            req.on('end', async () => {
-              try {
-                if (req.headers['x-ryunix-action'] !== 'true') {
-                  res.writeHead(403, { 'Content-Type': 'application/json' })
-                  return res.end(
-                    JSON.stringify({ error: 'Forbidden: Missing CSRF header' }),
-                  )
-                }
-                const { actionId, args } = JSON.parse(body)
-                const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId]
-                if (!action) {
-                  res.writeHead(404, { 'Content-Type': 'application/json' })
-                  return res.end(
-                    JSON.stringify({
-                      error: `Server Action ${actionId} not found`,
-                    }),
-                  )
-                }
-                const result = await action(...args)
-                res.writeHead(200, { 'Content-Type': 'application/json' })
-                res.end(JSON.stringify(result))
-              } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : String(err)
-                res.writeHead(500, { 'Content-Type': 'application/json' })
-                res.end(JSON.stringify({ error: message }))
-              }
-            })
-            return
-          } catch (err) {
-            next(err)
-            return
-          }
-        }
-
-        if (req.method === 'GET' && req.url?.startsWith('/_ryunix/source')) {
-          try {
-            const urlObj = new URL(req.url ?? '/', `http://${req.headers.host}`)
-            const filePath = urlObj.searchParams.get('file')
-            const lineStr = urlObj.searchParams.get('line')
-            if (!filePath || !lineStr) {
-              res.writeHead(400, { 'Content-Type': 'application/json' })
-              return res.end(
-                JSON.stringify({ error: 'Missing file or line parameter' }),
-              )
-            }
-            const line = parseInt(lineStr, 10)
-            if (!fs.existsSync(filePath)) {
-              res.writeHead(404, { 'Content-Type': 'application/json' })
-              return res.end(JSON.stringify({ error: 'File not found' }))
-            }
-            const content = fs.readFileSync(filePath, 'utf8')
-            const lines = content.split('\n')
-            const start = Math.max(0, line - 5 - 1) // 0-indexed, 5 lines before
-            const end = Math.min(lines.length, line + 5)
-            const snippet = lines.slice(start, end).join('\n')
-            res.writeHead(200, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({ snippet, startLine: start + 1 }))
-          } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err)
-            res.writeHead(500, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({ error: message }))
-          }
-        }
-        next()
-      })
-
       devServer.app?.use(
         async (
           req: IncomingMessage,
           res: ServerResponse,
           next: (err?: unknown) => void,
         ) => {
-        try {
-          const apiRootPath = resolveApp(dir, `${config.buildDir}/server/api`)
-          const handled = await handleApiRequest(req, res, apiRootPath)
-          if (!handled) {
-            next()
+          if (req.method === 'POST' && req.url === '/_ryunix/action') {
+            try {
+              let body = ''
+              req.on('data', (chunk: Buffer | string) => {
+                body += chunk
+              })
+              req.on('end', async () => {
+                try {
+                  if (req.headers['x-ryunix-action'] !== 'true') {
+                    res.writeHead(403, { 'Content-Type': 'application/json' })
+                    return res.end(
+                      JSON.stringify({
+                        error: 'Forbidden: Missing CSRF header',
+                      }),
+                    )
+                  }
+                  const { actionId, args } = JSON.parse(body)
+                  const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId]
+                  if (!action) {
+                    res.writeHead(404, { 'Content-Type': 'application/json' })
+                    return res.end(
+                      JSON.stringify({
+                        error: `Server Action ${actionId} not found`,
+                      }),
+                    )
+                  }
+                  const result = await action(...args)
+                  res.writeHead(200, { 'Content-Type': 'application/json' })
+                  res.end(JSON.stringify(result))
+                } catch (err: unknown) {
+                  const message =
+                    err instanceof Error ? err.message : String(err)
+                  res.writeHead(500, { 'Content-Type': 'application/json' })
+                  res.end(JSON.stringify({ error: message }))
+                }
+              })
+              return
+            } catch (err) {
+              next(err)
+              return
+            }
           }
-        } catch (err) {
-          next(err)
-        }
-      },
+
+          if (req.method === 'GET' && req.url?.startsWith('/_ryunix/source')) {
+            try {
+              const urlObj = new URL(
+                req.url ?? '/',
+                `http://${req.headers.host}`,
+              )
+              const filePath = urlObj.searchParams.get('file')
+              const lineStr = urlObj.searchParams.get('line')
+              if (!filePath || !lineStr) {
+                res.writeHead(400, { 'Content-Type': 'application/json' })
+                return res.end(
+                  JSON.stringify({ error: 'Missing file or line parameter' }),
+                )
+              }
+              const line = parseInt(lineStr, 10)
+              if (!fs.existsSync(filePath)) {
+                res.writeHead(404, { 'Content-Type': 'application/json' })
+                return res.end(JSON.stringify({ error: 'File not found' }))
+              }
+              const content = fs.readFileSync(filePath, 'utf8')
+              const lines = content.split('\n')
+              const start = Math.max(0, line - 5 - 1) // 0-indexed, 5 lines before
+              const end = Math.min(lines.length, line + 5)
+              const snippet = lines.slice(start, end).join('\n')
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              return res.end(JSON.stringify({ snippet, startLine: start + 1 }))
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err)
+              res.writeHead(500, { 'Content-Type': 'application/json' })
+              return res.end(JSON.stringify({ error: message }))
+            }
+          }
+          next()
+        },
       )
 
       devServer.app?.use(
@@ -775,22 +771,40 @@ const clientConfig = {
           res: ServerResponse,
           next: (err?: unknown) => void,
         ) => {
-        try {
-          if (config.ssr) {
-            const handled = await renderDevRoute(
-              req,
-              res,
-              devServer as Parameters<typeof renderDevRoute>[2],
-              dir,
-              config,
-            )
-            if (handled) return
+          try {
+            const apiRootPath = resolveApp(dir, `${config.buildDir}/server/api`)
+            const handled = await handleApiRequest(req, res, apiRootPath)
+            if (!handled) {
+              next()
+            }
+          } catch (err) {
+            next(err)
           }
-        } catch (err) {
-          console.error('[Ryunix Dev SSR]', err)
-        }
-        next()
-      },
+        },
+      )
+
+      devServer.app?.use(
+        async (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: (err?: unknown) => void,
+        ) => {
+          try {
+            if (config.ssr) {
+              const handled = await renderDevRoute(
+                req,
+                res,
+                devServer as Parameters<typeof renderDevRoute>[2],
+                dir,
+                config,
+              )
+              if (handled) return
+            }
+          } catch (err) {
+            console.error('[Ryunix Dev SSR]', err)
+          }
+          next()
+        },
       )
 
       return middlewares

@@ -89,18 +89,18 @@ concreto.
 Motor del runtime: Virtual DOM, reconciliador Fiber, hooks, renderizado
 cliente/servidor y componentes integrados.
 
-| Documento                                                   | Tema                                                     |
-| :---------------------------------------------------------- | :------------------------------------------------------- |
+| Documento                                                   | Tema                                                           |
+| :---------------------------------------------------------- | :------------------------------------------------------------- |
 | [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — estructura, módulos, flujo de render |
-| [vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) | `createElement`, work loop, reconciliador, commit al DOM |
-| [hooks.md](./core/hooks.md)                                 | `useStore`, `useEffect`, memoización, hooks en SSR       |
-| [renderizado.md](./core/renderizado.md)                     | `render`, `hydrate`, `renderToString`, streaming         |
-| [estado-y-prioridad.md](./core/estado-y-prioridad.md)       | Batching, cola de prioridad, `useTransition`             |
-| [componentes-avanzados.md](./core/componentes-avanzados.md) | `lazy`, `Suspense`, `memo`, portals, `forwardRef`        |
-| [componentes.md](./core/componentes.md)                     | Resumen de componentes integrados                        |
-| [funciones-servidor.md](./core/funciones-servidor.md)       | Server Actions, `ServerBoundary`, `bridge.js`            |
-| [limites-de-error.md](./core/limites-de-error.md)           | Error boundaries y overlay de desarrollo                 |
-| [devtools-y-profiler.md](./core/devtools-y-profiler.md)     | Advertencias de desarrollo y profiler en memoria         |
+| [vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) | `createElement`, work loop, reconciliador, commit al DOM       |
+| [hooks.md](./core/hooks.md)                                 | `useStore`, `useEffect`, memoización, hooks en SSR             |
+| [renderizado.md](./core/renderizado.md)                     | `render`, `hydrate`, `renderToString`, streaming               |
+| [estado-y-prioridad.md](./core/estado-y-prioridad.md)       | Batching, cola de prioridad, `useTransition`                   |
+| [componentes-avanzados.md](./core/componentes-avanzados.md) | `lazy`, `Suspense`, `memo`, portals, `forwardRef`              |
+| [componentes.md](./core/componentes.md)                     | Resumen de componentes integrados                              |
+| [funciones-servidor.md](./core/funciones-servidor.md)       | Server Actions, `ServerBoundary`, `bridge.js`                  |
+| [limites-de-error.md](./core/limites-de-error.md)           | Error boundaries y overlay de desarrollo                       |
+| [devtools-y-profiler.md](./core/devtools-y-profiler.md)     | Advertencias de desarrollo y profiler en memoria               |
 
 ---
 

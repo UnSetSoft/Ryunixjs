@@ -141,16 +141,20 @@
     display: none;
   `
   tryAppendOverlay(overlay)
-  document.addEventListener('DOMContentLoaded', () => tryAppendOverlay(overlay), {
-    once: true,
-  })
+  document.addEventListener(
+    'DOMContentLoaded',
+    () => tryAppendOverlay(overlay),
+    {
+      once: true,
+    },
+  )
 
   const isElementLike = (value: unknown): value is RyunixFiberLike => {
     return Boolean(
       value &&
-        typeof value === 'object' &&
-        'type' in (value as Record<string, unknown>) &&
-        'props' in (value as Record<string, unknown>),
+      typeof value === 'object' &&
+      'type' in (value as Record<string, unknown>) &&
+      'props' in (value as Record<string, unknown>),
     )
   }
 

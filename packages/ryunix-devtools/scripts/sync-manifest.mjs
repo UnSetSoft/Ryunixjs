@@ -30,9 +30,7 @@ export function toExtensionVersion(version) {
     : `${major}.${minor}.${patch}`
 }
 
-const pkg = JSON.parse(
-  fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
-)
+const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 const manifestPath = path.join(root, 'manifest.json')
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
 

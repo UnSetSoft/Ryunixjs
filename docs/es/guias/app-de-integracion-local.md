@@ -9,10 +9,10 @@ el workspace de pnpm y ver los cambios del framework en el navegador.
 No sustituye a Jest ni a `pnpm lint` — ver
 [tests-automatizados.md](./tests-automatizados.md).
 
-| Vía                                 | Guía                                    |
-| :---------------------------------- | :-------------------------------------- |
+| Vía                                 | Guía                                               |
+| :---------------------------------- | :------------------------------------------------- |
 | Tests automatizados                 | [tests-automatizados.md](./tests-automatizados.md) |
-| App de integración (este documento) | `../ryunix-doc` + `pnpm run dev:doc` |
+| App de integración (este documento) | `../ryunix-doc` + `pnpm run dev:doc`               |
 
 ---
 
@@ -32,14 +32,14 @@ No sustituye a Jest ni a `pnpm lint` — ver
 
 ## Conceptos clave
 
-| Término | Qué es |
-| :------ | :----- |
-| **Monorepo (`Ryunixjs/`)** | Paquetes del framework (`packages/core`, `packages/ryunix-presets`, …). |
+| Término                         | Qué es                                                                       |
+| :------------------------------ | :--------------------------------------------------------------------------- |
+| **Monorepo (`Ryunixjs/`)**      | Paquetes del framework (`packages/core`, `packages/ryunix-presets`, …).      |
 | **`ryunix-doc` (repo hermano)** | Sitio canónico de docs. Entra en `pnpm-workspace.yaml` como `../ryunix-doc`. |
-| **App de integración** | Ese sitio con `workspace:*` en `@unsetsoft/ryunixjs` y presets. |
-| **`workspace:*`** | pnpm enlaza `packages/*` en lugar de versiones de npm. |
-| **`pnpm run dev:doc`** | Compila core y ejecuta `ryunix dev` en `ryunix-doc`. |
-| **`pnpm dev` (raíz)** | Tareas Turbo (CRA, etc.). Para el navegador usa `dev:doc`. |
+| **App de integración**          | Ese sitio con `workspace:*` en `@unsetsoft/ryunixjs` y presets.              |
+| **`workspace:*`**               | pnpm enlaza `packages/*` en lugar de versiones de npm.                       |
+| **`pnpm run dev:doc`**          | Compila core y ejecuta `ryunix dev` en `ryunix-doc`.                         |
+| **`pnpm dev` (raíz)**           | Tareas Turbo (CRA, etc.). Para el navegador usa `dev:doc`.                   |
 
 ```text
 ryx/                         ← carpeta padre habitual (no es un repo git)
@@ -91,11 +91,11 @@ Abre la URL del terminal (p. ej. `http://localhost:3000`).
 1. **`pnpm run dev:doc`** — déjalo en marcha.
 2. Edita según el ámbito:
 
-| Editas… | Después de guardar |
-| :------ | :----------------- |
-| `ryunix-doc/src/**` | HMR recarga. |
-| `packages/core/src/**` | `pnpm --filter @unsetsoft/ryunixjs build`, F5. |
-| `packages/ryunix-presets/**` | Reinicia `pnpm run dev:doc`. |
+| Editas…                       | Después de guardar                              |
+| :---------------------------- | :---------------------------------------------- |
+| `ryunix-doc/src/**`           | HMR recarga.                                    |
+| `packages/core/src/**`        | `pnpm --filter @unsetsoft/ryunixjs build`, F5.  |
+| `packages/ryunix-presets/**`  | Reinicia `pnpm run dev:doc`.                    |
 | `packages/ryunix-devtools/**` | Recarga la extensión en `chrome://extensions/`. |
 
 Antes del PR: `pnpm test`, `pnpm lint`.
@@ -104,14 +104,14 @@ Antes del PR: `pnpm test`, `pnpm lint`.
 
 ## Comandos desde la raíz
 
-| Comando | Acción |
-| :------ | :----- |
-| `pnpm run setup:web` | Verifica `../ryunix-doc` y enlaces workspace |
-| `pnpm run dev:doc` | `ryunix dev` en el sitio de docs |
-| `pnpm run build:doc` | Build de producción del sitio |
-| `pnpm run run:web` | Alias de `dev:doc` (nombre legacy) |
-| `pnpm run run:web:build` | Alias de `build:doc` |
-| `pnpm run run:web:start` | `ryunix start` en `ryunix-doc` |
+| Comando                  | Acción                                       |
+| :----------------------- | :------------------------------------------- |
+| `pnpm run setup:web`     | Verifica `../ryunix-doc` y enlaces workspace |
+| `pnpm run dev:doc`       | `ryunix dev` en el sitio de docs             |
+| `pnpm run build:doc`     | Build de producción del sitio                |
+| `pnpm run run:web`       | Alias de `dev:doc` (nombre legacy)           |
+| `pnpm run run:web:build` | Alias de `build:doc`                         |
+| `pnpm run run:web:start` | `ryunix start` en `ryunix-doc`               |
 
 Si falla con «no projects matched», falta `../ryunix-doc` o no está en el
 workspace.
@@ -135,11 +135,11 @@ workspace.
 
 ## Smoke de CI vs docs local
 
-| | Integración local | CI (`scripts/ci-smoke-build.mjs`) |
-| :--- | :---------------- | :-------------------------------- |
-| App | `../ryunix-doc` | `_ci/smoke-app` desde plantilla `ryunix-base` |
-| Uso | Docs y rutas `[locale]` | Build mínimo del scaffold CRA |
-| En git | repo `ryunix-doc` aparte | `_ci/` ignorado; se genera en CI |
+|        | Integración local        | CI (`scripts/ci-smoke-build.mjs`)             |
+| :----- | :----------------------- | :-------------------------------------------- |
+| App    | `../ryunix-doc`          | `_ci/smoke-app` desde plantilla `ryunix-base` |
+| Uso    | Docs y rutas `[locale]`  | Build mínimo del scaffold CRA                 |
+| En git | repo `ryunix-doc` aparte | `_ci/` ignorado; se genera en CI              |
 
 ---
 
@@ -154,18 +154,18 @@ compartido es `ryunix-doc`.
 
 ## Git y commits
 
-| Ámbito | Commits |
-| :----- | :------ |
-| `Ryunixjs/packages/*`, `Ryunixjs/docs/` | Sí → PR a `canary` |
-| `ryunix-doc/` | Sí → su repo / deploy |
-| `test/webpack*` (cualquier nombre) | Nunca — `.gitignore` |
+| Ámbito                                  | Commits               |
+| :-------------------------------------- | :-------------------- |
+| `Ryunixjs/packages/*`, `Ryunixjs/docs/` | Sí → PR a `canary`    |
+| `ryunix-doc/`                           | Sí → su repo / deploy |
+| `test/webpack*` (cualquier nombre)      | Nunca — `.gitignore`  |
 
 ---
 
 ## Documentación relacionada
 
-| Tema | Enlace |
-| :--- | :----- |
-| Tests | [tests-automatizados.md](./tests-automatizados.md) |
+| Tema          | Enlace                                               |
+| :------------ | :--------------------------------------------------- |
+| Tests         | [tests-automatizados.md](./tests-automatizados.md)   |
 | Guía del repo | [guia-del-repositorio.md](./guia-del-repositorio.md) |
-| Índice | [resumen.md](../resumen.md) |
+| Índice        | [resumen.md](../resumen.md)                          |

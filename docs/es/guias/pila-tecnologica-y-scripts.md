@@ -151,11 +151,11 @@ Los comandos se ejecutan desde la **raíz del repositorio** salvo indicación.
 
 ### App de integración local (framework en el navegador)
 
-| Script                   | Propósito                                                      |
-| :----------------------- | :------------------------------------------------------------- |
-| `pnpm run run:web`       | Alias de `dev:doc` (`ryunix dev` en `../ryunix-doc`)           |
-| `pnpm run run:web:build` | Build de producción de esa app                                 |
-| `pnpm run run:web:start` | `ryunix start` de la app compilada                             |
+| Script                   | Propósito                                            |
+| :----------------------- | :--------------------------------------------------- |
+| `pnpm run run:web`       | Alias de `dev:doc` (`ryunix dev` en `../ryunix-doc`) |
+| `pnpm run run:web:build` | Build de producción de esa app                       |
+| `pnpm run run:web:start` | `ryunix start` de la app compilada                   |
 
 `pnpm run dev` en la raíz **no** arranca la app Webpack de prueba; `run:web` es
 el equivalente a `pnpm dev` en una aplicación Ryunix.

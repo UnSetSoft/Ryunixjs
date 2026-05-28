@@ -53,9 +53,7 @@ if (!skipBuild) {
 
 const linkedCore = path.join(DOC_DIR, 'node_modules/@unsetsoft/ryunixjs')
 if (!fs.existsSync(linkedCore)) {
-  fail(
-    `workspace link missing at ${linkedCore}; run pnpm install from ${ROOT}`,
-  )
+  fail(`workspace link missing at ${linkedCore}; run pnpm install from ${ROOT}`)
 }
 
 console.log('\nDone. Docs integration app: ../ryunix-doc')

@@ -16,10 +16,7 @@ type ApiRequest = IncomingMessage & {
 /**
  * Parses url and extracts dynamic parameters like [id]
  */
-function matchRoute(
-  requestUrl: string,
-  apiDirPath: string,
-): RouteMatch | null {
+function matchRoute(requestUrl: string, apiDirPath: string): RouteMatch | null {
   if (!fs.existsSync(apiDirPath)) return null
 
   const urlParts = requestUrl.split('?')[0].split('/').filter(Boolean)
@@ -108,7 +105,10 @@ export async function handleApiRequest(
 ): Promise<boolean> {
   let parsedUrl: URL
   try {
-    parsedUrl = new URL(req.url ?? '/', `http://${req.headers.host || 'localhost'}`)
+    parsedUrl = new URL(
+      req.url ?? '/',
+      `http://${req.headers.host || 'localhost'}`,
+    )
   } catch {
     res.writeHead(400)
     res.end('Bad Request')

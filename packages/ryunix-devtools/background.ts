@@ -3,9 +3,8 @@
  */
 
 ;(function () {
-  const ext = (
-    (globalThis as { browser?: typeof chrome }).browser ?? chrome
-  ) as typeof chrome
+  const ext = ((globalThis as { browser?: typeof chrome }).browser ??
+    chrome) as typeof chrome
 
   interface RyunixDevtoolsMessage {
     source?: string

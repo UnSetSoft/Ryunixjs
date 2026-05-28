@@ -43,7 +43,8 @@ const warnDeprecated = (configPath: string, message: string) => {
 }
 
 // Check for App Router presence
-const rootDir = (userConfig?.webpack as { root?: string } | undefined)?.root ?? 'src'
+const rootDir =
+  (userConfig?.webpack as { root?: string } | undefined)?.root ?? 'src'
 const hasAppDir =
   fs.existsSync(path.resolve(process.cwd(), 'app')) ||
   fs.existsSync(path.resolve(process.cwd(), `${rootDir}/app`))
@@ -198,7 +199,10 @@ const defaultSettings = {
       rules: getConfigValue('webpack.module.rules', []),
     },
     experiments: {
-      lazyCompilation: getConfigValue('webpack.experiments.lazyCompilation', false),
+      lazyCompilation: getConfigValue(
+        'webpack.experiments.lazyCompilation',
+        false,
+      ),
     },
   },
 

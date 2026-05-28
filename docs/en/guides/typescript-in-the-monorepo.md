@@ -105,10 +105,10 @@ Each package has its own `tsconfig.json` extending this file.
 
 ### Turbo and root scripts
 
-| Item                 | Location                       | Role                                              |
-| :------------------- | :----------------------------- | :------------------------------------------------ |
-| `typecheck` task     | `turbo.json`                   | Runs `typecheck` in every package that defines it |
-| `pnpm run typecheck` | Root `package.json`            | Turbo orchestration                               |
+| Item                 | Location                   | Role                                              |
+| :------------------- | :------------------------- | :------------------------------------------------ |
+| `typecheck` task     | `turbo.json`               | Runs `typecheck` in every package that defines it |
+| `pnpm run typecheck` | Root `package.json`        | Turbo orchestration                               |
 | CI                   | `.github/workflows/ci.yml` | Runs `pnpm run typecheck` in the `quality` job    |
 
 ### Dependency

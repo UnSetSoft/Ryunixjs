@@ -70,9 +70,7 @@ class RyunixRoutesPlugin {
           const routes = this.parseRoutes(content)
 
           // Count routes with meta (reserved for future manifest enrichment)
-          void routes.filter(
-            (r) => r.meta && Object.keys(r.meta).length > 0,
-          )
+          void routes.filter((r) => r.meta && Object.keys(r.meta).length > 0)
 
           const manifest = JSON.stringify(routes, null, 2)
           const outputPath = path.resolve(process.cwd(), this.outputPath)
@@ -620,7 +618,7 @@ class RyunixRoutesPlugin {
     if (value === 'false') return false
 
     // Number
-      if (!Number.isNaN(Number(value)) && value !== '') {
+    if (!Number.isNaN(Number(value)) && value !== '') {
       return Number(value)
     }
 

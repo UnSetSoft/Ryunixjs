@@ -48,7 +48,11 @@ export async function renderDevRoute(
 
   const outputFs =
     clientCompiler.outputFileSystem as unknown as MemoryOutputFileSystem
-  if (!outputFs?.readFileSync || !outputFs.existsSync || !outputFs.readdirSync) {
+  if (
+    !outputFs?.readFileSync ||
+    !outputFs.existsSync ||
+    !outputFs.readdirSync
+  ) {
     return false
   }
 
@@ -140,9 +144,9 @@ export async function renderDevRoute(
     try {
       const cssDir = resolveApp(dir, `${buildDir}/static/css`)
       if (outputFs.existsSync(cssDir)) {
-        const cssFiles = outputFs.readdirSync(cssDir).filter((f) =>
-          f.endsWith('.css'),
-        )
+        const cssFiles = outputFs
+          .readdirSync(cssDir)
+          .filter((f) => f.endsWith('.css'))
         if (config.debug)
           console.log(
             `[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`,

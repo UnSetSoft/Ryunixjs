@@ -9,10 +9,7 @@ import chalk from 'chalk'
 import boxen from 'boxen'
 import defaultSettings from '../utils/config.js'
 import Prerender from './prerender.js'
-import {
-  resolveApp,
-  getPackageVersion,
-} from '../utils/index.js'
+import { resolveApp, getPackageVersion } from '../utils/index.js'
 import { ESLint } from 'eslint'
 import eslintConfig from '../eslint.config.js'
 import fs from 'fs'
