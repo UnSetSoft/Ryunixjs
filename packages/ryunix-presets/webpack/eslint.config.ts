@@ -1,4 +1,4 @@
-import config from './utils/config.cjs'
+import config from './utils/config.js'
 import { defineConfig } from 'eslint/config'
 
 /**

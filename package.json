@@ -41,7 +41,9 @@
     "run:web:start": "pnpm --filter ./test/webpack run start",
     "run:web2": "pnpm --filter ./test/webpack2 run dev",
     "run:web2:build": "pnpm --filter ./test/webpack2 run build",
-    "run:web2:start": "pnpm --filter ./test/webpack2 run start"
+    "run:web2:start": "pnpm --filter ./test/webpack2 run start",
+    "dev:doc": "pnpm run build:core && pnpm --filter ryunix-doc run dev",
+    "build:doc": "pnpm run build:core && pnpm --filter ryunix-doc run build"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",

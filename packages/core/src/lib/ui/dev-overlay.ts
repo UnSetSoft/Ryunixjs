@@ -1,21 +1,19 @@
 import { createElement } from '../reconciler/createElement.js'
 import { useStore, useEffect } from '../hooks/hooks.js'
 
-/**
- * @typedef {object} OverlayError
- * @property {string} [name]
- * @property {string} [message]
- * @property {string | string[]} [stack]
- * @property {{ fileName?: string, lineNumber?: number }} [__ryunix_source]
- */
+interface OverlayError {
+  name?: string
+  message?: string
+  stack?: string | string[]
+  __ryunix_source?: { fileName?: string; lineNumber?: number }
+}
 
-/**
- * @param {unknown} propsOrError
- */
-export function RyunixDevOverlay(propsOrError) {
-  /** @type {Record<string, unknown> | Error | null | undefined} */
-  const propsInput =
-    /** @type {Record<string, unknown> | Error | null | undefined} */ propsOrError
+export function RyunixDevOverlay(propsOrError: unknown) {
+  const propsInput = propsOrError as
+    | Record<string, unknown>
+    | Error
+    | null
+    | undefined
 
   // If propsOrError is an event or wrapped object, try to extract error
   const rawError =
@@ -26,21 +24,20 @@ export function RyunixDevOverlay(propsOrError) {
       ? propsInput.error
       : propsInput
 
-  /** @type {OverlayError | null} */
-  let error = null
+  let error: OverlayError | null = null
   if (rawError instanceof Error) {
-    error = rawError
+    error = rawError as OverlayError
   } else if (rawError && typeof rawError === 'object') {
     if ('message' in rawError) {
-      error = /** @type {OverlayError} */ rawError
+      error = rawError as OverlayError
     } else if ('error' in rawError) {
-      const nested = /** @type {Record<string, unknown>} */ rawError.error
+      const nested = (rawError as Record<string, unknown>).error
       error =
         nested && typeof nested === 'object'
-          ? /** @type {OverlayError} */ nested
+          ? (nested as OverlayError)
           : null
     } else {
-      error = /** @type {OverlayError} */ rawError
+      error = rawError as OverlayError
     }
   }
 
@@ -50,22 +47,20 @@ export function RyunixDevOverlay(propsOrError) {
     Object.getOwnPropertyNames(propsInput || {}),
   )
 
-  const [snippetState, setSnippet] = useStore(null)
+  const [snippetState, setSnippet] = useStore(null as string | null)
   const [startLineState, setStartLine] = useStore(1)
   const [errorFileState, setErrorFile] = useStore('')
   const [errorLineState, setErrorLine] = useStore(0)
-  const snippet = /** @type {string | null} */ snippetState
-  const startLine = /** @type {number} */ startLineState
-  const errorFile = /** @type {string} */ errorFileState
-  const errorLine = /** @type {number} */ errorLineState
+  const snippet = snippetState as string | null
+  const startLine = startLineState as number
+  const errorFile = errorFileState as string
+  const errorLine = errorLineState as number
 
-  // Normalize stack ensuring we have lines
-  /** @type {string[]} */
-  let stackLines = []
+  let stackLines: string[] = []
   if (error && error.stack) {
     stackLines =
       typeof error.stack === 'string'
-        ? error.stack.split('\n').filter((/** @type {string} */ line) => {
+        ? error.stack.split('\n').filter((line: string) => {
             const trimmed = line.trim()
             if (!trimmed) return false
             if (trimmed.includes('node_modules')) return false
@@ -280,8 +275,7 @@ export function RyunixDevOverlay(propsOrError) {
     height: 'auto',
   }
 
-  /** @param {boolean} isErrorLine */
-  const lineStyle = (isErrorLine) => ({
+  const lineStyle = (isErrorLine: boolean) => ({
     display: 'flex',
     backgroundColor: isErrorLine ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
     padding: '2px 8px',
@@ -404,11 +398,7 @@ export function RyunixDevOverlay(propsOrError) {
             createElement(
               'div',
               { style: { display: 'flex', flexDirection: 'column' } },
-              ...snippetLines.map(
-                (
-                  /** @type {string} */ lineText,
-                  /** @type {number} */ index,
-                ) => {
+              ...snippetLines.map((lineText: string, index: number) => {
                   const currentLineNumber = startLine + index
                   const isErrorLine = currentLineNumber === errorLine
                   return createElement(
@@ -477,8 +467,7 @@ export function RyunixDevOverlay(propsOrError) {
                       gap: '12px',
                     },
                   },
-                  ...stackLines.map(
-                    (/** @type {string} */ line, /** @type {number} */ i) => {
+                  ...stackLines.map((line: string, i: number) => {
                       if (
                         i === 0 &&
                         (line.startsWith('Error:') ||

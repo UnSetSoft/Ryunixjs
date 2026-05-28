@@ -2,14 +2,12 @@ import { createHash } from 'node:crypto'
 import { resolve } from 'path'
 
 import { promises as fs } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import { createRequire } from 'node:module'
 import { readFile } from 'node:fs/promises'
 
-const resolveApp = (appDirectory, relativePath) =>
+const resolveApp = (appDirectory: string, relativePath: string): string =>
   resolve(appDirectory, relativePath)
 
 function getPackageManager() {
@@ -38,7 +36,7 @@ function getPackageManager() {
   return 'npm'
 }
 
-const ENV_HASH = (env) => {
+const ENV_HASH = (env: Record<string, unknown>): string => {
   const hash = createHash('md5')
   hash.update(JSON.stringify(env))
 
@@ -47,10 +45,10 @@ const ENV_HASH = (env) => {
 
 const RYUNIX_APP = /^RYUNIX_APP_/i
 
-const getEnviroment = () =>
+const getEnviroment = (): Record<string, string | undefined> =>
   Object.keys(process.env)
     .filter((key) => RYUNIX_APP.test(key))
-    .reduce(
+    .reduce<Record<string, string | undefined>>(
       (env, key) => {
         env[key] = process.env[key]
         return env
@@ -68,16 +66,17 @@ const getPackageVersion = async () => {
   return JSON.parse(data)
 }
 
-async function cleanCacheDir(dirPath) {
+async function cleanCacheDir(dirPath: string) {
   try {
     await fs.access(dirPath)
     await fs.rm(dirPath, { recursive: true, force: true })
     logger.info(
       `webpack cache cleaned ${chalk.bold(chalk.green('successfully'))}`,
     )
-  } catch (err) {
+  } catch (err: unknown) {
     // Directory does not exist or some error occurred
-    if (err.code === 'ENOENT') {
+    const nodeErr = err as NodeJS.ErrnoException
+    if (nodeErr.code === 'ENOENT') {
       logger.info(`webpack cache cleaned ${chalk.red('failed')}`)
     } else {
       throw err // or handle error accordingly
@@ -85,17 +84,18 @@ async function cleanCacheDir(dirPath) {
   }
 }
 
-async function cleanBuildDirectory(dirPath) {
+async function cleanBuildDirectory(dirPath: string) {
   try {
     await fs.access(dirPath)
     await fs.rm(dirPath, { recursive: true, force: true })
     logger.info(
       `static folder cleaned ${chalk.bold(chalk.green('successfully'))}`,
     )
-  } catch (err) {
+  } catch (err: unknown) {
     // Directory does not exist or some error occurred
 
-    if (err.code === 'ENOENT') {
+    const nodeErr = err as NodeJS.ErrnoException
+    if (nodeErr.code === 'ENOENT') {
       logger.info(`static folder cleaned ${chalk.red('failed')}`)
     } else {
       throw err // or handle error accordingly
@@ -104,8 +104,18 @@ async function cleanBuildDirectory(dirPath) {
 }
 
 // utils/convertFlatToClassic.js
-export function convertFlatToClassic(configArray) {
-  const combined = {
+export function convertFlatToClassic(configArray: Record<string, unknown>[]) {
+  interface CombinedEslintConfig {
+    env: Record<string, unknown>
+    globals: Record<string, unknown>
+    parserOptions: Record<string, unknown>
+    plugins: Set<unknown>
+    extends: Set<unknown>
+    rules: Record<string, unknown>
+    parser: unknown
+  }
+
+  const combined: CombinedEslintConfig = {
     env: {},
     globals: {},
     parserOptions: {},
@@ -117,7 +127,21 @@ export function convertFlatToClassic(configArray) {
 
   const invalidKeys = new Set()
 
-  for (const cfg of configArray) {
+  for (const rawCfg of configArray) {
+    const cfg = rawCfg as {
+      env?: Record<string, unknown>
+      globals?: Record<string, unknown>
+      parserOptions?: Record<string, unknown>
+      languageOptions?: {
+        parserOptions?: Record<string, unknown>
+        parser?: unknown
+      }
+      plugins?: unknown[] | Record<string, unknown>
+      extends?: unknown[] | string
+      rules?: Record<string, unknown>
+      parser?: unknown
+    }
+
     // Detectar keys inválidas
     for (const key of Object.keys(cfg)) {
       if (
@@ -152,7 +176,7 @@ export function convertFlatToClassic(configArray) {
     // Combinar plugins
     if (cfg.plugins) {
       if (Array.isArray(cfg.plugins)) {
-        cfg.plugins.forEach((p) => combined.plugins.add(p))
+        cfg.plugins.forEach((p: unknown) => combined.plugins.add(p))
       } else if (typeof cfg.plugins === 'object' && cfg.plugins !== null) {
         Object.keys(cfg.plugins).forEach((p) => combined.plugins.add(p))
       }
@@ -161,7 +185,7 @@ export function convertFlatToClassic(configArray) {
     // Combinar extends
     if (cfg.extends) {
       if (Array.isArray(cfg.extends)) {
-        cfg.extends.forEach((e) => combined.extends.add(e))
+        cfg.extends.forEach((e: unknown) => combined.extends.add(e))
       } else if (typeof cfg.extends === 'string') {
         combined.extends.add(cfg.extends)
       }

@@ -1,9 +1,39 @@
-// @ts-nocheck
 import fs from 'fs'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { Compiler } from 'webpack'
 import { prerenderRoute } from './ssg.js'
 import { resolveApp } from './index.js'
 
-export async function renderDevRoute(req, res, devServer, dir, config) {
+interface MemoryOutputFileSystem {
+  readFileSync: (path: string, encoding: string) => string
+  existsSync: (path: string) => boolean
+  readdirSync: (path: string) => string[]
+}
+
+interface DevServerLike {
+  compiler: Compiler & {
+    compilers?: Compiler[]
+  }
+}
+
+declare global {
+  var Ryunix:
+    | {
+        renderToString?: (element: unknown) => string
+        renderToStringAsync?: (element: unknown) => Promise<string>
+        createElement?: (component: unknown) => unknown
+        getState?: () => { ssrMetadata?: Record<string, unknown> }
+      }
+    | undefined
+}
+
+export async function renderDevRoute(
+  req: IncomingMessage,
+  res: ServerResponse,
+  devServer: DevServerLike,
+  dir: string,
+  config: Record<string, unknown>,
+): Promise<boolean> {
   // We only care about GET requests for HTML documents
   if (req.method !== 'GET' || !req.headers.accept?.includes('text/html')) {
     return false
@@ -16,21 +46,26 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
 
   if (!clientCompiler) return false
 
-  const outputFs = clientCompiler.outputFileSystem
-  const buildDir = config.buildDir
+  const outputFs =
+    clientCompiler.outputFileSystem as unknown as MemoryOutputFileSystem
+  if (!outputFs?.readFileSync || !outputFs.existsSync || !outputFs.readdirSync) {
+    return false
+  }
+
+  const buildDir = String(config.buildDir)
   const indexPath = resolveApp(dir, `${buildDir}/static/index.html`)
 
-  let template
+  let template: string
   try {
     template = outputFs.readFileSync(indexPath, 'utf-8')
-  } catch (err) {
+  } catch {
     // index.html not generated yet, let the dev server handle default logic
     return false
   }
 
-  let AppRouterApp = null
-  let ryunixRenderToString = null
-  let ryunixCreateElement = null
+  let AppRouterApp: unknown = null
+  let ryunixRenderToString: ((element: unknown) => string) | null = null
+  let ryunixCreateElement: ((component: unknown) => unknown) | null = null
 
   try {
     const serverBundleCandidates = [
@@ -42,13 +77,15 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     )
     if (serverBundlePath) {
       if (typeof global.window === 'undefined') {
-        global.window = { location: { pathname: req.url } }
+        global.window = {
+          location: { pathname: req.url ?? '/' },
+        } as Window & typeof globalThis
       }
       if (typeof global.document === 'undefined') {
         global.document = {
           querySelector: () => null,
           getElementById: () => null,
-        }
+        } as unknown as Document
       }
 
       const serverModule = await import(
@@ -58,18 +95,25 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')
       const Ryunix = ryunixCore.default || ryunixCore
-      global.Ryunix = Ryunix
-      ryunixRenderToString = Ryunix.renderToString
-      ryunixCreateElement = Ryunix.createElement
+      global.Ryunix = Ryunix as typeof global.Ryunix
+      ryunixRenderToString = Ryunix.renderToString as (
+        element: unknown,
+      ) => string
+      ryunixCreateElement = Ryunix.createElement as (
+        component: unknown,
+      ) => unknown
     }
-  } catch (e) {
-    console.warn(`[Ryunix SSR Dev] Failed to load server bundle: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.warn(`[Ryunix SSR Dev] Failed to load server bundle: ${message}`)
     return false // fallback to SPA
   }
 
   let renderedString = ''
   if (AppRouterApp && ryunixRenderToString && ryunixCreateElement) {
-    global.window = { location: { pathname: req.url } }
+    global.window = {
+      location: { pathname: req.url ?? '/' },
+    } as Window & typeof globalThis
     try {
       const element = ryunixCreateElement(AppRouterApp)
       if (typeof global.Ryunix?.renderToStringAsync === 'function') {
@@ -83,10 +127,10 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
   }
 
   // Generic mock route for prerenderRoute (to inject metadata)
-  const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {}
+  const ssrMetadata = globalThis.Ryunix?.getState?.()?.ssrMetadata || {}
   if (config.debug)
     console.log('[Ryunix SSR Dev] Captured metadata:', ssrMetadata)
-  const mockRoute = { path: req.url, meta: ssrMetadata }
+  const mockRoute = { path: req.url ?? '/', meta: ssrMetadata }
 
   try {
     let html = await prerenderRoute(mockRoute, template, config, renderedString)
@@ -96,9 +140,9 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
     try {
       const cssDir = resolveApp(dir, `${buildDir}/static/css`)
       if (outputFs.existsSync(cssDir)) {
-        const cssFiles = outputFs
-          .readdirSync(cssDir)
-          .filter((f) => f.endsWith('.css'))
+        const cssFiles = outputFs.readdirSync(cssDir).filter((f) =>
+          f.endsWith('.css'),
+        )
         if (config.debug)
           console.log(
             `[Ryunix SSR Dev] Found CSS files: ${cssFiles.join(', ')}`,
@@ -111,7 +155,7 @@ export async function renderDevRoute(req, res, devServer, dir, config) {
           html = html.replace('</head>', `${styleLinks}\n</head>`)
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore errors reading CSS directory
     }
 

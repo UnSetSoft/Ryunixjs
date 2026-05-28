@@ -20,7 +20,7 @@ export function forwardRef(render: ForwardRefRender): ForwardRefComponent {
   ) => {
     const { ref, ...restProps } = props || {}
     return render(restProps, ref ?? null)
-  }) as ForwardRefComponent
+  }) as unknown as ForwardRefComponent
 
   const named = render as { displayName?: string; name?: string }
   ForwardRefComponent.displayName = `ForwardRef(${named.displayName || named.name || 'Component'})`

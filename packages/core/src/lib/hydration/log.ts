@@ -2,11 +2,7 @@ import { getState } from '../../utils/index.js'
 
 const PREFIX = '[Ryunix Hydration]'
 
-/**
- * @param {'warn' | 'error'} level
- * @param {string} message
- */
-const emit = (level, message) => {
+const emit = (level: 'warn' | 'error', message: string) => {
   const line = `${PREFIX} ${message}`
   if (level === 'error') {
     console.error(line)
@@ -19,17 +15,15 @@ const shouldReportStrict = () =>
   process.env.NODE_ENV !== 'production' &&
   process.env.RYUNIX_HYDRATION_STRICT === 'true'
 
-/** @param {string} message */
-export const logHydrationInfo = (message) => {
+export const logHydrationInfo = (message: string) => {
   if (!shouldReportStrict()) return
   emit('warn', message)
 }
 
 /**
  * Log the first hydration DOM mismatch (tag/text vs client tree).
- * @param {string} detail
  */
-export const logHydrationMismatch = (detail) => {
+export const logHydrationMismatch = (detail: string) => {
   const state = getState()
   if (state.hydrationMismatchReported) return
   state.hydrationMismatchReported = true
@@ -41,10 +35,7 @@ export const logHydrationMismatch = (detail) => {
   )
 }
 
-/**
- * @param {string} detail
- */
-export const logHydrationBoundaryMismatch = (detail) => {
+export const logHydrationBoundaryMismatch = (detail: string) => {
   const state = getState()
   if (state.hydrationBoundaryMismatchReported) return
   state.hydrationBoundaryMismatchReported = true
@@ -55,10 +46,7 @@ export const logHydrationBoundaryMismatch = (detail) => {
   )
 }
 
-/**
- * @param {string} detail
- */
-export const logHydrationRecoverable = (detail) => {
+export const logHydrationRecoverable = (detail: string) => {
   if (!shouldReportStrict()) return
   emit(
     'warn',
@@ -68,7 +56,6 @@ export const logHydrationRecoverable = (detail) => {
 
 /**
  * Log when hydration failed and the SSR container is being cleared.
- * @param {string} [reason]
  */
 export const logHydrationFailure = (reason = '') => {
   const state = getState()
@@ -87,9 +74,8 @@ export const logHydrationFailure = (reason = '') => {
 
 /**
  * Log when leftover SSR nodes are removed after hydration (soft mismatch).
- * @param {number} count
  */
-export const logHydrationUnmatchedNodes = (count) => {
+export const logHydrationUnmatchedNodes = (count: number) => {
   if (!count) return
   const state = getState()
   if (state.hydrationUnmatchedReported) return
@@ -121,10 +107,7 @@ export const logHydrationBoundaryRecovery = () => {
   emit('warn', 'Remounting a hydration boundary after local mismatch.')
 }
 
-/**
- * @param {string} reason
- */
-export const logHydrationFatal = (reason) => {
+export const logHydrationFatal = (reason: string) => {
   emit('error', reason)
 }
 

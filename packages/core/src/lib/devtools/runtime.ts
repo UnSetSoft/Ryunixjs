@@ -1,39 +1,25 @@
 import { getState } from '../../utils/index.js'
-
-/**
- * @typedef {import('../../types/internal.js').RyunixComponent} RyunixComponent
- * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
- */
+import type { RyunixComponent, RyunixFiber } from '../../types/internal.js'
 
 /**
  * Development warnings
  */
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-/**
- * @param {boolean} condition
- * @param {string} message
- */
-const warning = (condition, message) => {
+const warning = (condition: boolean, message: string) => {
   if (!isDevelopment) return
   if (condition) return
   console.warn(`[Ryunix Warning] ${message}`)
 }
 
-/**
- * @param {string} message
- */
-const error = (message) => {
+const error = (message: string) => {
   if (!isDevelopment) return
   console.error(`[Ryunix Error] ${message}`)
 }
 
-/**
- * Component name detection
- * @param {RyunixComponent | null | undefined} component
- * @returns {string}
- */
-const getComponentName = (component) => {
+const getComponentName = (
+  component: RyunixComponent | null | undefined,
+): string => {
   if (!component) return 'Unknown'
   return component.displayName || component.name || 'Anonymous'
 }
@@ -49,7 +35,7 @@ const validateHookContext = (hookName = 'A hook') => {
         'Make sure you are calling hooks at the top level of your component.',
     )
   }
-  const wipFiber = /** @type {RyunixFiber} */ state.wipFiber
+  const wipFiber = state.wipFiber as RyunixFiber
   if (!Array.isArray(wipFiber.hooks)) {
     wipFiber.hooks = []
   }
@@ -59,19 +45,14 @@ const validateHookContext = (hookName = 'A hook') => {
  * Performance tracking utilities
  */
 const perfTracker = {
-  marks: new Map(),
+  marks: new Map<string, number>(),
 
-  /** @param {string} name */
-  mark(name) {
+  mark(name: string) {
     if (!isDevelopment) return
     this.marks.set(name, Date.now())
   },
 
-  /**
-   * @param {string} name
-   * @param {string} startMark
-   */
-  measure(name, startMark) {
+  measure(name: string, startMark: string) {
     if (!isDevelopment) return
     const start = this.marks.get(startMark)
     if (!start) return
@@ -88,12 +69,7 @@ const perfTracker = {
 /**
  * Deprecation warnings
  */
-/**
- * @param {string} oldAPI
- * @param {string} newAPI
- * @param {string} version
- */
-const deprecated = (oldAPI, newAPI, version) => {
+const deprecated = (oldAPI: string, newAPI: string, version: string) => {
   if (!isDevelopment) return
   console.warn(
     `[Ryunix Deprecated] ${oldAPI} is deprecated and will be removed in version ${version}. ` +

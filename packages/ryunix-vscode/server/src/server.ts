@@ -5,7 +5,6 @@ import {
   InitializeParams,
   TextDocumentSyncKind,
   InitializeResult,
-  CompletionItem,
   CompletionItemKind,
   Location,
   Diagnostic,

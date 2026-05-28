@@ -3,30 +3,25 @@ import { cancelEffects, cancelEffectsDeep } from './effects.js'
 import { EFFECT_TAGS, RYUNIX_TYPES, getState, is } from '../../utils/index.js'
 import { RYUNIX_PORTAL } from '../render/portal.js'
 import { logHydrationUnmatchedNodes } from '../hydration/log.js'
+import type { RyunixFiber, RyunixHook } from '../../types/internal.js'
 
-/**
- * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../../types/internal.js').RyunixRootFiber} RyunixRootFiber
- */
+type LayoutHook = RyunixHook & { isLayout?: boolean }
 
 /**
  * Run layout effects (useLayoutEffect) synchronously during commit.
  * These run after DOM mutations but before the browser paints.
- * @param {RyunixFiber} fiber
  */
-const runLayoutEffects = (fiber) => {
+const runLayoutEffects = (fiber: RyunixFiber) => {
   if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
-    /** @type {import('../../types/internal.js').RyunixHook & { isLayout?: boolean }} */
-    const hook = fiber.hooks[i]
+    const hook = fiber.hooks[i] as LayoutHook
 
     if (
       hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
       hook.isLayout &&
       is.function(hook.effect)
     ) {
-      // Cancel previous layout cleanup if exists
       if (is.function(hook.cancel)) {
         try {
           hook.cancel()
@@ -37,12 +32,9 @@ const runLayoutEffects = (fiber) => {
         }
       }
 
-      // Run new layout effect synchronously
       try {
         const cleanup = hook.effect()
-        hook.cancel = is.function(cleanup)
-          ? /** @type {() => void} */ cleanup
-          : null
+        hook.cancel = is.function(cleanup) ? cleanup : null
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.error('Error in layout effect:', error)
@@ -57,21 +49,18 @@ const runLayoutEffects = (fiber) => {
 
 /**
  * Run normal (non-layout) effects asynchronously after paint.
- * @param {RyunixFiber} fiber
  */
-const runNormalEffects = (fiber) => {
+const runNormalEffects = (fiber: RyunixFiber) => {
   if (!fiber?.hooks?.length) return
 
   for (let i = 0; i < fiber.hooks.length; i++) {
-    /** @type {import('../../types/internal.js').RyunixHook & { isLayout?: boolean }} */
-    const hook = fiber.hooks[i]
+    const hook = fiber.hooks[i] as LayoutHook
 
     if (
       hook.type === RYUNIX_TYPES.RYUNIX_EFFECT &&
       !hook.isLayout &&
       is.function(hook.effect)
     ) {
-      // Cancel previous cleanup if exists
       if (is.function(hook.cancel)) {
         try {
           hook.cancel()
@@ -82,12 +71,9 @@ const runNormalEffects = (fiber) => {
         }
       }
 
-      // Run new effect
       try {
         const cleanup = hook.effect()
-        hook.cancel = is.function(cleanup)
-          ? /** @type {() => void} */ cleanup
-          : null
+        hook.cancel = is.function(cleanup) ? cleanup : null
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           console.error('Error in effect:', error)
@@ -107,13 +93,11 @@ function commitRoot() {
   const state = getState()
   state.deletions.forEach(commitWork)
 
-  const finishedWork = /** @type {RyunixRootFiber} */ state.wipRoot
+  const finishedWork = state.wipRoot
+  if (!finishedWork) return
 
-  // Swap the currentRoot pointer BEFORE running effects
-  // This allows dispatches inside effects to base their new work on the just-finished tree
   state.currentRoot = finishedWork
 
-  // After hydration is done, reset the flag and cleanup unconsumed nodes
   if (state.isHydrating || state.hydrationFailed) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
       console.log(
@@ -123,8 +107,6 @@ function commitRoot() {
     if (state.hydrationFailed) {
       // Defer clearing to recoverHydrationFailureIfNeeded → renderSubtree.
     } else {
-      // If there is a cursor left, it means these are SSR nodes that weren't matched
-      // by any client fiber. We must remove them to avoid duplication.
       let cursor = state.hydrateCursor
       let removed = 0
       if (
@@ -152,25 +134,19 @@ function commitRoot() {
 
   commitWork(finishedWork.child)
 
-  // If wipRoot was not reassigned by a synchronous dispatch during effects, clear it
   if (state.wipRoot === finishedWork) {
     state.wipRoot = null
   }
 }
 
-/**
- * @param {RyunixFiber | null | undefined} fiber
- */
-function commitWork(fiber) {
+function commitWork(fiber: RyunixFiber | null | undefined) {
   if (!fiber) {
     return
   }
 
-  // Handle portal fibers — they render into a different container
   if (fiber.type === RYUNIX_PORTAL || fiber._isPortal) {
     const portalContainer = fiber.containerInfo
     if (portalContainer) {
-      // Process portal children into the portal container
       const portalFiber = fiber.child
       if (portalFiber) {
         commitPortalWork(portalFiber, portalContainer)
@@ -190,6 +166,7 @@ function commitWork(fiber) {
   }
 
   const domParent = domParentFiber.dom
+  if (!domParent) return
 
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
     if (fiber.dom != null) {
@@ -198,14 +175,16 @@ function commitWork(fiber) {
       }
       domParent.appendChild(fiber.dom)
     }
-    // Layout effects run synchronously during commit
     runLayoutEffects(fiber)
-    // Normal effects run after paint
     runNormalEffects(fiber)
   } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber)
     if (fiber.dom != null) {
-      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+      updateDom(
+        fiber.dom as HTMLElement | Text,
+        fiber.alternate?.props,
+        fiber.props,
+      )
     }
     runLayoutEffects(fiber)
     runNormalEffects(fiber)
@@ -215,8 +194,6 @@ function commitWork(fiber) {
       if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
         console.log('[Ryunix Debug] Hydration fallback PLACEMENT:', fiber.type)
       }
-      // Since container is cleared on fallback, treat as normal placement
-      // No need to check fiber.dom.parentNode !== domParent because the container was cleared.
       if (fiber.dom != null) {
         domParent.appendChild(fiber.dom)
       }
@@ -227,15 +204,14 @@ function commitWork(fiber) {
         console.log('[Ryunix Debug] Hydrating node:', fiber.type)
       }
       if (fiber.dom != null) {
-        updateDom(fiber.dom, {}, fiber.props)
+        updateDom(fiber.dom as HTMLElement | Text, {}, fiber.props)
       }
       runLayoutEffects(fiber)
       runNormalEffects(fiber)
     }
   } else if (fiber.effectTag === EFFECT_TAGS.DELETION) {
-    // Run cleanups BEFORE removing DOM to allow cleanup functions to read DOM state
     cancelEffectsDeep(fiber)
-    commitDeletion(fiber, domParent)
+    commitDeletion(fiber, domParent as Node)
     return
   }
 
@@ -243,12 +219,10 @@ function commitWork(fiber) {
   commitWork(fiber.sibling)
 }
 
-/**
- * Commit work for portal children into a specific container
- * @param {RyunixFiber | null | undefined} fiber
- * @param {Element | DocumentFragment} portalContainer
- */
-const commitPortalWork = (fiber, portalContainer) => {
+const commitPortalWork = (
+  fiber: RyunixFiber | null | undefined,
+  portalContainer: Element | DocumentFragment,
+) => {
   if (!fiber) return
 
   if (fiber.effectTag === EFFECT_TAGS.PLACEMENT) {
@@ -260,7 +234,11 @@ const commitPortalWork = (fiber, portalContainer) => {
   } else if (fiber.effectTag === EFFECT_TAGS.UPDATE) {
     cancelEffects(fiber)
     if (fiber.dom != null) {
-      updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+      updateDom(
+        fiber.dom as HTMLElement | Text,
+        fiber.alternate?.props,
+        fiber.props,
+      )
     }
     runLayoutEffects(fiber)
     runNormalEffects(fiber)
@@ -274,11 +252,7 @@ const commitPortalWork = (fiber, portalContainer) => {
   commitPortalWork(fiber.sibling, portalContainer)
 }
 
-/**
- * @param {RyunixFiber} fiber
- * @param {Node} domParent
- */
-const commitDeletion = (fiber, domParent) => {
+const commitDeletion = (fiber: RyunixFiber, domParent: Node) => {
   if (fiber.dom) {
     if (fiber.dom.parentNode) {
       fiber.dom.parentNode.removeChild(fiber.dom)

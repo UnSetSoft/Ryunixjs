@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url'
 import { dirname, join, resolve } from 'path'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
 import webpack from 'webpack'
@@ -15,7 +16,7 @@ import {
   resolveApp,
 } from './utils/index.js'
 import fs from 'fs'
-import config from './utils/config.cjs'
+import config from './utils/config.js'
 import { buildStyleVarsCss, buildFontHeadLinks } from './utils/styleConfig.js'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.js'
@@ -29,23 +30,31 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { remarkGithubAlerts } from './plugins/remark-github-alerts.js'
 import rehypeHighlight from 'rehype-highlight'
+import type WebpackDevServer from 'webpack-dev-server'
+
+declare global {
+  var __RYUNIX_SERVER_ACTIONS__:
+    | Record<string, (...args: unknown[]) => unknown>
+    | undefined
+}
 
 const __filename = fileURLToPath(import.meta.url)
 
 const __dirname = dirname(__filename)
 
-let dir
+let dir: string
 
 const manager = getPackageManager()
 
-const loadDir = (pkm) => {
+const loadDir = (pkm: string): string => {
   try {
     switch (pkm) {
       default:
         return process.cwd()
     }
-  } catch (e) {
-    console.error(`[RYUNIX INIT ERROR]: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.error(`[RYUNIX INIT ERROR]: ${message}`)
     process.exit(1)
   }
 }
@@ -57,11 +66,11 @@ dir = loadDir(manager)
  * @param {Object} object - Alias configuration object
  * @returns {Object} Webpack-compatible alias object
  */
-function getAlias(object) {
+function getAlias(object: Record<string, string | false | string[] | null | undefined>) {
   return Object.entries(object)
-    .filter(([k, v]) => v != null)
-    .reduce((accum, [k, v]) => {
-      accum[k] = resolveApp(dir, v)
+    .filter(([, v]) => v != null && typeof v === 'string')
+    .reduce<Record<string, string>>((accum, [k, v]) => {
+      accum[k] = resolveApp(dir, v as string)
       return accum
     }, {})
 }
@@ -76,13 +85,13 @@ try {
   presetsNodeModules = dirname(
     dirname(ryunixRequire.resolve('thread-loader/package.json')),
   )
-} catch (e) {
+} catch (_e) {
   // Fallback: try to resolve from the ryunix-presets package itself
   try {
     presetsNodeModules = dirname(
       ryunixRequire.resolve('@unsetsoft/ryunix-presets/package.json'),
     )
-  } catch (e2) {
+  } catch (_e2) {
     // Last fallback: use the project's node_modules
     presetsNodeModules = dirname(resolveApp(dir, 'package.json'))
   }
@@ -111,8 +120,9 @@ const resolvePostcssPlugins = () => {
         ? fn(opts)
         : fn()
     })
-  } catch (e) {
-    console.warn(`[Ryunix] Could not load postcss.config.js: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.warn(`[Ryunix] Could not load postcss.config.js: ${message}`)
     return []
   }
 }
@@ -143,7 +153,7 @@ const styleFontLinks = buildFontHeadLinks(config.style?.font)
 
 const sharedWebpackConfig = {
   experiments: {
-    lazyCompilation: config.webpack.experiments.lazyCompilation,
+    lazyCompilation: config.webpack.experiments?.lazyCompilation,
   },
   context: resolveApp(dir, config.rootDir),
   devtool: config.webpack.production ? false : 'source-map',
@@ -360,21 +370,21 @@ const sharedWebpackConfig = {
         },
       },
       // Custom rules from config
-      ...config.webpack.module.rules,
+      ...(config.webpack.module?.rules ?? []),
     ],
   },
   resolve: {
     alias:
-      config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
+      config.webpack.resolve?.alias && getAlias(config.webpack.resolve.alias),
     extensions: [
       '.js',
       '.jsx',
       '.ryx',
       '.mdx',
       '.md',
-      ...config.webpack.resolve.extensions,
+      ...(config.webpack.resolve?.extensions ?? []),
     ],
-    fallback: config.webpack.resolve.fallback,
+    fallback: config.webpack.resolve?.fallback,
   },
   resolveLoader: {
     modules: ['node_modules', presetsNodeModules],
@@ -426,14 +436,14 @@ const getPlugins = (isServer = false) =>
     // Only inject HTML for the client build
     !isServer &&
       new HtmlWebpackPlugin({
-        pageLang: config.legacy.seo.pageLang,
-        title: config.legacy.seo.title,
+        pageLang: config.legacy.seo?.pageLang,
+        title: config.legacy.seo?.title,
         favicon: config.favicon
           ? typeof config.favicon === 'string'
             ? resolveApp(dir, config.favicon)
             : join(dir, 'public', 'favicon.png')
           : false,
-        meta: config.legacy.seo.meta as never,
+        meta: config.legacy.seo?.meta as never,
         template: config.legacy.template
           ? resolveApp(dir, config.legacy.template)
           : join(__dirname, 'template', 'index.html'),
@@ -610,7 +620,7 @@ const getPlugins = (isServer = false) =>
           },
         ],
       }),
-    ...(!isServer ? config.webpack.plugins : []),
+    ...(!isServer ? (config.webpack.plugins ?? []) : []),
   ].filter(Boolean)
 
 const clientConfig = {
@@ -633,7 +643,7 @@ const clientConfig = {
       overlay: false, // Disable default webpack iframe overlay
     },
     devMiddleware: {
-      writeToDisk: (filePath) => {
+      writeToDisk: (filePath: string) => {
         try {
           return (
             filePath.includes('/server/') || filePath.includes('\\server\\')
@@ -650,26 +660,29 @@ const clientConfig = {
     },
     liveReload: false,
     headers: {
-      'Access-Control-Allow-Origin': config.server.cors.origin || '*',
-      'Access-Control-Allow-Methods': config.server.cors.methods || '*',
-      'Access-Control-Allow-Headers': config.server.cors.headers || '*',
+      'Access-Control-Allow-Origin': config.server.cors?.origin || '*',
+      'Access-Control-Allow-Methods': config.server.cors?.methods || '*',
+      'Access-Control-Allow-Headers': config.server.cors?.headers || '*',
       'Access-Control-Allow-Credentials': String(
-        config.server.cors.credentials || false,
+        config.server.cors?.credentials || false,
       ),
     },
     allowedHosts: config.webpack.devServer.allowedHosts,
     port: config.port,
     proxy: config.proxy,
-    setupMiddlewares: (middlewares, devServer) => {
+    setupMiddlewares: (
+      middlewares: WebpackDevServer.Middleware[],
+      devServer: WebpackDevServer,
+    ) => {
       if (!devServer) {
         throw new Error('webpack-dev-server is not defined')
       }
 
-      devServer.app.use(async (req, res, next) => {
+      devServer.app?.use(async (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => {
         if (req.method === 'POST' && req.url === '/_ryunix/action') {
           try {
             let body = ''
-            req.on('data', (chunk) => {
+            req.on('data', (chunk: Buffer | string) => {
               body += chunk
             })
             req.on('end', async () => {
@@ -693,9 +706,10 @@ const clientConfig = {
                 const result = await action(...args)
                 res.writeHead(200, { 'Content-Type': 'application/json' })
                 res.end(JSON.stringify(result))
-              } catch (err) {
+              } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err)
                 res.writeHead(500, { 'Content-Type': 'application/json' })
-                res.end(JSON.stringify({ error: err.message }))
+                res.end(JSON.stringify({ error: message }))
               }
             })
             return
@@ -705,9 +719,9 @@ const clientConfig = {
           }
         }
 
-        if (req.method === 'GET' && req.url.startsWith('/_ryunix/source')) {
+        if (req.method === 'GET' && req.url?.startsWith('/_ryunix/source')) {
           try {
-            const urlObj = new URL(req.url, `http://${req.headers.host}`)
+            const urlObj = new URL(req.url ?? '/', `http://${req.headers.host}`)
             const filePath = urlObj.searchParams.get('file')
             const lineStr = urlObj.searchParams.get('line')
             if (!filePath || !lineStr) {
@@ -728,15 +742,21 @@ const clientConfig = {
             const snippet = lines.slice(start, end).join('\n')
             res.writeHead(200, { 'Content-Type': 'application/json' })
             return res.end(JSON.stringify({ snippet, startLine: start + 1 }))
-          } catch (err) {
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err)
             res.writeHead(500, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({ error: err.message }))
+            return res.end(JSON.stringify({ error: message }))
           }
         }
         next()
       })
 
-      devServer.app.use(async (req, res, next) => {
+      devServer.app?.use(
+        async (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: (err?: unknown) => void,
+        ) => {
         try {
           const apiRootPath = resolveApp(dir, `${config.buildDir}/server/api`)
           const handled = await handleApiRequest(req, res, apiRootPath)
@@ -746,15 +766,21 @@ const clientConfig = {
         } catch (err) {
           next(err)
         }
-      })
+      },
+      )
 
-      devServer.app.use(async (req, res, next) => {
+      devServer.app?.use(
+        async (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: (err?: unknown) => void,
+        ) => {
         try {
           if (config.ssr) {
             const handled = await renderDevRoute(
               req,
               res,
-              devServer,
+              devServer as Parameters<typeof renderDevRoute>[2],
               dir,
               config,
             )
@@ -764,7 +790,8 @@ const clientConfig = {
           console.error('[Ryunix Dev SSR]', err)
         }
         next()
-      })
+      },
+      )
 
       return middlewares
     },
@@ -915,7 +942,7 @@ const serverConfig = {
 // Export dual compilers if SSR is enabled, or in production if SSG prerender is enabled
 const enableServerDualCompiler =
   config.ssr ||
-  (config.webpack.production && config.legacy.ssg?.prerender?.length > 0)
+  (config.webpack.production && (config.legacy.ssg?.prerender?.length ?? 0) > 0)
 export default enableServerDualCompiler
   ? [clientConfig, serverConfig]
   : clientConfig

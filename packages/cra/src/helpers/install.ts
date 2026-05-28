@@ -53,7 +53,7 @@ export function install(
       env: { ...process.env, ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' },
     })
 
-    child.on('close', (code) => {
+    child.on('close', (code: number | null) => {
       clearInterval(interval)
       process.stdout.write('\r\x1b[K')
       if (code !== 0) {

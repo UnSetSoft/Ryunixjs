@@ -17,7 +17,7 @@ export function memo(
 ): MemoizedComponent {
   const MemoizedComponent = ((props: Record<string, unknown>) => {
     return Component(props as never)
-  }) as MemoizedComponent
+  }) as unknown as MemoizedComponent
 
   MemoizedComponent._isMemo = true
   MemoizedComponent._wrappedComponent = Component

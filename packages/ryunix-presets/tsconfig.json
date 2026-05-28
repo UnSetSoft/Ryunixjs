@@ -4,7 +4,6 @@
     "moduleResolution": "node10",
     "types": ["node"],
     "skipLibCheck": true,
-    "noImplicitAny": false,
     "strictPropertyInitialization": false
   },
   "include": [

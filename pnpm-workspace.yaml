@@ -3,3 +3,5 @@ packages:
   - 'test/*'
   - 'test/webpack/*'
   - '_ci/smoke-app'
+  # Sibling docs site (ryx/ryunix-doc) — use workspace:* in its package.json
+  - '../ryunix-doc'
