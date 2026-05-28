@@ -1,7 +1,7 @@
 # Ryunix Presets — package overview
 
 > **Language / Idioma:** [English](./package-overview.md) ·
-> [Español](../../es/ryunix-presets/resumen-del-paquete.md)
+> [Español](../../es/ryunix-presets/resumen-paquete.md)
 
 The npm package **`@unsetsoft/ryunix-presets`** lives in
 `packages/ryunix-presets/`. It is RyunixJS **build tooling and CLI**: the

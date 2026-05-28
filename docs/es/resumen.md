@@ -46,10 +46,12 @@ docs/
 │   └── ryunix-vscode/               ← packages/ryunix-vscode — extensión VS Code
 └── es/                              ← Español (esta carpeta)
     ├── resumen.md                   ← Índice (este archivo)
-    ├── guias/                     ← Guías del monorepo (nombres en español)
+    ├── guias/                       ← Guías del monorepo (nombres en español)
     ├── core/
     ├── ryunix-presets/
-    └── cra/
+    ├── cra/
+    ├── ryunix-devtools/
+    └── ryunix-vscode/
 ```
 
 | Ruta (desde `docs/es/`)                    | Paquete en el repo         | Qué encontrarás                                                         |
@@ -89,7 +91,7 @@ cliente/servidor y componentes integrados.
 
 | Documento                                                   | Tema                                                     |
 | :---------------------------------------------------------- | :------------------------------------------------------- |
-| [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — estructura, módulos, render en |
+| [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — estructura, módulos, flujo de render |
 | [vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) | `createElement`, work loop, reconciliador, commit al DOM |
 | [hooks.md](./core/hooks.md)                                 | `useStore`, `useEffect`, memoización, hooks en SSR       |
 | [renderizado.md](./core/renderizado.md)                     | `render`, `hydrate`, `renderToString`, streaming         |
@@ -156,22 +158,14 @@ sintaxis y snippets en archivos `.ryx`.
 ## Orden de lectura sugerido
 
 1. [Guía del repositorio](./guias/guia-del-repositorio.md) — contexto del
-   monorepo
-
-   y cómo encajan las piezas.
-
+   monorepo y cómo encajan las piezas.
 2. [Tests automatizados](./guias/tests-automatizados.md) y
    [app de integración](./guias/app-de-integracion-local.md) — Jest/lint y
-
    validación en navegador con `workspace:*`.
-
 3. [core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) — cómo se
-
    actualiza la UI.
-
-4. [ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md) — cómo
-
-   se compilan y sirven las apps.
+4. [ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md) —
+   cómo se compilan y sirven las apps.
 
 5. Profundizar en cualquier doc de `core/` o `ryunix-presets/` según necesidad.
 

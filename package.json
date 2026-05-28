@@ -75,6 +75,10 @@
   },
   "packageManager": "pnpm@10.26.0",
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core"
+    ],
     "overrides": {
       "@unsetsoft/ryunixjs": "workspace:*",
       "@unsetsoft/ryunix-presets": "workspace:*",

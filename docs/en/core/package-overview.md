@@ -1,7 +1,7 @@
 # Ryunix Core — package overview
 
 > **Language / Idioma:** [English](./package-overview.md) ·
-> [Español](../../es/core/resumen-del-paquete.md)
+> [Español](../../es/core/resumen-paquete.md)
 
 The npm package **`@unsetsoft/ryunixjs`** lives in `packages/core/`. It is the
 **UI engine** of RyunixJS: Virtual DOM, Fiber reconciler, hooks, client render,

@@ -1,7 +1,7 @@
 # Create Ryunix App — package overview
 
 > **Language / Idioma:** [English](./package-overview.md) ·
-> [Español](../../es/cra/resumen-del-paquete.md)
+> [Español](../../es/cra/resumen-paquete.md)
 
 The npm package **`@unsetsoft/cra`** lives in `packages/cra/`. It is the
 **official scaffolder** of the RyunixJS monorepo: it generates new project

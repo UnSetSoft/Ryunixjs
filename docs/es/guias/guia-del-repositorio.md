@@ -80,7 +80,7 @@ bajo el scope `@unsetsoft/*`.
    (`useLayoutEffect`, `useEffect`).
 
 Documentación técnica detallada:
-[Virtual DOM y reconciliación](./core/vdom-y-reconciliacion.md).
+[Virtual DOM y reconciliación](../core/vdom-y-reconciliacion.md).
 
 ### 2. Los presets: compilación y servidor
 
@@ -102,8 +102,8 @@ El **routing es basado en archivos** bajo `app/`:
 Un plugin de Webpack escanea `app/`, infiere componentes de servidor o cliente y
 genera el router con `Suspense`, `ServerBoundary` y `ErrorBoundary`.
 
-Más información: [CLI y arranque](./ryunix-presets/cli-y-arranque.md),
-[Enrutamiento y SSG](./ryunix-presets/enrutamiento-y-ssg.md).
+Más información: [CLI y arranque](../ryunix-presets/cli-y-arranque.md),
+[Enrutamiento y SSG](../ryunix-presets/enrutamiento-y-ssg.md).
 
 ### 3. Flujo de una aplicación
 
@@ -380,12 +380,12 @@ pnpm dev          # Turbo: hoy solo lanza el CLI de CRA, no una web
 | :--------------------------- | :------------------------------------------------------------------------------------- |
 | Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                     |
 | App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                           |
-| Resumen técnico              | [docs/es/resumen.md](./resumen.md)                                                     |
-| Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md)               |
-| Hooks                        | [docs/es/core/hooks.md](./core/hooks.md)                                               |
-| CLI y presets                | [docs/es/ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md)         |
-| Enrutamiento y SSG           | [docs/es/ryunix-presets/enrutamiento-y-ssg.md](./ryunix-presets/enrutamiento-y-ssg.md) |
-| CRA y plantillas             | [docs/es/cra/cli-y-ayudantes.md](./cra/cli-y-ayudantes.md)                             |
+| Resumen técnico              | [docs/es/resumen.md](../resumen.md)                                                     |
+| Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](../core/vdom-y-reconciliacion.md)               |
+| Hooks                        | [docs/es/core/hooks.md](../core/hooks.md)                                               |
+| CLI y presets                | [docs/es/ryunix-presets/cli-y-arranque.md](../ryunix-presets/cli-y-arranque.md)         |
+| Enrutamiento y SSG           | [docs/es/ryunix-presets/enrutamiento-y-ssg.md](../ryunix-presets/enrutamiento-y-ssg.md) |
+| CRA y plantillas             | [docs/es/cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md)                             |
 | README público               | [README.es.md](../../README.es.md)                                                     |
 
 ---
