@@ -40,11 +40,18 @@ const updateFunctionComponent = (fiber: RyunixFiber) => {
   state.hookIndex = 0
   fiber.hooks = []
 
+  const componentType = fiber.type as MemoComponent & { ryunix_type?: string }
+  if (
+    state.hydrationRecover &&
+    componentType.ryunix_type === 'RYUNIX_ERROR_BOUNDARY'
+  ) {
+    fiber.stateError = undefined
+  }
+
   if (state.isHydrating) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
   }
 
-  const componentType = fiber.type as MemoComponent
   if (componentType._isMemo && fiber.alternate) {
     const { children: _pc, ...prevRest } = fiber.alternate.props || {}
     const { children: _nc, ...nextRest } = fiber.props || {}
@@ -84,6 +91,17 @@ const isUnderClientOnlyBoundary = (
   return false
 }
 
+const isUnderServerPreserveBoundary = (
+  fiber: RyunixFiber | null | undefined,
+): boolean => {
+  let current = fiber?.parent || null
+  while (current) {
+    if (current._hydratePreserveServer) return true
+    current = current.parent || null
+  }
+  return false
+}
+
 const normalizeChildNodes = (
   children: RyunixNode | RyunixNode[] | undefined,
 ): RyunixNode[] => {
@@ -106,6 +124,8 @@ const updateHostComponent = (fiber: RyunixFiber) => {
 
   if (state.isHydrating && isPassthrough) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
+  } else if (state.isHydrating && isUnderServerPreserveBoundary(fiber)) {
+    return
   } else if (state.isHydrating && isUnderClientOnlyBoundary(fiber)) {
     if (!fiber.dom) {
       fiber.dom = createDom(fiber)
@@ -132,6 +152,16 @@ const updateHostComponent = (fiber: RyunixFiber) => {
         ) {
           domNode.nodeValue = String(fiber.props.nodeValue)
           logHydrationRecoverable('text')
+        }
+
+        if (
+          isElement &&
+          (domNode as Element).hasAttribute('data-ryunix-server')
+        ) {
+          fiber._hydratePreserveServer = true
+          state.hydrateCursor = nextValidSibling(domNode)
+          reconcileChildren(fiber, [])
+          return
         }
 
         if (
@@ -183,6 +213,10 @@ const updateHostComponent = (fiber: RyunixFiber) => {
     } else {
       fiber.dom = createDom(fiber)
     }
+  }
+
+  if (fiber._hydratePreserveServer) {
+    return
   }
 
   const children = normalizeChildNodes(fiber.props?.children)

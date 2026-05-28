@@ -63,6 +63,8 @@ export const recoverHydrationFailureIfNeeded = () => {
 }
 
 export const runHydrationRecovery = () => {
+  const state = getState()
   recoverScopedHydrationFailures()
   recoverHydrationFailureIfNeeded()
+  state.hydrationRecover = false
 }

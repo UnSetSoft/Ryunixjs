@@ -74,6 +74,8 @@ export interface RyunixFiber {
   _isPortal?: boolean
   __devtoolsId?: string
   _hydrateClientOnly?: boolean
+  /** Skip reconciling children; preserve SSR markup inside data-ryunix-server */
+  _hydratePreserveServer?: boolean
 }
 
 export type HydrationRecoverMode = 'none' | 'boundary' | 'root'
