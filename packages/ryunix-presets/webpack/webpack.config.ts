@@ -23,6 +23,10 @@ import { getPackageVersion } from './utils/index.js'
 import RyunixRoutesPlugin from './utils/ssgPlugin.js'
 import AppRouterPlugin from './utils/appRouterPlugin.js'
 import ApiRouterPlugin from './utils/ApiRouterPlugin.js'
+import {
+  resolveEslintExtensions,
+  resolveEslintFilePatterns,
+} from './utils/eslint-files.js'
 import { handleApiRequest } from './utils/apiHandler.js'
 import { renderDevRoute } from './utils/ssrDevHandler.js'
 import remarkGfm from 'remark-gfm'
@@ -293,9 +297,74 @@ const sharedWebpackConfig = {
           },
         ],
       },
-      // JavaScript/JSX/RYX files
+      // TypeScript / TSX / typed RYX
       {
-        test: /\.(js|jsx|ryx)$/,
+        test: /\.(ts|tsx|ryx)$/,
+        exclude: /node_modules/,
+        use: [
+          config.compiler !== 'swc' && ryunixRequire.resolve('thread-loader'),
+          config.compiler === 'swc'
+            ? {
+                loader: ryunixRequire.resolve('swc-loader'),
+                options: {
+                  jsc: {
+                    parser: {
+                      syntax: 'typescript',
+                      tsx: true,
+                    },
+                    transform: {
+                      react: {
+                        pragma: 'Ryunix.createElement',
+                        pragmaFrag: 'Ryunix.Fragment',
+                      },
+                    },
+                    target: 'es2022',
+                  },
+                },
+              }
+            : {
+                loader: ryunixRequire.resolve('babel-loader'),
+                options: {
+                  presets: [
+                    [
+                      ryunixRequire.resolve('@babel/preset-env'),
+                      {
+                        targets: 'defaults and not IE 11',
+                        useBuiltIns: false,
+                        modules: false,
+                        bugfixes: true,
+                      },
+                    ],
+                    [
+                      ryunixRequire.resolve('@babel/preset-typescript'),
+                      { isTSX: true, allExtensions: true },
+                    ],
+                    ryunixRequire.resolve('@babel/preset-react'),
+                  ],
+                  cacheDirectory: resolveApp(
+                    dir,
+                    `${config.buildDir}/cache/babel-loader`,
+                  ),
+                  plugins: [
+                    [
+                      ryunixRequire.resolve(
+                        '@babel/plugin-transform-react-jsx',
+                      ),
+                      {
+                        pragma: 'Ryunix.createElement',
+                        pragmaFrag: 'Ryunix.Fragment',
+                      },
+                    ],
+                  ],
+                },
+              },
+          resolve(__dirname, 'loaders/ryunix-server-action-loader.js'),
+          resolve(__dirname, 'loaders/ryunix-rsc-loader.js'),
+        ].filter(Boolean),
+      },
+      // JavaScript / JSX
+      {
+        test: /\.(js|jsx)$/,
         use: [
           config.compiler !== 'swc' && ryunixRequire.resolve('thread-loader'),
           config.compiler === 'swc'
@@ -379,6 +448,8 @@ const sharedWebpackConfig = {
     alias:
       config.webpack.resolve?.alias && getAlias(config.webpack.resolve.alias),
     extensions: [
+      '.ts',
+      '.tsx',
       '.js',
       '.jsx',
       '.ryx',
@@ -881,8 +952,8 @@ const clientConfig = {
     // ESLintPlugin - excluding MDX and MD files
     new ESLintPlugin({
       cwd: dir,
-      files: ['**/*.ryx', ...config.eslint.files],
-      extensions: ['js', 'ryx', 'jsx'],
+      files: resolveEslintFilePatterns(dir, config.eslint.files),
+      extensions: resolveEslintExtensions(dir),
       exclude: ['node_modules', '**/*.mdx', '**/*.md'],
       emitError: true,
       emitWarning: true,
