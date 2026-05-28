@@ -220,14 +220,14 @@ encontrarás `app/index.ryx` aquí; eso vive en proyectos creados con CRA.
 
 Cerebro del workspace: scripts globales y devDependencies compartidas.
 
-| Script                                   | Descripción                                             |
-| :--------------------------------------- | :------------------------------------------------------ |
-| `pnpm dev`                               | Desarrollo vía Turbo en los paquetes que lo definan.    |
-| `pnpm build`                             | Build de todos los paquetes.                            |
-| `pnpm test`                              | Tests.                                                  |
-| `pnpm lint`                              | ESLint en raíz + lint por paquete.                      |
-| `pnpm release:canary` / `release:stable` | Versionado (`gmvu`) y publicación.                      |
-| `pnpm run dev:doc`                       | Sitio de docs en `../ryunix-doc` (workspace).           |
+| Script                                   | Descripción                                          |
+| :--------------------------------------- | :--------------------------------------------------- |
+| `pnpm dev`                               | Desarrollo vía Turbo en los paquetes que lo definan. |
+| `pnpm build`                             | Build de todos los paquetes.                         |
+| `pnpm test`                              | Tests.                                               |
+| `pnpm lint`                              | ESLint en raíz + lint por paquete.                   |
+| `pnpm release:canary` / `release:stable` | Versionado (`gmvu`) y publicación.                   |
+| `pnpm run dev:doc`                       | Sitio de docs en `../ryunix-doc` (workspace).        |
 
 El repo raíz es `private: true` y no se publica a npm; sí lo hacen los paquetes
 en `packages/`.
@@ -258,13 +258,12 @@ Configuración de **@kagarisoft/gmvu-cli** para bump de versiones. Indica qué
 
 ### Calidad de código y formato
 
-| Archivo             | Rol                                                                                    |
-| :------------------ | :------------------------------------------------------------------------------------- |
-| `eslint.config.mjs` | ESLint flat config (v9): JSX, parser Babel, reglas del repo. Usado por `pnpm lint`.    |
-| `.eslintrc.json`    | Config legacy; puede usarse por compatibilidad con plantillas o herramientas antiguas. |
-| `.prettierrc.json`  | Prettier: comillas simples, sin punto y coma al final.                                 |
-| `.prettierignore`   | Archivos excluidos de Prettier.                                                        |
-| `.editorconfig`     | Estilo base: UTF-8, LF, indentación de 2 espacios.                                     |
+| Archivo             | Rol                                                                                 |
+| :------------------ | :---------------------------------------------------------------------------------- |
+| `eslint.config.mjs` | ESLint flat config (v9): JSX, parser Babel, reglas del repo. Usado por `pnpm lint`. |
+| `.prettierrc.json`  | Prettier: comillas simples, sin punto y coma al final.                              |
+| `.prettierignore`   | Archivos excluidos de Prettier.                                                     |
+| `.editorconfig`     | Estilo base: UTF-8, LF, indentación de 2 espacios.                                  |
 
 ### Git y colaboración
 
@@ -376,17 +375,17 @@ pnpm dev          # Turbo: hoy solo lanza el CLI de CRA, no una web
 
 ## Documentación relacionada
 
-| Tema                         | Enlace                                                                                 |
-| :--------------------------- | :------------------------------------------------------------------------------------- |
-| Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                     |
-| App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                           |
+| Tema                         | Enlace                                                                                  |
+| :--------------------------- | :-------------------------------------------------------------------------------------- |
+| Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                      |
+| App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                            |
 | Resumen técnico              | [docs/es/resumen.md](../resumen.md)                                                     |
 | Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](../core/vdom-y-reconciliacion.md)               |
 | Hooks                        | [docs/es/core/hooks.md](../core/hooks.md)                                               |
 | CLI y presets                | [docs/es/ryunix-presets/cli-y-arranque.md](../ryunix-presets/cli-y-arranque.md)         |
 | Enrutamiento y SSG           | [docs/es/ryunix-presets/enrutamiento-y-ssg.md](../ryunix-presets/enrutamiento-y-ssg.md) |
 | CRA y plantillas             | [docs/es/cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md)                             |
-| README público               | [README.es.md](../../README.es.md)                                                     |
+| README público               | [README.es.md](../../README.es.md)                                                      |
 
 ---
 
