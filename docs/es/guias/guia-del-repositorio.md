@@ -277,7 +277,8 @@ Configuración de **@kagarisoft/gmvu-cli** para bump de versiones. Indica qué
 
 #### `.github/` (resumen)
 
-- `workflows/eslint.yml` — CI de lint.
+- `workflows/ci.yml` — lint, tests, typecheck y smoke build (Node 20/22).
+- `workflows/devtools.yml` — empaquetado manual del XPI de Firefox (AMO).
 - `dependabot.yml` — actualizaciones de dependencias.
 - `ISSUE_TEMPLATE/` — formularios de bug y feature.
 - `pull_request_template.md` — plantilla de pull request.

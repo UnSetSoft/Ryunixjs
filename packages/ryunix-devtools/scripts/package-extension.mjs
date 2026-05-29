@@ -1,4 +1,11 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { execSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -26,7 +33,10 @@ function rewritePathsDeep(value) {
   if (Array.isArray(value)) return value.map(rewritePathsDeep)
   if (value && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, rewritePathsDeep(entry)]),
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        rewritePathsDeep(entry),
+      ]),
     )
   }
   return value
@@ -93,10 +103,9 @@ function stageFirefox(stagingDir, manifest) {
 /** @param {string} zipPath @param {string} sourceDir */
 function zipDirectory(zipPath, sourceDir) {
   execSync(`rm -f "${zipPath}"`)
-  execSync(
-    `cd "${sourceDir}" && zip -r "${zipPath}" . -x "**/.DS_Store"`,
-    { stdio: 'inherit' },
-  )
+  execSync(`cd "${sourceDir}" && zip -r "${zipPath}" . -x "**/.DS_Store"`, {
+    stdio: 'inherit',
+  })
 }
 
 mkdirSync(outDir, { recursive: true })
@@ -121,6 +130,8 @@ const firefoxXpi = join(outDir, 'ryunix_devtools-firefox.xpi')
 zipDirectory(firefoxZip, firefoxStaging)
 cpSync(firefoxZip, firefoxXpi)
 console.log('[ryunix-devtools] Packaged ryunix-devtools-firefox.zip (firefox)')
-console.log('[ryunix-devtools] Packaged ryunix_devtools-firefox.xpi (firefox, AMO upload)')
+console.log(
+  '[ryunix-devtools] Packaged ryunix_devtools-firefox.xpi (firefox, AMO upload)',
+)
 
 console.log('[ryunix-devtools] Browser packages ready in dist-packages/')
