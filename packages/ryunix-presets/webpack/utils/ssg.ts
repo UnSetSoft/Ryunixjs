@@ -8,6 +8,7 @@ import path from 'path'
 import os from 'os'
 import chalk from 'chalk'
 import { randomBytes } from 'crypto'
+import { resolvePageMetadata } from '@unsetsoft/ryunixjs'
 
 interface SsgRouteConfig {
   path?: string
@@ -390,6 +391,82 @@ const generateMetaTags = (
   return lines.length > 0 ? '    ' + lines.join('\n    ') : ''
 }
 
+const injectSsrRootMarkup = (html: string, renderedString: string): string => {
+  if (!renderedString) return html
+
+  const marker = 'id="__ryunix"'
+  const markerIndex = html.indexOf(marker)
+  if (markerIndex === -1) return html
+
+  const openStart = html.lastIndexOf('<div', markerIndex)
+  if (openStart === -1) return html
+
+  const openEnd = html.indexOf('>', markerIndex)
+  if (openEnd === -1) return html
+
+  let depth = 1
+  let pos = openEnd + 1
+  while (depth > 0 && pos < html.length) {
+    const nextOpen = html.indexOf('<div', pos)
+    const nextClose = html.indexOf('</div>', pos)
+    if (nextClose === -1) break
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1
+      pos = nextOpen + 4
+      continue
+    }
+
+    depth -= 1
+    if (depth === 0) {
+      const openTag = html.slice(openStart, openEnd + 1)
+      const markedOpenTag = openTag.includes('data-ryunix-ssr-root')
+        ? openTag
+        : openTag.replace(/^<div\b/i, '<div data-ryunix-ssr-root')
+      return (
+        html.slice(0, openStart) +
+        markedOpenTag +
+        renderedString +
+        html.slice(nextClose)
+      )
+    }
+
+    pos = nextClose + 6
+  }
+
+  return html
+}
+
+const buildMetadataLinkTags = (
+  tags: Record<string, string | string[]>,
+): string => {
+  const lines: string[] = []
+
+  const iconHref =
+    (typeof tags.icon === 'string' && tags.icon) ||
+    (typeof tags['shortcut icon'] === 'string' && tags['shortcut icon']) ||
+    undefined
+  if (iconHref) {
+    lines.push(`<link rel="icon" href="${escapeHtml(iconHref)}" />`)
+  }
+
+  const appleIcon =
+    typeof tags.appleTouchIcon === 'string' ? tags.appleTouchIcon : undefined
+  if (appleIcon) {
+    lines.push(
+      `<link rel="apple-touch-icon" href="${escapeHtml(appleIcon)}" />`,
+    )
+  }
+
+  const canonical =
+    typeof tags.canonical === 'string' ? tags.canonical : undefined
+  if (canonical) {
+    lines.push(`<link rel="canonical" href="${escapeHtml(canonical)}" />`)
+  }
+
+  return lines.join('\n')
+}
+
 /**
  * Prerender a route to static HTML
  *
@@ -407,41 +484,37 @@ const prerenderRoute = async (
 ): Promise<string> => {
   const meta = route.meta || {}
   const legacy = config.legacy as
-    | { seo?: { meta?: Record<string, unknown> } }
+    | {
+        seo?: {
+          meta?: Record<string, unknown>
+          title?: { template?: string; prefix?: string }
+        }
+      }
     | undefined
   const defaultMeta = legacy?.seo?.meta || {}
   let html = template
 
-  if (renderedString) {
-    // Find the Ryunix root and inject the rendered HTML.
-    // Mark the container so client init hydrates only real SSR payloads (not HMR leftovers).
-    html = html.replace(
-      /(<div)([^>]*\bid=["']__ryunix["'][^>]*)(>)([\s\S]*?)(<\/div>)/i,
-      (_, open, attrs, close, _content, end) => {
-        const markedAttrs = attrs.includes('data-ryunix-ssr-root')
-          ? attrs
-          : `${attrs} data-ryunix-ssr-root`.replace(/\s+/g, ' ').trim()
-        return `${open} ${markedAttrs}${close}${renderedString}${end}`
-      },
-    )
-  }
+  html = injectSsrRootMarkup(html, renderedString)
 
-  // Replace title - use route meta or default
-  const pageTitle = meta.title || defaultMeta.title || 'Ryunix App'
+  const mergedMeta = { ...defaultMeta, ...meta }
+  const resolved = resolvePageMetadata(mergedMeta, {
+    title: legacy?.seo?.title,
+  })
+  const pageTitle = escapeHtml(resolved.title)
   html = html.replace(/<title>.*?<\/title>/, `<title>${pageTitle}</title>`)
 
-  // Generate and add meta tags
-  const metaTags = generateMetaTags(meta, defaultMeta)
+  const metaTags = generateMetaTags(resolved.tags, defaultMeta)
+  const linkTags = buildMetadataLinkTags(resolved.tags)
 
   // Remove existing meta tags (except framework/mode) and duplicate favicon
-  // Remove all meta tags except framework and mode
   html = html.replace(/<meta\s+name="(?!framework|mode)[^"]*"[^>]*>/gi, '')
   html = html.replace(/<meta\s+property="[^"]*"[^>]*>/gi, '')
+  html = html.replace(/<link\s+rel="canonical"[^>]*>/gi, '')
+  html = html.replace(/<link\s+rel="apple-touch-icon"[^>]*>/gi, '')
 
   // Remove duplicate favicon links (keep only first one)
   const faviconMatches = html.match(/<link\s+rel="icon"[^>]*>/gi)
   if (faviconMatches && faviconMatches.length > 1) {
-    // Keep first, remove rest
     let firstFound = false
     html = html.replace(/<link\s+rel="icon"[^>]*>/gi, (match) => {
       if (!firstFound) {
@@ -452,55 +525,36 @@ const prerenderRoute = async (
     })
   }
 
-  // Find the position to insert meta tags (after viewport or charset)
+  const headInjection = [metaTags, linkTags].filter(Boolean).join('\n')
   const viewportPosition = html.search(/<meta\s+name="viewport"/)
   const charsetPosition = html.search(/<meta\s+charset/)
   let insertPosition = -1
 
   if (viewportPosition !== -1) {
-    // Find end of viewport tag
     const afterViewport = html.substring(viewportPosition)
     const tagEnd = afterViewport.search(/>/)
     insertPosition = viewportPosition + tagEnd + 1
   } else if (charsetPosition !== -1) {
-    // Find end of charset tag
     const afterCharset = html.substring(charsetPosition)
     const tagEnd = afterCharset.search(/>/)
     insertPosition = charsetPosition + tagEnd + 1
   }
 
-  if (insertPosition !== -1 && metaTags) {
-    // Insert meta tags after viewport/charset
+  if (insertPosition !== -1 && headInjection) {
     const before = html.substring(0, insertPosition)
     const after = html.substring(insertPosition)
-    html = before + '\n' + metaTags + after
-  } else if (metaTags) {
-    // Fallback: insert before framework meta tag or </head>
+    html = before + '\n' + headInjection + after
+  } else if (headInjection) {
     const frameworkPosition = html.search(/<meta\s+name="framework"/)
     if (frameworkPosition !== -1) {
       const before = html.substring(0, frameworkPosition)
       const after = html.substring(frameworkPosition)
-      html = before + metaTags + '\n' + after
+      html = before + headInjection + '\n' + after
     } else {
-      html = html.replace(/<\/head>/, `${metaTags}\n</head>`)
+      html = html.replace(/<\/head>/, `${headInjection}\n</head>`)
     }
   }
 
-  // Add canonical link if provided
-  if (meta.canonical) {
-    const canonical = `<link rel="canonical" href="${meta.canonical}" />`
-    // Insert canonical after meta tags, before title
-    const titlePosition = html.search(/<title/)
-    if (titlePosition !== -1) {
-      const before = html.substring(0, titlePosition)
-      const after = html.substring(titlePosition)
-      html = before + canonical + '\n' + after
-    } else {
-      html = html.replace(/<\/head>/, `${canonical}\n</head>`)
-    }
-  }
-
-  // Clean up multiple empty lines and format
   html = html.replace(/\n\s*\n\s*\n+/g, '\n')
   html = html.replace(/>\n\n+</g, '>\n<')
 

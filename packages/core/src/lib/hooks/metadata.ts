@@ -10,6 +10,8 @@ const INTERNAL_META_KEYS = new Set([
   'changefreq',
   'priority',
   'custom',
+  'icon',
+  'appleTouchIcon',
 ])
 
 type TitleConfig = {
@@ -79,6 +81,14 @@ export function resolvePageMetadata(
 
   if (pickString(meta.canonical)) {
     tags.canonical = meta.canonical as string
+  }
+
+  if (pickString(meta.icon)) {
+    tags.icon = meta.icon as string
+  }
+
+  if (pickString(meta.appleTouchIcon)) {
+    tags.appleTouchIcon = meta.appleTouchIcon as string
   }
 
   return { title, tags }

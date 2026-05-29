@@ -342,7 +342,7 @@ class AppRouterPlugin {
     outputPath: string,
   ) {
     const generate = (isServerBuild: boolean) => {
-      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, HydrationBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`
+      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, HydrationBoundary, RyunixDevOverlay, mergeRouteMetadata } from '@unsetsoft/ryunixjs';\n`
       let componentIdCounter = 0
       const getNextId = () => componentIdCounter++
       const routeDefinitions: RouteDefinition[] = []
@@ -694,21 +694,21 @@ const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, e
   let combinedMeta = {};
   if (layouts) {
     for (const l of layouts) {
-      if (l.Metatags) combinedMeta = { ...combinedMeta, ...l.Metatags };
+      if (l.Metatags) combinedMeta = mergeRouteMetadata(combinedMeta, l.Metatags);
       if (l.generateMetadata) {
         try {
           const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
-          combinedMeta = { ...combinedMeta, ...dynamic };
+          combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
         } catch (e) { console.error('Error in layout generateMetadata:', e); }
       }
     }
   }
   if (index) {
-    if (index.Metatags) combinedMeta = { ...combinedMeta, ...index.Metatags };
+    if (index.Metatags) combinedMeta = mergeRouteMetadata(combinedMeta, index.Metatags);
     if (index.generateMetadata) {
       try {
         const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
-        combinedMeta = { ...combinedMeta, ...dynamic };
+        combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
       } catch (e) { console.error('Error in index generateMetadata:', e); }
     }
   }
@@ -722,11 +722,11 @@ const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }
     let meta = {};
     if (layouts) {
       for (const l of layouts) {
-        if (l.Metatags) meta = { ...meta, ...l.Metatags };
+        if (l.Metatags) meta = mergeRouteMetadata(meta, l.Metatags);
       }
     }
     if (index && index.Metatags) {
-      meta = { ...meta, ...index.Metatags };
+      meta = mergeRouteMetadata(meta, index.Metatags);
     }
     return meta;
   };
@@ -742,7 +742,7 @@ const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }
           if (l.generateMetadata) {
             try {
               const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
-              combinedMeta = { ...combinedMeta, ...dynamic };
+              combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
             } catch (e) { console.error('Error in layout generateMetadata:', e); }
           }
         }
@@ -750,7 +750,7 @@ const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }
       if (index && index.generateMetadata) {
         try {
           const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
-          combinedMeta = { ...combinedMeta, ...dynamic };
+          combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
         } catch (e) { console.error('Error in index generateMetadata:', e); }
       }
       setCurrentMeta(combinedMeta);
