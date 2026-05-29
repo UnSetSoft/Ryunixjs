@@ -22,16 +22,12 @@ describe('escapeHtml', () => {
 describe('renderToString', () => {
   test('renders host elements and text', () => {
     const tree = createElement('div', { className: 'box' }, 'Hello')
-    expect(renderToString(tree)).toBe(
-      '<div class="box">Hello</div>',
-    )
+    expect(renderToString(tree)).toBe('<div class="box">Hello</div>')
   })
 
   test('renders void elements with self-closing tags', () => {
     const tree = createElement('img', { src: '/logo.png', alt: 'Logo' })
-    expect(renderToString(tree)).toBe(
-      '<img src="/logo.png" alt="Logo" />',
-    )
+    expect(renderToString(tree)).toBe('<img src="/logo.png" alt="Logo" />')
   })
 
   test('rejects async components', () => {
@@ -105,9 +101,7 @@ describe('SSR metadata helpers', () => {
       useMetadata({ title: 'Docs' })
       return createElement('main', null, 'Content')
     }
-    renderToString(
-      createElement(Layout, null, createElement(Page)),
-    )
+    renderToString(createElement(Layout, null, createElement(Page)))
     const meta = getState().ssrMetadata || {}
     const resolved = resolvePageMetadata(meta)
     expect(resolved.title).toBe('Docs | App')

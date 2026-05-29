@@ -96,7 +96,9 @@ const buildHostProps = (
   Object.entries(props).forEach(([key, value]) => {
     if (key === 'children') {
       if (Array.isArray(value)) {
-        htmlChildren = value.map((child) => renderChild(child as RyunixNode)).join('')
+        htmlChildren = value
+          .map((child) => renderChild(child as RyunixNode))
+          .join('')
       } else {
         htmlChildren = renderChild(value as RyunixNode)
       }
@@ -393,9 +395,7 @@ const handleSuspenseTaskResult = (
   nonceAttr: string,
 ): void => {
   if (res.success) {
-    push(
-      `<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`,
-    )
+    push(`<template id="P:${res.id}" data-ryunix-ssr>${res.content}</template>`)
     push(
       `<script${nonceAttr} data-ryunix-ssr>$RC("S:${res.id}", "P:${res.id}")</script>`,
     )
@@ -403,7 +403,9 @@ const handleSuspenseTaskResult = (
   }
 
   const message =
-    res.error instanceof Error ? res.error.message : String(res.error ?? 'Unknown error')
+    res.error instanceof Error
+      ? res.error.message
+      : String(res.error ?? 'Unknown error')
   if (process.env.NODE_ENV !== 'production') {
     console.error('[Ryunix SSR] Suspense boundary failed:', res.error)
   }
