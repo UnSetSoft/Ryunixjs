@@ -9,6 +9,17 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
+      
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: build devtools
+        working-directory: ./packages/ryunix-devtools
+        run: |
+          pnpm build
 
       - name: "web-ext build"
         id: web-ext-build
@@ -22,5 +33,5 @@ jobs:
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: target.xpi
+          name: ryunix-devtools.xpi
           path: ${{ steps.web-ext-build.outputs.target }}
