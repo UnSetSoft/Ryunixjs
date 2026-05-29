@@ -2,7 +2,7 @@
  * Ryunix DevTools Panel UI.
  */
 
-;(function () {
+; (function () {
   const ext = ((globalThis as { browser?: typeof chrome }).browser ??
     chrome) as typeof chrome
 
@@ -76,53 +76,69 @@
   })
 
   function renderTree(): void {
-    if (fibers.length === 0) return
+    if (fibers.length === 0) return;
 
-    treeEl.innerHTML = fibers
-      .map(
-        (f, i) =>
-          `<div class="tree-item" data-index="${i}">
-      <span class="component-name">&lt;${escapeHtml(f.type)}/&gt;</span>
-      ${f.hooks > 0 ? `<span class="hook-badge">${f.hooks}</span>` : ''}
-    </div>`,
-      )
-      .join('')
+    treeEl.textContent = '';
 
-    treeEl.querySelectorAll('.tree-item').forEach((el) => {
-      el.addEventListener('click', () => {
-        const index = parseInt((el as HTMLElement).dataset.index ?? '-1', 10)
-        if (index >= 0) selectFiber(index)
-      })
-    })
+    fibers.forEach((f, i) => {
+      const item = document.createElement('div');
+      item.className = 'tree-item';
+      item.dataset.index = String(i);
+
+      const name = document.createElement('span');
+      name.className = 'component-name';
+
+      name.textContent = `<${f.type}/>`;
+      item.appendChild(name);
+
+      if (f.hooks > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'hook-badge';
+        badge.textContent = String(f.hooks);
+        item.appendChild(badge);
+      }
+
+      item.addEventListener('click', () => selectFiber(i));
+      treeEl.appendChild(item);
+    });
   }
 
   function selectFiber(index: number): void {
-    selected = fibers[index] ?? null
-    if (!selected) return
+    selected = fibers[index] ?? null;
+    if (!selected) return;
 
     treeEl.querySelectorAll('.tree-item').forEach((el, i) => {
-      el.classList.toggle('selected', i === index)
-    })
+      el.classList.toggle('selected', i === index);
+    });
 
-    const props = Object.entries(selected.props)
-    detailsEl.innerHTML = `
-    <div class="section-header">Props</div>
-    ${
-      props.length > 0
-        ? props
-            .map(
-              ([k, v]) =>
-                `<div class="prop-row">
-            <span class="prop-key">${escapeHtml(k)}:</span>
-            <span class="prop-value">${escapeHtml(v)}</span>
-          </div>`,
-            )
-            .join('')
-        : '<div style="color: #999; padding: 1rem 0;">No props</div>'
+    detailsEl.textContent = '';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = 'Props';
+    detailsEl.appendChild(header);
+
+    const props = Object.entries(selected.props);
+    if (props.length > 0) {
+      props.forEach(([k, v]) => {
+        const row = document.createElement('div');
+        row.className = 'prop-row';
+        const keySpan = document.createElement('span');
+        keySpan.className = 'prop-key';
+        keySpan.textContent = `${k}:`;
+        const valSpan = document.createElement('span');
+        valSpan.className = 'prop-value';
+        valSpan.textContent = String(v);
+        row.appendChild(keySpan);
+        row.appendChild(valSpan);
+        detailsEl.appendChild(row);
+      });
+    } else {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'color: #999; padding: 1rem 0;';
+      empty.textContent = 'No props';
+      detailsEl.appendChild(empty);
     }
-    <div class="section-header">Hooks</div>
-    <div style="padding: 1rem 0;">${selected.hooks || 0} hooks</div>
-  `
   }
 
   function updatePerformance(): void {
