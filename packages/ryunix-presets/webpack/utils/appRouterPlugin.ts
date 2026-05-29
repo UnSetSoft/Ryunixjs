@@ -7,6 +7,14 @@ import {
   type DynamicSsgRoute,
   type SsgRouteMeta,
 } from './ssgStaticParams.js'
+import {
+  copyRouteMetadataAssets,
+  mergeMetadataAssets,
+  metadataAssetsToMeta,
+  scanSegmentMetadataFiles,
+  toMetadataAssetManifest,
+  type RouteMetadataAsset,
+} from './routeMetadataFiles.js'
 
 interface ComponentPaths {
   path?: string | null
@@ -28,6 +36,7 @@ interface RouteNode {
   indexIsAsync: boolean
   error: ComponentPaths | null
   loading: ComponentPaths | null
+  metadataFiles: RouteMetadataAsset[]
   children: RouteNode[]
 }
 
@@ -59,6 +68,7 @@ interface RouteDefinition {
   errorPropStr: string
   loadingConfigStr: string
   errorConfigStr: string
+  fileMetadataJson: string
 }
 
 class AppRouterPlugin {
@@ -148,6 +158,8 @@ class AppRouterPlugin {
     let loadingFile: ComponentPaths | null = null
     const children: RouteNode[] = []
     const pendingFlatMdx: FlatMdxPending[] = []
+    const routePath = basePath === '' ? '/' : basePath
+    const segmentMetadataFiles = scanSegmentMetadataFiles(dir, routePath)
 
     const isAsync = (filePath: string | null): boolean => {
       if (!filePath) return false
@@ -278,6 +290,7 @@ class AppRouterPlugin {
         indexIsAsync: isAsync(flatMdx.fullPath),
         error: null,
         loading: null,
+        metadataFiles: [],
         children: [],
       })
     }
@@ -315,13 +328,14 @@ class AppRouterPlugin {
       !index &&
       children.length === 0 &&
       !errorFile &&
-      !loadingFile
+      !loadingFile &&
+      segmentMetadataFiles.length === 0
     ) {
       return null
     }
 
     const node: RouteNode = {
-      path: basePath === '' ? '/' : basePath,
+      path: routePath,
       dynamicSegment: segmentAtThisLevel,
       layout,
       layoutIsAsync: isAsync(getPath(layout)),
@@ -329,6 +343,7 @@ class AppRouterPlugin {
       indexIsAsync: isAsync(getPath(index)),
       error: errorFile,
       loading: loadingFile,
+      metadataFiles: segmentMetadataFiles,
       children,
     }
 
@@ -365,12 +380,20 @@ class AppRouterPlugin {
         node: RouteNode | RouteNode[],
         parentLayouts: ComponentInfo[] = [],
         dynamicSegments: DynamicSsgSegment[] = [],
+        inheritedMetadata: RouteMetadataAsset[] = [],
       ) => {
         if (Array.isArray(node)) {
           for (const child of node)
-            traverse(child, parentLayouts, dynamicSegments)
+            traverse(child, parentLayouts, dynamicSegments, inheritedMetadata)
           return
         }
+
+        const routeMetadataChain = mergeMetadataAssets(
+          inheritedMetadata,
+          node.metadataFiles || [],
+        )
+        const routeFileMeta = metadataAssetsToMeta(routeMetadataChain)
+        const fileMetadataJson = JSON.stringify(routeFileMeta)
 
         const currentLayouts = [...parentLayouts]
         let layoutInfo: ComponentInfo | null = null
@@ -467,17 +490,24 @@ class AppRouterPlugin {
               errorPropStr,
               loadingConfigStr,
               errorConfigStr,
+              fileMetadataJson,
             })
 
             if (isServerBuild) {
+              const metadataAssets = toMetadataAssetManifest(routeMetadataChain)
               if (node.path.includes(':')) {
                 dynamicSsgRoutes.push({
                   path: node.path,
-                  meta: {},
+                  meta: routeFileMeta,
+                  metadataAssets,
                   segments,
                 })
               } else {
-                staticSsgRoutes.push({ path: node.path, meta: {} })
+                staticSsgRoutes.push({
+                  path: node.path,
+                  meta: routeFileMeta,
+                  metadataAssets,
+                })
               }
             }
           }
@@ -495,7 +525,7 @@ class AppRouterPlugin {
 
         if (Array.isArray(node.children)) {
           for (const child of node.children) {
-            traverse(child, currentLayouts, segments)
+            traverse(child, currentLayouts, segments, routeMetadataChain)
           }
         }
       }
@@ -535,9 +565,10 @@ class AppRouterPlugin {
     const ssgManifestRoutes = [
       ...serverResult.staticSsgRoutes,
       ...serverResult.dynamicSsgRoutes.map(
-        ({ path: routePath, meta, segments }) => ({
+        ({ path: routePath, meta, segments, metadataAssets }) => ({
           path: routePath,
           meta,
+          metadataAssets,
           dynamic: true,
           segments,
         }),
@@ -582,6 +613,30 @@ class AppRouterPlugin {
       ssgManifestPath,
       JSON.stringify(ssgManifestRoutes, null, 2),
     )
+
+    this.syncMetadataAssetsToStatic([
+      ...serverResult.staticSsgRoutes,
+      ...serverResult.dynamicSsgRoutes,
+    ])
+  }
+
+  syncMetadataAssetsToStatic(routes: SsgRouteMeta[]) {
+    const assets = new Map<string, RouteMetadataAsset>()
+    for (const route of routes) {
+      for (const manifest of route.metadataAssets || []) {
+        assets.set(manifest.publicPath, {
+          kind: manifest.kind,
+          filename: manifest.filename,
+          sourcePath: manifest.sourcePath,
+          publicPath: manifest.publicPath,
+        })
+      }
+    }
+
+    if (assets.size === 0) return
+
+    const staticRoot = path.resolve(process.cwd(), '.ryunix/static')
+    copyRouteMetadataAssets(Array.from(assets.values()), staticRoot)
   }
 
   assembleFileContent(
@@ -601,6 +656,7 @@ class AppRouterPlugin {
     index: ${def.errorPropStr},
     loading: ${def.loadingConfigStr},
     error: ${def.errorConfigStr},
+    fileMetadata: ${def.fileMetadataJson},
   }`,
       )
       .join(',')
@@ -615,6 +671,35 @@ class AppRouterPlugin {
     return `/* AUTO-GENERATED APP ROUTER */
 ${importStatements}
 const getOptExport = (mod, key) => mod ? mod[key] : undefined;
+
+const resolveFileMetadata = (fileMetadata, routePath, params = {}) => {
+  if (!fileMetadata || typeof fileMetadata !== 'object') return {};
+  if (!routePath || !routePath.includes(':')) return fileMetadata;
+
+  const actualPath = routePath
+    .replace(/:\.\.\.(\w+)/g, (_, key) => {
+      const val = params[key];
+      if (val == null || val === '') return '';
+      return Array.isArray(val) ? val.join('/') : String(val);
+    })
+    .replace(/:(\w+)/g, (_, key) => {
+      const val = params[key];
+      if (val == null || val === '') return '';
+      return Array.isArray(val) ? val.join('/') : String(val);
+    })
+    .replace(/\/+/g, '/');
+
+  const normalizedActual = actualPath.startsWith('/') ? actualPath : \`/\${actualPath}\`;
+  const resolved = {};
+  for (const [key, value] of Object.entries(fileMetadata)) {
+    if (typeof value === 'string') {
+      resolved[key] = value.split(routePath).join(normalizedActual);
+    } else {
+      resolved[key] = value;
+    }
+  }
+  return resolved;
+};
 
 const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
   const [content, setContent] = useStore(() => {
@@ -690,8 +775,8 @@ const RouteWrapper = (props) => {
   return RouteWrapperClient(props);
 };
 
-const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, error }) => {
-  let combinedMeta = {};
+const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, error, fileMetadata = {} }) => {
+  let combinedMeta = mergeRouteMetadata({}, resolveFileMetadata(fileMetadata, routePath, props.params));
   if (layouts) {
     for (const l of layouts) {
       if (l.Metatags) combinedMeta = mergeRouteMetadata(combinedMeta, l.Metatags);
@@ -717,9 +802,9 @@ const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, e
   return <RouteWrapperRender routePath={routePath} layouts={layouts} index={index} props={props} loading={loading} error={error} />;
 };
 
-const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }) => {
+const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error, fileMetadata = {} }) => {
   const getStaticMeta = () => {
-    let meta = {};
+    let meta = mergeRouteMetadata({}, resolveFileMetadata(fileMetadata, routePath, props.params));
     if (layouts) {
       for (const l of layouts) {
         if (l.Metatags) meta = mergeRouteMetadata(meta, l.Metatags);
@@ -878,6 +963,7 @@ const RouteRenderer = (props) => {
       index={def.index}
       loading={def.loading}
       error={def.error}
+      fileMetadata={def.fileMetadata || {}}
       props={props}
     />
   );

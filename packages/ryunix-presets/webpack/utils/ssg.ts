@@ -9,11 +9,19 @@ import os from 'os'
 import chalk from 'chalk'
 import { randomBytes } from 'crypto'
 import { resolvePageMetadata } from '@unsetsoft/ryunixjs'
+import {
+  buildMetadataPublicPath,
+  copyRouteMetadataAssets,
+  fromMetadataAssetManifest,
+  metadataAssetsToMeta,
+  type RouteMetadataAssetManifest,
+} from './routeMetadataFiles.js'
 
 interface SsgRouteConfig {
   path?: string
   component?: unknown
   meta?: Record<string, unknown>
+  metadataAssets?: RouteMetadataAssetManifest[]
   sitemap?: Record<string, unknown>
   label?: string
   NotFound?: unknown
@@ -25,6 +33,7 @@ interface SsgResolvedRoute {
   path: string
   component?: unknown
   meta: Record<string, unknown>
+  metadataAssets?: RouteMetadataAssetManifest[]
   sitemap: Record<string, unknown>
   label?: string
 }
@@ -96,6 +105,7 @@ const extractSSGRoutes = (routes: SsgRouteConfig[]): SsgResolvedRoute[] => {
       path: normalizedPath,
       component: route.component,
       meta: route.meta || {},
+      metadataAssets: route.metadataAssets,
       sitemap: route.sitemap || {},
       label: route.label,
     })
@@ -835,8 +845,34 @@ const buildSSG = async (
       }
 
       const ssrMetadata = ryunixGlobal.Ryunix?.getState?.()?.ssrMetadata || {}
+      const sitemapBaseURL =
+        typeof legacySitemap?.baseURL === 'string'
+          ? legacySitemap.baseURL
+          : ''
+      const resolvedMetadataAssets = route.metadataAssets?.length
+        ? fromMetadataAssetManifest(
+            route.metadataAssets.map((asset) => ({
+              ...asset,
+              publicPath: buildMetadataPublicPath(route.path, asset.filename),
+            })),
+          )
+        : []
+      const fileMetaFromAssets = resolvedMetadataAssets.length
+        ? metadataAssetsToMeta(resolvedMetadataAssets, sitemapBaseURL)
+        : {}
+
+      if (resolvedMetadataAssets.length > 0) {
+        copyRouteMetadataAssets(
+          resolvedMetadataAssets,
+          path.join(buildDir, 'static'),
+        )
+      }
+
       const html = await prerenderRoute(
-        { ...route, meta: { ...route.meta, ...ssrMetadata } },
+        {
+          ...route,
+          meta: { ...fileMetaFromAssets, ...route.meta, ...ssrMetadata },
+        },
         activeTemplate,
         config,
         renderedString,

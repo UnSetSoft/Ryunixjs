@@ -2,6 +2,8 @@
  * Helpers for expanding dynamic App Router paths via generateStaticParams at SSG time.
  */
 
+import type { RouteMetadataAssetManifest } from './routeMetadataFiles.js'
+
 export interface DynamicSsgSegment {
   param: string
   isCatchAll: boolean
@@ -12,6 +14,7 @@ export interface DynamicSsgSegment {
 export interface SsgRouteMeta {
   path: string
   meta?: Record<string, unknown>
+  metadataAssets?: RouteMetadataAssetManifest[]
 }
 
 export interface DynamicSsgRoute extends SsgRouteMeta {
