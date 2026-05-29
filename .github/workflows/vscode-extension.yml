@@ -131,7 +131,7 @@ jobs:
           VSIX=$(ls -1 *.vsix | head -1)
           echo "Publishing $VSIX to Visual Studio Marketplace"
           for i in 1 2 3 4; do
-            pnpm exec vsce publish -i "$VSIX" --no-dependencies && break || {
+            pnpm exec vsce publish --packagePath "$VSIX" && break || {
               if [ $i -lt 4 ]; then
                 echo "Publish failed, retrying in 10 seconds..."
                 sleep 10
