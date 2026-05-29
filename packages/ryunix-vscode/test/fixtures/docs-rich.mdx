@@ -1,0 +1,41 @@
+---
+title: Rich MDX Fixture
+description: Grammar coverage for Ryunix docs-style MDX
+slug: rich-fixture
+section: Fixtures
+---
+
+import { CodeTabs } from "@/components/ui/CodeTabs";
+import { CraQuickStart } from "@/components/docs/CraQuickStart";
+
+# Rich MDX Fixture
+
+> [!WARNING]
+> **Built-in routing** is no longer supported. Use [App Router](/en/docs/introduction/navigation).
+
+> [!TIP]
+> Prefer `rootDir: "src"` when routes live under `src/app/`.
+
+<CraQuickStart channel="canary" />
+
+<div data-ryx-unstyled>
+  <h1>Unstyled block</h1>
+</div>
+
+<CodeTabs tabs={[
+  { name: "pnpm", code: "pnpm dev" },
+  { name: "npm", code: "npm run dev" },
+]} />
+
+- `src/i18n/packages.js` — npm versions
+- [MDX guide](/en/docs/guides/mdx) with **bold** and *emphasis*
+
+```txt
+app/docs/page.mdx
+# → /docs/page
+```
+
+```mdx
+import { Link } from "@unsetsoft/ryunixjs";
+<Link href="/">Home</Link>
+```
