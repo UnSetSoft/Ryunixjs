@@ -115,7 +115,8 @@ const resolvePostcssPlugins = () => {
   const configPath = resolveApp(dir, 'postcss.config.js')
   if (!fs.existsSync(configPath)) return []
   try {
-    const config = projectRequire(configPath)
+    const loaded = projectRequire(configPath)
+    const config = loaded?.default ?? loaded
     const plugins = config.plugins || {}
     if (Array.isArray(plugins)) return plugins
     // Object form: { 'plugin-name': options }

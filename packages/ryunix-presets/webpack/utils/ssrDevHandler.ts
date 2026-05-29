@@ -156,7 +156,8 @@ export async function renderDevRoute(
           .map((f) => `<link rel="stylesheet" href="/css/${f}" />`)
           .join('\n')
 
-        if (styleLinks) {
+        const hasStylesheet = /<link[^>]+rel=["']stylesheet["']/i.test(html)
+        if (styleLinks && !hasStylesheet) {
           html = html.replace('</head>', `${styleLinks}\n</head>`)
         }
       }
