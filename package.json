@@ -44,7 +44,7 @@
     "build:devtools": "pnpm --filter @unsetsoft/ryunix-devtools build"
   },
   "devDependencies": {
-    "@babel/core": "7.28.5",
+    "@babel/core": "7.29.7",
     "@babel/eslint-parser": "7.28.5",
     "@babel/preset-env": "7.28.5",
     "@babel/preset-react": "7.28.5",
