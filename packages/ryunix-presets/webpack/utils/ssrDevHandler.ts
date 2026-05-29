@@ -90,9 +90,7 @@ export async function renderDevRoute(
         getElementById: () => null,
       } as unknown as Document
 
-      const serverModule = await import(
-        moduleImportUrl(serverBundlePath, true)
-      )
+      const serverModule = await import(moduleImportUrl(serverBundlePath, true))
       AppRouterApp = serverModule.default?.default || serverModule.default
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')

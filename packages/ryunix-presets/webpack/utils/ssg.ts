@@ -776,9 +776,7 @@ const buildSSG = async (
         }
       }
 
-      const serverModule = await import(
-        moduleImportUrl(serverBundlePath, true)
-      )
+      const serverModule = await import(moduleImportUrl(serverBundlePath, true))
       AppRouterApp = serverModule.default?.default || serverModule.default
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')

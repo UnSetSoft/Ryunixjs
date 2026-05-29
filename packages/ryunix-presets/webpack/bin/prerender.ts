@@ -28,9 +28,7 @@ const loadResolvedSSGRoutes = async (
   if (!serverBundlePath) return null
 
   try {
-    const serverModule = await import(
-      moduleImportUrl(serverBundlePath, true)
-    )
+    const serverModule = await import(moduleImportUrl(serverBundlePath, true))
     if (typeof serverModule.resolveSSGPaths === 'function') {
       return await serverModule.resolveSSGPaths()
     }
