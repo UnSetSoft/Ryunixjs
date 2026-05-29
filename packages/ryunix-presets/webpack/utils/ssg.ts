@@ -785,8 +785,12 @@ const buildSSG = async (
       // User .ryx modules reference the Ryunix JSX pragma without importing it.
       // Match ssrDevHandler: expose the full runtime, not a partial API stub.
       ryunixGlobal.Ryunix = Ryunix as RyunixRuntimeGlobal['Ryunix']
-      ryunixRenderToString = Ryunix.renderToString as (element: unknown) => string
-      ryunixCreateElement = Ryunix.createElement as (component: unknown) => unknown
+      ryunixRenderToString = Ryunix.renderToString as (
+        element: unknown,
+      ) => string
+      ryunixCreateElement = Ryunix.createElement as (
+        component: unknown,
+      ) => unknown
     }
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e)

@@ -245,6 +245,117 @@ export function mergeRouteMetadata(
 ): Record<string, unknown>
 
 // ---------------------------------------------------------------------------
+// i18n
+// ---------------------------------------------------------------------------
+
+export interface RyunixI18nCookieConfig {
+  name?: string
+  maxAgeSeconds?: number
+}
+
+export interface RyunixI18nConfig {
+  locales: string[]
+  defaultLocale: string
+  localeLabels?: Record<string, string>
+  cookie?: boolean | RyunixI18nCookieConfig
+}
+
+export type RyunixMessageTree = string | RyunixMessageTreeRecord
+export interface RyunixMessageTreeRecord {
+  [key: string]: RyunixMessageTree
+}
+export type RyunixMessagesByLocale = Record<string, RyunixMessageTreeRecord>
+
+export interface RyunixCreateI18nOptions extends RyunixI18nConfig {
+  messages?: RyunixMessagesByLocale
+  cookieName?: string
+  maxAgeSeconds?: number
+}
+
+export type RyunixTranslateFn = (
+  key: string,
+  params?: Record<string, string | number>,
+) => string
+
+export interface RyunixI18nContextValue {
+  locale: string
+  defaultLocale: string
+  locales: readonly string[]
+  localeLabels: Record<string, string>
+  t: RyunixTranslateFn
+}
+
+export interface RyunixI18nHandle {
+  config: RyunixI18nConfig & {
+    locales: readonly string[]
+    defaultLocale: string
+    localeLabels: Record<string, string>
+    cookieName: string
+    maxAgeSeconds: number
+    messages: RyunixMessagesByLocale
+  }
+  Provider: RyunixComponent<{ children?: RyunixNode }>
+  useI18n: () => RyunixI18nContextValue
+  useLocale: () => string
+  useTranslations: () => RyunixTranslateFn
+  LocaleSwitcher: RyunixComponent<Record<string, unknown>>
+  generateStaticParams: () => Array<{ locale: string }>
+  getLocaleFromPath: (pathname: string) => string | null
+  localePath: (locale: string, path?: string) => string
+  swapLocalePath: (pathname: string, targetLocale: string) => string
+  pickLocale: <T>(record: Record<string, T>, locale: string) => T | undefined
+  getLocaleCookie: () => string | null
+  setLocaleCookie: (locale: string) => void
+  resolveLocaleFromCookie: () => string
+  getLocaleRedirectScript: () => string
+}
+
+export const DEFAULT_LOCALE_COOKIE_NAME: string
+
+export function createI18n(options: RyunixCreateI18nOptions): RyunixI18nHandle
+
+export function createAppI18n(
+  messages?: RyunixMessagesByLocale,
+  fallback?: RyunixI18nConfig,
+): RyunixI18nHandle
+
+export function createI18nFromConfig(
+  config: RyunixI18nConfig | null | undefined,
+  messages?: RyunixMessagesByLocale,
+): RyunixI18nHandle
+
+export function defineMessages<T extends RyunixMessagesByLocale>(messages: T): T
+
+export function getRyunixI18nConfig(): RyunixI18nConfig | null
+
+export function normalizeI18nConfig<
+  T extends { locales: readonly string[]; defaultLocale: string },
+>(config: T): T & { locales: readonly string[]; defaultLocale: string }
+
+export function getLocaleFromPath(
+  pathname: string,
+  locales: readonly string[],
+): string | null
+
+export function localePath(
+  locale: string,
+  path: string | undefined,
+  locales: readonly string[],
+): string
+
+export function pickLocale<T>(
+  record: Record<string, T> | null | undefined,
+  locale: string,
+  fallback: string,
+): T | undefined
+
+export function swapLocalePath(
+  pathname: string,
+  targetLocale: string,
+  options: { locales: readonly string[]; defaultLocale: string },
+): string
+
+// ---------------------------------------------------------------------------
 // Router
 // ---------------------------------------------------------------------------
 
@@ -672,6 +783,17 @@ declare const Ryunix: {
   themeController: typeof themeController
   applyTheme: typeof applyTheme
   themeInitScript: typeof themeInitScript
+  createI18n: typeof createI18n
+  createAppI18n: typeof createAppI18n
+  createI18nFromConfig: typeof createI18nFromConfig
+  defineMessages: typeof defineMessages
+  getRyunixI18nConfig: typeof getRyunixI18nConfig
+  DEFAULT_LOCALE_COOKIE_NAME: typeof DEFAULT_LOCALE_COOKIE_NAME
+  getLocaleFromPath: typeof getLocaleFromPath
+  localePath: typeof localePath
+  pickLocale: typeof pickLocale
+  swapLocalePath: typeof swapLocalePath
+  normalizeI18nConfig: typeof normalizeI18nConfig
 }
 
 export default Ryunix

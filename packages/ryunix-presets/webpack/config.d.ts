@@ -174,6 +174,19 @@ export interface RyunixStyleResolvedConfig {
   font: RyunixStyleFontResolved
 }
 
+export interface RyunixI18nCookieConfig {
+  name?: string
+  maxAgeSeconds?: number
+}
+
+/** Locale routing and message catalogs (`createI18n` / `createAppI18n`). */
+export interface RyunixI18nConfig {
+  locales: string[]
+  defaultLocale: string
+  localeLabels?: Record<string, string>
+  cookie?: boolean | RyunixI18nCookieConfig
+}
+
 /**
  * Modern options for `ryunix.config.js` (merged with defaults in `config.cjs`).
  */
@@ -203,6 +216,8 @@ export interface RyunixConfig {
   favicon?: boolean | string
   /** Transpiler for application sources: `"swc"` (default) or `"babel"`. */
   compiler?: 'swc' | 'babel'
+  /** Locale routing (`/[locale]/…`) and optional message catalogs. */
+  i18n?: RyunixI18nConfig
   /** Verbose Ryunix / webpack logging. */
   debug?: boolean
   eslint?: RyunixEslintConfig
