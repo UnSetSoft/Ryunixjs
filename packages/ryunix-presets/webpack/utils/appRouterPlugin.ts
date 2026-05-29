@@ -677,17 +677,17 @@ const resolveFileMetadata = (fileMetadata, routePath, params = {}) => {
   if (!routePath || !routePath.includes(':')) return fileMetadata;
 
   const actualPath = routePath
-    .replace(/:\.\.\.(\w+)/g, (_, key) => {
+    .replace(/:\\.\\.\\.(\\w+)/g, (_, key) => {
       const val = params[key];
       if (val == null || val === '') return '';
       return Array.isArray(val) ? val.join('/') : String(val);
     })
-    .replace(/:(\w+)/g, (_, key) => {
+    .replace(/:(\\w+)/g, (_, key) => {
       const val = params[key];
       if (val == null || val === '') return '';
       return Array.isArray(val) ? val.join('/') : String(val);
     })
-    .replace(/\/+/g, '/');
+    .replace(/\\/+/g, '/');
 
   const normalizedActual = actualPath.startsWith('/') ? actualPath : \`/\${actualPath}\`;
   const resolved = {};
