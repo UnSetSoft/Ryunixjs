@@ -17,15 +17,6 @@
     duration: number
   }
 
-  const escapeHtml = (unsafe: unknown): string => {
-    if (typeof unsafe !== 'string') return String(unsafe)
-    return unsafe
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;')
-  }
 
   function requireElement(id: string): HTMLElement {
     const el = document.getElementById(id)
@@ -159,19 +150,30 @@
 
     const slow = fibers.filter((f) => (f.renderTime ?? 0) > 16)
 
+    slowList.textContent = '';
+
     if (slow.length > 0) {
-      slowList.innerHTML = slow
-        .map(
-          (f) =>
-            `<div class="slow-component">
-        <div class="slow-component-name">&lt;${escapeHtml(f.type)}/&gt;</div>
-        <div class="slow-component-time">${(f.renderTime ?? 0).toFixed(2)}ms</div>
-      </div>`,
-        )
-        .join('')
+      slow.forEach((f) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'slow-component';
+
+        const name = document.createElement('div');
+        name.className = 'slow-component-name';
+        name.textContent = `<${f.type}/>`;
+
+        const time = document.createElement('div');
+        time.className = 'slow-component-time';
+        time.textContent = `${(f.renderTime ?? 0).toFixed(2)}ms`;
+
+        wrapper.appendChild(name);
+        wrapper.appendChild(time);
+        slowList.appendChild(wrapper);
+      });
     } else {
-      slowList.innerHTML =
-        '<div style="color: #999; padding: 1rem 0;">No slow components detected</div>'
+      const msg = document.createElement('div');
+      msg.style.cssText = 'color: #999; padding: 1rem 0;';
+      msg.textContent = 'No slow components detected';
+      slowList.appendChild(msg);
     }
   }
 })()
