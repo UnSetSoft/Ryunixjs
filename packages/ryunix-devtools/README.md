@@ -23,6 +23,16 @@ Firefox.
 2. Open `about:debugging#/runtime/this-firefox`.
 3. **Load Temporary Add-on** → select this folder’s `manifest.json`.
 
+### Firefox Add-ons (AMO)
+
+1. From this package directory, run `pnpm run build:release`.
+2. Upload `dist-packages/ryunix_devtools-firefox.xpi` to
+   [addons.mozilla.org](https://addons.mozilla.org/) (or validate with the AMO
+   developer hub before submit).
+3. The Firefox artifact uses **flat script paths** (`content-script.js` at the
+   package root), `background.scripts` as a fallback for `service_worker`, and
+   `browser_specific_settings.gecko.data_collection_permissions.required: ["none"]`.
+
 ## Usage
 
 1. Open DevTools (F12).
@@ -39,7 +49,8 @@ Firefox.
 ## Development
 
 ```bash
-pnpm run build   # Sync manifest.version and compile dist/
+pnpm run build          # Sync manifest.version and compile dist/
+pnpm run build:release  # build + zip Chrome and Firefox packages
 pnpm run typecheck
 ```
 

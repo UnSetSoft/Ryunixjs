@@ -24,6 +24,16 @@ Chromium y Firefox.
 3. **Cargar extensión temporal** → selecciona el archivo `manifest.json` de
    esta carpeta.
 
+### Firefox Add-ons (AMO)
+
+1. En esta carpeta ejecuta `pnpm run build:release`.
+2. Sube `dist-packages/ryunix_devtools-firefox.xpi` a
+   [addons.mozilla.org](https://addons.mozilla.org/) (o valida antes en el hub
+   de desarrolladores de AMO).
+3. El artefacto para Firefox usa rutas planas (`content-script.js` en la raíz),
+   `background.scripts` como respaldo de `service_worker`, y
+   `data_collection_permissions.required: ["none"]` en `browser_specific_settings.gecko`.
+
 ## Uso
 
 1. Abre DevTools (F12).
@@ -40,7 +50,8 @@ Chromium y Firefox.
 ## Desarrollo
 
 ```bash
-pnpm run build   # Sincroniza manifest.version y compila dist/
+pnpm run build          # Sincroniza manifest.version y compila dist/
+pnpm run build:release  # build + empaqueta Chrome y Firefox
 pnpm run typecheck
 ```
 
