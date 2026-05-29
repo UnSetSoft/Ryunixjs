@@ -7,12 +7,13 @@
     "manifest.json",
     "devtools.html",
     "panel.html",
-    ".generated"
+    "dist"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "pnpm run build:lib-ts",
-    "build:lib-ts": "tsc -p tsconfig.emit.json && prettier -w \".generated/**/*.js\"",
+    "build:manifest": "node scripts/sync-manifest.mjs",
+    "build:lib-ts": "pnpm run build:manifest && tsc -p tsconfig.emit.json && prettier -w \"dist/**/*.js\" manifest.json",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

@@ -1,5 +1,9 @@
-import config from './utils/config.cjs'
 import { defineConfig } from 'eslint/config'
+import config from './utils/config.js'
+import {
+  projectHasTsConfig,
+  resolveEslintFilePatterns,
+} from './utils/eslint-files.js'
 
 /**
  * ESLint Configuration for Ryunix
@@ -8,14 +12,20 @@ import { defineConfig } from 'eslint/config'
  * .mdx and .md files are excluded from ESLint due to compatibility issues
  * between eslint-plugin-mdx and ESM/flat config.
  *
- * Error: “Could not find ESLint Linter in require cache”
- *
- * MDX files are validated during compilation by @mdx-js/loader,
- * which is sufficient for detecting syntax and JSX errors.
+ * Typed `.ryx` (projects with `tsconfig.json`) is compiled as TypeScript; ESLint
+ * uses the JS parser only for `.js`/`.jsx`/`.ts` here — use `tsc` for `.ryx`.
  */
+const projectRoot = process.cwd()
+const eslintFiles = resolveEslintFilePatterns(
+  projectRoot,
+  config?.eslint?.files ?? ['**/*.ryx'],
+)
+const lintRyxAsJs =
+  eslintFiles.some((f) => /ryx/i.test(f)) && !projectHasTsConfig(projectRoot)
+
 const eslintConfig = defineConfig([
   {
-    files: ['**/*.ryx', ...(config?.eslint?.files ?? [])],
+    files: eslintFiles,
 
     ignores: ['**/*.mdx', '**/*.md', '**/node_modules/**'],
 
@@ -26,7 +36,7 @@ const eslintConfig = defineConfig([
         ecmaFeatures: {
           jsx: true,
         },
-        extraFileExtensions: ['.ryx'],
+        ...(lintRyxAsJs ? { extraFileExtensions: ['.ryx'] } : {}),
       },
     },
     settings: {

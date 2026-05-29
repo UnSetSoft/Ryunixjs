@@ -117,3 +117,28 @@ peticiones de forma idéntica:
   buffer de respuesta.
 
 - Elimina implícitamente pantallas en blanco en el First Paint.
+
+---
+
+## 4. Archivos de metadata estáticos por ruta
+
+El plugin `appRouterPlugin` detecta archivos en cada segmento de `app/` (estilo
+Next.js App Router) y los convierte en metadatos + assets públicos:
+
+| Archivo                                   | Efecto                          |
+| :---------------------------------------- | :------------------------------ |
+| `favicon.ico`                             | `<link rel="icon">`             |
+| `icon.{ico,jpg,jpeg,png,svg}`             | icono del segmento              |
+| `apple-icon.{jpg,jpeg,png}`               | `<link rel="apple-touch-icon">` |
+| `opengraph-image.{jpg,jpeg,png,gif,webp}` | `og:image`                      |
+| `twitter-image.{jpg,jpeg,png,gif,webp}`   | `twitter:image`                 |
+| `opengraph-image.alt.txt`                 | `og:image:alt`                  |
+| `twitter-image.alt.txt`                   | `twitter:image:alt`             |
+
+Implementación: `packages/ryunix-presets/webpack/utils/routeMetadataFiles.ts`.
+
+- **Herencia:** layouts padre → hijo; gana el segmento más específico.
+- **Build:** copia a `.ryunix/static/<ruta>/<archivo>` y resuelve URLs en SSG.
+- **Runtime:** `mergeRouteMetadata` + `resolvePageMetadata` unen archivos,
+  `Metatags`, `generateMetadata` y `useMetadata` antes de inyectar `<title>` /
+  `<meta>` en `prerenderRoute`.

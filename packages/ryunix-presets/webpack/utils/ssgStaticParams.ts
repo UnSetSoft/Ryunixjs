@@ -1,14 +1,30 @@
-// @ts-nocheck
 /**
  * Helpers for expanding dynamic App Router paths via generateStaticParams at SSG time.
  */
 
-/**
- * @param {string} template - Route template, e.g. "/:locale/docs/:...path"
- * @param {Record<string, unknown>} params
- * @returns {string}
- */
-export function buildPathFromParams(template, params) {
+import type { RouteMetadataAssetManifest } from './routeMetadataFiles.js'
+
+export interface DynamicSsgSegment {
+  param: string
+  isCatchAll: boolean
+  layoutId: string | null
+  indexId: string | null
+}
+
+export interface SsgRouteMeta {
+  path: string
+  meta?: Record<string, unknown>
+  metadataAssets?: RouteMetadataAssetManifest[]
+}
+
+export interface DynamicSsgRoute extends SsgRouteMeta {
+  segments: DynamicSsgSegment[]
+}
+
+export function buildPathFromParams(
+  template: string,
+  params: Record<string, unknown>,
+): string {
   let path = template
 
   path = path.replace(/:\.\.\.(\w+)/g, (_, key) => {
@@ -32,13 +48,16 @@ export function buildPathFromParams(template, params) {
   return path || '/'
 }
 
-function generateNestedLoops(segments, resolveFn) {
+function generateNestedLoops(
+  segments: DynamicSsgSegment[],
+  resolveFn: (layoutId: string | null, indexId: string | null) => string,
+) {
   if (!segments.length) {
     return 'results.push({ path: buildPathFromParams(template, {}), meta });'
   }
 
-  const open = []
-  const close = []
+  const open: string[] = []
+  const close: string[] = []
   let parentParams = '{}'
 
   for (let depth = 0; depth < segments.length; depth++) {
@@ -67,12 +86,10 @@ function generateNestedLoops(segments, resolveFn) {
       results.push({ path: buildPathFromParams(template, ${parentParams}), meta });${close.join('')}`
 }
 
-/**
- * @param {{ path: string, meta?: object }[]} staticRoutes
- * @param {{ path: string, meta?: object, segments: object[] }[]} dynamicRoutes
- * @returns {string}
- */
-export function generateResolveSSGPathsCode(staticRoutes, dynamicRoutes) {
+export function generateResolveSSGPathsCode(
+  staticRoutes: SsgRouteMeta[],
+  dynamicRoutes: DynamicSsgRoute[],
+): string {
   const staticLiteral = JSON.stringify(
     staticRoutes.map((r) => ({ path: r.path, meta: r.meta || {} })),
     null,
@@ -88,8 +105,8 @@ export function generateResolveSSGPathsCode(staticRoutes, dynamicRoutes) {
     }))
 
     const fnName = `expandSSG_${index}`
-    const resolveFn = (layoutId, indexId) => {
-      const parts = []
+    const resolveFn = (layoutId: string | null, indexId: string | null) => {
+      const parts: string[] = []
       if (indexId)
         parts.push(`getOptExport(${indexId}, 'generateStaticParams')`)
       if (layoutId)
@@ -146,11 +163,9 @@ export async function resolveSSGPaths() {
 `
 }
 
-/**
- * Parse a dynamic App Router folder name into segment metadata.
- * @param {string} folderName
- */
-export function parseDynamicSegment(folderName) {
+export function parseDynamicSegment(
+  folderName: string,
+): { param: string; isCatchAll: boolean } | null {
   const match = folderName.match(/^\[(\.\.\.)?([^\]]+)\]$/)
   if (!match) return null
   return { param: match[2], isCatchAll: !!match[1] }

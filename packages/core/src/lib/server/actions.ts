@@ -1,10 +1,8 @@
 /**
  * Client proxy for a compiled server action.
- * @param {string} actionId - Build-time action identifier
- * @returns {(...args: unknown[]) => Promise<unknown>}
  */
-export function createActionProxy(actionId) {
-  return async function (...args) {
+export function createActionProxy(actionId: string) {
+  return async function (...args: unknown[]): Promise<unknown> {
     const response = await fetch('/_ryunix/action', {
       method: 'POST',
       headers: {
@@ -15,7 +13,9 @@ export function createActionProxy(actionId) {
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string
+      }
       throw new Error(errorData.error || 'Server Action failed')
     }
 

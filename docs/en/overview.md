@@ -76,7 +76,7 @@ single package.
 | :-------------------------------------------------------------- | :---------------------------------------------------------------------------- |
 | [repository-guide.md](./guides/repository-guide.md)             | What RyunixJS is, repo layout, useful commands. **Start here after cloning.** |
 | [automated-testing.md](./guides/automated-testing.md)           | Jest in core, `pnpm test`, `pnpm lint`, manual CRA checks.                    |
-| [local-integration-app.md](./guides/local-integration-app.md)   | Ryunix app in `test/webpack` with `workspace:*` and `pnpm run:web`.           |
+| [local-integration-app.md](./guides/local-integration-app.md)   | Docs site `../ryunix-doc` with `workspace:*` and `pnpm run dev:doc`.          |
 | [tech-stack-and-scripts.md](./guides/tech-stack-and-scripts.md) | Technologies and root `pnpm` scripts (AI-assisted).                           |
 
 ---
@@ -154,22 +154,14 @@ highlighting and snippets.
 
 ## Suggested reading order
 
-1. [Repository guide](./guides/repository-guide.md) — context for the monorepo
-   and
-
-   how pieces connect.
-
+1. [Repository guide](./guides/repository-guide.md) — monorepo context and how
+   pieces connect.
 2. [Automated testing](./guides/automated-testing.md) and
    [local integration app](./guides/local-integration-app.md) — Jest/lint and
-
    browser validation with `workspace:*`.
-
 3. [core/virtual-dom-and-reconciliation.md](./core/virtual-dom-and-reconciliation.md)
-
    — how UI updates work.
-
 4. [ryunix-presets/cli-and-bootstrapping.md](./ryunix-presets/cli-and-bootstrapping.md)
-
    — how apps are built and served.
 
 5. Deep-dive into any `core/` or `ryunix-presets/` doc as needed.

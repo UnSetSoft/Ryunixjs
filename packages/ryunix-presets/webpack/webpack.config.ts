@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url'
 import { dirname, join, resolve } from 'path'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
 import webpack from 'webpack'
@@ -15,13 +16,17 @@ import {
   resolveApp,
 } from './utils/index.js'
 import fs from 'fs'
-import config from './utils/config.cjs'
+import config from './utils/config.js'
 import { buildStyleVarsCss, buildFontHeadLinks } from './utils/styleConfig.js'
 import Dotenv from 'dotenv-webpack'
 import { getPackageVersion } from './utils/index.js'
 import RyunixRoutesPlugin from './utils/ssgPlugin.js'
 import AppRouterPlugin from './utils/appRouterPlugin.js'
 import ApiRouterPlugin from './utils/ApiRouterPlugin.js'
+import {
+  resolveEslintExtensions,
+  resolveEslintFilePatterns,
+} from './utils/eslint-files.js'
 import { handleApiRequest } from './utils/apiHandler.js'
 import { renderDevRoute } from './utils/ssrDevHandler.js'
 import remarkGfm from 'remark-gfm'
@@ -29,23 +34,31 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { remarkGithubAlerts } from './plugins/remark-github-alerts.js'
 import rehypeHighlight from 'rehype-highlight'
+import type WebpackDevServer from 'webpack-dev-server'
+
+declare global {
+  var __RYUNIX_SERVER_ACTIONS__:
+    | Record<string, (...args: unknown[]) => unknown>
+    | undefined
+}
 
 const __filename = fileURLToPath(import.meta.url)
 
 const __dirname = dirname(__filename)
 
-let dir
+let dir: string
 
 const manager = getPackageManager()
 
-const loadDir = (pkm) => {
+const loadDir = (pkm: string): string => {
   try {
     switch (pkm) {
       default:
         return process.cwd()
     }
-  } catch (e) {
-    console.error(`[RYUNIX INIT ERROR]: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.error(`[RYUNIX INIT ERROR]: ${message}`)
     process.exit(1)
   }
 }
@@ -57,11 +70,13 @@ dir = loadDir(manager)
  * @param {Object} object - Alias configuration object
  * @returns {Object} Webpack-compatible alias object
  */
-function getAlias(object) {
+function getAlias(
+  object: Record<string, string | false | string[] | null | undefined>,
+) {
   return Object.entries(object)
-    .filter(([k, v]) => v != null)
-    .reduce((accum, [k, v]) => {
-      accum[k] = resolveApp(dir, v)
+    .filter(([, v]) => v != null && typeof v === 'string')
+    .reduce<Record<string, string>>((accum, [k, v]) => {
+      accum[k] = resolveApp(dir, v as string)
       return accum
     }, {})
 }
@@ -76,13 +91,13 @@ try {
   presetsNodeModules = dirname(
     dirname(ryunixRequire.resolve('thread-loader/package.json')),
   )
-} catch (e) {
+} catch (_e) {
   // Fallback: try to resolve from the ryunix-presets package itself
   try {
     presetsNodeModules = dirname(
       ryunixRequire.resolve('@unsetsoft/ryunix-presets/package.json'),
     )
-  } catch (e2) {
+  } catch (_e2) {
     // Last fallback: use the project's node_modules
     presetsNodeModules = dirname(resolveApp(dir, 'package.json'))
   }
@@ -111,8 +126,9 @@ const resolvePostcssPlugins = () => {
         ? fn(opts)
         : fn()
     })
-  } catch (e) {
-    console.warn(`[Ryunix] Could not load postcss.config.js: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.warn(`[Ryunix] Could not load postcss.config.js: ${message}`)
     return []
   }
 }
@@ -143,7 +159,7 @@ const styleFontLinks = buildFontHeadLinks(config.style?.font)
 
 const sharedWebpackConfig = {
   experiments: {
-    lazyCompilation: config.webpack.experiments.lazyCompilation,
+    lazyCompilation: config.webpack.experiments?.lazyCompilation,
   },
   context: resolveApp(dir, config.rootDir),
   devtool: config.webpack.production ? false : 'source-map',
@@ -281,9 +297,74 @@ const sharedWebpackConfig = {
           },
         ],
       },
-      // JavaScript/JSX/RYX files
+      // TypeScript / TSX / typed RYX
       {
-        test: /\.(js|jsx|ryx)$/,
+        test: /\.(ts|tsx|ryx)$/,
+        exclude: /node_modules/,
+        use: [
+          config.compiler !== 'swc' && ryunixRequire.resolve('thread-loader'),
+          config.compiler === 'swc'
+            ? {
+                loader: ryunixRequire.resolve('swc-loader'),
+                options: {
+                  jsc: {
+                    parser: {
+                      syntax: 'typescript',
+                      tsx: true,
+                    },
+                    transform: {
+                      react: {
+                        pragma: 'Ryunix.createElement',
+                        pragmaFrag: 'Ryunix.Fragment',
+                      },
+                    },
+                    target: 'es2022',
+                  },
+                },
+              }
+            : {
+                loader: ryunixRequire.resolve('babel-loader'),
+                options: {
+                  presets: [
+                    [
+                      ryunixRequire.resolve('@babel/preset-env'),
+                      {
+                        targets: 'defaults and not IE 11',
+                        useBuiltIns: false,
+                        modules: false,
+                        bugfixes: true,
+                      },
+                    ],
+                    [
+                      ryunixRequire.resolve('@babel/preset-typescript'),
+                      { isTSX: true, allExtensions: true },
+                    ],
+                    ryunixRequire.resolve('@babel/preset-react'),
+                  ],
+                  cacheDirectory: resolveApp(
+                    dir,
+                    `${config.buildDir}/cache/babel-loader`,
+                  ),
+                  plugins: [
+                    [
+                      ryunixRequire.resolve(
+                        '@babel/plugin-transform-react-jsx',
+                      ),
+                      {
+                        pragma: 'Ryunix.createElement',
+                        pragmaFrag: 'Ryunix.Fragment',
+                      },
+                    ],
+                  ],
+                },
+              },
+          resolve(__dirname, 'loaders/ryunix-server-action-loader.js'),
+          resolve(__dirname, 'loaders/ryunix-rsc-loader.js'),
+        ].filter(Boolean),
+      },
+      // JavaScript / JSX
+      {
+        test: /\.(js|jsx)$/,
         use: [
           config.compiler !== 'swc' && ryunixRequire.resolve('thread-loader'),
           config.compiler === 'swc'
@@ -360,21 +441,23 @@ const sharedWebpackConfig = {
         },
       },
       // Custom rules from config
-      ...config.webpack.module.rules,
+      ...(config.webpack.module?.rules ?? []),
     ],
   },
   resolve: {
     alias:
-      config.webpack.resolve.alias && getAlias(config.webpack.resolve.alias),
+      config.webpack.resolve?.alias && getAlias(config.webpack.resolve.alias),
     extensions: [
+      '.ts',
+      '.tsx',
       '.js',
       '.jsx',
       '.ryx',
       '.mdx',
       '.md',
-      ...config.webpack.resolve.extensions,
+      ...(config.webpack.resolve?.extensions ?? []),
     ],
-    fallback: config.webpack.resolve.fallback,
+    fallback: config.webpack.resolve?.fallback,
   },
   resolveLoader: {
     modules: ['node_modules', presetsNodeModules],
@@ -426,14 +509,14 @@ const getPlugins = (isServer = false) =>
     // Only inject HTML for the client build
     !isServer &&
       new HtmlWebpackPlugin({
-        pageLang: config.legacy.seo.pageLang,
-        title: config.legacy.seo.title,
+        pageLang: config.legacy.seo?.pageLang,
+        title: config.legacy.seo?.title,
         favicon: config.favicon
           ? typeof config.favicon === 'string'
             ? resolveApp(dir, config.favicon)
             : join(dir, 'public', 'favicon.png')
           : false,
-        meta: config.legacy.seo.meta as never,
+        meta: config.legacy.seo?.meta as never,
         template: config.legacy.template
           ? resolveApp(dir, config.legacy.template)
           : join(__dirname, 'template', 'index.html'),
@@ -610,7 +693,7 @@ const getPlugins = (isServer = false) =>
           },
         ],
       }),
-    ...(!isServer ? config.webpack.plugins : []),
+    ...(!isServer ? (config.webpack.plugins ?? []) : []),
   ].filter(Boolean)
 
 const clientConfig = {
@@ -633,7 +716,7 @@ const clientConfig = {
       overlay: false, // Disable default webpack iframe overlay
     },
     devMiddleware: {
-      writeToDisk: (filePath) => {
+      writeToDisk: (filePath: string) => {
         try {
           return (
             filePath.includes('/server/') || filePath.includes('\\server\\')
@@ -650,121 +733,150 @@ const clientConfig = {
     },
     liveReload: false,
     headers: {
-      'Access-Control-Allow-Origin': config.server.cors.origin || '*',
-      'Access-Control-Allow-Methods': config.server.cors.methods || '*',
-      'Access-Control-Allow-Headers': config.server.cors.headers || '*',
+      'Access-Control-Allow-Origin': config.server.cors?.origin || '*',
+      'Access-Control-Allow-Methods': config.server.cors?.methods || '*',
+      'Access-Control-Allow-Headers': config.server.cors?.headers || '*',
       'Access-Control-Allow-Credentials': String(
-        config.server.cors.credentials || false,
+        config.server.cors?.credentials || false,
       ),
     },
     allowedHosts: config.webpack.devServer.allowedHosts,
     port: config.port,
     proxy: config.proxy,
-    setupMiddlewares: (middlewares, devServer) => {
+    setupMiddlewares: (
+      middlewares: WebpackDevServer.Middleware[],
+      devServer: WebpackDevServer,
+    ) => {
       if (!devServer) {
         throw new Error('webpack-dev-server is not defined')
       }
 
-      devServer.app.use(async (req, res, next) => {
-        if (req.method === 'POST' && req.url === '/_ryunix/action') {
-          try {
-            let body = ''
-            req.on('data', (chunk) => {
-              body += chunk
-            })
-            req.on('end', async () => {
-              try {
-                if (req.headers['x-ryunix-action'] !== 'true') {
-                  res.writeHead(403, { 'Content-Type': 'application/json' })
-                  return res.end(
-                    JSON.stringify({ error: 'Forbidden: Missing CSRF header' }),
-                  )
+      devServer.app?.use(
+        async (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: (err?: unknown) => void,
+        ) => {
+          if (req.method === 'POST' && req.url === '/_ryunix/action') {
+            try {
+              let body = ''
+              req.on('data', (chunk: Buffer | string) => {
+                body += chunk
+              })
+              req.on('end', async () => {
+                try {
+                  if (req.headers['x-ryunix-action'] !== 'true') {
+                    res.writeHead(403, { 'Content-Type': 'application/json' })
+                    return res.end(
+                      JSON.stringify({
+                        error: 'Forbidden: Missing CSRF header',
+                      }),
+                    )
+                  }
+                  const { actionId, args } = JSON.parse(body)
+                  const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId]
+                  if (!action) {
+                    res.writeHead(404, { 'Content-Type': 'application/json' })
+                    return res.end(
+                      JSON.stringify({
+                        error: `Server Action ${actionId} not found`,
+                      }),
+                    )
+                  }
+                  const result = await action(...args)
+                  res.writeHead(200, { 'Content-Type': 'application/json' })
+                  res.end(JSON.stringify(result))
+                } catch (err: unknown) {
+                  const message =
+                    err instanceof Error ? err.message : String(err)
+                  res.writeHead(500, { 'Content-Type': 'application/json' })
+                  res.end(JSON.stringify({ error: message }))
                 }
-                const { actionId, args } = JSON.parse(body)
-                const action = global.__RYUNIX_SERVER_ACTIONS__?.[actionId]
-                if (!action) {
-                  res.writeHead(404, { 'Content-Type': 'application/json' })
-                  return res.end(
-                    JSON.stringify({
-                      error: `Server Action ${actionId} not found`,
-                    }),
-                  )
-                }
-                const result = await action(...args)
-                res.writeHead(200, { 'Content-Type': 'application/json' })
-                res.end(JSON.stringify(result))
-              } catch (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' })
-                res.end(JSON.stringify({ error: err.message }))
+              })
+              return
+            } catch (err) {
+              next(err)
+              return
+            }
+          }
+
+          if (req.method === 'GET' && req.url?.startsWith('/_ryunix/source')) {
+            try {
+              const urlObj = new URL(
+                req.url ?? '/',
+                `http://${req.headers.host}`,
+              )
+              const filePath = urlObj.searchParams.get('file')
+              const lineStr = urlObj.searchParams.get('line')
+              if (!filePath || !lineStr) {
+                res.writeHead(400, { 'Content-Type': 'application/json' })
+                return res.end(
+                  JSON.stringify({ error: 'Missing file or line parameter' }),
+                )
               }
-            })
-            return
+              const line = parseInt(lineStr, 10)
+              if (!fs.existsSync(filePath)) {
+                res.writeHead(404, { 'Content-Type': 'application/json' })
+                return res.end(JSON.stringify({ error: 'File not found' }))
+              }
+              const content = fs.readFileSync(filePath, 'utf8')
+              const lines = content.split('\n')
+              const start = Math.max(0, line - 5 - 1) // 0-indexed, 5 lines before
+              const end = Math.min(lines.length, line + 5)
+              const snippet = lines.slice(start, end).join('\n')
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              return res.end(JSON.stringify({ snippet, startLine: start + 1 }))
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err)
+              res.writeHead(500, { 'Content-Type': 'application/json' })
+              return res.end(JSON.stringify({ error: message }))
+            }
+          }
+          next()
+        },
+      )
+
+      devServer.app?.use(
+        async (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: (err?: unknown) => void,
+        ) => {
+          try {
+            const apiRootPath = resolveApp(dir, `${config.buildDir}/server/api`)
+            const handled = await handleApiRequest(req, res, apiRootPath)
+            if (!handled) {
+              next()
+            }
           } catch (err) {
             next(err)
-            return
           }
-        }
+        },
+      )
 
-        if (req.method === 'GET' && req.url.startsWith('/_ryunix/source')) {
+      devServer.app?.use(
+        async (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: (err?: unknown) => void,
+        ) => {
           try {
-            const urlObj = new URL(req.url, `http://${req.headers.host}`)
-            const filePath = urlObj.searchParams.get('file')
-            const lineStr = urlObj.searchParams.get('line')
-            if (!filePath || !lineStr) {
-              res.writeHead(400, { 'Content-Type': 'application/json' })
-              return res.end(
-                JSON.stringify({ error: 'Missing file or line parameter' }),
+            if (config.ssr) {
+              const handled = await renderDevRoute(
+                req,
+                res,
+                devServer as Parameters<typeof renderDevRoute>[2],
+                dir,
+                config,
               )
+              if (handled) return
             }
-            const line = parseInt(lineStr, 10)
-            if (!fs.existsSync(filePath)) {
-              res.writeHead(404, { 'Content-Type': 'application/json' })
-              return res.end(JSON.stringify({ error: 'File not found' }))
-            }
-            const content = fs.readFileSync(filePath, 'utf8')
-            const lines = content.split('\n')
-            const start = Math.max(0, line - 5 - 1) // 0-indexed, 5 lines before
-            const end = Math.min(lines.length, line + 5)
-            const snippet = lines.slice(start, end).join('\n')
-            res.writeHead(200, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({ snippet, startLine: start + 1 }))
           } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({ error: err.message }))
+            console.error('[Ryunix Dev SSR]', err)
           }
-        }
-        next()
-      })
-
-      devServer.app.use(async (req, res, next) => {
-        try {
-          const apiRootPath = resolveApp(dir, `${config.buildDir}/server/api`)
-          const handled = await handleApiRequest(req, res, apiRootPath)
-          if (!handled) {
-            next()
-          }
-        } catch (err) {
-          next(err)
-        }
-      })
-
-      devServer.app.use(async (req, res, next) => {
-        try {
-          if (config.ssr) {
-            const handled = await renderDevRoute(
-              req,
-              res,
-              devServer,
-              dir,
-              config,
-            )
-            if (handled) return
-          }
-        } catch (err) {
-          console.error('[Ryunix Dev SSR]', err)
-        }
-        next()
-      })
+          next()
+        },
+      )
 
       return middlewares
     },
@@ -840,8 +952,8 @@ const clientConfig = {
     // ESLintPlugin - excluding MDX and MD files
     new ESLintPlugin({
       cwd: dir,
-      files: ['**/*.ryx', ...config.eslint.files],
-      extensions: ['js', 'ryx', 'jsx'],
+      files: resolveEslintFilePatterns(dir, config.eslint.files),
+      extensions: resolveEslintExtensions(dir),
       exclude: ['node_modules', '**/*.mdx', '**/*.md'],
       emitError: true,
       emitWarning: true,
@@ -915,7 +1027,7 @@ const serverConfig = {
 // Export dual compilers if SSR is enabled, or in production if SSG prerender is enabled
 const enableServerDualCompiler =
   config.ssr ||
-  (config.webpack.production && config.legacy.ssg?.prerender?.length > 0)
+  (config.webpack.production && (config.legacy.ssg?.prerender?.length ?? 0) > 0)
 export default enableServerDualCompiler
   ? [clientConfig, serverConfig]
   : clientConfig

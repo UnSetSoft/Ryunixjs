@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { normalizeFontConfig } from './styleFonts.cjs'
+import { normalizeFontConfig } from '../../.generated/webpack/utils/styleFonts.js'
 
 test('google font config builds fonts.googleapis.com link', () => {
   const font = normalizeFontConfig({

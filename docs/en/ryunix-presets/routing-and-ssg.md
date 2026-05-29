@@ -112,3 +112,29 @@ the Webpack `devServer` intercepts requests identically:
   buffer.
 
 - Eliminates First Paint Blank Screens implicitly.
+
+---
+
+## 4. Static route metadata files
+
+`appRouterPlugin` detects files in each `app/` segment (Next.js App Router style)
+and maps them to metadata plus public assets:
+
+| File                                      | Effect                          |
+| :---------------------------------------- | :------------------------------ |
+| `favicon.ico`                             | `<link rel="icon">`             |
+| `icon.{ico,jpg,jpeg,png,svg}`             | segment icon                    |
+| `apple-icon.{jpg,jpeg,png}`               | `<link rel="apple-touch-icon">` |
+| `opengraph-image.{jpg,jpeg,png,gif,webp}` | `og:image`                      |
+| `twitter-image.{jpg,jpeg,png,gif,webp}`   | `twitter:image`                 |
+| `opengraph-image.alt.txt`                 | `og:image:alt`                  |
+| `twitter-image.alt.txt`                   | `twitter:image:alt`             |
+
+Implementation: `packages/ryunix-presets/webpack/utils/routeMetadataFiles.ts`.
+
+- **Inheritance:** parent layout → child; the most specific segment wins.
+- **Build:** copies to `.ryunix/static/<route>/<file>` and resolves URLs during
+  SSG.
+- **Runtime:** `mergeRouteMetadata` + `resolvePageMetadata` combine file assets,
+  `Metatags`, `generateMetadata`, and `useMetadata` before `prerenderRoute`
+  injects `<title>` / `<meta>`.

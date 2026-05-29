@@ -1,7 +1,7 @@
 # Ryunix DevTools — resumen del paquete
 
 > **Language / Idioma:** [English](../../en/ryunix-devtools/package-overview.md)
-> · [Español](./resumen-del-paquete.md)
+> · [Español](./resumen-paquete.md)
 
 El paquete **`@unsetsoft/ryunix-devtools`** vive en `packages/ryunix-devtools/`.
 Es una **extensión de navegador** (Chrome / Edge) para depurar aplicaciones
@@ -148,6 +148,6 @@ flowchart TB
 | Documento                                                        | Contenido                               |
 | :--------------------------------------------------------------- | :-------------------------------------- |
 | [core/devtools-y-profiler.md](../core/devtools-y-profiler.md)    | Advertencias y profiler en el motor     |
-| [core/resumen-del-paquete.md](../core/resumen-del-paquete.md)    | Paquete `@unsetsoft/ryunixjs`           |
+| [core/resumen-paquete.md](../core/resumen-paquete.md)            | Paquete `@unsetsoft/ryunixjs`           |
 | [App de integración local](../guias/app-de-integracion-local.md) | Probar una app con la extensión cargada |
 | `packages/ryunix-devtools/README.md`                             | Instalación y compatibilidad            |

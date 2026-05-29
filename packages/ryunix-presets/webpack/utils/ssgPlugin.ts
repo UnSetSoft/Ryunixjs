@@ -11,11 +11,12 @@
 
 import fs from 'fs'
 import path from 'path'
+import type { Compiler } from 'webpack'
 
 class RyunixRoutesPlugin {
   routesPath: string
   outputPath: string
-  frontmatterCache: Map<string, unknown>
+  frontmatterCache: Map<string, Record<string, unknown>>
   debug: boolean
 
   constructor(
@@ -31,10 +32,10 @@ class RyunixRoutesPlugin {
     this.debug = options.debug || false
   }
 
-  apply(compiler) {
+  apply(compiler: Compiler) {
     compiler.hooks.emit.tapAsync(
       'RyunixRoutesPlugin',
-      (compilation, callback) => {
+      (_compilation, callback) => {
         // Skip in development mode
         if (compiler.options.mode !== 'production') {
           callback()
@@ -68,10 +69,8 @@ class RyunixRoutesPlugin {
 
           const routes = this.parseRoutes(content)
 
-          // Count routes with meta
-          const routesWithMeta = routes.filter(
-            (r) => r.meta && Object.keys(r.meta).length > 0,
-          )
+          // Count routes with meta (reserved for future manifest enrichment)
+          void routes.filter((r) => r.meta && Object.keys(r.meta).length > 0)
 
           const manifest = JSON.stringify(routes, null, 2)
           const outputPath = path.resolve(process.cwd(), this.outputPath)
@@ -98,7 +97,7 @@ class RyunixRoutesPlugin {
    * Matches: import X, { frontmatter as Y } from "path.mdx"
    * Supports multiline imports
    */
-  extractFrontmatter(content, baseDir) {
+  extractFrontmatter(content: string, baseDir: string) {
     // Updated regex to support multiline imports
     const importRegex =
       /import\s+\w+\s*,\s*\{[\s\S]*?frontmatter\s+as\s+(\w+)[\s\S]*?\}\s+from\s+["']([^"']+\.mdx)["']/g
@@ -132,8 +131,9 @@ class RyunixRoutesPlugin {
         if (Object.keys(frontmatter).length > 0) {
           this.frontmatterCache.set(alias, frontmatter)
         }
-      } catch (error) {
-        console.error(`❌ Error reading ${absolutePath}:`, error.message)
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error(`❌ Error reading ${absolutePath}:`, message)
       }
     }
   }
@@ -142,7 +142,7 @@ class RyunixRoutesPlugin {
    * Parse YAML frontmatter from MDX content
    * Handles multiple formats and edge cases
    */
-  parseFrontmatter(content) {
+  parseFrontmatter(content: string): Record<string, unknown> {
     // Remove BOM if present
     if (content.charCodeAt(0) === 0xfeff) {
       content = content.slice(1)
@@ -158,7 +158,7 @@ class RyunixRoutesPlugin {
       /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/,
     ]
 
-    let yamlContent = null
+    let yamlContent: string | null = null
 
     for (const pattern of patterns) {
       const match = content.match(pattern)
@@ -172,7 +172,7 @@ class RyunixRoutesPlugin {
       return {}
     }
 
-    const frontmatter = {}
+    const frontmatter: Record<string, unknown> = {}
 
     // Split by lines
     const lines = yamlContent.split('\n').filter((line) => line.trim())
@@ -215,7 +215,7 @@ class RyunixRoutesPlugin {
       }
 
       // Parse numbers
-      if (!isNaN(value) && value !== '') {
+      if (!Number.isNaN(Number(value)) && value !== '') {
         frontmatter[key] = Number(value)
         continue
       }
@@ -231,8 +231,8 @@ class RyunixRoutesPlugin {
    * Parse routes from content with expression evaluation
    * Handles: string literals, template literals, and fallback expressions
    */
-  parseRoutes(content) {
-    const routes = []
+  parseRoutes(content: string) {
+    const routes: Record<string, unknown>[] = []
 
     // Match route objects - capture the entire object
     const routeRegex =
@@ -295,18 +295,18 @@ class RyunixRoutesPlugin {
       const metaContent = this.extractMetaObject(routeBlock)
 
       if (metaContent) {
-        route.meta = {}
+        const meta: Record<string, unknown> = {}
+        route.meta = meta
 
         // Temporalmente activar debug para esta ruta
-        const oldDebug = this.debug
         this.debug = true
 
-        this.extractField(metaContent, 'title', route.meta)
-        this.extractField(metaContent, 'description', route.meta)
-        this.extractField(metaContent, 'keywords', route.meta)
-        this.extractField(metaContent, 'image', route.meta)
-        this.extractField(metaContent, 'author', route.meta)
-        this.extractField(metaContent, 'canonical', route.meta)
+        this.extractField(metaContent, 'title', meta)
+        this.extractField(metaContent, 'description', meta)
+        this.extractField(metaContent, 'keywords', meta)
+        this.extractField(metaContent, 'image', meta)
+        this.extractField(metaContent, 'author', meta)
+        this.extractField(metaContent, 'canonical', meta)
       } else {
         console.log(`   ❌ No object meta found in route: ${evaluatedPath}`)
       }
@@ -321,7 +321,7 @@ class RyunixRoutesPlugin {
    * Evaluate path expressions including template literals
    * Handles: `/docs/${variable.field}` || "/fallback"
    */
-  evaluatePathExpression(expression) {
+  evaluatePathExpression(expression: string): string | undefined {
     // Handle fallback expressions: `...` || "..."
     const fallbackMatch = expression.match(
       /([`"'][^`"']*[`"'])\s*\|\|\s*([`"'][^`"']*[`"'])/,
@@ -341,7 +341,7 @@ class RyunixRoutesPlugin {
   /**
    * Evaluate a single path expression (template literal or string)
    */
-  evaluateSinglePath(pathExpr) {
+  evaluateSinglePath(pathExpr: string): string | undefined {
     // Remove surrounding quotes/backticks
     pathExpr = pathExpr.trim().replace(/^[`"']|[`"']$/g, '')
 
@@ -355,7 +355,7 @@ class RyunixRoutesPlugin {
       const value = this.resolveExpression(expression)
 
       if (value !== undefined && value !== null) {
-        result = result.replace(match[0], value)
+        result = result.replace(match[0], String(value))
       } else {
         // If can't resolve, return undefined to try fallback
         return undefined
@@ -369,7 +369,7 @@ class RyunixRoutesPlugin {
    * Extract meta object content with proper brace matching
    * Handles nested braces and arrays correctly
    */
-  extractMetaObject(routeBlock) {
+  extractMetaObject(routeBlock: string): string | null {
     const metaStart = routeBlock.indexOf('meta:')
     if (metaStart === -1) return null
 
@@ -424,7 +424,7 @@ class RyunixRoutesPlugin {
    * Resolve expression like "variable.field" or "variable?.field" using frontmatter cache
    * Handles optional chaining
    */
-  resolveExpression(expression) {
+  resolveExpression(expression: string): unknown {
     // Remove optional chaining operator if present
     expression = expression.replace(/\?\./, '.')
 
@@ -448,7 +448,11 @@ class RyunixRoutesPlugin {
    * Extract and evaluate field from route block
    * Handles arrays, objects, and expressions with fallbacks
    */
-  extractField(block, fieldName, target) {
+  extractField(
+    block: string,
+    fieldName: string,
+    target: Record<string, unknown>,
+  ) {
     // Find the field name
     const fieldStart = block.indexOf(`${fieldName}:`)
     if (fieldStart === -1) return
@@ -464,7 +468,7 @@ class RyunixRoutesPlugin {
     let bracketCount = 0
     let braceCount = 0
     let inQuotes = false
-    let quoteChar = null
+    let quoteChar: string | null = null
 
     for (let i = valueStart; i < block.length; i++) {
       const char = block[i]
@@ -528,7 +532,7 @@ class RyunixRoutesPlugin {
    * Evaluate expression with frontmatter data
    * Handles: variable?.field || fallback
    */
-  evaluateExpression(expression) {
+  evaluateExpression(expression: string): unknown {
     // Match: Variable?.field || fallback
     const exprMatch = expression.match(/(\w+)\?\.(\w+)\s*\|\|\s*(.+)/)
 
@@ -557,7 +561,7 @@ class RyunixRoutesPlugin {
    * Parse literal value from string
    * Handles: strings, numbers, booleans, arrays (including with quotes)
    */
-  parseLiteral(value) {
+  parseLiteral(value: string): unknown {
     value = value.trim()
 
     // Handle array literals: ["item1", "item2", "item3"]
@@ -570,10 +574,10 @@ class RyunixRoutesPlugin {
       }
 
       // Parse items, handling quoted strings
-      const items = []
+      const items: string[] = []
       let currentItem = ''
       let inQuotes = false
-      let quoteChar = null
+      let quoteChar: string | null = null
 
       for (let i = 0; i < arrayContent.length; i++) {
         const char = arrayContent[i]
@@ -614,7 +618,7 @@ class RyunixRoutesPlugin {
     if (value === 'false') return false
 
     // Number
-    if (!isNaN(value) && value !== '') {
+    if (!Number.isNaN(Number(value)) && value !== '') {
       return Number(value)
     }
 

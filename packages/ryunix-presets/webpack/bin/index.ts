@@ -7,24 +7,25 @@ import { compiler } from './compiler.js'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import boxen from 'boxen'
-import defaultSettings from '../utils/config.cjs'
+import defaultSettings from '../utils/config.js'
 import Prerender from './prerender.js'
-import {
-  cleanBuildDirectory,
-  convertFlatToClassic,
-  resolveApp,
-  getPackageVersion,
-} from '../utils/index.js'
+import { resolveApp, getPackageVersion } from '../utils/index.js'
 import { ESLint } from 'eslint'
 import eslintConfig from '../eslint.config.js'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import server from './prod.server.js'
-import config from '../utils/config.cjs'
+import config from '../utils/config.js'
 const __filename = fileURLToPath(import.meta.url)
 
 const __dirname = dirname(__filename)
+
+interface CliArgs {
+  fix?: boolean
+  browser?: boolean
+  [key: string]: unknown
+}
 
 const lint = {
   command: 'lint',
@@ -37,7 +38,7 @@ const lint = {
       describe: 'Automatically fix problems',
     },
   },
-  handler: async (arg) => {
+  handler: async (arg: CliArgs) => {
     const classicConfig = eslintConfig[0]
 
     const fix = arg.fix
@@ -61,7 +62,7 @@ const lint = {
 const dev = {
   command: 'dev',
   describe: 'Run server for developer mode.',
-  handler: async (arg) => {
+  handler: async (arg: CliArgs) => {
     process.env.RYUNIX_MODE = 'development'
     const open = Boolean(arg.browser) || false
     const settings = {
@@ -85,7 +86,7 @@ const dev = {
 const prod = {
   command: 'start',
   describe: 'Run server for production mode. Requiere .ryunix/static',
-  handler: async (arg) => {
+  handler: async (_arg: CliArgs) => {
     process.env.RYUNIX_MODE = 'production'
     if (!fs.existsSync(join(process.cwd(), config.buildDir, 'static'))) {
       logger.error('You need build first!')
@@ -120,13 +121,13 @@ const prod = {
 const build = {
   command: 'build',
   describe: 'Run builder',
-  handler: async (arg) => {
+  handler: async (_arg: CliArgs) => {
     process.env.RYUNIX_MODE = 'production'
 
     // ── Clean build output before each production build ───────────────────
     // Clears static/ and server/ (except server/api/) but keeps cache/ intact.
     const buildRoot = resolveApp(process.cwd(), defaultSettings.buildDir)
-    const clean = (dir) => {
+    const clean = (dir: string) => {
       if (fs.existsSync(dir)) {
         fs.rmSync(dir, { recursive: true, force: true })
       }
@@ -142,13 +143,13 @@ const build = {
     const buildStart = Date.now()
 
     compiler.run(async (err, stats) => {
-      if (err || stats.hasErrors()) {
+      if (err || !stats || stats.hasErrors()) {
         logger.error(chalk.red('✘ Error during compilation:'))
         if (err) {
           logger.error(err)
         } else {
           // MultiStats or Stats — toString works on both
-          const output = stats.toString('errors-only')
+          const output = stats!.toString('errors-only')
           const lines = output.split('\n').filter(Boolean)
           lines.forEach((line) => logger.error(line))
         }
@@ -171,8 +172,8 @@ const build = {
       // ── API Routes log ─────────────────────────────────────────────────────
       const apiOutputDir = join(buildRoot, 'server', 'api')
       if (fs.existsSync(apiOutputDir)) {
-        const collectRoutes = (dir, base = '') => {
-          const routes = []
+        const collectRoutes = (dir: string, base = ''): string[] => {
+          const routes: string[] = []
           for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
             const fullPath = join(dir, entry.name)
             if (entry.isDirectory()) {
@@ -213,7 +214,7 @@ const build = {
 const extractHTML = {
   command: 'customHtml',
   describe: 'Extract HTML for customization',
-  handler: async (arg) => {
+  handler: async (_arg: CliArgs) => {
     const runPath = process.cwd()
 
     fs.copyFile(

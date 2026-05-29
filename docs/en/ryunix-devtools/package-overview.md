@@ -1,7 +1,7 @@
 # Ryunix DevTools — package overview
 
 > **Language / Idioma:** [English](./package-overview.md) ·
-> [Español](../../es/ryunix-devtools/resumen-del-paquete.md)
+> [Español](../../es/ryunix-devtools/resumen-paquete.md)
 
 The **`@unsetsoft/ryunix-devtools`** package lives in
 `packages/ryunix-devtools/`. It is a **browser extension** (Chrome / Edge) for

@@ -1,7 +1,6 @@
 import { createElement } from '../reconciler/createElement.js'
 import { useEffect, useStore } from '../hooks/hooks.js'
 import {
-  createThemeController,
   themeController,
   type ThemeController,
   type ThemePreference,

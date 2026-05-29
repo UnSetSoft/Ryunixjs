@@ -1,7 +1,29 @@
 import babel from '@babel/core'
 import { createHash } from 'crypto'
+import type { LoaderContext } from 'webpack'
 
-export default async function ryunixServerActionLoader(source) {
+interface ExportNamedDeclarationPath {
+  node: {
+    declaration: unknown
+  }
+}
+
+interface BabelPluginTypes {
+  isFunctionDeclaration(
+    node: unknown,
+  ): node is { async: boolean; id?: { name: string } | null }
+  isVariableDeclaration(
+    node: unknown,
+  ): node is { declarations: Array<{ id: unknown; init?: unknown }> }
+  isIdentifier(node: unknown): node is { name: string }
+  isArrowFunctionExpression(node: unknown): node is { async: boolean }
+  isFunctionExpression(node: unknown): node is { async: boolean }
+}
+
+export default async function ryunixServerActionLoader(
+  this: LoaderContext<unknown>,
+  source: string,
+) {
   if (!/^\s*\/\/\s*@server/m.test(source)) {
     return source
   }
@@ -14,36 +36,35 @@ export default async function ryunixServerActionLoader(source) {
     .update(this.resourcePath)
     .digest('hex')
     .slice(0, 8)
-  const actionNames = []
+  const actionNames: string[] = []
 
   try {
     const result = await babel.transformAsync(source, {
       filename: this.resourcePath,
       plugins: [
-        function ({ types: t }) {
+        function ({ types: t }: { types: BabelPluginTypes }) {
           return {
             visitor: {
-              ExportNamedDeclaration(path) {
+              ExportNamedDeclaration(path: ExportNamedDeclarationPath) {
                 const declaration = path.node.declaration
 
                 if (t.isFunctionDeclaration(declaration) && declaration.async) {
-                  const name = declaration.id.name
+                  const name = declaration.id?.name
+                  if (!name) return
                   actionNames.push(name)
-                  const actionId = `${hash}_${name}`
 
                   // We don't transform the AST for client builds here anymore,
                   // we just let it collect the actionNames and completely replace the client source string at the end.
                 } else if (t.isVariableDeclaration(declaration)) {
-                  let hasAsyncArrow = false
                   declaration.declarations.forEach((decl) => {
                     if (
+                      t.isIdentifier(decl.id) &&
                       (t.isArrowFunctionExpression(decl.init) ||
                         t.isFunctionExpression(decl.init)) &&
                       decl.init.async
                     ) {
                       const name = decl.id.name
                       actionNames.push(name)
-                      hasAsyncArrow = true
                     }
                   })
                 }
@@ -54,7 +75,7 @@ export default async function ryunixServerActionLoader(source) {
       ],
     })
 
-    let code = result.code
+    let code = result?.code ?? source
 
     if (isServer && actionNames.length > 0) {
       code += `\n\n// Ryunix Server Actions Registration`
@@ -80,7 +101,7 @@ export default async function ryunixServerActionLoader(source) {
     }
 
     callback(null, code)
-  } catch (err) {
-    callback(err)
+  } catch (err: unknown) {
+    callback(err instanceof Error ? err : new Error(String(err)))
   }
 }

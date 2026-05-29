@@ -14,7 +14,7 @@ converting Ryunix Elements into physical pixels or raw HTML strings.
 - [RyunixJS Rendering Architecture](#ryunixjs-rendering-architecture)
   - [Table of contents](#table-of-contents)
   - [1. Client-Side Rendering (`render.js`)](#1-client-side-rendering-renderjs)
-  - [2. Server-Side Rendering (`server.js`)](#2-server-side-rendering-serverjs)
+  - [2. Server-Side Rendering (`ssr.ts`)](#2-server-side-rendering-ssrts)
 
 ---
 
@@ -67,24 +67,23 @@ Attaches the RyunixJS engine to pre-compiled HTML sent from the server.
 
 ---
 
-## 2. Server-Side Rendering (`server.js`)
+## 2. Server-Side Rendering (`ssr.ts`)
 
-The Server parser works completely synchronously (or asynchronously with
-Streams), aggressively short-circuiting Hooks logic via globals
-(`state.isServerRendering = true`) to prevent memory leaks in stateful hooks
-across varying Node.js threads.
+Implementation lives in `packages/core/src/lib/server/ssr.ts`. The server parser
+runs synchronously (`renderToString`) or asynchronously via streams
+(`renderToReadableStream` / `renderToStringAsync`), short-circuiting hooks with
+`state.isServerRendering = true` and resetting `ssrMetadata` / `ssrContexts` at
+the start of each render.
 
 ### `renderToString(element)`
 
-Used for generic Static Site Generation (SSG). Recursively parses the Virtual
-DOM tree, evaluating component Functions and mapping properties to HTML string
-blobs.
+Synchronous render for trees without async components or Suspense streaming.
+Throws when a component returns a `Promise` (use `renderToStringAsync` instead).
 
-- Converts `className` to `class` natively.
-- Evaluates standard HTML5 Void empty tags `<img />` correctly.
-- Safely strips dangerous URI protocols via `validateUri` (e.g., `javascript:`
+### `renderToStringAsync(element)`
 
-  links).
+Convenience wrapper over `renderToReadableStream`; used by the App Router during
+SSG and SSR dev.
 
 ### `renderToReadableStream(element)`
 

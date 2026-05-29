@@ -124,6 +124,12 @@
 
   window.__RYUNIX_DEVTOOLS_HOOK__ = hook
 
+  const tryAppendOverlay = (overlay: HTMLDivElement): void => {
+    const parent = document.body || document.documentElement
+    if (!parent) return
+    if (!overlay.isConnected) parent.appendChild(overlay)
+  }
+
   const overlay = document.createElement('div')
   overlay.id = '__ryunix_devtools_highlight__'
   overlay.style.cssText = `
@@ -134,15 +140,64 @@
     z-index: 999999;
     display: none;
   `
-  document.body.appendChild(overlay)
+  tryAppendOverlay(overlay)
+  document.addEventListener(
+    'DOMContentLoaded',
+    () => tryAppendOverlay(overlay),
+    {
+      once: true,
+    },
+  )
 
-  const patchRyunix = (): void => {
-    if (!window.Ryunix) {
-      setTimeout(patchRyunix, 100)
+  const isElementLike = (value: unknown): value is RyunixFiberLike => {
+    return Boolean(
+      value &&
+      typeof value === 'object' &&
+      'type' in (value as Record<string, unknown>) &&
+      'props' in (value as Record<string, unknown>),
+    )
+  }
+
+  const walkTree = (node: unknown): void => {
+    if (!isElementLike(node)) return
+    hook.recordFiber(node)
+
+    const children = node.props?.children
+    if (Array.isArray(children)) {
+      children.forEach((child) => walkTree(child))
+    } else if (children != null) {
+      walkTree(children)
+    }
+  }
+
+  const patchRenderEntryPoint = (
+    ryunix: RyunixGlobal,
+    key: 'init' | 'render' | 'hydrate',
+  ): void => {
+    const target = ryunix[key]
+    if (typeof target !== 'function') return
+
+    const original = target
+    ryunix[key] = function (...args: unknown[]) {
+      const start = performance.now()
+      const mainElement = args[0]
+      walkTree(mainElement)
+      hook.emit('init', { api: key, time: Date.now() })
+      const result = original.apply(this, args)
+      hook.emit('render', { api: key, duration: performance.now() - start })
+      return result
+    }
+  }
+
+  const patchRyunix = (ryunix: RyunixGlobal): void => {
+    if (ryunix.__devtoolsPatched) return
+    ryunix.__devtoolsPatched = true
+
+    if (typeof ryunix.createElement !== 'function') {
+      hook.emit('ready', { status: 'missing-createElement' })
       return
     }
 
-    const ryunix = window.Ryunix
     const originalCreateElement = ryunix.createElement
     ryunix.createElement = function (...args: unknown[]) {
       const element = originalCreateElement.apply(this, args) as RyunixFiberLike
@@ -150,16 +205,39 @@
       return element
     }
 
-    if (ryunix.init) {
-      const originalInit = ryunix.init
-      ryunix.init = function (...args: unknown[]) {
-        hook.emit('init', { time: Date.now() })
-        return originalInit.apply(this, args)
-      }
-    }
+    patchRenderEntryPoint(ryunix, 'init')
+    patchRenderEntryPoint(ryunix, 'render')
+    patchRenderEntryPoint(ryunix, 'hydrate')
 
     hook.emit('ready', { status: 'ok' })
   }
 
-  patchRyunix()
+  const current = window.Ryunix
+  if (current) {
+    patchRyunix(current)
+    return
+  }
+
+  try {
+    let ryunixRef: RyunixGlobal | undefined
+    Object.defineProperty(window, 'Ryunix', {
+      configurable: true,
+      get() {
+        return ryunixRef
+      },
+      set(value: RyunixGlobal | undefined) {
+        ryunixRef = value
+        if (value) patchRyunix(value)
+      },
+    })
+  } catch (_error) {
+    const poll = (): void => {
+      if (!window.Ryunix) {
+        setTimeout(poll, 100)
+        return
+      }
+      patchRyunix(window.Ryunix)
+    }
+    poll()
+  }
 })()

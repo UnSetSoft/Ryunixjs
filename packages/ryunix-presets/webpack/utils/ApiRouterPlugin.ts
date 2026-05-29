@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { transformSync } from '@swc/core'
+import type { Compiler, Compilation } from 'webpack'
 
 /**
  * Valid API route file names
@@ -29,13 +30,8 @@ class ApiRouterPlugin {
     this.debug = options.debug || false
   }
 
-  apply(compiler) {
-    let lastScanTime = 0
-    let isWatching = false
-    let watcher = null
-
-    compiler.hooks.watchRun.tapAsync('ApiRouterPlugin', (comp, callback) => {
-      isWatching = true
+  apply(compiler: Compiler) {
+    compiler.hooks.watchRun.tapAsync('ApiRouterPlugin', (_comp, callback) => {
       callback()
     })
 
@@ -53,8 +49,11 @@ class ApiRouterPlugin {
         }
 
         // Add api directory to webpack's context dependencies so it detects new files/folders
-        if (params && params.compilationDependencies) {
-          params.contextDependencies.add(apiDirPath)
+        const compileParams = params as {
+          contextDependencies?: { add: (path: string) => void }
+        }
+        if (compileParams.contextDependencies) {
+          compileParams.contextDependencies.add(apiDirPath)
         }
 
         try {
@@ -72,7 +71,7 @@ class ApiRouterPlugin {
 
     compiler.hooks.afterCompile.tapAsync(
       'ApiRouterPlugin',
-      (compilation, callback) => {
+      (compilation: Compilation, callback) => {
         const appDirPath = path.resolve(process.cwd(), this.appDir)
         const apiDirPath = path.join(appDirPath, 'api')
         if (fs.existsSync(apiDirPath)) {
@@ -83,12 +82,12 @@ class ApiRouterPlugin {
     )
   }
 
-  compileApiRoutes(sourceDir, outDir) {
+  compileApiRoutes(sourceDir: string, outDir: string) {
     if (!fs.existsSync(outDir)) {
       fs.mkdirSync(outDir, { recursive: true })
     }
 
-    const compileDirectory = (currentDir, currentOutDir) => {
+    const compileDirectory = (currentDir: string, currentOutDir: string) => {
       if (!fs.existsSync(currentOutDir)) {
         fs.mkdirSync(currentOutDir, { recursive: true })
       }
@@ -109,7 +108,7 @@ class ApiRouterPlugin {
     compileDirectory(sourceDir, outDir)
   }
 
-  compileFile(sourcePath, currentOutDir, fileName) {
+  compileFile(sourcePath: string, currentOutDir: string, fileName: string) {
     try {
       const content = fs.readFileSync(sourcePath, 'utf8')
       const isTs = fileName.endsWith('.ts')
@@ -151,8 +150,9 @@ class ApiRouterPlugin {
           console.log(`[ApiRouter] Compiled: ${sourcePath} -> ${outFilePath}`)
         fs.writeFileSync(outFilePath, code)
       }
-    } catch (e) {
-      console.error(`[ApiRouter] Error compiling ${sourcePath}:`, e.message)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
+      console.error(`[ApiRouter] Error compiling ${sourcePath}:`, message)
     }
   }
 }

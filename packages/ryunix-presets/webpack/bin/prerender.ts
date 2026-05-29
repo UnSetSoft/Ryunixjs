@@ -2,13 +2,20 @@
  * Automatic Prerender - reads routes from manifest
  */
 import { buildSSG } from '../utils/ssg.js'
-import { configFileExist } from '../utils/settingfile.cjs'
-import defaultSettings from '../utils/config.cjs'
+import { configFileExist } from '../utils/settingfile.js'
+import defaultSettings from '../utils/config.js'
 import { resolveApp } from '../utils/index.js'
 import fs from 'fs'
 import path from 'path'
 
-const loadResolvedSSGRoutes = async (buildDirectory) => {
+interface SsgRoute {
+  path: string
+  meta?: Record<string, unknown>
+}
+
+const loadResolvedSSGRoutes = async (
+  buildDirectory: string,
+): Promise<SsgRoute[] | null> => {
   const serverBundleCandidates = [
     path.join(buildDirectory, 'server', 'app-router-server.bundle.js'),
     path.join(buildDirectory, 'server', 'app-router-server.bundle.mjs'),
@@ -26,17 +33,18 @@ const loadResolvedSSGRoutes = async (buildDirectory) => {
     if (typeof serverModule.resolveSSGPaths === 'function') {
       return await serverModule.resolveSSGPaths()
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
     console.warn(
       '[SSG] Could not resolve dynamic routes from server bundle:',
-      error.message,
+      message,
     )
   }
 
   return null
 }
 
-const normalizeManifestRoutes = (routes) =>
+const normalizeManifestRoutes = (routes: SsgRoute[]): SsgRoute[] =>
   routes
     .filter((route) => route && route.path && !route.path.includes(':'))
     .map((route) => ({
@@ -44,7 +52,7 @@ const normalizeManifestRoutes = (routes) =>
       meta: route.meta || {},
     }))
 
-const Prerender = async (directory) => {
+const Prerender = async (directory: string) => {
   const buildDirectory = resolveApp(process.cwd(), directory)
 
   if (!configFileExist()) {
@@ -58,7 +66,7 @@ const Prerender = async (directory) => {
     'cache/ssg',
     'routes.json',
   )
-  let routes = []
+  let routes: SsgRoute[] = []
 
   if (fs.existsSync(manifestPath)) {
     try {
@@ -83,7 +91,7 @@ const Prerender = async (directory) => {
   const metaExist = routes.some((route) => route.meta)
   if (
     metaExist &&
-    Object.keys(defaultSettings.legacy.seo.meta || {}).length > 0
+    Object.keys(defaultSettings.legacy?.seo?.meta || {}).length > 0
   ) {
     console.error(
       '[Ryunix Error] You are mixing static and dynamic meta tags; you can only use one of the two. Remove legacy.seo.meta from ryunix.config.js.',
@@ -106,7 +114,17 @@ const Prerender = async (directory) => {
     return
   }
 
-  await buildSSG(routes, defaultSettings, buildDirectory, defaultSettings.debug)
+  try {
+    await buildSSG(
+      routes,
+      defaultSettings as Parameters<typeof buildSSG>[1],
+      buildDirectory,
+      defaultSettings.debug,
+    )
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error)
+    process.exit(1)
+  }
   console.log('✅ SSG build complete')
 }
 

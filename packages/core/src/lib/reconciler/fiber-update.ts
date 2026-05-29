@@ -20,28 +20,38 @@ import {
   getHydrationPolicy,
   skipHydrationSubtree,
 } from '../hydration/policy.js'
+import type {
+  RyunixComponent,
+  RyunixFiber,
+  RyunixNode,
+} from '../../types/internal.js'
 
-/**
- * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../../types/internal.js').RyunixComponent} RyunixComponent
- * @typedef {import('../../types/internal.js').RyunixNode} RyunixNode
- */
+type MemoComponent = RyunixComponent & {
+  _isMemo?: boolean
+  _arePropsEqual?: (
+    prev: Record<string, unknown>,
+    next: Record<string, unknown>,
+  ) => boolean
+}
 
-/**
- * @param {RyunixFiber} fiber
- */
-const updateFunctionComponent = (fiber) => {
+const updateFunctionComponent = (fiber: RyunixFiber) => {
   const state = getState()
   state.wipFiber = fiber
   state.hookIndex = 0
-  /** @type {RyunixFiber} */ state.wipFiber.hooks = []
+  fiber.hooks = []
+
+  const componentType = fiber.type as MemoComponent & { ryunix_type?: string }
+  if (
+    state.hydrationRecover &&
+    componentType.ryunix_type === 'RYUNIX_ERROR_BOUNDARY'
+  ) {
+    fiber.stateError = undefined
+  }
 
   if (state.isHydrating) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
   }
 
-  const componentType =
-    /** @type {RyunixComponent & { _arePropsEqual?: (prev: Record<string, unknown>, next: Record<string, unknown>) => boolean }} */ fiber.type
   if (componentType._isMemo && fiber.alternate) {
     const { children: _pc, ...prevRest } = fiber.alternate.props || {}
     const { children: _nc, ...nextRest } = fiber.props || {}
@@ -56,8 +66,8 @@ const updateFunctionComponent = (fiber) => {
     }
   }
 
-  let children = [
-    /** @type {RyunixNode} */ /** @type {(props?: Record<string, unknown>) => unknown} */ componentType(
+  const children = [
+    (componentType as (props?: Record<string, unknown>) => RyunixNode)(
       fiber.props,
     ),
   ]
@@ -70,11 +80,9 @@ const updateFunctionComponent = (fiber) => {
   reconcileChildren(fiber, children)
 }
 
-/**
- * @param {RyunixFiber | null | undefined} fiber
- * @returns {boolean}
- */
-const isUnderClientOnlyBoundary = (fiber) => {
+const isUnderClientOnlyBoundary = (
+  fiber: RyunixFiber | null | undefined,
+): boolean => {
   let current = fiber?.parent || null
   while (current) {
     if (current._hydrateClientOnly) return true
@@ -83,15 +91,29 @@ const isUnderClientOnlyBoundary = (fiber) => {
   return false
 }
 
-/**
- * @param {RyunixFiber} fiber
- */
-const updateHostComponent = (fiber) => {
+const isUnderServerPreserveBoundary = (
+  fiber: RyunixFiber | null | undefined,
+): boolean => {
+  let current = fiber?.parent || null
+  while (current) {
+    if (current._hydratePreserveServer) return true
+    current = current.parent || null
+  }
+  return false
+}
+
+const normalizeChildNodes = (
+  children: RyunixNode | RyunixNode[] | undefined,
+): RyunixNode[] => {
+  if (children == null) return []
+  return Array.isArray(children) ? children : [children]
+}
+
+const updateHostComponent = (fiber: RyunixFiber) => {
   const state = getState()
 
   if (fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT) {
-    fiber._contextId =
-      /** @type {string | symbol | undefined} */ fiber.props?._contextId
+    fiber._contextId = fiber.props?._contextId as string | symbol | undefined
     fiber._contextValue = fiber.props?.value
   }
 
@@ -102,9 +124,11 @@ const updateHostComponent = (fiber) => {
 
   if (state.isHydrating && isPassthrough) {
     fiber.effectTag = EFFECT_TAGS.HYDRATE
+  } else if (state.isHydrating && isUnderServerPreserveBoundary(fiber)) {
+    return
   } else if (state.isHydrating && isUnderClientOnlyBoundary(fiber)) {
     if (!fiber.dom) {
-      fiber.dom = /** @type {HTMLElement | Text | null} */ createDom(fiber)
+      fiber.dom = createDom(fiber)
       fiber.effectTag = EFFECT_TAGS.PLACEMENT
     }
   } else if (!fiber.dom) {
@@ -118,7 +142,7 @@ const updateHostComponent = (fiber) => {
         (domNode as Element).tagName.toLowerCase() === fiber.type.toLowerCase()
 
       if (isText || isElement) {
-        fiber.dom = /** @type {HTMLElement | Text} */ domNode
+        fiber.dom = domNode as HTMLElement | Text
         fiber.effectTag = EFFECT_TAGS.HYDRATE
 
         if (
@@ -132,6 +156,16 @@ const updateHostComponent = (fiber) => {
 
         if (
           isElement &&
+          (domNode as Element).hasAttribute('data-ryunix-server')
+        ) {
+          fiber._hydratePreserveServer = true
+          state.hydrateCursor = nextValidSibling(domNode)
+          reconcileChildren(fiber, [])
+          return
+        }
+
+        if (
+          isElement &&
           (domNode as Element).hasAttribute('data-ryunix-hydrate-boundary')
         ) {
           fiber._hydrateClientOnly = true
@@ -140,7 +174,7 @@ const updateHostComponent = (fiber) => {
         state.hydrateCursor = nextValidSibling(domNode.firstChild)
       } else {
         const policy = getHydrationPolicy()
-        const detail = `Mismatch at ${getTypeLabel(fiber.type)}. Expected ${
+        const detail = `Mismatch at ${getTypeLabel(fiber.type ?? 'unknown')}. Expected ${
           domNode.nodeType === 1 ? (domNode as Element).tagName : 'text'
         } but got ${String(fiber.type)}.`
         const boundaryFiber = findNearestHydrationBoundary(fiber)
@@ -159,37 +193,39 @@ const updateHostComponent = (fiber) => {
             state.hydrateCursor ?? null,
             boundaryDom,
           )
-          fiber.dom = /** @type {HTMLElement | Text | null} */ createDom(fiber)
+          fiber.dom = createDom(fiber)
           fiber.effectTag = EFFECT_TAGS.PLACEMENT
         } else if (policy.recover === 'none') {
           logHydrationFatal(detail)
           state.isHydrating = false
           state.hydrateCursor = null
-          fiber.dom = /** @type {HTMLElement | Text | null} */ createDom(fiber)
+          fiber.dom = createDom(fiber)
           fiber.effectTag = EFFECT_TAGS.PLACEMENT
         } else {
           logHydrationMismatch(detail)
           state.isHydrating = false
           state.hydrationFailed = true
           state.hydrateCursor = null
-          fiber.dom = /** @type {HTMLElement | Text | null} */ createDom(fiber)
+          fiber.dom = createDom(fiber)
           fiber.effectTag = EFFECT_TAGS.PLACEMENT
         }
       }
     } else {
-      fiber.dom = /** @type {HTMLElement | Text | null} */ createDom(fiber)
+      fiber.dom = createDom(fiber)
     }
   }
 
-  const children = fiber.props?.children || []
+  if (fiber._hydratePreserveServer) {
+    return
+  }
+
+  const children = normalizeChildNodes(fiber.props?.children)
   reconcileChildren(fiber, children)
 }
 
-/**
- * @param {string | symbol | RyunixComponent | object} type
- * @returns {string}
- */
-const getTypeLabel = (type) => {
+const getTypeLabel = (
+  type: string | symbol | RyunixComponent | object,
+): string => {
   if (typeof type === 'symbol') return type.description || type.toString()
   if (typeof type === 'function') return type.name || 'anonymous'
   return String(type)

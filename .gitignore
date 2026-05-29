@@ -6,11 +6,8 @@ yarn.lock
 package-lock.json
 _cra
 _ci
+# Local smoke copies (webpack1, webpack2, etc.) — never commit; use ../ryunix-doc
 test/*
-!test/webpack/
-test/webpack/node_modules/
-test/webpack/.ryunix/
-test/webpack/*.vsix
 !packages/ryunix-vscode/test/
 !packages/ryunix-vscode/test/**
 .yarn

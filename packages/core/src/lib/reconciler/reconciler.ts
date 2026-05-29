@@ -38,6 +38,17 @@ const reconcileChildren = (wipFiber: RyunixFiber, elements: RyunixNode[]) => {
     const sameType = matchedFiber && element.type === matchedFiber.type
 
     if (sameType && matchedFiber) {
+      const matchedType = matchedFiber.type as
+        | { ryunix_type?: string }
+        | undefined
+      const isErrorBoundary =
+        typeof matchedFiber.type === 'function' &&
+        matchedType?.ryunix_type === 'RYUNIX_ERROR_BOUNDARY'
+      const preserveBoundaryError =
+        isErrorBoundary &&
+        matchedFiber.stateError != null &&
+        matchedFiber.child == null
+
       newFiber = {
         type: matchedFiber.type,
         props: element.props,
@@ -46,7 +57,7 @@ const reconcileChildren = (wipFiber: RyunixFiber, elements: RyunixNode[]) => {
         alternate: matchedFiber,
         effectTag: EFFECT_TAGS.UPDATE,
         hooks: matchedFiber.hooks,
-        stateError: matchedFiber.stateError,
+        stateError: preserveBoundaryError ? matchedFiber.stateError : undefined,
         key: element.key,
         index,
       }

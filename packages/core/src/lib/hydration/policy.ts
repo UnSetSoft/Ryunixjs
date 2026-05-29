@@ -47,8 +47,7 @@ export const findNearestHydrationBoundary = (
     if (
       type &&
       typeof type === 'function' &&
-      (maybeTyped?.ryunix_type === 'RYUNIX_HYDRATION_BOUNDARY' ||
-        maybeTyped?.ryunix_type === 'RYUNIX_SERVER_BOUNDARY')
+      maybeTyped?.ryunix_type === 'RYUNIX_HYDRATION_BOUNDARY'
     ) {
       return current
     }

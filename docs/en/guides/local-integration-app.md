@@ -3,9 +3,8 @@
 > **Language / Idioma:** [English](./local-integration-app.md) ·
 > [Español](../../es/guias/app-de-integracion-local.md)
 
-Guide to set up and use a **test Ryunix application** inside the monorepo so
-changes in `packages/*` show up in the browser like they would in a real app
-built with the framework.
+Guide to run the **Ryunix documentation site** against `packages/*` via the
+pnpm workspace so framework changes show up in the browser.
 
 This does not replace Jest or `pnpm lint` — see
 [automated-testing.md](./automated-testing.md).
@@ -13,322 +12,163 @@ This does not replace Jest or `pnpm lint` — see
 | Path                            | Guide                                          |
 | :------------------------------ | :--------------------------------------------- |
 | Automated tests                 | [automated-testing.md](./automated-testing.md) |
-| Integration app (this document) | `test/webpack` + `pnpm run:web`                |
+| Integration app (this document) | `../ryunix-doc` + `pnpm run dev:doc`           |
 
 ---
 
 ## Table of contents
 
-- [Local integration app](#local-integration-app)
-  - [Table of contents](#table-of-contents)
-  - [Key concepts](#key-concepts)
-  - [Step by step: first-time setup](#step-by-step-first-time-setup)
-  - [Step by step: daily workflow](#step-by-step-daily-workflow)
-  - [Commands from the monorepo root](#commands-from-the-monorepo-root)
-  - [What to do per package you change](#what-to-do-per-package-you-change)
-  - [Create the app with CRA (alternative)](#create-the-app-with-cra-alternative)
-  - [App structure](#app-structure)
-  - [Git and commits](#git-and-commits)
-  - [Related documentation](#related-documentation)
+- [Key concepts](#key-concepts)
+- [First-time setup](#first-time-setup)
+- [Daily workflow](#daily-workflow)
+- [Commands from the monorepo root](#commands-from-the-monorepo-root)
+- [What to do per package you change](#what-to-do-per-package-you-change)
+- [CI smoke vs local docs app](#ci-smoke-vs-local-docs-app)
+- [Optional scratch apps under test/](#optional-scratch-apps-under-test)
+- [Git and commits](#git-and-commits)
+- [Related documentation](#related-documentation)
 
 ---
 
 ## Key concepts
 
-Before running commands, these terms are worth separating:
-
-| Term                            | What it is                                                                                                                                           |
-| :------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Monorepo (root `Ryunixjs/`)** | The **framework** repo: `packages/core`, `packages/ryunix-presets`, etc. It is not a web app; there is no `app/index.ryx` at the root.               |
-| **Integration app**             | A **normal Ryunix app** (`app/*.ryx`, `ryunix.config.js`) living under `test/webpack/`. It mirrors what `npx @unsetsoft/cra` generates.              |
-| **`test/webpack`**              | **Recommended** path for that app. It is in `.gitignore`: not pushed to git; each developer creates it locally.                                      |
-| **`workspace:*`**               | In the app `package.json`, tells pnpm: «use the package from `packages/` in this repo», not the version on npmjs.com.                                |
-| **Symlink**                     | After `pnpm install`, `test/webpack/node_modules/@unsetsoft/ryunixjs` points at `packages/core/`. The browser loads the code edited in the monorepo. |
-| **`pnpm run:web`**              | **Root** script that runs `ryunix dev` inside `test/webpack` (dev server + HMR).                                                                     |
-| **Root `pnpm dev`**             | Does **not** start the integration app. Today it runs Turbo tasks (e.g. CRA CLI). Use `pnpm run:web` for the browser.                                |
+| Term                            | What it is                                                               |
+| :------------------------------ | :----------------------------------------------------------------------- |
+| **Monorepo (`Ryunixjs/`)**      | Framework packages (`packages/core`, `packages/ryunix-presets`, …).      |
+| **`ryunix-doc` (sibling repo)** | Canonical docs site. Listed in `pnpm-workspace.yaml` as `../ryunix-doc`. |
+| **Integration app**             | That docs site with `workspace:*` on `@unsetsoft/ryunixjs` and presets.  |
+| **`workspace:*`**               | pnpm links `packages/*` instead of npm registry versions.                |
+| **`pnpm run dev:doc`**          | Builds core, then `ryunix dev` in `ryunix-doc`.                          |
+| **Root `pnpm dev`**             | Turbo tasks (CRA, etc.). Use `dev:doc` for the browser.                  |
 
 ```text
-Ryunixjs/                    ← monorepo (framework)
-├── packages/core/           ← UI engine (@unsetsoft/ryunixjs)
-├── packages/ryunix-presets/ ← ryunix CLI + Webpack
-└── test/webpack/            ← integration app (gitignored)
+ryx/                         ← typical parent folder (not a git repo)
+├── Ryunixjs/                ← framework monorepo
+│   ├── packages/core/
+│   └── packages/ryunix-presets/
+└── ryunix-doc/              ← docs app (workspace member)
          │
-         │  workspace:*  →  links to packages/, not npm
+         │  workspace:*  →  packages/
          │
-         └── pnpm run:web  →  ryunix dev  →  http://localhost:…
+         └── pnpm run dev:doc  →  http://localhost:…
 ```
 
-### What this app is for
-
-| Goal                        | Example                                           |
-| :-------------------------- | :------------------------------------------------ |
-| See `packages/core` changes | Page with `useStore`, hydration                   |
-| Exercise `ryunix-presets`   | `ryunix dev`, routes under `app/`, `ryunix build` |
-| Try DevTools                | Chrome extension + Ryunix tab in F12              |
-| Sanity-check CRA templates  | Same layout as `ryunix-base`                      |
+There is **no** maintained copy under `test/webpack`, `test/webpack1`, or
+`test/webpack2`. Those paths are `.gitignore`d; anything you create there is
+local scratch only and is not part of the monorepo.
 
 ---
 
-## Step by step: first-time setup
-
-Full sequence from a fresh clone to the app in the browser. Do this **once**
-per machine (or after deleting `test/webpack`).
+## First-time setup
 
 ### 0. Requirements
 
-- Node.js 20, 22, or 24 and pnpm 10+ (see `CONTRIBUTING.md`).
-- Shell at the monorepo **root** (`Ryunixjs/`).
+- Node.js 20, 22, 24, or 26 and pnpm 10+ (see `CONTRIBUTING.md`).
+- Shell at `Ryunixjs/` and `ryunix-doc` cloned as siblings (see layout above).
 
-### 1. Install monorepo dependencies
-
-```bash
-pnpm install
-```
-
-Installs `packages/*` and registers the workspace. The app under `test/webpack`
-does **not** exist yet.
-
-### 2. Create the app folder (copy template)
-
-The official template is at `packages/cra/templates/ryunix-base/`. Copy it to
-`test/webpack`:
+### 1. Install and link
 
 ```bash
-mkdir -p test
-cp -r packages/cra/templates/ryunix-base test/webpack
-cp packages/cra/templates/ryunix-base/gitignore test/webpack/.gitignore
+cd Ryunixjs
+pnpm run setup:web
 ```
 
-Confirm files such as `test/webpack/app/index.ryx` and
-`test/webpack/ryunix.config.js` exist.
+Runs `pnpm install`, builds `@unsetsoft/ryunixjs`, and checks
+`../ryunix-doc/node_modules/@unsetsoft/ryunixjs` points at `packages/core`.
 
-### 3. Set `package.json` with `workspace:*`
-
-The copied template does **not** include framework dependencies; add them.
-Edit `test/webpack/package.json` to look like this (project name is arbitrary):
-
-```json
-{
-  "name": "ryunix-integration-app",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "ryunix dev",
-    "start": "ryunix start",
-    "build": "ryunix build"
-  },
-  "dependencies": {
-    "@unsetsoft/ryunixjs": "workspace:*"
-  },
-  "devDependencies": {
-    "@unsetsoft/ryunix-presets": "workspace:*"
-  },
-  "engines": {
-    "node": "^20 || ^22 || ^24"
-  }
-}
-```
-
-| Field                                        | Meaning                                                           |
-| :------------------------------------------- | :---------------------------------------------------------------- |
-| `"@unsetsoft/ryunixjs": "workspace:*"`       | Runtime from `packages/core`.                                     |
-| `"@unsetsoft/ryunix-presets": "workspace:*"` | Tooling: `ryunix` CLI and Webpack from `packages/ryunix-presets`. |
-| `dev` / `build` / `start` scripts            | Same as in a CRA-generated app.                                   |
-
-Root `pnpm-workspace.yaml` already lists `test/*`, so pnpm treats
-`test/webpack` as a workspace package.
-
-### 4. Install again (from the root)
+### 2. Start the dev server
 
 ```bash
-pnpm install
+pnpm run dev:doc
 ```
 
-pnpm creates `test/webpack/node_modules/` and links `@unsetsoft/*` to
-`packages/`.
-
-### 5. Verify the link is local
-
-```bash
-ls -la test/webpack/node_modules/@unsetsoft/ryunixjs
-```
-
-Expected: arrow or path to `../../../packages/core` (symlink). If it is a plain
-copy with no link, recheck step 3 and repeat step 4.
-
-### 6. Build framework packages
-
-```bash
-pnpm build
-```
-
-Builds `packages/core` and other packages that define `build`. The dev app
-consumes the core build output.
-
-### 7. Start the dev server
-
-```bash
-pnpm run:web
-```
-
-Same as `pnpm --filter ./test/webpack run dev` → `ryunix dev`. The terminal
-prints a URL (e.g. `http://localhost:3000`). Open it in the browser: the
-`ryunix-base` welcome page should appear.
-
-### First-time flow (diagram)
-
-```text
-pnpm install          → monorepo ready
-     ↓
-copy ryunix-base → test/webpack
-     ↓
-edit package.json (workspace:*)
-     ↓
-pnpm install          → symlinks in test/webpack/node_modules
-     ↓
-ls -la …/ryunixjs     → verify symlink
-     ↓
-pnpm build            → build packages/*
-     ↓
-pnpm run:web          → browser
-```
+Open the URL from the terminal (e.g. `http://localhost:3000`).
 
 ---
 
-## Step by step: daily workflow
+## Daily workflow
 
-When `test/webpack` **already exists**, the routine is shorter:
+1. **`pnpm run dev:doc`** — leave running.
+2. Edit by scope:
 
-1. **Open a terminal at the monorepo root.**
-2. Run **`pnpm run:web`** — leave it running (dev server).
-3. **Edit code** depending on scope:
+| You edit…                     | After saving                                                |
+| :---------------------------- | :---------------------------------------------------------- |
+| `ryunix-doc/src/**`           | HMR reloads.                                                |
+| `packages/core/src/**`        | `pnpm --filter @unsetsoft/ryunixjs build`, refresh browser. |
+| `packages/ryunix-presets/**`  | Restart `pnpm run dev:doc`.                                 |
+| `packages/ryunix-devtools/**` | Reload extension at `chrome://extensions/`.                 |
 
-| You edit…                     | After saving                                                                                       |
-| :---------------------------- | :------------------------------------------------------------------------------------------------- |
-| `test/webpack/app/**/*.ryx`   | Nothing extra: HMR reloads the page.                                                               |
-| `packages/core/src/**`        | In another terminal: `pnpm --filter @unsetsoft/ryunixjs build`, then **refresh** the browser (F5). |
-| `packages/ryunix-presets/**`  | Stop `pnpm run:web` (Ctrl+C) and start it again.                                                   |
-| `packages/ryunix-devtools/**` | Reload the extension at `chrome://extensions/`.                                                    |
-
-- **Before a PR** touching core: also run
-  [automated-testing.md](./automated-testing.md) (`pnpm test`, `pnpm lint`).
-- **Commits**: only `packages/*` and `docs/`; `test/webpack` is not in git.
+Before a PR: `pnpm test`, `pnpm lint` ([automated-testing.md](./automated-testing.md)).
 
 ---
 
 ## Commands from the monorepo root
 
-| Command              | What it does                   | When to use                      |
-| :------------------- | :----------------------------- | :------------------------------- |
-| `pnpm run:web`       | `ryunix dev` on `test/webpack` | Daily browser development        |
-| `pnpm run:web:build` | `ryunix build` on the app      | Test SSG / production bundles    |
-| `pnpm run:web:start` | `ryunix start`                 | Serve a production build locally |
+| Command                  | What it does                             |
+| :----------------------- | :--------------------------------------- |
+| `pnpm run setup:web`     | Verify `../ryunix-doc` + workspace links |
+| `pnpm run dev:doc`       | `ryunix dev` on the docs site            |
+| `pnpm run build:doc`     | Production build of the docs site        |
+| `pnpm run run:web`       | Alias of `dev:doc` (legacy name)         |
+| `pnpm run run:web:build` | Alias of `build:doc`                     |
+| `pnpm run run:web:start` | `ryunix start` in `ryunix-doc`           |
 
-**Requirement:** `test/webpack/package.json` exists (first-time steps above).
-
-If `pnpm run:web` fails with «no projects matched», the app was not created or
-the path is not `test/webpack`.
+If a command fails with «no projects matched», `../ryunix-doc` is missing or not
+listed in `pnpm-workspace.yaml`.
 
 ---
 
 ## What to do per package you change
 
-### `@unsetsoft/ryunix-presets` (Webpack, CLI, routing)
+### `@unsetsoft/ryunix-presets`
 
-1. `pnpm --filter @unsetsoft/ryunixjs build` (if core changed).
-2. `pnpm run:web`.
-3. Check in the app:
-
-| Area            | Check                                                     |
-| :-------------- | :-------------------------------------------------------- |
-| Routing         | Routes under `app/`, `layout.ryx`, `errors.ryx`           |
-| Build           | `pnpm run:web:build` succeeds; `.ryunix/` output          |
-| SSR / hydration | No hydration errors in the console                        |
-| API             | `app/api/**/router.js` in dev and after `build` + `start` |
+1. Build core if needed: `pnpm run build:core`.
+2. `pnpm run dev:doc`.
+3. Check routing (`src/app/[locale]/`), `pnpm run build:doc`, SSR/hydration.
 
 Docs: [CLI and bootstrapping](../ryunix-presets/cli-and-bootstrapping.md),
 [Routing and SSG](../ryunix-presets/routing-and-ssg.md).
 
 ### `@unsetsoft/ryunix-devtools`
 
-1. App running: `pnpm run:web`.
-2. Chrome → `chrome://extensions/` → **Developer mode** → **Load unpacked** →
-   folder `packages/ryunix-devtools`.
-3. F12 → **Ryunix** tab → component tree and props.
-
-Detail: `packages/ryunix-devtools/README.md`.
-
-### Quick summary
-
-| Change in…               | In the integration app                     |
-| :----------------------- | :----------------------------------------- |
-| Core (hooks, reconciler) | `pnpm test` → build core → refresh browser |
-| Presets (Webpack, CLI)   | Restart `pnpm run:web` + checklist above   |
-| DevTools                 | Running app + extension reloaded           |
+1. `pnpm run dev:doc`.
+2. Chrome → Load unpacked → `packages/ryunix-devtools`.
 
 ---
 
-## Create the app with CRA (alternative)
+## CI smoke vs local docs app
 
-Instead of copying the template (first-time steps 2–3), run the generator; then
-**replace** npm versions with `workspace:*`.
-
-```bash
-mkdir -p test
-node packages/cra/src/cli.js test/webpack-app --latest
-mv test/webpack-app test/webpack   # if the CLI used another folder name
-```
-
-Edit `test/webpack/package.json`: change `@unsetsoft/ryunixjs` and
-`@unsetsoft/ryunix-presets` from `^x.y.z` to `workspace:*`. Continue from
-**step 4** of [Step by step: first-time setup](#step-by-step-first-time-setup).
-
-### `test/webpack` vs another folder?
-
-|                          | `test/webpack` (recommended) | Folder outside `test/`              |
-| :----------------------- | :--------------------------- | :---------------------------------- |
-| `pnpm run:web` from root | Yes                          | No (only `pnpm dev` inside the app) |
-| Automatic `workspace:*`  | Yes                          | Manual setup                        |
-| Git                      | Ignored with rest of `test/` | Depends on location                 |
+|         | Local integration          | CI (`scripts/ci-smoke-build.mjs`)           |
+| :------ | :------------------------- | :------------------------------------------ |
+| App     | `../ryunix-doc`            | `_ci/smoke-app` from `ryunix-base` template |
+| Purpose | Docs + `[locale]` routes   | Minimal CRA scaffold build                  |
+| In git  | `ryunix-doc` separate repo | `_ci/` gitignored; generated in CI          |
 
 ---
 
-## App structure
+## Optional scratch apps under test/
 
-```text
-test/webpack/
-├── app/
-│   ├── index.ryx          ← route /
-│   ├── layout.ryx         ← global layout
-│   ├── errors.ryx         ← error page
-│   └── api/hello/router.js
-├── styles/global.css
-├── ryunix.config.js
-└── package.json           ← workspace:* required
-```
-
-Each folder under `app/` defines a route; components used on one route only can
-live next to that route.
+You may copy `ryunix-base` into `test/my-app/` for experiments. That folder is
+**gitignored** and **not** in `pnpm-workspace.yaml` unless you add it yourself.
+Do not commit configs or sync scripts for those copies — edit `ryunix-doc` for
+the shared docs site.
 
 ---
 
 ## Git and commits
 
-| Scope                 | In `git status`?  | Action                    |
-| :-------------------- | :---------------- | :------------------------ |
-| `packages/*`, `docs/` | Yes               | Commit and PR to `canary` |
-| `test/webpack/**`     | No (`.gitignore`) | Local dev only            |
-
-The integration app is a **personal dev tool**, not part of the published
-framework code.
+| Scope                                   | Commits                     |
+| :-------------------------------------- | :-------------------------- |
+| `Ryunixjs/packages/*`, `Ryunixjs/docs/` | Yes → PR to `canary`        |
+| `ryunix-doc/`                           | Yes → its own repo / deploy |
+| `test/webpack*` (any name)              | Never — `.gitignore`        |
 
 ---
 
 ## Related documentation
 
-| Topic                  | Link                                                     |
-| :--------------------- | :------------------------------------------------------- |
-| Automated tests        | [automated-testing.md](./automated-testing.md)           |
-| Repository guide       | [repository-guide.md](./repository-guide.md)             |
-| Tech stack and scripts | [tech-stack-and-scripts.md](./tech-stack-and-scripts.md) |
-| Docs index             | [overview.md](../overview.md)                            |
+| Topic            | Link                                           |
+| :--------------- | :--------------------------------------------- |
+| Automated tests  | [automated-testing.md](./automated-testing.md) |
+| Repository guide | [repository-guide.md](./repository-guide.md)   |
+| Docs index       | [overview.md](../overview.md)                  |

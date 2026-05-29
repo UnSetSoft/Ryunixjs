@@ -1,6 +1,6 @@
 /**
  * CI smoke: scaffold ryunix-base with workspace packages and run production build.
- * Does not require the gitignored test/webpack app.
+ * Does not use ../ryunix-doc or gitignored test/webpack* copies.
  */
 import fs from 'node:fs'
 import path from 'node:path'

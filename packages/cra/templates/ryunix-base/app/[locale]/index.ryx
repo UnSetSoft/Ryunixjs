@@ -1,0 +1,44 @@
+import logo from '../../assets/logo.svg'
+import { LocaleSwitcher, useTranslations } from '../../i18n.js'
+
+export const Metatags = {
+  title: 'Ryunix App',
+}
+
+export default function HomePage() {
+  const t = useTranslations()
+
+  return (
+    <main className="main">
+      <div className="locale-bar">
+        <LocaleSwitcher />
+      </div>
+      <img src={logo} alt="Ryunix Logo" className="logo" />
+      <h1 className="hero-title">{t('home.title')}</h1>
+      <p className="subtitle">
+        {t('home.subtitle')}
+        <br />
+        {t('home.editHint')}
+      </p>
+
+      <div className="links">
+        <a
+          href="https://ryunixjs.unsetsoft.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link"
+        >
+          {t('home.docs')}
+        </a>
+        <a
+          href="https://github.com/UnSetSoft/Ryunixjs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link"
+        >
+          {t('home.github')}
+        </a>
+      </div>
+    </main>
+  )
+}

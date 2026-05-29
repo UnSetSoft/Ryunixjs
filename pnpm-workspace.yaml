@@ -1,5 +1,5 @@
 packages:
   - 'packages/*'
-  - 'test/*'
-  - 'test/webpack/*'
   - '_ci/smoke-app'
+  # Canonical docs site (sibling repo). Not copied under test/webpack*.
+  - '../ryunix-doc'

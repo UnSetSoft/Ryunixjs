@@ -9,15 +9,20 @@ import {
 import { getHydrationPolicy } from './policy.js'
 import type { RyunixNode, RyunixRootFiber } from '../../types/internal.js'
 
-/**
- * @param {RyunixNode} element
- * @param {Element | DocumentFragment} container
- */
-export const renderSubtree = (element, container) => {
-  clearContainer(/** @type {HTMLElement} */ container)
+const getRootChild = (
+  children: RyunixNode | RyunixNode[] | undefined,
+): RyunixNode | undefined => {
+  if (children == null) return undefined
+  return Array.isArray(children) ? children[0] : children
+}
 
-  /** @type {RyunixRootFiber} */
-  const root = {
+export const renderSubtree = (
+  element: RyunixNode,
+  container: Element | DocumentFragment,
+) => {
+  clearContainer(container as HTMLElement)
+
+  const root: RyunixRootFiber = {
     dom: container,
     props: { children: [element] },
     isHydrating: false,
@@ -47,17 +52,19 @@ export const recoverHydrationFailureIfNeeded = () => {
   if (policy.recover === 'none') return
 
   const container = state.containerRoot || state.currentRoot?.dom
-  const element = state.currentRoot?.props?.children?.[0]
+  const element = getRootChild(state.currentRoot?.props?.children)
   if (!container || element == null) return
 
   state.hydrationRecover = true
   state.hydrationFailed = false
   logHydrationFailure('')
   logHydrationRecovery()
-  renderSubtree(/** @type {RyunixNode} */ element, container)
+  renderSubtree(element as RyunixNode, container)
 }
 
 export const runHydrationRecovery = () => {
+  const state = getState()
   recoverScopedHydrationFailures()
   recoverHydrationFailureIfNeeded()
+  state.hydrationRecover = false
 }

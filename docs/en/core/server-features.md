@@ -60,10 +60,12 @@ server-only content strings.
 
   `<div data-ryunix-server="id" style="display: contents">`.
 
-- This informs the `dom.js` and `commits.js` reconciliation engines to **skip**
+- During hydration, the reconciler (`fiber-update.js`) **skips reconciling
+  children** under this node and advances the hydration cursor past the
+  preserved server markup.
 
-  this node's internal evaluation entirely, preserving the pre-compiled
-  server-rendered inner-HTML permanently.
+- `ServerBoundary` is **not** a hydration recovery target (unlike
+  `HydrationBoundary`).
 
 ---
 

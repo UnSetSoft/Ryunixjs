@@ -52,3 +52,16 @@ export {
 } from './ui/theme.js'
 export { ThemeToggle, ThemeInitScript } from './ui/theme-toggle.js'
 export { Header, Footer, Main } from './ui/layout.js'
+export {
+  createI18n,
+  createAppI18n,
+  createI18nFromConfig,
+  defineMessages,
+  getRyunixI18nConfig,
+  DEFAULT_LOCALE_COOKIE_NAME,
+  getLocaleFromPath,
+  localePath,
+  pickLocale,
+  swapLocalePath,
+  normalizeI18nConfig,
+} from './i18n/index.js'

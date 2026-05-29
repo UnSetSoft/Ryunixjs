@@ -3,35 +3,33 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "nightly:release",
-      "path": "packages/ryunix",
+      "script": "release:canary",
       "problemMatcher": [],
-      "label": "npm: nightly:release - packages/ryunix",
-      "detail": "npm publish --tag nightly"
+      "label": "npm: release:canary - root",
+      "detail": "Bump versions and publish core canary"
+    },
+    {
+      "type": "npm",
+      "script": "release:stable",
+      "problemMatcher": [],
+      "label": "npm: release:stable - root",
+      "detail": "Bump versions and publish core stable"
+    },
+    {
+      "type": "npm",
+      "script": "canary:release",
+      "path": "packages/core",
+      "problemMatcher": [],
+      "label": "npm: canary:release - packages/core",
+      "detail": "Publish @unsetsoft/ryunixjs canary"
     },
     {
       "type": "npm",
       "script": "release",
-      "path": "packages/ryunix",
+      "path": "packages/core",
       "problemMatcher": [],
-      "label": "npm: release - packages/ryunix",
-      "detail": "npm publish"
-    },
-    {
-      "type": "npm",
-      "script": "release",
-      "path": "packages/ryunix-navigation",
-      "problemMatcher": [],
-      "label": "npm: release - packages/ryunix-navigation",
-      "detail": "npm publish"
-    },
-    {
-      "type": "npm",
-      "script": "nightly:release",
-      "path": "packages/ryunix-navigation",
-      "problemMatcher": [],
-      "label": "npm: nightly:release - packages/ryunix-navigation",
-      "detail": "npm publish --tag nightly"
+      "label": "npm: release - packages/core",
+      "detail": "Publish @unsetsoft/ryunixjs stable"
     },
     {
       "type": "npm",

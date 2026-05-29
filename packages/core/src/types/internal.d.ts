@@ -12,8 +12,8 @@ export type RyunixNode =
   | RyunixTextElement
 
 export interface RyunixElement {
-  type: string | symbol | Function
-  props: Record<string, unknown> & { children?: RyunixNode[] }
+  type: string | symbol | RyunixComponent
+  props: Record<string, unknown> & { children?: RyunixNode | RyunixNode[] }
   key?: string | number
 }
 
@@ -50,8 +50,8 @@ export interface RyunixHook {
 
 export interface RyunixFiber {
   type?: string | symbol | RyunixComponent | object
-  props?: Record<string, unknown> & { children?: RyunixNode[] }
-  dom?: HTMLElement | Text | null
+  props?: Record<string, unknown> & { children?: RyunixNode | RyunixNode[] }
+  dom?: HTMLElement | SVGElement | Text | Element | DocumentFragment | null
   parent?: RyunixFiber | null
   child?: RyunixFiber | null
   sibling?: RyunixFiber | null
@@ -74,6 +74,8 @@ export interface RyunixFiber {
   _isPortal?: boolean
   __devtoolsId?: string
   _hydrateClientOnly?: boolean
+  /** Skip reconciling children; preserve SSR markup inside data-ryunix-server */
+  _hydratePreserveServer?: boolean
 }
 
 export type HydrationRecoverMode = 'none' | 'boundary' | 'root'

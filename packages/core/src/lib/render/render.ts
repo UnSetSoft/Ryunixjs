@@ -3,37 +3,32 @@ import { getState } from '../../utils/index.js'
 import { scheduleWork } from '../reconciler/workers.js'
 import { resetHydrationLogFlags } from '../hydration/log.js'
 import { getHydrationPolicy } from '../hydration/policy.js'
-
-/**
- * @typedef {import('./createElement.js').RyunixNode} RyunixNode
- * @typedef {import('../../types/internal.js').RyunixRootFiber} RyunixRootFiber
- * @typedef {import('../../types/internal.js').RyunixComponent} RyunixComponent
- */
+import type {
+  RyunixComponent,
+  RyunixNode,
+  RyunixRootFiber,
+} from '../../types/internal.js'
 
 /**
  * The `render` function in JavaScript updates the DOM with a new element and schedules work to be done
  * on the element.
- * @param {RyunixNode} element
- * @param {Element | DocumentFragment} container
- * @returns {RyunixRootFiber}
  */
-const render = (element, container) => {
+const render = (
+  element: RyunixNode,
+  container: Element | DocumentFragment,
+): RyunixRootFiber => {
   const state = getState()
 
-  // Clear container before CSR render to avoid duplication
-  clearContainer(/** @type {HTMLElement} */ container)
+  clearContainer(container as HTMLElement)
 
-  /** @type {RyunixRootFiber} */
-  const root = {
+  const root: RyunixRootFiber = {
     dom: container,
     props: {
-      children: [
-        /** @type {import('../../types/internal.js').RyunixNode} */ element,
-      ],
+      children: [element],
     },
     alternate: state.currentRoot,
     isHydrating: false,
-    hydrateCursor: /** @type {ChildNode | null} */ null,
+    hydrateCursor: null,
   }
 
   scheduleWork(root)
@@ -42,18 +37,14 @@ const render = (element, container) => {
 
 const SSR_ROOT_ATTR = 'data-ryunix-ssr-root'
 
-/**
- * @param {ChildNode | null} node
- * @returns {ChildNode | null}
- */
-const nextValidSibling = (node) => {
+const nextValidSibling = (node: ChildNode | null): ChildNode | null => {
   let next = node
   while (
     next &&
-    ((next.nodeType === 3 && !next.nodeValue.trim()) ||
+    ((next.nodeType === 3 && !next.nodeValue?.trim()) ||
       next.nodeType === 8 ||
       (next.nodeType === 1 &&
-        /** @type {Element} */ next.hasAttribute('data-ryunix-ssr')))
+        (next as Element).hasAttribute('data-ryunix-ssr')))
   ) {
     next = next.nextSibling
   }
@@ -62,24 +53,19 @@ const nextValidSibling = (node) => {
 
 /**
  * The `hydrate` function attaches Ryunix to an existing server-rendered DOM tree.
- * Instead of clearing and re-rendering, it walks the existing DOM nodes and
- * attaches event listeners and reconciles state, preserving SSR HTML.
- * @param {RyunixNode} element
- * @param {Element | DocumentFragment} container
- * @returns {RyunixRootFiber}
  */
-const hydrate = (element, container) => {
+const hydrate = (
+  element: RyunixNode,
+  container: Element | DocumentFragment,
+): RyunixRootFiber => {
   const state = getState()
 
   state.containerRoot = container
 
-  /** @type {RyunixRootFiber} */
-  const root = {
+  const root: RyunixRootFiber = {
     dom: container,
     props: {
-      children: [
-        /** @type {import('../../types/internal.js').RyunixNode} */ element,
-      ],
+      children: [element],
     },
     alternate: state.currentRoot,
     isHydrating: true,
@@ -90,13 +76,11 @@ const hydrate = (element, container) => {
   return root
 }
 
-/**
- * @param {RyunixNode} MainElement
- * @param {string} [root]
- * @param {Record<string, unknown>} [components]
- * @returns {RyunixRootFiber | undefined}
- */
-const init = (MainElement, root = '__ryunix', components = {}) => {
+const init = (
+  MainElement: RyunixNode,
+  root = '__ryunix',
+  _components: Record<string, unknown> = {},
+): RyunixRootFiber | undefined => {
   const state = getState()
   const container = document.getElementById(root)
   state.containerRoot = container
@@ -113,11 +97,9 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   state.scopedRecoveryQueue = []
   state.hydrationRecover = false
 
-  // Reset any stale hydration flags
   state.isHydrating = false
   state.hydrationFailed = false
 
-  // HMR / re-init: replace the existing client tree instead of hydrating again.
   if (state.currentRoot) {
     if (process.env.NODE_ENV !== 'production' && process.env.RYUNIX_DEBUG) {
       console.log(
@@ -153,17 +135,13 @@ const init = (MainElement, root = '__ryunix', components = {}) => {
   return render(MainElement, container)
 }
 
-/**
- * @param {RyunixComponent} component
- * @param {Record<string, unknown>} props
- * @param {(error: unknown) => void} [onError]
- * @returns {RyunixNode}
- */
-const safeRender = (component, props, onError) => {
+const safeRender = (
+  component: RyunixComponent,
+  props: Record<string, unknown>,
+  onError?: (error: unknown) => void,
+): RyunixNode => {
   try {
-    return /** @type {RyunixNode} */ /** @type {(props: Record<string, unknown>) => RyunixNode} */ component(
-      props,
-    )
+    return (component as (props: Record<string, unknown>) => RyunixNode)(props)
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Component error:', error)

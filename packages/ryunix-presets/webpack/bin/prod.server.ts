@@ -1,12 +1,13 @@
 import http from 'http'
-import { promises as fs } from 'fs'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { promises as fs, type Stats } from 'fs'
 import path from 'path'
 import { createHash } from 'crypto'
 import zlib from 'zlib'
 import { promisify } from 'util'
 import { createReadStream } from 'fs'
 import { pipeline } from 'stream/promises'
-import config from '../utils/config.cjs'
+import config from '../utils/config.js'
 import { handleApiRequest } from '../utils/apiHandler.js'
 
 const gzip = promisify(zlib.gzip)
@@ -54,14 +55,23 @@ const MIME_TYPES: Record<string, string> = {
 }
 
 // File cache for production server
-const fileCache = new Map()
+interface CachedFile {
+  content: Buffer
+  brotli: Buffer | null
+  gzipped: Buffer | null
+  etag: string
+  mimeType: string
+  size: number
+}
+
+const fileCache = new Map<string, CachedFile>()
 const MAX_CACHE_SIZE = 50 * 1024 * 1024 // 50MB
 let currentCacheSize = 0
 
 /**
  * Get MIME type from file extension
  */
-const getMimeType = (filePath) => {
+const getMimeType = (filePath: string): string => {
   const ext = path.extname(filePath).toLowerCase()
   return MIME_TYPES[ext] || 'application/octet-stream'
 }
@@ -69,7 +79,7 @@ const getMimeType = (filePath) => {
 /**
  * Validate path to prevent directory traversal attacks
  */
-const validatePath = (requestPath, rootDir) => {
+const validatePath = (requestPath: string, rootDir: string): string | null => {
   try {
     const normalizedPath = path.normalize(requestPath)
     const resolvedPath = path.resolve(rootDir, normalizedPath.slice(1))
@@ -87,14 +97,16 @@ const validatePath = (requestPath, rootDir) => {
 /**
  * Generate ETag from file content
  */
-const generateETag = (content) => {
+const generateETag = (content: Buffer | string): string => {
   return createHash('md5').update(content).digest('hex')
 }
 
 /**
  * Check compression support (Brotli preferred over Gzip)
  */
-const getAcceptedEncoding = (headers) => {
+const getAcceptedEncoding = (
+  headers: IncomingMessage['headers'],
+): 'br' | 'gzip' | null => {
   const encoding = headers['accept-encoding'] || ''
   if (encoding.includes('br')) return 'br'
   if (encoding.includes('gzip')) return 'gzip'
@@ -104,7 +116,7 @@ const getAcceptedEncoding = (headers) => {
 /**
  * Check if MIME type is compressible
  */
-const isCompressible = (mimeType) => {
+const isCompressible = (mimeType: string): boolean => {
   return (
     mimeType.startsWith('text/') ||
     mimeType.includes('javascript') ||
@@ -116,7 +128,10 @@ const isCompressible = (mimeType) => {
 /**
  * Parse Range header
  */
-const parseRange = (rangeHeader, fileSize) => {
+const parseRange = (
+  rangeHeader: string | undefined,
+  fileSize: number,
+): { start: number; end: number; length: number } | null => {
   if (!rangeHeader) return null
 
   const parts = rangeHeader.replace(/bytes=/, '').split('-')
@@ -133,7 +148,7 @@ const parseRange = (rangeHeader, fileSize) => {
 /**
  * Check if file should support range requests (media files)
  */
-const supportsRangeRequests = (mimeType) => {
+const supportsRangeRequests = (mimeType: string): boolean => {
   return (
     mimeType.startsWith('video/') ||
     mimeType.startsWith('audio/') ||
@@ -144,11 +159,16 @@ const supportsRangeRequests = (mimeType) => {
 /**
  * Serve file with range support (for video/audio)
  */
-const serveWithRange = async (filePath, req, res, stats) => {
+const serveWithRange = async (
+  filePath: string,
+  req: IncomingMessage,
+  res: ServerResponse,
+  stats: Stats,
+): Promise<boolean> => {
   const mimeType = getMimeType(filePath)
   const range = parseRange(req.headers.range, stats.size)
 
-  const headers = {
+  const headers: Record<string, string | number> = {
     'Content-Type': mimeType,
     'Accept-Ranges': 'bytes',
     'Cache-Control': 'public, max-age=31536000',
@@ -181,7 +201,11 @@ const serveWithRange = async (filePath, req, res, stats) => {
 /**
  * Serve static file with caching and compression
  */
-const serveStaticFile = async (filePath, req, res) => {
+const serveStaticFile = async (
+  filePath: string,
+  req: IncomingMessage,
+  res: ServerResponse,
+): Promise<boolean> => {
   try {
     let stats = await fs.stat(filePath)
 
@@ -208,8 +232,8 @@ const serveStaticFile = async (filePath, req, res) => {
       const etag = generateETag(content)
 
       // Compress if text-based content
-      let brotli = null
-      let gzipped = null
+      let brotli: Buffer | null = null
+      let gzipped: Buffer | null = null
 
       if (isCompressible(mimeType)) {
         try {
@@ -251,8 +275,8 @@ const serveStaticFile = async (filePath, req, res) => {
 
     // Select best encoding
     const encoding = getAcceptedEncoding(req.headers)
-    let responseContent = cached.content
-    let contentEncoding = null
+    let responseContent: Buffer = cached.content
+    let contentEncoding: 'br' | 'gzip' | null = null
 
     if (encoding === 'br' && cached.brotli) {
       responseContent = cached.brotli
@@ -262,7 +286,7 @@ const serveStaticFile = async (filePath, req, res) => {
       contentEncoding = 'gzip'
     }
 
-    const headers = {
+    const headers: Record<string, string | number> = {
       'Content-Type': cached.mimeType,
       'Content-Length': responseContent.length,
       ETag: cached.etag,
@@ -276,7 +300,7 @@ const serveStaticFile = async (filePath, req, res) => {
     res.writeHead(200, headers)
     res.end(responseContent)
     return true
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
@@ -284,9 +308,14 @@ const serveStaticFile = async (filePath, req, res) => {
 /**
  * Serve HTML page with SPA fallback support
  */
-const serveHTMLPage = async (pathname, staticDir, req, res) => {
+const serveHTMLPage = async (
+  pathname: string,
+  staticDir: string,
+  req: IncomingMessage,
+  res: ServerResponse,
+): Promise<void> => {
   try {
-    const candidates = []
+    const candidates: string[] = []
 
     // / → /index.html
     if (pathname === '/') {
@@ -302,7 +331,7 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
       candidates.push(path.join(staticDir, 'index.html'))
     }
 
-    let pageFile = null
+    let pageFile: string | null = null
 
     for (const file of candidates) {
       try {
@@ -329,7 +358,7 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
 
     // Compress HTML
     let responseContent: string | Buffer = content
-    const headers = {
+    const headers: Record<string, string | number> = {
       'Content-Type': 'text/html; charset=utf-8',
       ETag: etag,
       'Cache-Control': 'no-cache',
@@ -357,7 +386,7 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
 
     res.writeHead(200, headers)
     res.end(responseContent)
-  } catch (error) {
+  } catch (_error) {
     res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' })
     res.end('500')
   }
@@ -366,12 +395,15 @@ const serveHTMLPage = async (pathname, staticDir, req, res) => {
 /**
  * Request handler
  */
-const requestHandler = async (req, res) => {
+const requestHandler = async (
+  req: IncomingMessage,
+  res: ServerResponse,
+): Promise<void> => {
   const rootDir = process.cwd()
   const staticDir = path.join(rootDir, config.buildDir, 'static')
 
   try {
-    const parsedUrl = new URL(req.url, `http://${req.headers.host}`)
+    const parsedUrl = new URL(req.url ?? '/', `http://${req.headers.host}`)
     const pathname = decodeURIComponent(parsedUrl.pathname)
 
     // Check for API Request
@@ -391,8 +423,9 @@ const requestHandler = async (req, res) => {
     if (!fileServed) {
       await serveHTMLPage(pathname, staticDir, req, res)
     }
-  } catch (error) {
-    console.error('[Ryunix Server Error]:', error.message)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[Ryunix Server Error]:', message)
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' })
     res.end('500')
   }

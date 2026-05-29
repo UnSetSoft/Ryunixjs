@@ -63,10 +63,12 @@ de cadenas de contenido solo-servidor.
   devolviendo un simple
   `<div data-ryunix-server="id" style="display: contents">`.
 
-- Esto informa a los motores de reconciliación `dom.js` y `commits.js` que deben
+- Durante la hidratación, el reconciliador (`fiber-update.js`) **no reconcilia
+  hijos** bajo este nodo y avanza el cursor de hidratación más allá del markup
+  preservado del servidor.
 
-  **omitir** por completo la evaluación interna de este nodo, preservando
-  permanentemente el inner-HTML precompilado renderizado en servidor.
+- `ServerBoundary` **no** es un objetivo de recovery de hidratación (a
+  diferencia de `HydrationBoundary`).
 
 ---
 

@@ -99,17 +99,17 @@ Opciones base para todos los paquetes:
 - `allowJs: true`, `checkJs: false` (comprobación estricta por paquete o vía
   configs dedicadas como `tsconfig.checkjs.json`)
 - `noEmit: true` en la base (los paquetes override al emitir JS)
-- `strict: false` global — se endurece de forma incremental
+- `strict: true`, `noImplicitAny: true` (endurecido en 2026-05)
 
 Cada paquete extiende este archivo con su `tsconfig.json`.
 
 ### Turbo y scripts raíz
 
-| Elemento             | Ubicación                      | Función                                           |
-| :------------------- | :----------------------------- | :------------------------------------------------ |
-| Tarea `typecheck`    | `turbo.json`                   | Ejecuta `typecheck` en cada paquete que lo define |
-| `pnpm run typecheck` | `package.json` raíz            | Orquestación Turbo                                |
-| CI                   | `.github/workflows/eslint.yml` | Ejecuta `npm run typecheck` tras ESLint           |
+| Elemento             | Ubicación                  | Función                                           |
+| :------------------- | :------------------------- | :------------------------------------------------ |
+| Tarea `typecheck`    | `turbo.json`               | Ejecuta `typecheck` en cada paquete que lo define |
+| `pnpm run typecheck` | `package.json` raíz        | Orquestación Turbo                                |
+| CI                   | `.github/workflows/ci.yml` | Ejecuta `pnpm run typecheck` en el job `quality`  |
 
 ### Dependencia
 

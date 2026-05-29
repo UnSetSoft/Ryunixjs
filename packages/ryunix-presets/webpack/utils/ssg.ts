@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * SSG Utilities - Static Site Generation
  * Provides utilities for generating static sites, sitemaps, and robots.txt
@@ -9,6 +8,55 @@ import path from 'path'
 import os from 'os'
 import chalk from 'chalk'
 import { randomBytes } from 'crypto'
+import { resolvePageMetadata } from '@unsetsoft/ryunixjs'
+import {
+  buildMetadataPublicPath,
+  copyRouteMetadataAssets,
+  fromMetadataAssetManifest,
+  metadataAssetsToMeta,
+  type RouteMetadataAssetManifest,
+} from './routeMetadataFiles.js'
+
+interface SsgRouteConfig {
+  path?: string
+  component?: unknown
+  meta?: Record<string, unknown>
+  metadataAssets?: RouteMetadataAssetManifest[]
+  sitemap?: Record<string, unknown>
+  label?: string
+  NotFound?: unknown
+  noRenderLink?: boolean
+  subRoutes?: SsgRouteConfig[]
+}
+
+interface SsgResolvedRoute {
+  path: string
+  component?: unknown
+  meta: Record<string, unknown>
+  metadataAssets?: RouteMetadataAssetManifest[]
+  sitemap: Record<string, unknown>
+  label?: string
+}
+
+interface SitemapEntry {
+  url?: string
+  lastModified?: Date | string
+  changefreq?: string
+  priority?: number | string
+}
+
+type RyunixSsgConfig = Record<string, unknown>
+
+type RyunixRuntimeGlobal = typeof globalThis & {
+  Ryunix?: {
+    renderToString?: (element: unknown) => string
+    renderToStringAsync?: (element: unknown) => Promise<string>
+    createElement?: (component: unknown) => unknown
+    getState?: () => { ssrMetadata?: Record<string, unknown> }
+  }
+}
+
+const ryunixGlobal = globalThis as RyunixRuntimeGlobal
 
 /**
  * Import a file as ES module — works for both .mjs and .js files.
@@ -16,7 +64,7 @@ import { randomBytes } from 'crypto'
  * NODE_TYPELESS_PACKAGE_JSON warning and performance overhead.
  * The temp file is cleaned up automatically after import.
  */
-const importEsmFile = async (filePath) => {
+const importEsmFile = async (filePath: string) => {
   if (filePath.endsWith('.js') || filePath.endsWith('.cjs')) {
     return import(`file://${filePath}?update=${Date.now()}`)
   }
@@ -42,10 +90,10 @@ const importEsmFile = async (filePath) => {
  * @param {Array} routes - Array of route objects
  * @returns {Array} - Array of valid SSG routes
  */
-const extractSSGRoutes = (routes) => {
-  const ssgRoutes = []
+const extractSSGRoutes = (routes: SsgRouteConfig[]): SsgResolvedRoute[] => {
+  const ssgRoutes: SsgResolvedRoute[] = []
 
-  const processRoute = (route, parentPath = '') => {
+  const processRoute = (route: SsgRouteConfig, parentPath = '') => {
     // Skip invalid routes
     if (!route.path || route.path.includes(':')) return
     if (route.NotFound || route.noRenderLink) return
@@ -57,6 +105,7 @@ const extractSSGRoutes = (routes) => {
       path: normalizedPath,
       component: route.component,
       meta: route.meta || {},
+      metadataAssets: route.metadataAssets,
       sitemap: route.sitemap || {},
       label: route.label,
     })
@@ -97,8 +146,11 @@ const extractSSGRoutes = (routes) => {
  * @param {string|null} baseURL
  * @param {Object} options
  */
-const generateRobotsTxt = (baseURL, options = {}) => {
-  const lines = []
+const generateRobotsTxt = (
+  baseURL: string | null,
+  options: Record<string, unknown> = {},
+): string => {
+  const lines: string[] = []
 
   if (Array.isArray(options.rules)) {
     // Next.js-style: rules array
@@ -106,7 +158,7 @@ const generateRobotsTxt = (baseURL, options = {}) => {
       const agents = Array.isArray(rule.userAgent)
         ? rule.userAgent
         : [rule.userAgent || '*']
-      agents.forEach((agent) => lines.push(`User-agent: ${agent}`))
+      agents.forEach((agent: string) => lines.push(`User-agent: ${agent}`))
 
       const allows = Array.isArray(rule.allow)
         ? rule.allow
@@ -118,8 +170,8 @@ const generateRobotsTxt = (baseURL, options = {}) => {
         : rule.disallow
           ? [rule.disallow]
           : []
-      allows.forEach((p) => lines.push(`Allow: ${p}`))
-      disallows.forEach((p) => lines.push(`Disallow: ${p}`))
+      allows.forEach((p: string) => lines.push(`Allow: ${p}`))
+      disallows.forEach((p: string) => lines.push(`Disallow: ${p}`))
       lines.push('')
     }
 
@@ -129,7 +181,15 @@ const generateRobotsTxt = (baseURL, options = {}) => {
     if (sitemapUrl) lines.push(`Sitemap: ${sitemapUrl}`)
   } else {
     // Legacy format
-    const { disallow = [], allow = [], userAgents = ['*'] } = options
+    const {
+      disallow = [],
+      allow = [],
+      userAgents = ['*'],
+    } = options as {
+      disallow?: string[]
+      allow?: string[]
+      userAgents?: string[]
+    }
     userAgents.forEach((agent) => {
       lines.push(`User-agent: ${agent}`)
       allow.forEach((p) => lines.push(`Allow: ${p}`))
@@ -148,7 +208,11 @@ const generateRobotsTxt = (baseURL, options = {}) => {
  * @param {string} baseURL
  * @param {Object} defaultSettings
  */
-const generateSitemap = (routes, baseURL, defaultSettings = {}) => {
+const generateSitemap = (
+  routes: SsgResolvedRoute[],
+  baseURL: string,
+  defaultSettings: Record<string, unknown> = {},
+): string => {
   const { changefreq = 'weekly', priority = '0.7' } = defaultSettings
 
   const urls = routes
@@ -184,7 +248,7 @@ ${urls}
  * Each entry: { url, lastModified?, changefreq?, priority? }
  * @param {Array} entries
  */
-const generateSitemapFromEntries = (entries) => {
+const generateSitemapFromEntries = (entries: SitemapEntry[]): string => {
   const urls = entries
     .map((entry) => {
       if (!entry.url) return ''
@@ -217,7 +281,7 @@ ${urls}
  * @param {string} baseURL
  * @param {number} count - number of indexed sitemap files
  */
-const generateSitemapIndex = (baseURL, count) => {
+const generateSitemapIndex = (baseURL: string, count: number): string => {
   const sitemaps = Array.from(
     { length: count },
     (_, i) =>
@@ -233,7 +297,7 @@ ${sitemaps}
 </sitemapindex>`
 }
 
-const escapeHtml = (unsafe) => {
+const escapeHtml = (unsafe: unknown): string => {
   if (typeof unsafe !== 'string') return String(unsafe)
   return unsafe
     .replace(/&/g, '&amp;')
@@ -254,9 +318,12 @@ const escapeHtml = (unsafe) => {
  * @param {Object} defaultMeta - Default metadata
  * @returns {string} - HTML meta tags
  */
-const generateMetaTags = (meta, defaultMeta = {}) => {
+const generateMetaTags = (
+  meta: Record<string, unknown>,
+  defaultMeta: Record<string, unknown> = {},
+): string => {
   const tags = { ...defaultMeta, ...meta }
-  const lines = []
+  const lines: string[] = []
 
   // Keys that are handled separately (title tag, link tag) — never emit as <meta>
   const INTERNAL_KEYS = new Set([
@@ -289,7 +356,7 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
   ]
 
   // Function to add a single meta tag
-  const addMetaTag = (key, value) => {
+  const addMetaTag = (key: string, value: unknown) => {
     if (!value || INTERNAL_KEYS.has(key)) return
 
     const isProperty = key.startsWith('og:') || key.startsWith('twitter:')
@@ -334,6 +401,82 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
   return lines.length > 0 ? '    ' + lines.join('\n    ') : ''
 }
 
+const injectSsrRootMarkup = (html: string, renderedString: string): string => {
+  if (!renderedString) return html
+
+  const marker = 'id="__ryunix"'
+  const markerIndex = html.indexOf(marker)
+  if (markerIndex === -1) return html
+
+  const openStart = html.lastIndexOf('<div', markerIndex)
+  if (openStart === -1) return html
+
+  const openEnd = html.indexOf('>', markerIndex)
+  if (openEnd === -1) return html
+
+  let depth = 1
+  let pos = openEnd + 1
+  while (depth > 0 && pos < html.length) {
+    const nextOpen = html.indexOf('<div', pos)
+    const nextClose = html.indexOf('</div>', pos)
+    if (nextClose === -1) break
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1
+      pos = nextOpen + 4
+      continue
+    }
+
+    depth -= 1
+    if (depth === 0) {
+      const openTag = html.slice(openStart, openEnd + 1)
+      const markedOpenTag = openTag.includes('data-ryunix-ssr-root')
+        ? openTag
+        : openTag.replace(/^<div\b/i, '<div data-ryunix-ssr-root')
+      return (
+        html.slice(0, openStart) +
+        markedOpenTag +
+        renderedString +
+        html.slice(nextClose)
+      )
+    }
+
+    pos = nextClose + 6
+  }
+
+  return html
+}
+
+const buildMetadataLinkTags = (
+  tags: Record<string, string | string[]>,
+): string => {
+  const lines: string[] = []
+
+  const iconHref =
+    (typeof tags.icon === 'string' && tags.icon) ||
+    (typeof tags['shortcut icon'] === 'string' && tags['shortcut icon']) ||
+    undefined
+  if (iconHref) {
+    lines.push(`<link rel="icon" href="${escapeHtml(iconHref)}" />`)
+  }
+
+  const appleIcon =
+    typeof tags.appleTouchIcon === 'string' ? tags.appleTouchIcon : undefined
+  if (appleIcon) {
+    lines.push(
+      `<link rel="apple-touch-icon" href="${escapeHtml(appleIcon)}" />`,
+    )
+  }
+
+  const canonical =
+    typeof tags.canonical === 'string' ? tags.canonical : undefined
+  if (canonical) {
+    lines.push(`<link rel="canonical" href="${escapeHtml(canonical)}" />`)
+  }
+
+  return lines.join('\n')
+}
+
 /**
  * Prerender a route to static HTML
  *
@@ -343,41 +486,45 @@ const generateMetaTags = (meta, defaultMeta = {}) => {
  * @param {string} renderedString - Processed HTML string from renderToString
  * @returns {Promise<string>} - Prerendered HTML
  */
-const prerenderRoute = async (route, template, config, renderedString = '') => {
+const prerenderRoute = async (
+  route: { meta?: Record<string, unknown> },
+  template: string,
+  config: RyunixSsgConfig,
+  renderedString = '',
+): Promise<string> => {
   const meta = route.meta || {}
-  const defaultMeta = config.legacy.seo.meta || {}
+  const legacy = config.legacy as
+    | {
+        seo?: {
+          meta?: Record<string, unknown>
+          title?: { template?: string; prefix?: string }
+        }
+      }
+    | undefined
+  const defaultMeta = legacy?.seo?.meta || {}
   let html = template
 
-  if (renderedString) {
-    // Find the Ryunix root and inject the rendered HTML.
-    // Mark the container so client init hydrates only real SSR payloads (not HMR leftovers).
-    html = html.replace(
-      /(<div)([^>]*\bid=["']__ryunix["'][^>]*)(>)([\s\S]*?)(<\/div>)/i,
-      (_, open, attrs, close, _content, end) => {
-        const markedAttrs = attrs.includes('data-ryunix-ssr-root')
-          ? attrs
-          : `${attrs} data-ryunix-ssr-root`.replace(/\s+/g, ' ').trim()
-        return `${open} ${markedAttrs}${close}${renderedString}${end}`
-      },
-    )
-  }
+  html = injectSsrRootMarkup(html, renderedString)
 
-  // Replace title - use route meta or default
-  const pageTitle = meta.title || defaultMeta.title || 'Ryunix App'
+  const mergedMeta = { ...defaultMeta, ...meta }
+  const resolved = resolvePageMetadata(mergedMeta, {
+    title: legacy?.seo?.title,
+  })
+  const pageTitle = escapeHtml(resolved.title)
   html = html.replace(/<title>.*?<\/title>/, `<title>${pageTitle}</title>`)
 
-  // Generate and add meta tags
-  const metaTags = generateMetaTags(meta, defaultMeta)
+  const metaTags = generateMetaTags(resolved.tags, defaultMeta)
+  const linkTags = buildMetadataLinkTags(resolved.tags)
 
   // Remove existing meta tags (except framework/mode) and duplicate favicon
-  // Remove all meta tags except framework and mode
   html = html.replace(/<meta\s+name="(?!framework|mode)[^"]*"[^>]*>/gi, '')
   html = html.replace(/<meta\s+property="[^"]*"[^>]*>/gi, '')
+  html = html.replace(/<link\s+rel="canonical"[^>]*>/gi, '')
+  html = html.replace(/<link\s+rel="apple-touch-icon"[^>]*>/gi, '')
 
   // Remove duplicate favicon links (keep only first one)
   const faviconMatches = html.match(/<link\s+rel="icon"[^>]*>/gi)
   if (faviconMatches && faviconMatches.length > 1) {
-    // Keep first, remove rest
     let firstFound = false
     html = html.replace(/<link\s+rel="icon"[^>]*>/gi, (match) => {
       if (!firstFound) {
@@ -388,55 +535,36 @@ const prerenderRoute = async (route, template, config, renderedString = '') => {
     })
   }
 
-  // Find the position to insert meta tags (after viewport or charset)
+  const headInjection = [metaTags, linkTags].filter(Boolean).join('\n')
   const viewportPosition = html.search(/<meta\s+name="viewport"/)
   const charsetPosition = html.search(/<meta\s+charset/)
   let insertPosition = -1
 
   if (viewportPosition !== -1) {
-    // Find end of viewport tag
     const afterViewport = html.substring(viewportPosition)
     const tagEnd = afterViewport.search(/>/)
     insertPosition = viewportPosition + tagEnd + 1
   } else if (charsetPosition !== -1) {
-    // Find end of charset tag
     const afterCharset = html.substring(charsetPosition)
     const tagEnd = afterCharset.search(/>/)
     insertPosition = charsetPosition + tagEnd + 1
   }
 
-  if (insertPosition !== -1 && metaTags) {
-    // Insert meta tags after viewport/charset
+  if (insertPosition !== -1 && headInjection) {
     const before = html.substring(0, insertPosition)
     const after = html.substring(insertPosition)
-    html = before + '\n' + metaTags + after
-  } else if (metaTags) {
-    // Fallback: insert before framework meta tag or </head>
+    html = before + '\n' + headInjection + after
+  } else if (headInjection) {
     const frameworkPosition = html.search(/<meta\s+name="framework"/)
     if (frameworkPosition !== -1) {
       const before = html.substring(0, frameworkPosition)
       const after = html.substring(frameworkPosition)
-      html = before + metaTags + '\n' + after
+      html = before + headInjection + '\n' + after
     } else {
-      html = html.replace(/<\/head>/, `${metaTags}\n</head>`)
+      html = html.replace(/<\/head>/, `${headInjection}\n</head>`)
     }
   }
 
-  // Add canonical link if provided
-  if (meta.canonical) {
-    const canonical = `<link rel="canonical" href="${meta.canonical}" />`
-    // Insert canonical after meta tags, before title
-    const titlePosition = html.search(/<title/)
-    if (titlePosition !== -1) {
-      const before = html.substring(0, titlePosition)
-      const after = html.substring(titlePosition)
-      html = before + canonical + '\n' + after
-    } else {
-      html = html.replace(/<\/head>/, `${canonical}\n</head>`)
-    }
-  }
-
-  // Clean up multiple empty lines and format
   html = html.replace(/\n\s*\n\s*\n+/g, '\n')
   html = html.replace(/>\n\n+</g, '>\n<')
 
@@ -452,7 +580,12 @@ const prerenderRoute = async (route, template, config, renderedString = '') => {
  * @param {string} buildDir - Build output directory
  * @param {boolean} debug - Debug mode
  */
-const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
+const buildSSG = async (
+  routesConfig: SsgRouteConfig[],
+  config: RyunixSsgConfig,
+  buildDir: string,
+  debug = false,
+): Promise<void> => {
   // Extract valid routes
   const routes = extractSSGRoutes(routesConfig)
   if (debug)
@@ -473,11 +606,22 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
 
   const template = fs.readFileSync(templatePath, 'utf-8')
   let activeTemplate = template // may be mutated by manifest injection
-  const prerenderRoutes = []
+  const prerenderRoutes: string[] = []
 
   // ─── Static Metadata Files (Priority: .js > .xml/.txt/.json) ──────────────
 
-  const appPath = path.join(process.cwd(), config.rootDir || 'src', 'app')
+  const legacyConfig = config.legacy as Record<string, unknown> | undefined
+  const legacySsg = legacyConfig?.ssg as Record<string, unknown> | undefined
+  const legacySitemap = legacySsg?.sitemap as
+    | Record<string, unknown>
+    | undefined
+  const legacyRobots = legacySsg?.robots as Record<string, unknown> | undefined
+
+  const appPath = path.join(
+    process.cwd(),
+    (config.rootDir as string | undefined) || 'src',
+    'app',
+  )
   const rootAppPath = path.join(process.cwd(), 'app')
   const finalAppPath = fs.existsSync(rootAppPath)
     ? rootAppPath
@@ -485,7 +629,7 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
       ? appPath
       : null
 
-  const copyStaticIfExist = (src, dest) => {
+  const copyStaticIfExist = (src: string, dest: string): boolean => {
     if (!finalAppPath) return false
     const fullSrc = path.join(finalAppPath, src)
     if (fs.existsSync(fullSrc)) {
@@ -522,8 +666,9 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
             hasManifest = true
           }
         }
-      } catch (e) {
-        console.error('[SSG] ❌ Error loading manifest.js:', e.message)
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e)
+        console.error('[SSG] ❌ Error loading manifest.js:', message)
       }
     } else {
       hasManifest = copyStaticIfExist('manifest.json', 'manifest.json')
@@ -540,9 +685,9 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
     }
   }
 
-  let AppRouterApp = null
-  let ryunixRenderToString = null
-  let ryunixCreateElement = null
+  let AppRouterApp: unknown = null
+  let ryunixRenderToString: ((element: unknown) => string) | null = null
+  let ryunixCreateElement: ((component: unknown) => unknown) | null = null
 
   try {
     const serverBundleCandidates = [
@@ -554,9 +699,11 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
     )
     if (serverBundlePath) {
       // Mock global browser APIs before importing the bundle in case of top-level references
-      if (typeof global.window === 'undefined') {
+      if (
+        typeof (globalThis as Record<string, unknown>).window === 'undefined'
+      ) {
         const noop = () => {}
-        global.window = {
+        ;(globalThis as Record<string, unknown>).window = {
           location: {
             pathname: '/',
             search: '',
@@ -586,8 +733,9 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
             setItem: noop,
             removeItem: noop,
           },
-          requestAnimationFrame: (cb) => setTimeout(cb, 0),
-          cancelAnimationFrame: (id) => clearTimeout(id),
+          requestAnimationFrame: (cb: () => void) => setTimeout(cb, 0),
+          cancelAnimationFrame: (id: ReturnType<typeof setTimeout>) =>
+            clearTimeout(id),
           matchMedia: () => ({
             matches: false,
             addListener: noop,
@@ -595,15 +743,17 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
           }),
         }
       }
-      if (typeof global.document === 'undefined') {
+      if (
+        typeof (globalThis as Record<string, unknown>).document === 'undefined'
+      ) {
         const noop = () => {}
-        global.document = {
+        ;(globalThis as Record<string, unknown>).document = {
           querySelector: () => null,
           querySelectorAll: () => [],
           getElementById: () => null,
           getElementsByClassName: () => [],
           getElementsByTagName: () => [],
-          createElement: (tag) => ({
+          createElement: (tag: string) => ({
             tagName: tag,
             style: {},
             setAttribute: noop,
@@ -617,8 +767,12 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
           title: '',
         }
       }
-      if (typeof global.navigator === 'undefined') {
-        global.navigator = { userAgent: 'ryunix-ssg' }
+      if (
+        typeof (globalThis as Record<string, unknown>).navigator === 'undefined'
+      ) {
+        ;(globalThis as Record<string, unknown>).navigator = {
+          userAgent: 'ryunix-ssg',
+        }
       }
 
       const serverModule = await import(
@@ -628,24 +782,36 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')
       const Ryunix = ryunixCore.default || ryunixCore
-      global.Ryunix = Ryunix
-      ryunixRenderToString = Ryunix.renderToString
-      ryunixCreateElement = Ryunix.createElement
+      ryunixGlobal.Ryunix = {
+        renderToString: Ryunix.renderToString as (element: unknown) => string,
+        renderToStringAsync: Ryunix.renderToStringAsync as (
+          element: unknown,
+        ) => Promise<string>,
+        createElement: Ryunix.createElement as (component: unknown) => unknown,
+        getState: Ryunix.getState,
+      }
+      ryunixRenderToString = ryunixGlobal.Ryunix.renderToString ?? null
+      ryunixCreateElement = ryunixGlobal.Ryunix.createElement ?? null
     }
-  } catch (e) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
     console.warn(
-      `[SSG] ⚠️ Failed to load server bundle for true SSR. Falling back to simple template SSG: ${e.message}`,
+      `[SSG] ⚠️ Failed to load server bundle for true SSR. Falling back to simple template SSG: ${message}`,
     )
   }
 
   // Prerender each route
+  const ssrFailures: { path: string; error: unknown }[] = []
+
   for (const route of routes) {
     try {
       let renderedString = ''
 
       if (AppRouterApp && ryunixRenderToString && ryunixCreateElement) {
         // Mock the window location for Ryunix router
-        global.window = { location: { pathname: route.path } }
+        ;(globalThis as Record<string, unknown>).window = {
+          location: { pathname: route.path },
+        }
         if (debug)
           console.log(
             `[SSG] Rendering ${route.path} with server App component...`,
@@ -653,8 +819,9 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
         try {
           const element = ryunixCreateElement(AppRouterApp)
 
-          if (typeof global.Ryunix?.renderToStringAsync === 'function') {
-            renderedString = await global.Ryunix.renderToStringAsync(element)
+          if (typeof ryunixGlobal.Ryunix?.renderToStringAsync === 'function') {
+            renderedString =
+              await ryunixGlobal.Ryunix.renderToStringAsync(element)
           } else {
             renderedString = ryunixRenderToString(element)
           }
@@ -663,16 +830,47 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
             `[SSG] Error executing SSR render for ${route.path}:`,
             err,
           )
+          ssrFailures.push({ path: route.path, error: err })
         }
+      } else if (AppRouterApp) {
+        const missing = new Error(
+          `Missing SSR APIs (renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement})`,
+        )
+        console.error(`[SSG] ${missing.message} for ${route.path}`)
+        ssrFailures.push({ path: route.path, error: missing })
       } else {
         console.warn(
           `[SSG] Missing SSR dependencies for ${route.path}. AppRouterApp: ${!!AppRouterApp}, renderToString: ${!!ryunixRenderToString}, createElement: ${!!ryunixCreateElement}`,
         )
       }
 
-      const ssrMetadata = global.Ryunix?.getState()?.ssrMetadata || {}
+      const ssrMetadata = ryunixGlobal.Ryunix?.getState?.()?.ssrMetadata || {}
+      const sitemapBaseURL =
+        typeof legacySitemap?.baseURL === 'string' ? legacySitemap.baseURL : ''
+      const resolvedMetadataAssets = route.metadataAssets?.length
+        ? fromMetadataAssetManifest(
+            route.metadataAssets.map((asset) => ({
+              ...asset,
+              publicPath: buildMetadataPublicPath(route.path, asset.filename),
+            })),
+          )
+        : []
+      const fileMetaFromAssets = resolvedMetadataAssets.length
+        ? metadataAssetsToMeta(resolvedMetadataAssets, sitemapBaseURL)
+        : {}
+
+      if (resolvedMetadataAssets.length > 0) {
+        copyRouteMetadataAssets(
+          resolvedMetadataAssets,
+          path.join(buildDir, 'static'),
+        )
+      }
+
       const html = await prerenderRoute(
-        { ...route, meta: { ...route.meta, ...ssrMetadata } },
+        {
+          ...route,
+          meta: { ...fileMetaFromAssets, ...route.meta, ...ssrMetadata },
+        },
         activeTemplate,
         config,
         renderedString,
@@ -698,10 +896,23 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
       prerenderRoutes.push(route.path)
     } catch (error) {
       console.error(`[SSG] ❌ Error prerendering ${route.path}:`, error)
+      ssrFailures.push({ path: route.path, error })
     }
   }
 
-  if (global.window) delete global.window // Cleanup
+  if (ssrFailures.length > 0) {
+    const summary = ssrFailures
+      .map(({ path, error }) => {
+        const msg = error instanceof Error ? error.message : String(error)
+        return `  - ${path}: ${msg}`
+      })
+      .join('\n')
+    throw new Error(
+      `[SSG] Failed to prerender ${ssrFailures.length} route(s):\n${summary}`,
+    )
+  }
+
+  ;(globalThis as Record<string, unknown>).window = undefined // Cleanup
 
   // Log results
   console.log(
@@ -790,22 +1001,23 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
           }
         }
       }
-    } catch (e) {
-      console.error('[SSG] ❌ Error running app/sitemap.js:', e.message)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
+      console.error('[SSG] ❌ Error running app/sitemap.js:', message)
     }
   } else if (copyStaticIfExist('sitemap.xml', 'sitemap.xml')) {
     // Already copied
-  } else if (config.legacy?.ssg?.sitemap?.enable) {
+  } else if (legacySitemap?.enable) {
     // ── Fallback: ryunix.config.js ───────────────────────────────────────
     try {
-      const baseURL = config.legacy.ssg.sitemap.baseURL
+      const baseURL = legacySitemap.baseURL
       if (!baseURL) {
         console.warn('[SSG] ⚠️  baseURL not set — skipping sitemap.')
       } else {
         const xml = generateSitemap(
           routes,
-          baseURL,
-          config.legacy.ssg.sitemap.settings,
+          String(baseURL),
+          (legacySitemap.settings as Record<string, unknown>) || {},
         )
         fs.writeFileSync(path.join(buildDir, 'static', 'sitemap.xml'), xml)
         if (debug)
@@ -850,20 +1062,18 @@ const buildSSG = async (routesConfig, config, buildDir, debug = false) => {
             `${chalk.green('✔')} Robots:   ${chalk.bold('Generated')}`,
           )
       }
-    } catch (e) {
-      console.error('[SSG] ❌ Error running app/robots.js:', e.message)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
+      console.error('[SSG] ❌ Error running app/robots.js:', message)
     }
   } else if (copyStaticIfExist('robots.txt', 'robots.txt')) {
     // Already copied
-  } else if (
-    config.legacy?.ssg?.robots ||
-    config.legacy?.ssg?.sitemap?.baseURL
-  ) {
+  } else if (legacyRobots || legacySitemap?.baseURL) {
     // ── Fallback: ryunix.config.js ───────────────────────────────────────
-    const baseURL = config.legacy.ssg.sitemap?.baseURL
+    const baseURL = legacySitemap?.baseURL
     if (baseURL) {
       try {
-        const robotsTxt = generateRobotsTxt(baseURL, config.legacy?.ssg?.robots)
+        const robotsTxt = generateRobotsTxt(String(baseURL), legacyRobots)
         fs.writeFileSync(path.join(buildDir, 'static', 'robots.txt'), robotsTxt)
         if (debug)
           console.log(

@@ -1,39 +1,25 @@
 import { RYUNIX_TYPES, STRINGS, is } from '../../utils/index.js'
+import type { RyunixFiber } from '../../types/internal.js'
 
-/** @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber */
-/** @typedef {import('../../types/internal.js').RyunixHook} RyunixHook */
-
-/**
- * @param {string} key
- * @returns {boolean}
- */
-const isEvent = (key) => key.startsWith('on')
+const isEvent = (key: string): boolean => key.startsWith('on')
 
 const RESERVED_DOM_PROPS = new Set(['key', 'ref', STRINGS.CHILDREN])
 
-/**
- * @param {string} key
- * @returns {boolean}
- */
-const isProperty = (key) => !RESERVED_DOM_PROPS.has(key) && !isEvent(key)
+const isProperty = (key: string): boolean =>
+  !RESERVED_DOM_PROPS.has(key) && !isEvent(key)
 
-/**
- * @param {Record<string, unknown>} prev
- * @param {Record<string, unknown>} next
- */
-const isNew = (prev, next) => /** @param {string} key */ (key) => {
-  return !Object.is(prev[key], next[key])
-}
+const isNew =
+  (prev: Record<string, unknown>, next: Record<string, unknown>) =>
+  (key: string): boolean => {
+    return !Object.is(prev[key], next[key])
+  }
 
-/**
- * @param {Record<string, unknown>} next
- */
-const isGone = (next) => /** @param {string} key */ (key) => !(key in next)
+const isGone =
+  (next: Record<string, unknown>) =>
+  (key: string): boolean =>
+    !(key in next)
 
-/**
- * @param {RyunixFiber} fiber
- */
-const cancelEffects = (fiber) => {
+const cancelEffects = (fiber: RyunixFiber) => {
   if (!fiber?.hooks?.length) return
 
   fiber.hooks
@@ -53,10 +39,7 @@ const cancelEffects = (fiber) => {
     })
 }
 
-/**
- * @param {RyunixFiber} fiber
- */
-const cancelEffectsDeep = (fiber) => {
+const cancelEffectsDeep = (fiber: RyunixFiber | null | undefined) => {
   if (!fiber) return
 
   if (fiber.hooks?.length) {

@@ -234,6 +234,16 @@ export function useMetadata(
   options?: RyunixMetadataOptions,
 ): void
 
+export function resolvePageMetadata(
+  meta?: Record<string, unknown>,
+  options?: RyunixMetadataOptions,
+): { title: string; tags: Record<string, string | string[]> }
+
+export function mergeRouteMetadata(
+  base?: Record<string, unknown>,
+  next?: Record<string, unknown>,
+): Record<string, unknown>
+
 // ---------------------------------------------------------------------------
 // Router
 // ---------------------------------------------------------------------------
@@ -615,6 +625,8 @@ declare const Ryunix: {
   useQuery: typeof useQuery
   useHash: typeof useHash
   useMetadata: typeof useMetadata
+  resolvePageMetadata: typeof resolvePageMetadata
+  mergeRouteMetadata: typeof mergeRouteMetadata
   useId: typeof useId
   resetIdCounter: typeof resetIdCounter
   useDebounce: typeof useDebounce

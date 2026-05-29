@@ -17,7 +17,7 @@ scripts `package.json`.
 
 | Aspecto          | Detalle                                                             |
 | :--------------- | :------------------------------------------------------------------ |
-| **Quién lo usa** | Apps generadas por CRA, plantillas y `test/webpack`                 |
+| **Quién lo usa** | Apps generadas por CRA, plantillas y `ryunix-doc` (workspace)       |
 | **Peer**         | `@unsetsoft/ryunixjs` — runtime que Webpack empaqueta o externaliza |
 | **Distribución** | Código fuente en `webpack/` (sin bundle previo del preset en CI)    |
 | **Binario**      | `ryunix` → `webpack/bin/index.mjs`                                  |

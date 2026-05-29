@@ -4,20 +4,30 @@
 
 # Ryunix DevTools Extension
 
-Chrome extension for debugging Ryunix applications.
+WebExtension (Manifest V3) for debugging Ryunix applications in Chromium and
+Firefox.
 
 ## Installation
 
-1. Open Chrome and go to `chrome://extensions/`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select the `packages/ryunix-devtools` folder
+### Chrome / Edge / Brave
+
+1. Build the extension: `pnpm run build` (from this folder or
+   `pnpm --filter @unsetsoft/ryunix-devtools run build` at the repo root).
+2. Open `chrome://extensions/` (Edge: `edge://extensions/`).
+3. Enable **Developer mode**.
+4. **Load unpacked** → select `packages/ryunix-devtools`.
+
+### Firefox
+
+1. Build with the same `pnpm run build` command.
+2. Open `about:debugging#/runtime/this-firefox`.
+3. **Load Temporary Add-on** → select this folder’s `manifest.json`.
 
 ## Usage
 
-1. Open DevTools (F12)
-2. Open the **Ryunix** panel
-3. The extension automatically detects Ryunix applications
+1. Open DevTools (F12).
+2. Open the **Ryunix** panel.
+3. The extension automatically detects Ryunix applications.
 
 ## Features
 
@@ -29,11 +39,17 @@ Chrome extension for debugging Ryunix applications.
 ## Development
 
 ```bash
-npm run build  # Creates devtools.zip
+pnpm run build   # Sync manifest.version and compile dist/
+pnpm run typecheck
 ```
+
+The manifest `version` field must be numeric only (`1.3.1` or `1.2.3.1`);
+Chrome rejects npm-style suffixes like `-canary.1`. The `build:manifest` script
+derives it from `package.json`.
 
 ## Compatibility
 
 - Chrome 88+
 - Edge 88+
+- Firefox 109+ (Manifest V3)
 - Ryunix 1.3.0+

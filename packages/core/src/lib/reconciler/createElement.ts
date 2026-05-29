@@ -1,15 +1,18 @@
 import { RYUNIX_TYPES, STRINGS, is } from '../../utils/index.js'
 import type {
+  RyunixComponent,
   RyunixElement,
   RyunixNode,
   RyunixTextElement,
 } from '../../types/internal.js'
 
-/**
- * @param {string | number | boolean} text
- * @returns {RyunixTextElement}
- */
-const createTextElement = (text) => {
+type RyunixProps = Record<string, unknown> & {
+  children?: RyunixNode | RyunixNode[]
+}
+
+const createTextElement = (
+  text: string | number | boolean,
+): RyunixTextElement => {
   return {
     type: RYUNIX_TYPES.TEXT_ELEMENT,
     props: {
@@ -21,14 +24,14 @@ const createTextElement = (text) => {
 
 /**
  * Create a virtual DOM element.
- * @param {string | symbol | RyunixComponent} type
- * @param {RyunixProps | null} [props]
- * @param {...RyunixNode} children
- * @returns {RyunixElement}
  */
-const createElement = (type, props, ...children) => {
+const createElement = (
+  type: string | symbol | RyunixComponent,
+  props?: RyunixProps | null,
+  ...children: RyunixNode[]
+): RyunixElement => {
   const safeProps = props || {}
-  let rawChildren = children
+  let rawChildren: RyunixNode[] = children
   if (children.length === 0 && safeProps.children !== undefined) {
     rawChildren = Array.isArray(safeProps.children)
       ? safeProps.children
@@ -39,8 +42,7 @@ const createElement = (type, props, ...children) => {
     .flat()
     .filter((child) => child != null && child !== false && child !== true)
 
-  /** @type {RyunixNode[]} */
-  const normalizedChildren = []
+  const normalizedChildren: RyunixNode[] = []
   let currentText = ''
 
   for (const child of rawChildren) {
@@ -68,23 +70,15 @@ const createElement = (type, props, ...children) => {
   }
 }
 
-/**
- * @param {{ children?: RyunixNode | RyunixNode[] }} props
- * @returns {RyunixElement}
- */
-const Fragment = (props) => {
+const Fragment = (props: {
+  children?: RyunixNode | RyunixNode[]
+}): RyunixElement => {
   const children = Array.isArray(props.children)
     ? props.children
     : [props.children]
   return createElement(RYUNIX_TYPES.RYUNIX_FRAGMENT, {}, ...children)
 }
 
-/**
- * @param {RyunixElement} element
- * @param {RyunixProps} [props]
- * @param {...RyunixNode} children
- * @returns {RyunixElement}
- */
 const cloneElement = (
   element: RyunixElement,
   props: Record<string, unknown> = {},

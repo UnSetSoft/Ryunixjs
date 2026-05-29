@@ -2,21 +2,15 @@
  * Bridge module to break circular dependencies between hooks and workers.
  */
 
-/** @type {import('../../types/internal.js').ScheduleWorkFn | null} */
-let scheduleWorkFn = null
+import type { RyunixRootFiber, ScheduleWorkFn } from '../../types/internal.js'
 
-/**
- * @param {import('../../types/internal.js').ScheduleWorkFn} fn
- */
-export const setScheduleWork = (fn) => {
+let scheduleWorkFn: ScheduleWorkFn | null = null
+
+export const setScheduleWork = (fn: ScheduleWorkFn) => {
   scheduleWorkFn = fn
 }
 
-/**
- * @param {import('../../types/internal.js').RyunixRootFiber} root
- * @param {number} [priority]
- */
-export const scheduleWork = (root, priority) => {
+export const scheduleWork = (root: RyunixRootFiber, priority?: number) => {
   if (scheduleWorkFn) {
     return scheduleWorkFn(root, priority)
   }

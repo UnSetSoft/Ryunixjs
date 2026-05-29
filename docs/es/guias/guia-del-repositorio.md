@@ -80,7 +80,7 @@ bajo el scope `@unsetsoft/*`.
    (`useLayoutEffect`, `useEffect`).
 
 Documentación técnica detallada:
-[Virtual DOM y reconciliación](./core/vdom-y-reconciliacion.md).
+[Virtual DOM y reconciliación](../core/vdom-y-reconciliacion.md).
 
 ### 2. Los presets: compilación y servidor
 
@@ -102,8 +102,8 @@ El **routing es basado en archivos** bajo `app/`:
 Un plugin de Webpack escanea `app/`, infiere componentes de servidor o cliente y
 genera el router con `Suspense`, `ServerBoundary` y `ErrorBoundary`.
 
-Más información: [CLI y arranque](./ryunix-presets/cli-y-arranque.md),
-[Enrutamiento y SSG](./ryunix-presets/enrutamiento-y-ssg.md).
+Más información: [CLI y arranque](../ryunix-presets/cli-y-arranque.md),
+[Enrutamiento y SSG](../ryunix-presets/enrutamiento-y-ssg.md).
 
 ### 3. Flujo de una aplicación
 
@@ -220,14 +220,14 @@ encontrarás `app/index.ryx` aquí; eso vive en proyectos creados con CRA.
 
 Cerebro del workspace: scripts globales y devDependencies compartidas.
 
-| Script                                   | Descripción                                             |
-| :--------------------------------------- | :------------------------------------------------------ |
-| `pnpm dev`                               | Desarrollo vía Turbo en los paquetes que lo definan.    |
-| `pnpm build`                             | Build de todos los paquetes.                            |
-| `pnpm test`                              | Tests.                                                  |
-| `pnpm lint`                              | ESLint en raíz + lint por paquete.                      |
-| `pnpm release:canary` / `release:stable` | Versionado (`gmvu`) y publicación.                      |
-| `pnpm run:web`                           | App de prueba en `test/webpack` (si existe localmente). |
+| Script                                   | Descripción                                          |
+| :--------------------------------------- | :--------------------------------------------------- |
+| `pnpm dev`                               | Desarrollo vía Turbo en los paquetes que lo definan. |
+| `pnpm build`                             | Build de todos los paquetes.                         |
+| `pnpm test`                              | Tests.                                               |
+| `pnpm lint`                              | ESLint en raíz + lint por paquete.                   |
+| `pnpm release:canary` / `release:stable` | Versionado (`gmvu`) y publicación.                   |
+| `pnpm run dev:doc`                       | Sitio de docs en `../ryunix-doc` (workspace).        |
 
 El repo raíz es `private: true` y no se publica a npm; sí lo hacen los paquetes
 en `packages/`.
@@ -239,7 +239,8 @@ Define los workspaces de pnpm:
 ```yaml
 packages:
   - 'packages/*'
-  - 'test/*'
+  - '_ci/smoke-app'
+  - '../ryunix-doc'
 ```
 
 #### `turbo.json`
@@ -257,13 +258,12 @@ Configuración de **@kagarisoft/gmvu-cli** para bump de versiones. Indica qué
 
 ### Calidad de código y formato
 
-| Archivo             | Rol                                                                                    |
-| :------------------ | :------------------------------------------------------------------------------------- |
-| `eslint.config.mjs` | ESLint flat config (v9): JSX, parser Babel, reglas del repo. Usado por `pnpm lint`.    |
-| `.eslintrc.json`    | Config legacy; puede usarse por compatibilidad con plantillas o herramientas antiguas. |
-| `.prettierrc.json`  | Prettier: comillas simples, sin punto y coma al final.                                 |
-| `.prettierignore`   | Archivos excluidos de Prettier.                                                        |
-| `.editorconfig`     | Estilo base: UTF-8, LF, indentación de 2 espacios.                                     |
+| Archivo             | Rol                                                                                 |
+| :------------------ | :---------------------------------------------------------------------------------- |
+| `eslint.config.mjs` | ESLint flat config (v9): JSX, parser Babel, reglas del repo. Usado por `pnpm lint`. |
+| `.prettierrc.json`  | Prettier: comillas simples, sin punto y coma al final.                              |
+| `.prettierignore`   | Archivos excluidos de Prettier.                                                     |
+| `.editorconfig`     | Estilo base: UTF-8, LF, indentación de 2 espacios.                                  |
 
 ### Git y colaboración
 
@@ -343,17 +343,16 @@ navegador**.
 ```text
 
 1. pnpm install
-2. Crear app local en test/webpack (una vez; ver app de integración)
-3. pnpm build
-4. pnpm run:web          ← aquí desarrollas como en una app normal
-5. Si tocas packages/core → pnpm --filter @unsetsoft/ryunixjs build → refrescar navegador
-6. Si tocas packages/ryunix-presets → reiniciar pnpm run:web
+2. pnpm run setup:web   (una vez; ver app de integración)
+3. pnpm run dev:doc     ← desarrollo en el navegador
+4. Si tocas packages/core → pnpm --filter @unsetsoft/ryunixjs build → F5
+5. Si tocas packages/ryunix-presets → reiniciar pnpm run dev:doc
 ```
 
-**Analogía:** React/Next se desarrollan con una **app de ejemplo** o el propio
-sitio de docs; Ryunix usa `test/webpack` (gitignored, cada uno la crea en su
-máquina). Los scripts `run:web`, `run:web:build` y `run:web:start` son atajos
-desde la raíz hacia esa app.
+**Analogía:** React/Next se desarrollan con el propio sitio de docs; Ryunix usa
+el repo hermano **`ryunix-doc`** enlazado con `workspace:*`. `run:web` es alias
+de `dev:doc`. No copies el sitio bajo `test/webpack*`: esa carpeta está en
+`.gitignore` y no se versiona.
 
 Detalle por paquete (tests, CRA, DevTools):
 [tests automatizados](./tests-automatizados.md),
@@ -365,7 +364,7 @@ Detalle por paquete (tests, CRA, DevTools):
 
 ```bash
 pnpm install      # instalar dependencias de todo el monorepo
-pnpm run:web      # ← desarrollo en navegador (app en test/webpack)
+pnpm run dev:doc    # ← desarrollo en navegador (../ryunix-doc)
 pnpm build        # compilar paquetes (necesario antes de run:web la primera vez)
 pnpm test         # tests automatizados (solo core, Jest)
 pnpm lint         # lint global
@@ -376,17 +375,17 @@ pnpm dev          # Turbo: hoy solo lanza el CLI de CRA, no una web
 
 ## Documentación relacionada
 
-| Tema                         | Enlace                                                                                 |
-| :--------------------------- | :------------------------------------------------------------------------------------- |
-| Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                     |
-| App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                           |
-| Resumen técnico              | [docs/es/resumen.md](./resumen.md)                                                     |
-| Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md)               |
-| Hooks                        | [docs/es/core/hooks.md](./core/hooks.md)                                               |
-| CLI y presets                | [docs/es/ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md)         |
-| Enrutamiento y SSG           | [docs/es/ryunix-presets/enrutamiento-y-ssg.md](./ryunix-presets/enrutamiento-y-ssg.md) |
-| CRA y plantillas             | [docs/es/cra/cli-y-ayudantes.md](./cra/cli-y-ayudantes.md)                             |
-| README público               | [README.es.md](../../README.es.md)                                                     |
+| Tema                         | Enlace                                                                                  |
+| :--------------------------- | :-------------------------------------------------------------------------------------- |
+| Tests automatizados          | [tests-automatizados.md](./tests-automatizados.md)                                      |
+| App de integración local     | [app-de-integracion-local.md](./app-de-integracion-local.md)                            |
+| Resumen técnico              | [docs/es/resumen.md](../resumen.md)                                                     |
+| Virtual DOM y reconciliación | [docs/es/core/vdom-y-reconciliacion.md](../core/vdom-y-reconciliacion.md)               |
+| Hooks                        | [docs/es/core/hooks.md](../core/hooks.md)                                               |
+| CLI y presets                | [docs/es/ryunix-presets/cli-y-arranque.md](../ryunix-presets/cli-y-arranque.md)         |
+| Enrutamiento y SSG           | [docs/es/ryunix-presets/enrutamiento-y-ssg.md](../ryunix-presets/enrutamiento-y-ssg.md) |
+| CRA y plantillas             | [docs/es/cra/cli-y-ayudantes.md](../cra/cli-y-ayudantes.md)                             |
+| README público               | [README.es.md](../../README.es.md)                                                      |
 
 ---
 

@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import type { LoaderContext } from 'webpack'
 
 /**
  * Strips // @client and // @server directive comments from source code
@@ -6,7 +6,7 @@ import crypto from 'crypto'
  * @param {string} target - 'node' for server, 'web' for client
  * @returns {string} - Filtered source code
  */
-function filterClientServerDirectives(source, target) {
+function filterClientServerDirectives(source: string, target: string): string {
   // Patterns for // @server and // @client block comments
   // These can appear as:
   // 1. // @client at start of line - entire file is client-only
@@ -16,9 +16,7 @@ function filterClientServerDirectives(source, target) {
 
   const isServerBuild = target === 'node'
 
-  // Check for file-level directives at the very start
-  const clientDirectiveMatch = source.match(/^\s*\/\/\s*@client/m)
-  const serverDirectiveMatch = source.match(/^\s*\/\/\s*@server/m)
+  // Check for file-level directives at the very start (legacy markers; kept for forward compatibility)
 
   // (Removed check that used to strip @client component directives)
 
@@ -46,19 +44,22 @@ function filterClientServerDirectives(source, target) {
   return result
 }
 
-export default function (content) {
+export default function (this: LoaderContext<unknown>, content: string) {
   const hasServerDirective =
     content.includes('//@server') || content.includes('// @server')
-  const hasClientDirective =
-    content.includes('//@client') || content.includes('// @client')
 
-  // Get build target from compiler - 'node' for server, 'web' for client
+  // Get build target from compiler
   // Try multiple ways to determine target
-  let target = this.target
+  let target = this.target as string | undefined
 
   // Try getting from compiler options
-  if (!target && this._compiler && this._compiler.options) {
-    target = this._compiler.options.target
+  if (!target && this._compiler?.options?.target) {
+    const compilerTarget = this._compiler.options.target
+    target = Array.isArray(compilerTarget)
+      ? compilerTarget[0]
+      : typeof compilerTarget === 'string'
+        ? compilerTarget
+        : undefined
   }
 
   // Try getting from webpack's global __webpack_require__.r or similar
@@ -101,12 +102,6 @@ export default function (content) {
 
   // Add RSC optimization marker for client components on server build
   if (isServerBuild && hasHooks) {
-    const hash = crypto
-      .createHash('md5')
-      .update(this.resourcePath)
-      .digest('hex')
-      .slice(0, 8)
-
     // Improved injection: handle export default more safely
     if (content.includes('export default')) {
       return `${content} \n\n/** Ryunix RSC Optimization **/

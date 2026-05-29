@@ -1,16 +1,22 @@
 import Webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import webpackConfig from '../webpack.config.js'
-import { configFileExist } from '../utils/settingfile.cjs'
-import envPath from '../utils/envExist.cjs'
+import { configFileExist } from '../utils/settingfile.js'
+import envPath from '../utils/envExist.js'
 import { getPackageVersion, resolveApp, cleanCacheDir } from '../utils/index.js'
 import logger from 'terminal-log'
 import chalk from 'chalk'
 import net from 'net' // Para verificar si el puerto está disponible
 import boxen from 'boxen'
-import defaultSettings from '../utils/config.cjs'
+import defaultSettings from '../utils/config.js'
 
-const checkPortInUse = (port) => {
+interface DevServerCliSettings {
+  production?: boolean
+  open?: boolean
+  [key: string]: unknown
+}
+
+const checkPortInUse = (port: number): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     const server = net.createServer()
     server.once('error', (err: NodeJS.ErrnoException) => {
@@ -28,7 +34,7 @@ const checkPortInUse = (port) => {
   })
 }
 
-const findAvailablePort = async (port) => {
+const findAvailablePort = async (port: number): Promise<number> => {
   let isPortInUse = await checkPortInUse(port)
   while (isPortInUse) {
     logger.warn(
@@ -40,7 +46,7 @@ const findAvailablePort = async (port) => {
   return port
 }
 
-const StartServer = async (cliSettings) => {
+const StartServer = async (cliSettings: DevServerCliSettings) => {
   const cacheDir = resolveApp(
     process.cwd(),
     `${defaultSettings.buildDir}/cache`,
@@ -76,7 +82,7 @@ const StartServer = async (cliSettings) => {
       devServer?: WebpackDevServer.Configuration
     }
   ).devServer
-  let port = clientDevServer?.port || 3000
+  let port = Number(clientDevServer?.port) || 3000
 
   // Encontrar un puerto disponible
   port = await findAvailablePort(port)
@@ -92,8 +98,6 @@ const StartServer = async (cliSettings) => {
   )
 
   const devMode = Boolean(!mode)
-
-  const { version } = await getPackageVersion()
 
   const startServer = async () => {
     try {
@@ -140,8 +144,9 @@ const StartServer = async (cliSettings) => {
           minimumWidth: 50,
         }),
       )
-    } catch (err) {
-      logger.error(`[error] ${err.message}`)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      logger.error(`[error] ${message}`)
     }
   }
 

@@ -14,6 +14,15 @@ describe('hydration boundary recovery', () => {
     expect(findNearestHydrationBoundary(nested)).toBe(boundary)
   })
 
+  test('does not treat ServerBoundary as hydration recovery target', () => {
+    const serverType = () => null
+    serverType.ryunix_type = 'RYUNIX_SERVER_BOUNDARY'
+    const serverFiber = { type: serverType, parent: null }
+    const nested = { type: 'span', parent: serverFiber }
+
+    expect(findNearestHydrationBoundary(nested)).toBeNull()
+  })
+
   test('finds boundary dom from hydrated node', () => {
     const root = document.createElement('div')
     const boundary = document.createElement('div')

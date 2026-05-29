@@ -1,0 +1,18 @@
+import '../../styles/global.css'
+import { I18nProvider, generateStaticParams } from '../../i18n.js'
+
+export { generateStaticParams }
+
+export const Metatags = {
+  title: {
+    template: '%s | Ryunix App',
+    default: 'Ryunix App',
+  },
+  description: 'A modern and flexible Ryunix application starter template.',
+  viewport: 'width=device-width, initial-scale=1.0',
+  charset: 'UTF-8',
+}
+
+export default function LocaleLayout({ children, params }) {
+  return <I18nProvider locale={params?.locale}>{children}</I18nProvider>
+}

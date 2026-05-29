@@ -33,6 +33,9 @@ declare global {
   interface RyunixGlobal {
     createElement: (...args: unknown[]) => unknown
     init?: (...args: unknown[]) => unknown
+    render?: (...args: unknown[]) => unknown
+    hydrate?: (...args: unknown[]) => unknown
+    __devtoolsPatched?: boolean
   }
 
   interface Window {

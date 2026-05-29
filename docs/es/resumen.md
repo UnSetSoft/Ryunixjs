@@ -46,10 +46,12 @@ docs/
 │   └── ryunix-vscode/               ← packages/ryunix-vscode — extensión VS Code
 └── es/                              ← Español (esta carpeta)
     ├── resumen.md                   ← Índice (este archivo)
-    ├── guias/                     ← Guías del monorepo (nombres en español)
+    ├── guias/                       ← Guías del monorepo (nombres en español)
     ├── core/
     ├── ryunix-presets/
-    └── cra/
+    ├── cra/
+    ├── ryunix-devtools/
+    └── ryunix-vscode/
 ```
 
 | Ruta (desde `docs/es/`)                    | Paquete en el repo         | Qué encontrarás                                                         |
@@ -77,7 +79,7 @@ concreto.
 | :--------------------------------------------------------------------- | :----------------------------------------------------------------------- |
 | [guia-del-repositorio.md](./guias/guia-del-repositorio.md)             | Qué es RyunixJS, estructura, comandos. **Punto de entrada tras clonar.** |
 | [tests-automatizados.md](./guias/tests-automatizados.md)               | Jest en core, `pnpm test`, `pnpm lint`, CRA manual.                      |
-| [app-de-integracion-local.md](./guias/app-de-integracion-local.md)     | App Ryunix en `test/webpack` con `workspace:*` y `pnpm run:web`.         |
+| [app-de-integracion-local.md](./guias/app-de-integracion-local.md)     | Sitio `../ryunix-doc` con `workspace:*` y `pnpm run dev:doc`.            |
 | [pila-tecnologica-y-scripts.md](./guias/pila-tecnologica-y-scripts.md) | Tecnologías y scripts `pnpm` raíz (asistido por IA).                     |
 
 ---
@@ -87,18 +89,18 @@ concreto.
 Motor del runtime: Virtual DOM, reconciliador Fiber, hooks, renderizado
 cliente/servidor y componentes integrados.
 
-| Documento                                                   | Tema                                                     |
-| :---------------------------------------------------------- | :------------------------------------------------------- |
-| [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — estructura, módulos, render en |
-| [vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) | `createElement`, work loop, reconciliador, commit al DOM |
-| [hooks.md](./core/hooks.md)                                 | `useStore`, `useEffect`, memoización, hooks en SSR       |
-| [renderizado.md](./core/renderizado.md)                     | `render`, `hydrate`, `renderToString`, streaming         |
-| [estado-y-prioridad.md](./core/estado-y-prioridad.md)       | Batching, cola de prioridad, `useTransition`             |
-| [componentes-avanzados.md](./core/componentes-avanzados.md) | `lazy`, `Suspense`, `memo`, portals, `forwardRef`        |
-| [componentes.md](./core/componentes.md)                     | Resumen de componentes integrados                        |
-| [funciones-servidor.md](./core/funciones-servidor.md)       | Server Actions, `ServerBoundary`, `bridge.js`            |
-| [limites-de-error.md](./core/limites-de-error.md)           | Error boundaries y overlay de desarrollo                 |
-| [devtools-y-profiler.md](./core/devtools-y-profiler.md)     | Advertencias de desarrollo y profiler en memoria         |
+| Documento                                                   | Tema                                                           |
+| :---------------------------------------------------------- | :------------------------------------------------------------- |
+| [resumen-paquete.md](./core/resumen-paquete.md)             | **Entrada del paquete** — estructura, módulos, flujo de render |
+| [vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) | `createElement`, work loop, reconciliador, commit al DOM       |
+| [hooks.md](./core/hooks.md)                                 | `useStore`, `useEffect`, memoización, hooks en SSR             |
+| [renderizado.md](./core/renderizado.md)                     | `render`, `hydrate`, `renderToString`, streaming               |
+| [estado-y-prioridad.md](./core/estado-y-prioridad.md)       | Batching, cola de prioridad, `useTransition`                   |
+| [componentes-avanzados.md](./core/componentes-avanzados.md) | `lazy`, `Suspense`, `memo`, portals, `forwardRef`              |
+| [componentes.md](./core/componentes.md)                     | Resumen de componentes integrados                              |
+| [funciones-servidor.md](./core/funciones-servidor.md)       | Server Actions, `ServerBoundary`, `bridge.js`                  |
+| [limites-de-error.md](./core/limites-de-error.md)           | Error boundaries y overlay de desarrollo                       |
+| [devtools-y-profiler.md](./core/devtools-y-profiler.md)     | Advertencias de desarrollo y profiler en memoria               |
 
 ---
 
@@ -156,22 +158,14 @@ sintaxis y snippets en archivos `.ryx`.
 ## Orden de lectura sugerido
 
 1. [Guía del repositorio](./guias/guia-del-repositorio.md) — contexto del
-   monorepo
-
-   y cómo encajan las piezas.
-
+   monorepo y cómo encajan las piezas.
 2. [Tests automatizados](./guias/tests-automatizados.md) y
    [app de integración](./guias/app-de-integracion-local.md) — Jest/lint y
-
    validación en navegador con `workspace:*`.
-
 3. [core/vdom-y-reconciliacion.md](./core/vdom-y-reconciliacion.md) — cómo se
-
    actualiza la UI.
-
-4. [ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md) — cómo
-
-   se compilan y sirven las apps.
+4. [ryunix-presets/cli-y-arranque.md](./ryunix-presets/cli-y-arranque.md) —
+   cómo se compilan y sirven las apps.
 
 5. Profundizar en cualquier doc de `core/` o `ryunix-presets/` según necesidad.
 

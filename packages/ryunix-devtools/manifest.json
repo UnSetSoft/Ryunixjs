@@ -1,26 +1,32 @@
 {
   "manifest_version": 3,
   "name": "Ryunix DevTools",
-  "version": "1.2.3-canary.1",
+  "version": "1.3.1",
   "description": "Ryunix DevTools Extension",
   "devtools_page": "devtools.html",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ryunix-devtools@unsetsoft",
+      "strict_min_version": "109.0"
+    }
+  },
   "icons": {},
   "permissions": ["tabs"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [".generated/content-script.js"],
+      "js": ["dist/content-script.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": [".generated/hook.js"],
+      "resources": ["dist/hook.js"],
       "matches": ["<all_urls>"]
     }
   ],
   "background": {
-    "service_worker": ".generated/background.js"
+    "service_worker": "dist/background.js"
   }
 }

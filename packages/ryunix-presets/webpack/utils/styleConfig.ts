@@ -1,14 +1,13 @@
 import type {
   RyunixStyleConfig,
   RyunixStyleFontInput,
-  RyunixStyleFontResolved,
   RyunixStyleResolvedConfig,
 } from '../config.d.ts'
 import {
   FONT_PRESETS,
   normalizeFontConfig,
   buildFontHeadLinks,
-} from './styleFonts.cjs'
+} from './styleFonts.js'
 
 export const DEFAULT_STYLE: RyunixStyleResolvedConfig = {
   enabled: false,

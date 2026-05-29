@@ -8,30 +8,22 @@ import {
 } from '../../utils/index.js'
 import { toSvgAttrName } from '../../utils/svgAttributes.js'
 import { Priority, runWithPriority } from './priority.js'
-
-/**
- * @typedef {import('../../types/internal.js').RyunixFiber} RyunixFiber
- * @typedef {import('../../types/internal.js').RyunixDomElement} RyunixDomElement
- */
+import type { RyunixDomElement, RyunixFiber } from '../../types/internal.js'
 
 /**
  * Convert camelCase to kebab-case for CSS properties
- * @param {string} camelCase - CamelCase string
- * @returns {string} Kebab-case string
  */
-const camelToKebab = (camelCase) => {
+const camelToKebab = (camelCase: string): string => {
   return camelCase.replace(
     CAMEL_TO_KEBAB_REGEX,
-    (match) => `-${match.toLowerCase()}`,
+    (match: string) => `-${match.toLowerCase()}`,
   )
 }
 
 /**
  * Apply styles to DOM element
- * @param {HTMLElement} dom - DOM element
- * @param {Object} styleObj - Style object
  */
-const applyStyles = (dom, styleObj) => {
+const applyStyles = (dom: HTMLElement, styleObj: Record<string, unknown>) => {
   if (!is.object(styleObj) || is.null(styleObj)) {
     dom.style.cssText = ''
     return
@@ -39,7 +31,7 @@ const applyStyles = (dom, styleObj) => {
 
   try {
     const cssText = Object.entries(styleObj)
-      .filter(([_, value]) => value != null) // Filter out null/undefined
+      .filter(([_, value]) => value != null)
       .map(([key, value]) => {
         const kebabKey = camelToKebab(key)
         return `${kebabKey}: ${value}`
@@ -56,12 +48,12 @@ const applyStyles = (dom, styleObj) => {
 
 /**
  * Apply CSS classes to DOM element
- * @param {HTMLElement} dom - DOM element
- * @param {string} prevClasses - Previous class string
- * @param {string} nextClasses - Next class string
  */
-const applyClasses = (dom, prevClasses, nextClasses) => {
-  // Allow empty/undefined - just remove classes
+const applyClasses = (
+  dom: HTMLElement,
+  prevClasses: string,
+  nextClasses: string,
+) => {
   if (!nextClasses || nextClasses.trim() === '') {
     if (prevClasses) {
       const oldClasses = prevClasses.split(/\s+/).filter(Boolean)
@@ -70,13 +62,11 @@ const applyClasses = (dom, prevClasses, nextClasses) => {
     return
   }
 
-  // Remove old classes
   if (prevClasses) {
     const oldClasses = prevClasses.split(/\s+/).filter(Boolean)
     dom.classList.remove(...oldClasses)
   }
 
-  // Add new classes
   const newClasses = nextClasses.split(/\s+/).filter(Boolean)
   if (newClasses.length > 0) {
     dom.classList.add(...newClasses)
@@ -85,11 +75,10 @@ const applyClasses = (dom, prevClasses, nextClasses) => {
 
 /**
  * Create a DOM element from fiber
- * @param {RyunixFiber} fiber - Fiber node
- * @returns {HTMLElement | SVGElement | Text | null}
  */
-const createDom = (fiber) => {
-  // Fragments and Context Providers don't create real DOM nodes
+const createDom = (
+  fiber: RyunixFiber,
+): HTMLElement | SVGElement | Text | null => {
   if (
     fiber.type === RYUNIX_TYPES.RYUNIX_FRAGMENT ||
     fiber.type === RYUNIX_TYPES.RYUNIX_CONTEXT ||
@@ -98,13 +87,13 @@ const createDom = (fiber) => {
     return null
   }
 
-  let dom
+  let dom: HTMLElement | SVGElement | Text | null
 
   try {
     if (fiber.type === RYUNIX_TYPES.TEXT_ELEMENT) {
       dom = document.createTextNode('')
     } else if (is.string(fiber.type)) {
-      const hostType = /** @type {string} */ fiber.type
+      const hostType = fiber.type
       const isSvg = [
         'svg',
         'path',
@@ -155,11 +144,7 @@ const createDom = (fiber) => {
       return null
     }
 
-    updateDom(
-      /** @type {HTMLElement | Text} */ /** @type {HTMLElement | SVGElement | Text} */ dom,
-      {},
-      fiber.props,
-    )
+    updateDom(dom, {}, fiber.props)
     return dom
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
@@ -169,13 +154,7 @@ const createDom = (fiber) => {
   }
 }
 
-/**
- * @param {string} attrName
- * @param {unknown} value
- * @returns {unknown}
- */
-/** @type {(attrName: string, value: unknown) => unknown} */
-const checkAttributeUri = (attrName, value) => {
+const checkAttributeUri = (attrName: string, value: unknown): unknown => {
   if (typeof value !== 'string') return value
   const attr = attrName.toLowerCase()
   if (
@@ -208,12 +187,9 @@ export const validateUri = checkAttributeUri
 
 /**
  * Update DOM element with new props
- * @param {HTMLElement|Text} dom - DOM element
- * @param {Record<string, unknown>} [prevProps] - Previous props
- * @param {Record<string, unknown>} [nextProps] - Next props
  */
 const updateDom = (
-  dom: HTMLElement | Text,
+  dom: HTMLElement | SVGElement | Text,
   prevProps: Record<string, unknown> = {},
   nextProps: Record<string, unknown> = {},
 ) => {
@@ -224,9 +200,10 @@ const updateDom = (
     return
   }
   const el = dom as HTMLElement
-  const domEl = el as import('../../types/internal.js').RyunixDomElement
+  const domEl = el as RyunixDomElement
   const handlerMap = domEl._ryunixHandlers
-  // Remove old event listeners
+  const elRecord = el as unknown as Record<string, unknown>
+
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => isGone(nextProps)(key) || isNew(prevProps, nextProps)(key))
@@ -247,12 +224,10 @@ const updateDom = (
       }
     })
 
-  // Remove old properties
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(nextProps))
     .forEach((propKey) => {
-      // Skip special properties
       if (
         propKey === STRINGS.STYLE ||
         propKey === OLD_STRINGS.STYLE ||
@@ -265,76 +240,55 @@ const updateDom = (
         const attrName = toSvgAttrName(propKey)
         el.removeAttribute(attrName)
       } else {
-        /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
-          propKey
-        ] = ''
+        elRecord[propKey] = ''
         el.removeAttribute(propKey)
       }
     })
 
-  // Set new properties
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((propKey) => {
       try {
-        // Handle style properties
         if (propKey === STRINGS.STYLE || propKey === OLD_STRINGS.STYLE) {
           const styleValue = nextProps[propKey]
-          applyStyles(el, /** @type {Record<string, unknown>} */ styleValue)
-        }
-        // Handle className properties
-        else if (propKey === STRINGS.CLASS_NAME) {
+          applyStyles(el, styleValue as Record<string, unknown>)
+        } else if (propKey === STRINGS.CLASS_NAME) {
           applyClasses(
             el,
-            /** @type {string} */ prevProps[STRINGS.CLASS_NAME],
-            /** @type {string} */ nextProps[STRINGS.CLASS_NAME],
+            prevProps[STRINGS.CLASS_NAME] as string,
+            nextProps[STRINGS.CLASS_NAME] as string,
           )
         } else if (propKey === OLD_STRINGS.CLASS_NAME) {
           applyClasses(
             el,
-            /** @type {string} */ prevProps[OLD_STRINGS.CLASS_NAME],
-            /** @type {string} */ nextProps[OLD_STRINGS.CLASS_NAME],
+            prevProps[OLD_STRINGS.CLASS_NAME] as string,
+            nextProps[OLD_STRINGS.CLASS_NAME] as string,
           )
-        }
-        // Handle other properties
-        else {
-          // Special handling for value and checked (controlled components)
+        } else {
           if (propKey === 'value' || propKey === 'checked') {
-            if (
-              /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
-                propKey
-              ] !== nextProps[propKey]
-            ) {
-              /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
-                propKey
-              ] = nextProps[propKey]
+            if (elRecord[propKey] !== nextProps[propKey]) {
+              elRecord[propKey] = nextProps[propKey]
             }
           } else {
             const isSvgNode = el instanceof SVGElement
             if (isSvgNode) {
               const attrName = toSvgAttrName(propKey)
-              /** @type {unknown} */
               const svgValidated = checkAttributeUri(
                 attrName,
                 nextProps[propKey],
               )
-              // viewBox is case sensitive, we respect the camelCase for it.
-              el.setAttribute(attrName, /** @type {string} */ svgValidated)
+              el.setAttribute(attrName, String(svgValidated))
             } else {
               const attrVal = nextProps[propKey]
-              /** @type {unknown} */
               const safeValue = checkAttributeUri(propKey, attrVal)
 
-              /** @type {Record<string, unknown>} */ /** @type {unknown} */ el[
-                propKey
-              ] = safeValue
-              // Best effort: set html attributes if it's not a primitive component property
+              elRecord[propKey] = safeValue
               if (
                 typeof attrVal !== 'object' &&
                 typeof attrVal !== 'function'
               ) {
-                el.setAttribute(propKey, /** @type {string} */ safeValue)
+                el.setAttribute(propKey, String(safeValue))
               }
             }
           }
@@ -346,7 +300,6 @@ const updateDom = (
       }
     })
 
-  // Add new event listeners
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
@@ -358,16 +311,7 @@ const updateDom = (
             (nextProps[propKey] as (e: Event) => void)(e),
           )
         }
-        // Store the wrapped handler so it can be removed later
-        // Note: For simplicity, we could also just wrap it on the fly,
-        // but we need the exact reference for removeEventListener.
-        // Actually, the current removeDom logic uses prevProps[name],
-        // which won't work if we wrap it here and don't store it.
-        // Wait, the current removeEventListener call in dom.js:177 is:
-        // dom.removeEventListener(eventType, prevProps[name])
-        // If we wrap it, we MUST store the wrapper.
 
-        // Let's use a weakMap or a property on the DOM node to store the wrappers.
         if (!domEl._ryunixHandlers) {
           domEl._ryunixHandlers = new Map()
         }
@@ -384,9 +328,8 @@ const updateDom = (
 
 /**
  * Clear all children from a DOM element
- * @param {HTMLElement} container - DOM element to clear
  */
-const clearContainer = (container) => {
+const clearContainer = (container: HTMLElement) => {
   if (!container) return
   while (container.firstChild) {
     container.removeChild(container.firstChild)

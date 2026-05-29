@@ -1,9 +1,75 @@
 import fs from 'fs'
 import path from 'path'
+import type { Compiler } from 'webpack'
 import {
   generateResolveSSGPathsCode,
   parseDynamicSegment,
+  type DynamicSsgRoute,
+  type SsgRouteMeta,
 } from './ssgStaticParams.js'
+import {
+  copyRouteMetadataAssets,
+  mergeMetadataAssets,
+  metadataAssetsToMeta,
+  scanSegmentMetadataFiles,
+  toMetadataAssetManifest,
+  type RouteMetadataAsset,
+} from './routeMetadataFiles.js'
+
+interface ComponentPaths {
+  path?: string | null
+  serverPath?: string | null
+  clientPath?: string | null
+}
+
+interface DynamicSegmentInfo {
+  param: string
+  isCatchAll: boolean
+}
+
+interface RouteNode {
+  path: string
+  dynamicSegment: DynamicSegmentInfo | null
+  layout: ComponentPaths | null
+  layoutIsAsync: boolean
+  index: ComponentPaths | null
+  indexIsAsync: boolean
+  error: ComponentPaths | null
+  loading: ComponentPaths | null
+  metadataFiles: RouteMetadataAsset[]
+  children: RouteNode[]
+}
+
+interface ComponentInfo {
+  id: string
+  isServerComponent: boolean
+  isAsync: boolean
+  isProxy?: boolean
+  loading?: ComponentInfo | null
+  error?: ComponentInfo | null
+}
+
+interface FlatMdxPending {
+  name: string
+  fullPath: string
+  index: ComponentPaths | null
+}
+
+interface DynamicSsgSegment {
+  param: string
+  isCatchAll: boolean
+  layoutId: string | null
+  indexId: string | null
+}
+
+interface RouteDefinition {
+  path: string
+  layoutsArrayStr: string
+  errorPropStr: string
+  loadingConfigStr: string
+  errorConfigStr: string
+  fileMetadataJson: string
+}
 
 class AppRouterPlugin {
   appDir: string
@@ -25,9 +91,9 @@ class AppRouterPlugin {
     this.debug = options.debug || false
   }
 
-  apply(compiler) {
+  apply(compiler: Compiler) {
     let lastScanTime = 0
-    let lastRoutes = null
+    let lastRoutes: RouteNode | RouteNode[] | null = null
 
     compiler.hooks.beforeCompile.tapAsync(
       'AppRouterPlugin',
@@ -41,8 +107,11 @@ class AppRouterPlugin {
           return
         }
 
-        if (params && params.compilationDependencies) {
-          params.contextDependencies.add(appDirPath)
+        const compileParams = params as {
+          contextDependencies?: { add: (path: string) => void }
+        }
+        if (compileParams.contextDependencies) {
+          compileParams.contextDependencies.add(appDirPath)
         }
 
         try {
@@ -77,16 +146,22 @@ class AppRouterPlugin {
     )
   }
 
-  scanDirectory(dir, basePath, segmentAtThisLevel = null) {
+  scanDirectory(
+    dir: string,
+    basePath: string,
+    segmentAtThisLevel: DynamicSegmentInfo | null = null,
+  ): RouteNode | RouteNode[] | null {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
-    let layout = null
-    let index = null
-    let errorFile = null
-    let loadingFile = null
-    const children = []
-    const pendingFlatMdx = []
+    let layout: ComponentPaths | null = null
+    let index: ComponentPaths | null = null
+    let errorFile: ComponentPaths | null = null
+    let loadingFile: ComponentPaths | null = null
+    const children: RouteNode[] = []
+    const pendingFlatMdx: FlatMdxPending[] = []
+    const routePath = basePath === '' ? '/' : basePath
+    const segmentMetadataFiles = scanSegmentMetadataFiles(dir, routePath)
 
-    const isAsync = (filePath) => {
+    const isAsync = (filePath: string | null): boolean => {
       if (!filePath) return false
       try {
         const content = fs.readFileSync(filePath, 'utf8')
@@ -95,15 +170,15 @@ class AppRouterPlugin {
           /export\s+default\s+async\s+function/i.test(content) ||
           /async\s+function\s+([A-Z][\w]*)/.test(content)
         )
-      } catch (e) {
+      } catch (_e) {
         return false
       }
     }
 
-    const getPath = (obj) => {
+    const getPath = (obj: ComponentPaths | string | null): string | null => {
       if (!obj) return null
       if (typeof obj === 'string') return obj
-      return obj.path || obj.serverPath || obj.clientPath
+      return obj.path ?? obj.serverPath ?? obj.clientPath ?? null
     }
 
     for (const entry of entries) {
@@ -156,17 +231,20 @@ class AppRouterPlugin {
           )
         }
 
-        const assign = (type, path) => {
+        const assign = (
+          type: ComponentPaths | null,
+          filePath: string,
+        ): ComponentPaths => {
           if (!type) {
             return {
-              path: isServer || isClient ? null : path,
-              serverPath: isServer ? path : null,
-              clientPath: isClient ? path : null,
+              path: isServer || isClient ? null : filePath,
+              serverPath: isServer ? filePath : null,
+              clientPath: isClient ? filePath : null,
             }
           }
-          if (isServer) type.serverPath = path
-          else if (isClient) type.clientPath = path
-          else type.path = path
+          if (isServer) type.serverPath = filePath
+          else if (isClient) type.clientPath = filePath
+          else type.path = filePath
           return type
         }
 
@@ -212,6 +290,7 @@ class AppRouterPlugin {
         indexIsAsync: isAsync(flatMdx.fullPath),
         error: null,
         loading: null,
+        metadataFiles: [],
         children: [],
       })
     }
@@ -249,13 +328,14 @@ class AppRouterPlugin {
       !index &&
       children.length === 0 &&
       !errorFile &&
-      !loadingFile
+      !loadingFile &&
+      segmentMetadataFiles.length === 0
     ) {
       return null
     }
 
-    const node = {
-      path: basePath === '' ? '/' : basePath,
+    const node: RouteNode = {
+      path: routePath,
       dynamicSegment: segmentAtThisLevel,
       layout,
       layoutIsAsync: isAsync(getPath(layout)),
@@ -263,6 +343,7 @@ class AppRouterPlugin {
       indexIsAsync: isAsync(getPath(index)),
       error: errorFile,
       loading: loadingFile,
+      metadataFiles: segmentMetadataFiles,
       children,
     }
 
@@ -271,39 +352,58 @@ class AppRouterPlugin {
     return node
   }
 
-  generateRouterFile(routeNode, outputPath) {
-    const generate = (isServerBuild) => {
-      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, HydrationBoundary, RyunixDevOverlay } from '@unsetsoft/ryunixjs';\n`
+  generateRouterFile(
+    routeNode: RouteNode | RouteNode[] | null,
+    outputPath: string,
+  ) {
+    const generate = (isServerBuild: boolean) => {
+      let importStatements = `import Ryunix, { RouterProvider, Children, useMetadata, useEffect, useStore, ServerBoundary, HydrationBoundary, RyunixDevOverlay, mergeRouteMetadata } from '@unsetsoft/ryunixjs';\n`
       let componentIdCounter = 0
       const getNextId = () => componentIdCounter++
-      const flattenedRoutes = []
-      const staticSsgRoutes = []
-      const dynamicSsgRoutes = []
-      let rootLayouts = []
+      const routeDefinitions: RouteDefinition[] = []
+      const staticSsgRoutes: SsgRouteMeta[] = []
+      const dynamicSsgRoutes: DynamicSsgRoute[] = []
+      let rootLayouts: ComponentInfo[] = []
 
       const appDirPath = path.resolve(process.cwd(), this.appDir)
       const errorsPath = fs.existsSync(path.join(appDirPath, 'error.ryx'))
         ? path.join(appDirPath, 'error.ryx')
         : null
 
-      let errorsId = null
+      let errorsId: string | null = null
       if (errorsPath) {
         errorsId = `Errors_App`
         importStatements += `import * as ${errorsId} from '${this.getRelativeImport(errorsPath, outputPath)}';\n`
       }
 
-      const traverse = (node, parentLayouts = [], dynamicSegments = []) => {
+      const traverse = (
+        node: RouteNode | RouteNode[],
+        parentLayouts: ComponentInfo[] = [],
+        dynamicSegments: DynamicSsgSegment[] = [],
+        inheritedMetadata: RouteMetadataAsset[] = [],
+      ) => {
         if (Array.isArray(node)) {
           for (const child of node)
-            traverse(child, parentLayouts, dynamicSegments)
+            traverse(child, parentLayouts, dynamicSegments, inheritedMetadata)
           return
         }
 
-        const currentLayouts = [...parentLayouts]
-        let layoutInfo = null
-        let indexInfo = null
+        const routeMetadataChain = mergeMetadataAssets(
+          inheritedMetadata,
+          node.metadataFiles || [],
+        )
+        const routeFileMeta = metadataAssetsToMeta(routeMetadataChain)
+        const fileMetadataJson = JSON.stringify(routeFileMeta)
 
-        const processComponent = (prefix, componentObj, isAsync) => {
+        const currentLayouts = [...parentLayouts]
+        let layoutInfo: ComponentInfo | null = null
+        let indexInfo: ComponentInfo | null = null
+
+        const processComponent = (
+          prefix: string,
+          componentObj: ComponentPaths | null,
+          isAsync: boolean,
+        ): ComponentInfo | null => {
           if (!componentObj) return null
           const id = `${prefix}_${getNextId()}`
           const compPath = isServerBuild
@@ -334,19 +434,19 @@ class AppRouterPlugin {
           const layoutErrorInfo = processComponent('Error', node.error, false)
 
           if (layoutInfo) {
-            ;(layoutInfo as Record<string, unknown>).loading = layoutLoadingInfo
-            ;(layoutInfo as Record<string, unknown>).error = layoutErrorInfo
+            layoutInfo.loading = layoutLoadingInfo
+            layoutInfo.error = layoutErrorInfo
             currentLayouts.push(layoutInfo)
             if (
               parentLayouts.length === 0 &&
-              !rootLayouts.some((l) => l.id === layoutInfo.id)
+              !rootLayouts.some((l) => l.id === layoutInfo!.id)
             ) {
               rootLayouts.push(layoutInfo)
             }
           }
         }
 
-        let segments = dynamicSegments
+        let segments: DynamicSsgSegment[] = dynamicSegments
 
         if (node.index) {
           indexInfo = processComponent('Index', node.index, !!node.indexIsAsync)
@@ -366,7 +466,9 @@ class AppRouterPlugin {
           }
 
           if (indexInfo) {
-            const formatComp = (info) => {
+            const formatComp = (
+              info: ComponentInfo | null | undefined,
+            ): string => {
               if (!info) return 'null'
               if (info.isProxy)
                 return `{ isServerComponent: true, id: '${info.id}', isAsync: ${info.isAsync}, loading: ${formatComp(info.loading)}, error: ${formatComp(info.error)} }`
@@ -382,21 +484,30 @@ class AppRouterPlugin {
               ? `Object.assign(${indexConfigStr}, { errorComponent: getOptExport(${errorsId}, 'UnknownError') || getOptExport(${errorsId}, 'default') })`
               : indexConfigStr
 
-            flattenedRoutes.push(`
-    {
-      path: '${node.path}',
-      component: (props) => <RouteWrapper routePath="${node.path}" layouts={${layoutsArrayStr}} index={${errorPropStr}} loading={${loadingConfigStr}} error={${errorConfigStr}} props={props} />
-    }`)
+            routeDefinitions.push({
+              path: node.path,
+              layoutsArrayStr,
+              errorPropStr,
+              loadingConfigStr,
+              errorConfigStr,
+              fileMetadataJson,
+            })
 
             if (isServerBuild) {
+              const metadataAssets = toMetadataAssetManifest(routeMetadataChain)
               if (node.path.includes(':')) {
                 dynamicSsgRoutes.push({
                   path: node.path,
-                  meta: {},
+                  meta: routeFileMeta,
+                  metadataAssets,
                   segments,
                 })
               } else {
-                staticSsgRoutes.push({ path: node.path, meta: {} })
+                staticSsgRoutes.push({
+                  path: node.path,
+                  meta: routeFileMeta,
+                  metadataAssets,
+                })
               }
             }
           }
@@ -414,24 +525,29 @@ class AppRouterPlugin {
 
         if (Array.isArray(node.children)) {
           for (const child of node.children) {
-            traverse(child, currentLayouts, segments)
+            traverse(child, currentLayouts, segments, routeMetadataChain)
           }
         }
       }
 
       if (routeNode) traverse(routeNode)
 
+      let notFoundRouteStr = ''
       if (errorsId) {
         const layoutsArrayStr = `[${rootLayouts.map((l) => `{ default: getOptExport(${l.id}, 'default'), isServerComponent: ${l.isServerComponent}, id: '${l.id}', isAsync: ${l.isAsync}, Metatags: getOptExport(${l.id}, 'Metatags') || getOptExport(${l.id}, 'frontmatter') || {} }`).join(', ')}]`
-        flattenedRoutes.push(`
+        notFoundRouteStr = `,
     {
       path: '*',
       NotFound: (props) => <RouteWrapper routePath="*" layouts={${layoutsArrayStr}} index={{ default: getOptExport(${errorsId}, 'NotFound') || getOptExport(${errorsId}, 'default'), isAsync: false, Metatags: getOptExport(${errorsId}, 'Metatags') || getOptExport(${errorsId}, 'frontmatter') || {} }} props={props} />
-    }`)
+    }`
       }
 
       return {
-        content: this.assembleFileContent(importStatements, flattenedRoutes),
+        content: this.assembleFileContent(
+          importStatements,
+          routeDefinitions,
+          notFoundRouteStr,
+        ),
         staticSsgRoutes,
         dynamicSsgRoutes,
       }
@@ -449,9 +565,10 @@ class AppRouterPlugin {
     const ssgManifestRoutes = [
       ...serverResult.staticSsgRoutes,
       ...serverResult.dynamicSsgRoutes.map(
-        ({ path: routePath, meta, segments }) => ({
+        ({ path: routePath, meta, segments, metadataAssets }) => ({
           path: routePath,
           meta,
+          metadataAssets,
           dynamic: true,
           segments,
         }),
@@ -496,30 +613,138 @@ class AppRouterPlugin {
       ssgManifestPath,
       JSON.stringify(ssgManifestRoutes, null, 2),
     )
+
+    this.syncMetadataAssetsToStatic([
+      ...serverResult.staticSsgRoutes,
+      ...serverResult.dynamicSsgRoutes,
+    ])
   }
 
-  assembleFileContent(importStatements, flattenedRoutes) {
+  syncMetadataAssetsToStatic(routes: SsgRouteMeta[]) {
+    const assets = new Map<string, RouteMetadataAsset>()
+    for (const route of routes) {
+      for (const manifest of route.metadataAssets || []) {
+        assets.set(manifest.publicPath, {
+          kind: manifest.kind,
+          filename: manifest.filename,
+          sourcePath: manifest.sourcePath,
+          publicPath: manifest.publicPath,
+        })
+      }
+    }
+
+    if (assets.size === 0) return
+
+    const staticRoot = path.resolve(process.cwd(), '.ryunix/static')
+    copyRouteMetadataAssets(Array.from(assets.values()), staticRoot)
+  }
+
+  assembleFileContent(
+    importStatements: string,
+    routeDefinitions: RouteDefinition[],
+    notFoundRouteStr = '',
+  ) {
+    const escapePath = (routePath: string) =>
+      routePath.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+
+    const routeDefinitionEntries = routeDefinitions
+      .map(
+        (def) => `
+  '${escapePath(def.path)}': {
+    routePath: '${escapePath(def.path)}',
+    layouts: ${def.layoutsArrayStr},
+    index: ${def.errorPropStr},
+    loading: ${def.loadingConfigStr},
+    error: ${def.errorConfigStr},
+    fileMetadata: ${def.fileMetadataJson},
+  }`,
+      )
+      .join(',')
+
+    const routeEntries = routeDefinitions
+      .map(
+        (def) => `
+    { path: '${escapePath(def.path)}', component: RouteRenderer }`,
+      )
+      .join(',')
+
     return `/* AUTO-GENERATED APP ROUTER */
 ${importStatements}
 const getOptExport = (mod, key) => mod ? mod[key] : undefined;
 
+const resolveFileMetadata = (fileMetadata, routePath, params = {}) => {
+  if (!fileMetadata || typeof fileMetadata !== 'object') return {};
+  if (!routePath || !routePath.includes(':')) return fileMetadata;
+
+  const actualPath = routePath
+    .replace(/:\\.\\.\\.(\\w+)/g, (_, key) => {
+      const val = params[key];
+      if (val == null || val === '') return '';
+      return Array.isArray(val) ? val.join('/') : String(val);
+    })
+    .replace(/:(\\w+)/g, (_, key) => {
+      const val = params[key];
+      if (val == null || val === '') return '';
+      return Array.isArray(val) ? val.join('/') : String(val);
+    })
+    .replace(/\\/+/g, '/');
+
+  const normalizedActual = actualPath.startsWith('/') ? actualPath : \`/\${actualPath}\`;
+  const resolved = {};
+  for (const [key, value] of Object.entries(fileMetadata)) {
+    if (typeof value === 'string') {
+      resolved[key] = value.split(routePath).join(normalizedActual);
+    } else {
+      resolved[key] = value;
+    }
+  }
+  return resolved;
+};
+
 const AsyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
-  const [content, setContent] = useStore(null);
-  useEffect(() => {
-    let active = true;
-    const run = async () => {
-      try {
-        const res = await Component(componentProps);
-        if (active) setContent(<Ryunix.Fragment>{res}</Ryunix.Fragment>);
-      } catch(err) {
-        console.error('Error rendering async component:', err);
-        if (active) setContent(ErrorFallback ? <ErrorFallback error={err} /> : <div style={{ padding: '2rem', color: 'red' }}>Error rendering async component</div>);
+  const [content, setContent] = useStore(() => {
+    try {
+      const res = Component(componentProps);
+      if (res != null && typeof res === 'object' && typeof res.then === 'function') {
+        return { status: 'pending', promise: res };
       }
+      return { status: 'ready', node: <Ryunix.Fragment>{res}</Ryunix.Fragment> };
+    } catch (err) {
+      return { status: 'error', err };
+    }
+  });
+
+  useEffect(() => {
+    if (!content || content.status !== 'pending') return undefined;
+    let active = true;
+    content.promise
+      .then((res) => {
+        if (!active) return;
+        setContent({ status: 'ready', node: <Ryunix.Fragment>{res}</Ryunix.Fragment> });
+      })
+      .catch((err) => {
+        console.error('Error rendering async component:', err);
+        if (!active) return;
+        setContent({
+          status: 'error',
+          err,
+        });
+      });
+    return () => {
+      active = false;
     };
-    run();
-    return () => { active = false; };
-  }, []);
-  return content;
+  }, [content?.status === 'pending' ? content.promise : null]);
+
+  if (!content) return null;
+  if (content.status === 'error') {
+    return ErrorFallback ? (
+      <ErrorFallback error={content.err} />
+    ) : (
+      <div style={{ padding: '2rem', color: 'red' }}>Error rendering async component</div>
+    );
+  }
+  if (content.status === 'ready') return content.node;
+  return null;
 };
 
 const SyncComponentRenderer = ({ Component, componentProps, ErrorFallback }) => {
@@ -550,25 +775,25 @@ const RouteWrapper = (props) => {
   return RouteWrapperClient(props);
 };
 
-const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, error }) => {
-  let combinedMeta = {};
+const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, error, fileMetadata = {} }) => {
+  let combinedMeta = mergeRouteMetadata({}, resolveFileMetadata(fileMetadata, routePath, props.params));
   if (layouts) {
     for (const l of layouts) {
-      if (l.Metatags) combinedMeta = { ...combinedMeta, ...l.Metatags };
+      if (l.Metatags) combinedMeta = mergeRouteMetadata(combinedMeta, l.Metatags);
       if (l.generateMetadata) {
         try {
           const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
-          combinedMeta = { ...combinedMeta, ...dynamic };
+          combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
         } catch (e) { console.error('Error in layout generateMetadata:', e); }
       }
     }
   }
   if (index) {
-    if (index.Metatags) combinedMeta = { ...combinedMeta, ...index.Metatags };
+    if (index.Metatags) combinedMeta = mergeRouteMetadata(combinedMeta, index.Metatags);
     if (index.generateMetadata) {
       try {
         const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
-        combinedMeta = { ...combinedMeta, ...dynamic };
+        combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
       } catch (e) { console.error('Error in index generateMetadata:', e); }
     }
   }
@@ -577,16 +802,16 @@ const RouteWrapperServer = async ({ routePath, layouts, index, props, loading, e
   return <RouteWrapperRender routePath={routePath} layouts={layouts} index={index} props={props} loading={loading} error={error} />;
 };
 
-const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }) => {
+const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error, fileMetadata = {} }) => {
   const getStaticMeta = () => {
-    let meta = {};
+    let meta = mergeRouteMetadata({}, resolveFileMetadata(fileMetadata, routePath, props.params));
     if (layouts) {
       for (const l of layouts) {
-        if (l.Metatags) meta = { ...meta, ...l.Metatags };
+        if (l.Metatags) meta = mergeRouteMetadata(meta, l.Metatags);
       }
     }
     if (index && index.Metatags) {
-      meta = { ...meta, ...index.Metatags };
+      meta = mergeRouteMetadata(meta, index.Metatags);
     }
     return meta;
   };
@@ -602,7 +827,7 @@ const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }
           if (l.generateMetadata) {
             try {
               const dynamic = await l.generateMetadata({ params: props.params, searchParams: props.query });
-              combinedMeta = { ...combinedMeta, ...dynamic };
+              combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
             } catch (e) { console.error('Error in layout generateMetadata:', e); }
           }
         }
@@ -610,7 +835,7 @@ const RouteWrapperClient = ({ routePath, layouts, index, props, loading, error }
       if (index && index.generateMetadata) {
         try {
           const dynamic = await index.generateMetadata({ params: props.params, searchParams: props.query });
-          combinedMeta = { ...combinedMeta, ...dynamic };
+          combinedMeta = mergeRouteMetadata(combinedMeta, dynamic);
         } catch (e) { console.error('Error in index generateMetadata:', e); }
       }
       setCurrentMeta(combinedMeta);
@@ -665,8 +890,13 @@ const RouteWrapperRender = ({ routePath, layouts, index, props, loading, error }
       content = renderComponent(index, props);
     }
     
-    // Wrap index with its segment boundaries
+    // Wrap index with its segment boundaries and route-level hydration boundary only.
     content = wrapBoundaries(content, loading, error);
+    content = (
+      <Ryunix.Fragment key={'page-' + (index.id || routePath)}>
+        {wrapRouteHydrationBoundary(content, routePath)}
+      </Ryunix.Fragment>
+    );
   }
 
   if (layouts) {
@@ -688,15 +918,59 @@ const RouteWrapperRender = ({ routePath, layouts, index, props, loading, error }
       }
 
       if (layoutContent) {
-        content = wrapBoundaries(layoutContent, l.loading, l.error);
+        content = (
+          <Ryunix.Fragment key={'layout-' + l.id}>
+            {wrapBoundaries(layoutContent, l.loading, l.error)}
+          </Ryunix.Fragment>
+        );
       }
     }
   }
 
-  return wrapRouteHydrationBoundary(content, routePath);
+  return content;
 };
 
-const routes = [${flattenedRoutes.join(',\n')}];
+const ROUTE_DEFINITIONS = {${routeDefinitionEntries}
+};
+
+const routePathToRegex = (routePath) => {
+  const parts = routePath.split('/').filter(Boolean).map((segment) => {
+    if (segment.startsWith(':...')) return '(.+)';
+    if (segment.startsWith(':')) return '([^/]+)';
+    return segment;
+  });
+  return new RegExp('^/' + parts.join('/') + '$');
+};
+
+const resolveRouteDefinition = (pathname) => {
+  const direct = ROUTE_DEFINITIONS[pathname];
+  if (direct) return direct;
+  for (const [pattern, def] of Object.entries(ROUTE_DEFINITIONS)) {
+    if (!pattern.includes(':')) continue;
+    if (routePathToRegex(pattern).test(pathname)) return def;
+  }
+  return null;
+};
+
+const RouteRenderer = (props) => {
+  const pathname = (props.location || '/').split('?')[0].split('#')[0];
+  const def = resolveRouteDefinition(pathname);
+  if (!def) return null;
+  return (
+    <RouteWrapper
+      routePath={def.routePath}
+      layouts={def.layouts}
+      index={def.index}
+      loading={def.loading}
+      error={def.error}
+      fileMetadata={def.fileMetadata || {}}
+      props={props}
+    />
+  );
+};
+
+const routes = [${routeEntries}${notFoundRouteStr}
+];
 
 export default function AppRouter() {
   const isDev = process.env.NODE_ENV !== 'production';
@@ -719,7 +993,7 @@ export default function AppRouter() {
 `
   }
 
-  writeIfChanged(filePath, content) {
+  writeIfChanged(filePath: string, content: string) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     if (fs.existsSync(filePath)) {
       if (fs.readFileSync(filePath, 'utf8') === content) return
@@ -727,14 +1001,14 @@ export default function AppRouter() {
     fs.writeFileSync(filePath, content)
   }
 
-  getRelativeImport(targetPath, outputPath) {
+  getRelativeImport(targetPath: string, outputPath: string) {
     const relativePath = path
       .relative(path.dirname(outputPath), targetPath)
       .replace(/\\/g, '/')
     return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
   }
 
-  getNewestMtime(dirPath) {
+  getNewestMtime(dirPath: string) {
     let newest = 0
     try {
       const entries = fs.readdirSync(dirPath, { withFileTypes: true })

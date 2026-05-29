@@ -33,7 +33,7 @@ Referencia de **tecnologías usadas en el monorepo RyunixJS** y de los **scripts
 | :----------------------------------------------------- | :-------------------------------------------------------- |
 | Lenguajes, runtimes y bibliotecas principales por área | Tutoriales paso a paso de cada herramienta                |
 | Scripts del `package.json` raíz y tareas Turbo         | Cada flag de `ryunix` o Webpack                           |
-| Scripts por paquete a nivel resumen                    | Apps generadas en `test/webpack` (local, en `.gitignore`) |
+| Scripts por paquete a nivel resumen                    | `../ryunix-doc` (workspace) y pruebas locales en `test/*` |
 
 Para onboarding y estructura de carpetas, ver
 [guia-del-repositorio.md](./guia-del-repositorio.md). Para tests y
@@ -151,11 +151,11 @@ Los comandos se ejecutan desde la **raíz del repositorio** salvo indicación.
 
 ### App de integración local (framework en el navegador)
 
-| Script                   | Propósito                                                      |
-| :----------------------- | :------------------------------------------------------------- |
-| `pnpm run run:web`       | `ryunix dev` sobre `test/webpack` (gitignored; crear en local) |
-| `pnpm run run:web:build` | Build de producción de esa app                                 |
-| `pnpm run run:web:start` | `ryunix start` de la app compilada                             |
+| Script                   | Propósito                                            |
+| :----------------------- | :--------------------------------------------------- |
+| `pnpm run run:web`       | Alias de `dev:doc` (`ryunix dev` en `../ryunix-doc`) |
+| `pnpm run run:web:build` | Build de producción de esa app                       |
+| `pnpm run run:web:start` | `ryunix start` de la app compilada                   |
 
 `pnpm run dev` en la raíz **no** arranca la app Webpack de prueba; `run:web` es
 el equivalente a `pnpm dev` en una aplicación Ryunix.

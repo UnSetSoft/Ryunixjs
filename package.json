@@ -9,8 +9,8 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=18",
-    "pnpm": ">=8"
+    "node": ">=22",
+    "pnpm": ">=10"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -35,13 +35,12 @@
     "publish:canary": "pnpm -r --filter \"!./test/**\" --filter \"!@unsetsoft/ryunix-devtools\" --filter \"!ryunixjs\" publish --no-git-checks --provenance --access public --tag canary",
     "changelog": "commit-and-tag-version --header '# Changelog'",
     "git:push": "git push --follow-tags origin",
-    "setup:web": "node setup-test-webpack.mjs",
-    "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run dev",
-    "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter ./test/webpack run build",
-    "run:web:start": "pnpm --filter ./test/webpack run start",
-    "run:web2": "pnpm --filter ./test/webpack2 run dev",
-    "run:web2:build": "pnpm --filter ./test/webpack2 run build",
-    "run:web2:start": "pnpm --filter ./test/webpack2 run start"
+    "setup:web": "node scripts/setup-ryunix-doc.mjs",
+    "dev:doc": "pnpm run build:core && pnpm --filter ryunix-doc run dev",
+    "build:doc": "pnpm run build:core && pnpm --filter ryunix-doc run build",
+    "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm run dev:doc",
+    "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm run build:doc",
+    "run:web:start": "pnpm --filter ryunix-doc run start"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
@@ -73,6 +72,10 @@
   },
   "packageManager": "pnpm@10.26.0",
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core"
+    ],
     "overrides": {
       "@unsetsoft/ryunixjs": "workspace:*",
       "@unsetsoft/ryunix-presets": "workspace:*",

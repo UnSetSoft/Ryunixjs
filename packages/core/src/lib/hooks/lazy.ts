@@ -46,7 +46,7 @@ export function lazy(importFn: () => Promise<LazyModule>): LazyComponent {
 
   const LazyComponent = ((props: Record<string, unknown>) => {
     if (status === SUSPENSE_STATUS.RESOLVED && Component) {
-      return createElement(Component as Function, props)
+      return createElement(Component as RyunixComponent, props)
     }
 
     if (status === SUSPENSE_STATUS.REJECTED && error) {
@@ -92,7 +92,7 @@ export function lazy(importFn: () => Promise<LazyModule>): LazyComponent {
     }, [])
 
     return null
-  }) as LazyComponent
+  }) as unknown as LazyComponent
 
   LazyComponent._isLazy = true
   LazyComponent._getStatus = () => status
@@ -131,7 +131,9 @@ export const Suspense: SuspenseComponent = ({
     return fallback || null
   }
 
-  return createElement(Fragment, { children })
+  return createElement(Fragment, {
+    children: children as RyunixNode | RyunixNode[],
+  })
 }
 
 Suspense.type = RYUNIX_TYPES.RYUNIX_SUSPENSE

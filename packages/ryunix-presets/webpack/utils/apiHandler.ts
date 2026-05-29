@@ -1,16 +1,31 @@
 import fs from 'fs'
 import path from 'path'
 import { pathToFileURL } from 'url'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+
+interface RouteMatch {
+  filePath: string
+  params: Record<string, string | string[]>
+}
+
+type ApiRequest = IncomingMessage & {
+  params?: Record<string, string | string[]>
+  query?: Record<string, string>
+}
 
 /**
  * Parses url and extracts dynamic parameters like [id]
  */
-function matchRoute(requestUrl, apiDirPath) {
+function matchRoute(requestUrl: string, apiDirPath: string): RouteMatch | null {
   if (!fs.existsSync(apiDirPath)) return null
 
   const urlParts = requestUrl.split('?')[0].split('/').filter(Boolean)
 
-  const findMatch = (currentDir, currentUrlParts, params) => {
+  const findMatch = (
+    currentDir: string,
+    currentUrlParts: string[],
+    params: Record<string, string | string[]>,
+  ): RouteMatch | null => {
     if (currentUrlParts.length === 0) {
       // Look for route.mjs or router.mjs
       for (const name of ['route.js', 'router.js']) {
@@ -83,11 +98,18 @@ function matchRoute(requestUrl, apiDirPath) {
   return findMatch(apiDirPath, urlParts, {})
 }
 
-export async function handleApiRequest(req, res, apiRootPath) {
-  let parsedUrl
+export async function handleApiRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  apiRootPath: string,
+): Promise<boolean> {
+  let parsedUrl: URL
   try {
-    parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`)
-  } catch (e) {
+    parsedUrl = new URL(
+      req.url ?? '/',
+      `http://${req.headers.host || 'localhost'}`,
+    )
+  } catch {
     res.writeHead(400)
     res.end('Bad Request')
     return true
@@ -117,17 +139,18 @@ export async function handleApiRequest(req, res, apiRootPath) {
 
     const module = await import(importUrl)
 
-    const method = req.method.toUpperCase()
+    const method = (req.method ?? 'GET').toUpperCase()
+    const apiReq = req as ApiRequest
 
     if (module[method]) {
-      req.params = match.params
-      req.query = Object.fromEntries(parsedUrl.searchParams.entries())
+      apiReq.params = match.params
+      apiReq.query = Object.fromEntries(parsedUrl.searchParams.entries())
 
       // Wait for execution
-      const result = await module[method](req, res)
+      const result = await module[method](apiReq, res)
 
       if (result instanceof Response) {
-        const headers = {}
+        const headers: Record<string, string | number> = {}
         result.headers.forEach((value, key) => {
           headers[key] = value
         })
@@ -156,14 +179,15 @@ export async function handleApiRequest(req, res, apiRootPath) {
       res.end(JSON.stringify({ error: 'Method Not Allowed' }))
       return true
     }
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(`[API Error]:`, err)
     if (!res.headersSent) {
+      const message = err instanceof Error ? err.message : String(err)
       res.writeHead(500, { 'Content-Type': 'application/json' })
       res.end(
         JSON.stringify({
           error: 'Internal Server Error',
-          details: err.message,
+          details: message,
         }),
       )
     }

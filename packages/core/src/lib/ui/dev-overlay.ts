@@ -1,21 +1,19 @@
 import { createElement } from '../reconciler/createElement.js'
 import { useStore, useEffect } from '../hooks/hooks.js'
 
-/**
- * @typedef {object} OverlayError
- * @property {string} [name]
- * @property {string} [message]
- * @property {string | string[]} [stack]
- * @property {{ fileName?: string, lineNumber?: number }} [__ryunix_source]
- */
+interface OverlayError {
+  name?: string
+  message?: string
+  stack?: string | string[]
+  __ryunix_source?: { fileName?: string; lineNumber?: number }
+}
 
-/**
- * @param {unknown} propsOrError
- */
-export function RyunixDevOverlay(propsOrError) {
-  /** @type {Record<string, unknown> | Error | null | undefined} */
-  const propsInput =
-    /** @type {Record<string, unknown> | Error | null | undefined} */ propsOrError
+export function RyunixDevOverlay(propsOrError: unknown) {
+  const propsInput = propsOrError as
+    | Record<string, unknown>
+    | Error
+    | null
+    | undefined
 
   // If propsOrError is an event or wrapped object, try to extract error
   const rawError =
@@ -26,21 +24,18 @@ export function RyunixDevOverlay(propsOrError) {
       ? propsInput.error
       : propsInput
 
-  /** @type {OverlayError | null} */
-  let error = null
+  let error: OverlayError | null = null
   if (rawError instanceof Error) {
-    error = rawError
+    error = rawError as OverlayError
   } else if (rawError && typeof rawError === 'object') {
     if ('message' in rawError) {
-      error = /** @type {OverlayError} */ rawError
+      error = rawError as OverlayError
     } else if ('error' in rawError) {
-      const nested = /** @type {Record<string, unknown>} */ rawError.error
+      const nested = (rawError as Record<string, unknown>).error
       error =
-        nested && typeof nested === 'object'
-          ? /** @type {OverlayError} */ nested
-          : null
+        nested && typeof nested === 'object' ? (nested as OverlayError) : null
     } else {
-      error = /** @type {OverlayError} */ rawError
+      error = rawError as OverlayError
     }
   }
 
@@ -50,22 +45,20 @@ export function RyunixDevOverlay(propsOrError) {
     Object.getOwnPropertyNames(propsInput || {}),
   )
 
-  const [snippetState, setSnippet] = useStore(null)
+  const [snippetState, setSnippet] = useStore(null as string | null)
   const [startLineState, setStartLine] = useStore(1)
   const [errorFileState, setErrorFile] = useStore('')
   const [errorLineState, setErrorLine] = useStore(0)
-  const snippet = /** @type {string | null} */ snippetState
-  const startLine = /** @type {number} */ startLineState
-  const errorFile = /** @type {string} */ errorFileState
-  const errorLine = /** @type {number} */ errorLineState
+  const snippet = snippetState as string | null
+  const startLine = startLineState as number
+  const errorFile = errorFileState as string
+  const errorLine = errorLineState as number
 
-  // Normalize stack ensuring we have lines
-  /** @type {string[]} */
-  let stackLines = []
+  let stackLines: string[] = []
   if (error && error.stack) {
     stackLines =
       typeof error.stack === 'string'
-        ? error.stack.split('\n').filter((/** @type {string} */ line) => {
+        ? error.stack.split('\n').filter((line: string) => {
             const trimmed = line.trim()
             if (!trimmed) return false
             if (trimmed.includes('node_modules')) return false
@@ -280,8 +273,7 @@ export function RyunixDevOverlay(propsOrError) {
     height: 'auto',
   }
 
-  /** @param {boolean} isErrorLine */
-  const lineStyle = (isErrorLine) => ({
+  const lineStyle = (isErrorLine: boolean) => ({
     display: 'flex',
     backgroundColor: isErrorLine ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
     padding: '2px 8px',
@@ -404,43 +396,38 @@ export function RyunixDevOverlay(propsOrError) {
             createElement(
               'div',
               { style: { display: 'flex', flexDirection: 'column' } },
-              ...snippetLines.map(
-                (
-                  /** @type {string} */ lineText,
-                  /** @type {number} */ index,
-                ) => {
-                  const currentLineNumber = startLine + index
-                  const isErrorLine = currentLineNumber === errorLine
-                  return createElement(
-                    'div',
-                    { key: index, style: lineStyle(isErrorLine) },
-                    createElement(
-                      'span',
-                      {
-                        style: {
-                          color: '#6b7280',
-                          width: '40px',
-                          userSelect: 'none',
-                          textAlign: 'right',
-                          marginRight: '16px',
-                          display: 'inline-block',
-                        },
+              ...snippetLines.map((lineText: string, index: number) => {
+                const currentLineNumber = startLine + index
+                const isErrorLine = currentLineNumber === errorLine
+                return createElement(
+                  'div',
+                  { key: index, style: lineStyle(isErrorLine) },
+                  createElement(
+                    'span',
+                    {
+                      style: {
+                        color: '#6b7280',
+                        width: '40px',
+                        userSelect: 'none',
+                        textAlign: 'right',
+                        marginRight: '16px',
+                        display: 'inline-block',
                       },
-                      currentLineNumber,
-                    ),
-                    createElement(
-                      'span',
-                      {
-                        style: {
-                          color: isErrorLine ? '#f87171' : '#e5e7eb',
-                          whiteSpace: 'pre',
-                        },
+                    },
+                    currentLineNumber,
+                  ),
+                  createElement(
+                    'span',
+                    {
+                      style: {
+                        color: isErrorLine ? '#f87171' : '#e5e7eb',
+                        whiteSpace: 'pre',
                       },
-                      lineText || ' ',
-                    ),
-                  )
-                },
-              ),
+                    },
+                    lineText || ' ',
+                  ),
+                )
+              }),
             ),
           ),
 
@@ -477,110 +464,106 @@ export function RyunixDevOverlay(propsOrError) {
                       gap: '12px',
                     },
                   },
-                  ...stackLines.map(
-                    (/** @type {string} */ line, /** @type {number} */ i) => {
-                      if (
-                        i === 0 &&
-                        (line.startsWith('Error:') ||
-                          line.startsWith('TypeError:'))
-                      )
-                        return null
+                  ...stackLines.map((line: string, i: number) => {
+                    if (
+                      i === 0 &&
+                      (line.startsWith('Error:') ||
+                        line.startsWith('TypeError:'))
+                    )
+                      return null
 
-                      // Deterministic string-based stack frame parsing (no polynomial regex)
-                      const trimmed = line.trim()
-                      let fnName = '<anonymous>'
-                      let filePath = line
+                    // Deterministic string-based stack frame parsing (no polynomial regex)
+                    const trimmed = line.trim()
+                    let fnName = '<anonymous>'
+                    let filePath = line
 
-                      // V8 format: "at fnName (file:line:col)" or "at file:line:col"
-                      if (trimmed.startsWith('at ')) {
-                        const rest = trimmed.slice(3)
-                        const parenOpen = rest.indexOf('(')
-                        const parenClose = rest.lastIndexOf(')')
-                        if (parenOpen !== -1 && parenClose > parenOpen) {
-                          fnName =
-                            rest.slice(0, parenOpen).trim() || '<anonymous>'
-                          filePath = rest.slice(parenOpen + 1, parenClose)
+                    // V8 format: "at fnName (file:line:col)" or "at file:line:col"
+                    if (trimmed.startsWith('at ')) {
+                      const rest = trimmed.slice(3)
+                      const parenOpen = rest.indexOf('(')
+                      const parenClose = rest.lastIndexOf(')')
+                      if (parenOpen !== -1 && parenClose > parenOpen) {
+                        fnName =
+                          rest.slice(0, parenOpen).trim() || '<anonymous>'
+                        filePath = rest.slice(parenOpen + 1, parenClose)
+                      } else {
+                        // "at file:line:col" — no function name
+                        if (rest.includes(':')) {
+                          fnName = '<anonymous>'
                         } else {
-                          // "at file:line:col" — no function name
-                          if (rest.includes(':')) {
-                            fnName = '<anonymous>'
-                          } else {
-                            fnName = rest
-                          }
-                          filePath = rest
+                          fnName = rest
+                        }
+                        filePath = rest
+                      }
+                    }
+                    // Firefox format: "fnName@file:line:col"
+                    else if (trimmed.includes('@')) {
+                      const atIdx = trimmed.indexOf('@')
+                      fnName = trimmed.slice(0, atIdx) || '<anonymous>'
+                      filePath = trimmed.slice(atIdx + 1)
+                    }
+                    // Ryunix format: "fnName file.ext:line"
+                    else {
+                      const exts = ['.ryx', '.jsx', '.js', '.ts', '.tsx']
+                      const parts = trimmed.split(/\s+/)
+                      if (parts.length >= 2) {
+                        const lastPart = parts[parts.length - 1]
+                        const colonIdx = lastPart.indexOf(':')
+                        const fileCandidate =
+                          colonIdx > 0 ? lastPart.slice(0, colonIdx) : lastPart
+                        if (exts.some((ext) => fileCandidate.endsWith(ext))) {
+                          fnName = parts.slice(0, -1).join(' ')
+                          filePath = lastPart
+                        } else {
+                          fnName = parts[0]
+                          filePath = parts.slice(1).join(' ')
                         }
                       }
-                      // Firefox format: "fnName@file:line:col"
-                      else if (trimmed.includes('@')) {
-                        const atIdx = trimmed.indexOf('@')
-                        fnName = trimmed.slice(0, atIdx) || '<anonymous>'
-                        filePath = trimmed.slice(atIdx + 1)
-                      }
-                      // Ryunix format: "fnName file.ext:line"
-                      else {
-                        const exts = ['.ryx', '.jsx', '.js', '.ts', '.tsx']
-                        const parts = trimmed.split(/\s+/)
-                        if (parts.length >= 2) {
-                          const lastPart = parts[parts.length - 1]
-                          const colonIdx = lastPart.indexOf(':')
-                          const fileCandidate =
-                            colonIdx > 0
-                              ? lastPart.slice(0, colonIdx)
-                              : lastPart
-                          if (exts.some((ext) => fileCandidate.endsWith(ext))) {
-                            fnName = parts.slice(0, -1).join(' ')
-                            filePath = lastPart
-                          } else {
-                            fnName = parts[0]
-                            filePath = parts.slice(1).join(' ')
-                          }
-                        }
-                      }
+                    }
 
-                      return createElement(
-                        'li',
-                        { key: i },
-                        createElement(
-                          'span',
-                          { style: { color: '#60a5fa', fontWeight: 600 } },
-                          fnName,
-                        ),
-                        createElement(
-                          'div',
-                          {
-                            style: {
-                              color: '#6b7280',
-                              marginTop: '4px',
-                              paddingLeft: '16px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                            },
+                    return createElement(
+                      'li',
+                      { key: i },
+                      createElement(
+                        'span',
+                        { style: { color: '#60a5fa', fontWeight: 600 } },
+                        fnName,
+                      ),
+                      createElement(
+                        'div',
+                        {
+                          style: {
+                            color: '#6b7280',
+                            marginTop: '4px',
+                            paddingLeft: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
                           },
-                          createElement(
-                            'svg',
-                            {
-                              width: '12',
-                              height: '12',
-                              viewBox: '0 0 24 24',
-                              fill: 'none',
-                              stroke: 'currentColor',
-                              strokeWidth: '2',
-                              strokeLinecap: 'round',
-                              strokeLinejoin: 'round',
-                            },
-                            createElement('path', {
-                              d: 'M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z',
-                            }),
-                            createElement('polyline', {
-                              points: '13 2 13 9 20 9',
-                            }),
-                          ),
-                          filePath,
+                        },
+                        createElement(
+                          'svg',
+                          {
+                            width: '12',
+                            height: '12',
+                            viewBox: '0 0 24 24',
+                            fill: 'none',
+                            stroke: 'currentColor',
+                            strokeWidth: '2',
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                          },
+                          createElement('path', {
+                            d: 'M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z',
+                          }),
+                          createElement('polyline', {
+                            points: '13 2 13 9 20 9',
+                          }),
                         ),
-                      )
-                    },
-                  ),
+                        filePath,
+                      ),
+                    )
+                  }),
                 )
               : createElement(
                   'div',
