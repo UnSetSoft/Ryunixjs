@@ -15,7 +15,7 @@ bruto.
 - [Arquitectura de renderizado de RyunixJS](#arquitectura-de-renderizado-de-ryunixjs)
   - [Índice](#índice)
   - [1. Renderizado en cliente (`render.js`)](#1-renderizado-en-cliente-renderjs)
-  - [2. Renderizado en servidor (`server.js`)](#2-renderizado-en-servidor-serverjs)
+  - [2. Renderizado en servidor (`ssr.ts`)](#2-renderizado-en-servidor-ssrts)
 
 ---
 
@@ -76,24 +76,23 @@ Adjunta el motor RyunixJS a HTML precompilado enviado desde el servidor.
 
 ---
 
-## 2. Renderizado en servidor (`server.js`)
+## 2. Renderizado en servidor (`ssr.ts`)
 
-El parser del servidor funciona completamente de forma sincrónica (o asíncrona
-con Streams), cortocircuitando agresivamente la lógica de Hooks mediante globals
-(`state.isServerRendering = true`) para evitar fugas de memoria en hooks con
-estado entre hilos Node.js variables.
+Implementación en `packages/core/src/lib/server/ssr.ts`. El parser del servidor
+funciona de forma sincrónica (`renderToString`) o asíncrona con streams
+(`renderToReadableStream` / `renderToStringAsync`), cortocircuitando hooks con
+`state.isServerRendering = true` y reseteando `ssrMetadata` / `ssrContexts` al
+inicio de cada render.
 
 ### `renderToString(element)`
 
-Usado para generación de sitios estáticos (SSG) genérica. Analiza recursivamente
-el árbol Virtual DOM, evalúa funciones de componente y mapea propiedades a blobs
-de cadena HTML.
+Render sincrónico para árboles sin componentes async ni Suspense streaming.
+Devuelve error si un componente devuelve `Promise` (usar `renderToStringAsync`).
 
-- Convierte `className` a `class` de forma nativa.
-- Evalúa correctamente etiquetas vacías HTML5 Void como `<img />`.
-- Elimina con seguridad protocolos URI peligrosos mediante `validateUri` (p. ej.
+### `renderToStringAsync(element)`
 
-  enlaces `javascript:`).
+Atajo sobre `renderToReadableStream`; camino usado por el App Router en SSG/SSR
+dev.
 
 ### `renderToReadableStream(element)`
 
