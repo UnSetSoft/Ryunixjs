@@ -972,6 +972,8 @@ const serverConfig = {
   ...sharedWebpackConfig,
   name: 'server',
   target: 'node', // Compile for Node.js
+  // Prevent webpack-dev-server from injecting HMR entry into the Node bundle.
+  devServer: false,
   entry: resolveApp(dir, `${config.buildDir}/server/app/app-router-server.js`),
   output: {
     path: resolveApp(dir, `${config.buildDir}/server`),
@@ -1014,7 +1016,12 @@ const serverConfig = {
       },
     ],
   },
-  plugins: getPlugins(true),
+  plugins: [
+    new webpack.ProvidePlugin({
+      Ryunix: '@unsetsoft/ryunixjs',
+    }),
+    ...getPlugins(true),
+  ],
   externals: [
     {
       ryunix: '@unsetsoft/ryunixjs',

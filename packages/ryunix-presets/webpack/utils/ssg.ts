@@ -782,16 +782,11 @@ const buildSSG = async (
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')
       const Ryunix = ryunixCore.default || ryunixCore
-      ryunixGlobal.Ryunix = {
-        renderToString: Ryunix.renderToString as (element: unknown) => string,
-        renderToStringAsync: Ryunix.renderToStringAsync as (
-          element: unknown,
-        ) => Promise<string>,
-        createElement: Ryunix.createElement as (component: unknown) => unknown,
-        getState: Ryunix.getState,
-      }
-      ryunixRenderToString = ryunixGlobal.Ryunix.renderToString ?? null
-      ryunixCreateElement = ryunixGlobal.Ryunix.createElement ?? null
+      // User .ryx modules reference the Ryunix JSX pragma without importing it.
+      // Match ssrDevHandler: expose the full runtime, not a partial API stub.
+      ryunixGlobal.Ryunix = Ryunix as RyunixRuntimeGlobal['Ryunix']
+      ryunixRenderToString = Ryunix.renderToString as (element: unknown) => string
+      ryunixCreateElement = Ryunix.createElement as (component: unknown) => unknown
     }
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e)
