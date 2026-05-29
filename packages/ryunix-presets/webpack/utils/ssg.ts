@@ -846,9 +846,7 @@ const buildSSG = async (
 
       const ssrMetadata = ryunixGlobal.Ryunix?.getState?.()?.ssrMetadata || {}
       const sitemapBaseURL =
-        typeof legacySitemap?.baseURL === 'string'
-          ? legacySitemap.baseURL
-          : ''
+        typeof legacySitemap?.baseURL === 'string' ? legacySitemap.baseURL : ''
       const resolvedMetadataAssets = route.metadataAssets?.length
         ? fromMetadataAssetManifest(
             route.metadataAssets.map((asset) => ({

@@ -72,7 +72,9 @@ export const buildMetadataPublicPath = (
   filename: string,
 ): string => {
   const normalizedRoute =
-    routePath === '/' ? '' : `/${routePath.replace(/^\/+/, '').replace(/\/+$/, '')}`
+    routePath === '/'
+      ? ''
+      : `/${routePath.replace(/^\/+/, '').replace(/\/+$/, '')}`
   return `${normalizedRoute}/${filename}`.replace(/\/+/g, '/')
 }
 
