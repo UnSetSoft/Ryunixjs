@@ -40,7 +40,8 @@
     "build:doc": "pnpm run build:core && pnpm --filter ryunix-doc run build",
     "run:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm run dev:doc",
     "run:web:build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 pnpm run build:doc",
-    "run:web:start": "pnpm --filter ryunix-doc run start"
+    "run:web:start": "pnpm --filter ryunix-doc run start",
+    "build:devtools": "pnpm --filter @unsetsoft/ryunix-devtools build"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",

@@ -9,17 +9,26 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
+
       
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+ 
       - name: Setup Node.js 22.x
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
           cache: 'pnpm'
 
+  
+      - name: Install dependencies
+        run: pnpm install
+
+   
       - name: build devtools
-        working-directory: ./packages/ryunix-devtools
-        run: |
-          pnpm build
+        run: pnpm build:devtools
 
       - name: "web-ext build"
         id: web-ext-build
