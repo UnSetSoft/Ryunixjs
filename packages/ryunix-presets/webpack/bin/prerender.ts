@@ -7,6 +7,7 @@ import defaultSettings from '../utils/config.js'
 import { resolveApp } from '../utils/index.js'
 import fs from 'fs'
 import path from 'path'
+import { moduleImportUrl } from '../utils/moduleImportUrl.js'
 
 interface SsgRoute {
   path: string
@@ -28,7 +29,7 @@ const loadResolvedSSGRoutes = async (
 
   try {
     const serverModule = await import(
-      `file://${serverBundlePath}?update=${Date.now()}`
+      moduleImportUrl(serverBundlePath, true)
     )
     if (typeof serverModule.resolveSSGPaths === 'function') {
       return await serverModule.resolveSSGPaths()

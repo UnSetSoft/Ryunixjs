@@ -1,24 +1,23 @@
-import logo from '../../assets/logo.svg'
-import { LocaleSwitcher, useTranslations } from '../../i18n'
+import logo from '../assets/logo.svg'
 
 export const Metatags = {
   title: 'Ryunix App',
+  description:
+    'A fast, modern, and flexible JavaScript framework for building user interfaces.',
+  viewport: 'width=device-width, initial-scale=1.0',
+  charset: 'UTF-8',
 }
 
-export default function HomePage() {
-  const t = useTranslations()
-
+export default function Index() {
   return (
     <main className="main">
-      <div className="locale-bar">
-        <LocaleSwitcher />
-      </div>
       <img src={logo} alt="Ryunix Logo" className="logo" />
-      <h1 className="hero-title">{t('home.title')}</h1>
+      <h1 className="hero-title">Welcome to Ryunix</h1>
       <p className="subtitle">
-        {t('home.subtitle')}
+        A fast, modern, and flexible JavaScript framework for building user
+        interfaces.
         <br />
-        {t('home.editHint')}
+        Start editing <code>app/index.ryx</code> to see changes instantly.
       </p>
 
       <div className="links">
@@ -28,7 +27,7 @@ export default function HomePage() {
           rel="noopener noreferrer"
           className="link"
         >
-          {t('home.docs')}
+          Documentation
         </a>
         <a
           href="https://github.com/UnSetSoft/Ryunixjs"
@@ -36,7 +35,7 @@ export default function HomePage() {
           rel="noopener noreferrer"
           className="link"
         >
-          {t('home.github')}
+          GitHub Repository
         </a>
       </div>
     </main>

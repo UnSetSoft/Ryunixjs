@@ -16,6 +16,7 @@ import {
   metadataAssetsToMeta,
   type RouteMetadataAssetManifest,
 } from './routeMetadataFiles.js'
+import { moduleImportUrl } from './moduleImportUrl.js'
 
 interface SsgRouteConfig {
   path?: string
@@ -66,7 +67,7 @@ const ryunixGlobal = globalThis as RyunixRuntimeGlobal
  */
 const importEsmFile = async (filePath: string) => {
   if (filePath.endsWith('.js') || filePath.endsWith('.cjs')) {
-    return import(`file://${filePath}?update=${Date.now()}`)
+    return import(moduleImportUrl(filePath, true))
   }
   // For .js: copy to a temp .mjs so Node.js treats it as ESM without warnings
   const tmpPath = path.join(
@@ -75,7 +76,7 @@ const importEsmFile = async (filePath: string) => {
   )
   try {
     fs.copyFileSync(filePath, tmpPath)
-    return await import(`file://${tmpPath}`)
+    return await import(moduleImportUrl(tmpPath))
   } finally {
     try {
       fs.unlinkSync(tmpPath)
@@ -776,7 +777,7 @@ const buildSSG = async (
       }
 
       const serverModule = await import(
-        `file://${serverBundlePath}?update=${Date.now()}`
+        moduleImportUrl(serverBundlePath, true)
       )
       AppRouterApp = serverModule.default?.default || serverModule.default
 

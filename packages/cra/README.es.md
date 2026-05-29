@@ -65,6 +65,7 @@ Para más control, puedes usar estos flags:
 | `--tailwind`    | Inicializa con configuración de Tailwind CSS.                                                  |
 | `--eslint`      | Inicializa con configuración de ESLint.                                                        |
 | `--vscode`      | Añade `.vscode/` recomendando extensiones Ryunix + ESLint (instálalas cuando VS Code lo pida). |
+| `--js`          | Proyecto solo JavaScript (`jsconfig.json`, helpers `.js`). **TypeScript es el predeterminado.** |
 
 ## 🏗️ ¿Qué incluye?
 
@@ -74,6 +75,7 @@ Cada proyecto generado con `cra` viene preconfigurado con:
 - **Listo para SSR**: bases para Server-Side Rendering.
 - **Estructura modular**: organización clara (`app/`, `src/`, `public/`).
 - **Configuración**: `ryunix.config.js` listo para usar.
+- **TypeScript (predeterminado)**: `tsconfig.json`, helpers tipados (`i18n.ts`, `router.ts`, …). Usa `--js` para la variante solo JavaScript con `jsconfig.json`.
 
 ## 📄 Licencia
 

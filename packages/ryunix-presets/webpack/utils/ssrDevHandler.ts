@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Compiler } from 'webpack'
 import { prerenderRoute } from './ssg.js'
 import { resolveApp } from './index.js'
+import { moduleImportUrl } from './moduleImportUrl.js'
 
 interface MemoryOutputFileSystem {
   readFileSync: (path: string, encoding: string) => string
@@ -90,7 +91,7 @@ export async function renderDevRoute(
       } as unknown as Document
 
       const serverModule = await import(
-        `file://${serverBundlePath}?update=${Date.now()}`
+        moduleImportUrl(serverBundlePath, true)
       )
       AppRouterApp = serverModule.default?.default || serverModule.default
 

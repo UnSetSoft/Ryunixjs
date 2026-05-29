@@ -28,6 +28,10 @@ const program = new Command(packageJson.name)
   .option('--eslint', 'Initialize with ESLint config.')
   .option('--vscode', 'Add VS Code settings for Ryunix extension.')
   .option('--compiler <type>', 'Choose compiler: swc or babel. (default: swc)')
+  .option(
+    '--js',
+    'Scaffold a JavaScript-only project (jsconfig, .js helpers). TypeScript is the default.',
+  )
   .action((name: string | undefined) => {
     if (name) projectPath = name
   })
@@ -41,6 +45,7 @@ const opts = program.opts<{
   eslint?: boolean
   vscode?: boolean
   compiler?: RyunixCompiler
+  js?: boolean
 }>()
 
 async function run(): Promise<void> {
@@ -194,6 +199,7 @@ async function run(): Promise<void> {
       tailwind,
       eslint,
       vscode,
+      useJs: Boolean(opts.js),
     })
   } catch (error) {
     console.error(pc.red('\nUnexpected error occurred:\n'), error)
