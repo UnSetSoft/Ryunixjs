@@ -65,6 +65,15 @@ describe('renderToStringAsync', () => {
     expect(html).toContain('<br />')
     expect(html).not.toContain('</br>')
   })
+
+  test('closes script tags when using dangerouslySetInnerHTML', async () => {
+    const tree = createElement('script', {
+      dangerouslySetInnerHTML: { __html: 'window.__boot = true;' },
+    })
+    const html = await renderToStringAsync(tree)
+    expect(html).toContain('<script>window.__boot = true;</script>')
+    expect(html).not.toContain('<undefined>')
+  })
 })
 
 describe('SSR metadata helpers', () => {

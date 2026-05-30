@@ -1,46 +1,66 @@
-name: "Build Devtools"
+# Build Ryunix DevTools Firefox XPI for AMO upload.
+#
+# Replaces a raw `web-ext build` on the source tree: that path skips the TypeScript
+# compile step and keeps dist/ paths that fail AMO validation. This workflow runs
+# `build:release`, which compiles dist/, then packages a Firefox-specific artifact
+# (flat script paths, background.scripts fallback, data_collection_permissions).
+#
+# Artifact: packages/ryunix-devtools/dist-packages/ryunix_devtools-<version>.xpi
+
+name: Build Devtools
+
 on:
   workflow_dispatch:
 
+concurrency:
+  group: devtools-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVTOOLS_DIR: packages/ryunix-devtools
+
 jobs:
   build:
-    name: "Build"
+    name: Build Firefox XPI
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
     steps:
-      - name: "Checkout"
+      - name: Checkout
         uses: actions/checkout@v4
 
-      
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.26.0
- 
-      - name: Setup Node.js 22.x
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
-           
+          node-version: 22
 
-  
       - name: Install dependencies
         run: pnpm install
 
-   
-      - name: build devtools
-        run: pnpm build:devtools
+      - name: Build and package Firefox XPI
+        working-directory: ${{ env.DEVTOOLS_DIR }}
+        run: pnpm run build:release
 
-      - name: "web-ext build"
-        id: web-ext-build
-        uses: kewisch/action-web-ext@v2
-        with:
-          cmd: build
-          source: ./packages/ryunix-devtools
-          filename: "{name}-{version}.xpi"
-          ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
+      - name: Resolve XPI path
+        id: xpi
+        working-directory: ${{ env.DEVTOOLS_DIR }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          XPI="dist-packages/ryunix_devtools-${VERSION}.xpi"
+          test -f "$XPI"
+          echo "path=${{ env.DEVTOOLS_DIR }}/$XPI" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: "Upload Artifact"
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ryunix-devtools.xpi
-          path: ${{ steps.web-ext-build.outputs.target }}
+          name: ryunix_devtools-${{ steps.xpi.outputs.version }}
+          path: ${{ steps.xpi.outputs.path }}
+          if-no-files-found: error

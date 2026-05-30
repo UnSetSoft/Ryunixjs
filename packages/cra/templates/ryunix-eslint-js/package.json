@@ -1,0 +1,16 @@
+{
+  "name": "{{kebab name}}",
+  "version": "1.0.0",
+  "main": "index.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "ryunix dev",
+    "start": "ryunix start",
+    "build": "ryunix build",
+    "lint": "ryunix lint",
+    "lint:fix": "ryunix lint --fix"
+  },
+  "engines": {
+    "node": "^20 || ^22 || ^24 || ^26"
+  }
+}

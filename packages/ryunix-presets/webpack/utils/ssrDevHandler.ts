@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Compiler } from 'webpack'
 import { prerenderRoute } from './ssg.js'
 import { resolveApp } from './index.js'
+import { moduleImportUrl } from './moduleImportUrl.js'
 
 interface MemoryOutputFileSystem {
   readFileSync: (path: string, encoding: string) => string
@@ -89,9 +90,7 @@ export async function renderDevRoute(
         getElementById: () => null,
       } as unknown as Document
 
-      const serverModule = await import(
-        `file://${serverBundlePath}?update=${Date.now()}`
-      )
+      const serverModule = await import(moduleImportUrl(serverBundlePath, true))
       AppRouterApp = serverModule.default?.default || serverModule.default
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')
@@ -156,7 +155,8 @@ export async function renderDevRoute(
           .map((f) => `<link rel="stylesheet" href="/css/${f}" />`)
           .join('\n')
 
-        if (styleLinks) {
+        const hasStylesheet = /<link[^>]+rel=["']stylesheet["']/i.test(html)
+        if (styleLinks && !hasStylesheet) {
           html = html.replace('</head>', `${styleLinks}\n</head>`)
         }
       }

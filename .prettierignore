@@ -1,6 +1,7 @@
 node_modules/
 **/.generated/
 **/dist/
+**/dist-packages/
 **/.turbo/
 **/.ryunix/
 packages/ryunix-vscode/out/

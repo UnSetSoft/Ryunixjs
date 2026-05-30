@@ -12,6 +12,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "pnpm run build:lib-ts",
+    "package": "node scripts/package-extension.mjs",
+    "build:release": "pnpm run build && pnpm run package",
     "build:manifest": "node scripts/sync-manifest.mjs",
     "build:lib-ts": "pnpm run build:manifest && tsc -p tsconfig.emit.json && prettier -w \"dist/**/*.js\" manifest.json",
     "prepublishOnly": "npm run build"

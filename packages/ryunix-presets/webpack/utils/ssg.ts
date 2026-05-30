@@ -16,6 +16,7 @@ import {
   metadataAssetsToMeta,
   type RouteMetadataAssetManifest,
 } from './routeMetadataFiles.js'
+import { moduleImportUrl } from './moduleImportUrl.js'
 
 interface SsgRouteConfig {
   path?: string
@@ -66,7 +67,7 @@ const ryunixGlobal = globalThis as RyunixRuntimeGlobal
  */
 const importEsmFile = async (filePath: string) => {
   if (filePath.endsWith('.js') || filePath.endsWith('.cjs')) {
-    return import(`file://${filePath}?update=${Date.now()}`)
+    return import(moduleImportUrl(filePath, true))
   }
   // For .js: copy to a temp .mjs so Node.js treats it as ESM without warnings
   const tmpPath = path.join(
@@ -75,7 +76,7 @@ const importEsmFile = async (filePath: string) => {
   )
   try {
     fs.copyFileSync(filePath, tmpPath)
-    return await import(`file://${tmpPath}`)
+    return await import(moduleImportUrl(tmpPath))
   } finally {
     try {
       fs.unlinkSync(tmpPath)
@@ -775,23 +776,20 @@ const buildSSG = async (
         }
       }
 
-      const serverModule = await import(
-        `file://${serverBundlePath}?update=${Date.now()}`
-      )
+      const serverModule = await import(moduleImportUrl(serverBundlePath, true))
       AppRouterApp = serverModule.default?.default || serverModule.default
 
       const ryunixCore = await import('@unsetsoft/ryunixjs')
       const Ryunix = ryunixCore.default || ryunixCore
-      ryunixGlobal.Ryunix = {
-        renderToString: Ryunix.renderToString as (element: unknown) => string,
-        renderToStringAsync: Ryunix.renderToStringAsync as (
-          element: unknown,
-        ) => Promise<string>,
-        createElement: Ryunix.createElement as (component: unknown) => unknown,
-        getState: Ryunix.getState,
-      }
-      ryunixRenderToString = ryunixGlobal.Ryunix.renderToString ?? null
-      ryunixCreateElement = ryunixGlobal.Ryunix.createElement ?? null
+      // User .ryx modules reference the Ryunix JSX pragma without importing it.
+      // Match ssrDevHandler: expose the full runtime, not a partial API stub.
+      ryunixGlobal.Ryunix = Ryunix as RyunixRuntimeGlobal['Ryunix']
+      ryunixRenderToString = Ryunix.renderToString as (
+        element: unknown,
+      ) => string
+      ryunixCreateElement = Ryunix.createElement as (
+        component: unknown,
+      ) => unknown
     }
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e)

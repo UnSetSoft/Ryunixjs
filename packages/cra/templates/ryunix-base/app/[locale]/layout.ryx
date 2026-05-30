@@ -1,5 +1,5 @@
 import '../../styles/global.css'
-import { I18nProvider, generateStaticParams } from '../../i18n.js'
+import { I18nProvider, generateStaticParams } from '../../i18n'
 
 export { generateStaticParams }
 

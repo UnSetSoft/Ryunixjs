@@ -2,20 +2,22 @@
   "manifest_version": 3,
   "name": "Ryunix DevTools",
   "version": "1.3.1",
-  "description": "Ryunix DevTools Extension",
+  "description": "Cross-browser DevTools extension for debugging Ryunix applications",
   "devtools_page": "devtools.html",
   "browser_specific_settings": {
     "gecko": {
       "id": "ryunix-devtools@unsetsoft",
       "strict_min_version": "150.0",
       "data_collection_permissions": {
-        "required": [
-          "none"
-        ]
+        "required": ["none"]
       }
     }
   },
-  "icons": {},
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["tabs"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
@@ -33,9 +35,7 @@
   ],
   "background": {
     "service_worker": "dist/background.js",
-    "scripts": [
-      "dist/background.js"
-    ],
+    "scripts": ["dist/background.js"],
     "type": "module"
   }
 }

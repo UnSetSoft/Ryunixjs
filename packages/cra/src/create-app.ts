@@ -22,6 +22,8 @@ export interface CreateAppOptions {
   tailwind: boolean
   eslint: boolean
   vscode: boolean
+  /** When true, scaffold the JavaScript-only template variant (`*-js`). */
+  useJs: boolean
 }
 
 export async function createApp({
@@ -32,6 +34,7 @@ export async function createApp({
   tailwind,
   eslint,
   vscode,
+  useJs,
 }: CreateAppOptions): Promise<void> {
   const root = path.resolve(appPath)
 
@@ -50,6 +53,8 @@ export async function createApp({
   if (tailwind && eslint) templateName = 'ryunix-all'
   else if (tailwind) templateName = 'ryunix-tailwind'
   else if (eslint) templateName = 'ryunix-eslint'
+
+  if (useJs) templateName = `${templateName}-js`
 
   const templateDir = path.resolve(__dirname, '..', 'templates', templateName)
   if (!fs.existsSync(templateDir)) {
@@ -124,16 +129,30 @@ export async function createApp({
     devDependencies['tailwindcss'] = '^4.0.0'
     devDependencies['@tailwindcss/postcss'] = '^4.0.0'
     devDependencies['postcss'] = '^8.4.35'
+    devDependencies['autoprefixer'] = '^10.4.20'
   }
 
   if (eslint) {
-    devDependencies['eslint'] = '^8.57.0'
-    devDependencies['eslint-plugin-react'] = '^7.34.0'
+    devDependencies['eslint'] = '^9.39.0'
+    devDependencies['eslint-plugin-react'] = '^7.37.0'
     devDependencies['eslint-plugin-react-hooks'] = '^4.6.0'
+  }
+
+  if (!useJs) {
+    devDependencies['typescript'] = '^5.9.3'
   }
 
   packageJson.dependencies = dependencies
   packageJson.devDependencies = devDependencies
+
+  const scripts =
+    (packageJson.scripts as Record<string, string> | undefined) ?? {}
+  if (!scripts.dev || scripts.dev === 'dev') scripts.dev = 'ryunix dev'
+  if (!scripts.start) scripts.start = 'ryunix start'
+  if (!scripts.build) scripts.build = 'ryunix build'
+  if (eslint && !scripts.lint) scripts.lint = 'ryunix lint'
+  if (eslint && !scripts['lint:fix']) scripts['lint:fix'] = 'ryunix lint --fix'
+  packageJson.scripts = scripts
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 

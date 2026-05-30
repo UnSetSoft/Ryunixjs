@@ -2,7 +2,7 @@
  * Ryunix DevTools Panel UI.
  */
 
-; (function () {
+;(function () {
   const ext = ((globalThis as { browser?: typeof chrome }).browser ??
     chrome) as typeof chrome
 
@@ -16,7 +16,6 @@
   interface RenderEventData {
     duration: number
   }
-
 
   function requireElement(id: string): HTMLElement {
     const el = document.getElementById(id)
@@ -67,68 +66,68 @@
   })
 
   function renderTree(): void {
-    if (fibers.length === 0) return;
+    if (fibers.length === 0) return
 
-    treeEl.textContent = '';
+    treeEl.textContent = ''
 
     fibers.forEach((f, i) => {
-      const item = document.createElement('div');
-      item.className = 'tree-item';
-      item.dataset.index = String(i);
+      const item = document.createElement('div')
+      item.className = 'tree-item'
+      item.dataset.index = String(i)
 
-      const name = document.createElement('span');
-      name.className = 'component-name';
+      const name = document.createElement('span')
+      name.className = 'component-name'
 
-      name.textContent = `<${f.type}/>`;
-      item.appendChild(name);
+      name.textContent = `<${f.type}/>`
+      item.appendChild(name)
 
       if (f.hooks > 0) {
-        const badge = document.createElement('span');
-        badge.className = 'hook-badge';
-        badge.textContent = String(f.hooks);
-        item.appendChild(badge);
+        const badge = document.createElement('span')
+        badge.className = 'hook-badge'
+        badge.textContent = String(f.hooks)
+        item.appendChild(badge)
       }
 
-      item.addEventListener('click', () => selectFiber(i));
-      treeEl.appendChild(item);
-    });
+      item.addEventListener('click', () => selectFiber(i))
+      treeEl.appendChild(item)
+    })
   }
 
   function selectFiber(index: number): void {
-    selected = fibers[index] ?? null;
-    if (!selected) return;
+    selected = fibers[index] ?? null
+    if (!selected) return
 
     treeEl.querySelectorAll('.tree-item').forEach((el, i) => {
-      el.classList.toggle('selected', i === index);
-    });
+      el.classList.toggle('selected', i === index)
+    })
 
-    detailsEl.textContent = '';
+    detailsEl.textContent = ''
 
-    const header = document.createElement('div');
-    header.className = 'section-header';
-    header.textContent = 'Props';
-    detailsEl.appendChild(header);
+    const header = document.createElement('div')
+    header.className = 'section-header'
+    header.textContent = 'Props'
+    detailsEl.appendChild(header)
 
-    const props = Object.entries(selected.props);
+    const props = Object.entries(selected.props)
     if (props.length > 0) {
       props.forEach(([k, v]) => {
-        const row = document.createElement('div');
-        row.className = 'prop-row';
-        const keySpan = document.createElement('span');
-        keySpan.className = 'prop-key';
-        keySpan.textContent = `${k}:`;
-        const valSpan = document.createElement('span');
-        valSpan.className = 'prop-value';
-        valSpan.textContent = String(v);
-        row.appendChild(keySpan);
-        row.appendChild(valSpan);
-        detailsEl.appendChild(row);
-      });
+        const row = document.createElement('div')
+        row.className = 'prop-row'
+        const keySpan = document.createElement('span')
+        keySpan.className = 'prop-key'
+        keySpan.textContent = `${k}:`
+        const valSpan = document.createElement('span')
+        valSpan.className = 'prop-value'
+        valSpan.textContent = String(v)
+        row.appendChild(keySpan)
+        row.appendChild(valSpan)
+        detailsEl.appendChild(row)
+      })
     } else {
-      const empty = document.createElement('div');
-      empty.style.cssText = 'color: #999; padding: 1rem 0;';
-      empty.textContent = 'No props';
-      detailsEl.appendChild(empty);
+      const empty = document.createElement('div')
+      empty.style.cssText = 'color: #999; padding: 1rem 0;'
+      empty.textContent = 'No props'
+      detailsEl.appendChild(empty)
     }
   }
 
@@ -150,30 +149,30 @@
 
     const slow = fibers.filter((f) => (f.renderTime ?? 0) > 16)
 
-    slowList.textContent = '';
+    slowList.textContent = ''
 
     if (slow.length > 0) {
       slow.forEach((f) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'slow-component';
+        const wrapper = document.createElement('div')
+        wrapper.className = 'slow-component'
 
-        const name = document.createElement('div');
-        name.className = 'slow-component-name';
-        name.textContent = `<${f.type}/>`;
+        const name = document.createElement('div')
+        name.className = 'slow-component-name'
+        name.textContent = `<${f.type}/>`
 
-        const time = document.createElement('div');
-        time.className = 'slow-component-time';
-        time.textContent = `${(f.renderTime ?? 0).toFixed(2)}ms`;
+        const time = document.createElement('div')
+        time.className = 'slow-component-time'
+        time.textContent = `${(f.renderTime ?? 0).toFixed(2)}ms`
 
-        wrapper.appendChild(name);
-        wrapper.appendChild(time);
-        slowList.appendChild(wrapper);
-      });
+        wrapper.appendChild(name)
+        wrapper.appendChild(time)
+        slowList.appendChild(wrapper)
+      })
     } else {
-      const msg = document.createElement('div');
-      msg.style.cssText = 'color: #999; padding: 1rem 0;';
-      msg.textContent = 'No slow components detected';
-      slowList.appendChild(msg);
+      const msg = document.createElement('div')
+      msg.style.cssText = 'color: #999; padding: 1rem 0;'
+      msg.textContent = 'No slow components detected'
+      slowList.appendChild(msg)
     }
   }
 })()

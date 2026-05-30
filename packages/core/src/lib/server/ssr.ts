@@ -212,7 +212,14 @@ const renderToStringImpl = (element: RyunixNode | RyunixNode[]): string => {
     return renderToStringImpl(renderedElement)
   }
 
+  if (vnode.type == null) {
+    return ''
+  }
+
   const type = String(vnode.type)
+  if (type === 'undefined') {
+    return ''
+  }
   const props = vnode.props || {}
   const { attributes, innerHTML, htmlChildren } = buildHostProps(
     props,
@@ -356,6 +363,10 @@ const renderToStreamImpl = async (
   const type = vnode.type
   const props = vnode.props || {}
 
+  if (type == null) {
+    return
+  }
+
   if (typeof type === 'function') {
     if (process.env.RYUNIX_DEBUG) {
       console.log('[SSR Debug] Rendering function:', type.name || 'anonymous')
@@ -370,6 +381,9 @@ const renderToStreamImpl = async (
   }
 
   const hostTag = String(type)
+  if (hostTag === 'undefined') {
+    return
+  }
   const children = props.children || []
   const { attributes, innerHTML } = buildHostProps(props, () => '')
 
@@ -377,6 +391,9 @@ const renderToStreamImpl = async (
 
   if (innerHTML !== null) {
     push(innerHTML)
+    if (!VOID_ELEMENTS.has(hostTag)) {
+      push(`</${hostTag}>`)
+    }
   } else if (!VOID_ELEMENTS.has(hostTag)) {
     if (Array.isArray(children)) {
       for (const child of children) {

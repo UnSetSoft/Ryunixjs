@@ -58,15 +58,16 @@ The CLI will guide you through several choices to customize your project:
 
 For more control, you can use the following flags:
 
-| Flag            | Description                                                                     |
-| :-------------- | :------------------------------------------------------------------------------ |
-| `-v, --version` | Output the current version of the CLI.                                          |
-| `-h, --help`    | Display the help message.                                                       |
-| `--canary`      | Use the Canary channel for Ryunix dependencies.                                 |
-| `--latest`      | Use the Latest channel for Ryunix dependencies (default).                       |
-| `--tailwind`    | Initialize with Tailwind CSS configuration.                                     |
-| `--eslint`      | Initialize with ESLint configuration.                                           |
-| `--vscode`      | Add `.vscode/` (Ryunix + ESLint; install recommended extensions when prompted). |
+| Flag            | Description                                                                               |
+| :-------------- | :---------------------------------------------------------------------------------------- |
+| `-v, --version` | Output the current version of the CLI.                                                    |
+| `-h, --help`    | Display the help message.                                                                 |
+| `--canary`      | Use the Canary channel for Ryunix dependencies.                                           |
+| `--latest`      | Use the Latest channel for Ryunix dependencies (default).                                 |
+| `--tailwind`    | Initialize with Tailwind CSS configuration.                                               |
+| `--eslint`      | Initialize with ESLint configuration.                                                     |
+| `--vscode`      | Add `.vscode/` (Ryunix + ESLint; install recommended extensions when prompted).           |
+| `--js`          | JavaScript-only scaffold (`jsconfig.json`, `.js` helpers). **TypeScript is the default.** |
 
 ## 🏗️ What's Inside?
 
@@ -76,6 +77,9 @@ Every project scaffolded with `cra` comes pre-configured with:
 - **SSR Ready**: Foundations for Server-Side Rendering.
 - **Modular Structure**: Clean directory layout (`app/`, `src/`, `public/`).
 - **Configuration**: Ready-to-use `ryunix.config.js`.
+- **TypeScript (default)**: `tsconfig.json`, typed helpers (`i18n.ts`,
+  `router.ts`, …). Use `--js` for the JavaScript-only layout with
+  `jsconfig.json`.
 
 ## 📄 License
 

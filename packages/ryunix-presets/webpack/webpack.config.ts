@@ -29,6 +29,7 @@ import {
 } from './utils/eslint-files.js'
 import { handleApiRequest } from './utils/apiHandler.js'
 import { renderDevRoute } from './utils/ssrDevHandler.js'
+import { resolvePostcssPlugins } from './utils/postcss-config.js'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
@@ -103,37 +104,7 @@ try {
   }
 }
 
-// A require() rooted at the user project — resolves user-installed packages (e.g. tailwind, postcss plugins)
-const projectRequire = createRequire(resolveApp(dir, 'package.json'))
-
-/**
- * Load postcss plugins from the user project's postcss.config.js
- * resolving each plugin name via projectRequire so they are found
- * in the user's node_modules even in pnpm monorepos.
- */
-const resolvePostcssPlugins = () => {
-  const configPath = resolveApp(dir, 'postcss.config.js')
-  if (!fs.existsSync(configPath)) return []
-  try {
-    const config = projectRequire(configPath)
-    const plugins = config.plugins || {}
-    if (Array.isArray(plugins)) return plugins
-    // Object form: { 'plugin-name': options }
-    return Object.entries(plugins).map(([name, opts]) => {
-      const pluginFn = projectRequire(name)
-      const fn = pluginFn.default || pluginFn
-      return opts && typeof opts === 'object' && Object.keys(opts).length > 0
-        ? fn(opts)
-        : fn()
-    })
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : String(e)
-    console.warn(`[Ryunix] Could not load postcss.config.js: ${message}`)
-    return []
-  }
-}
-
-const postcssPlugins = resolvePostcssPlugins()
+const postcssPlugins = await resolvePostcssPlugins(dir)
 
 const hasAppDir =
   fs.existsSync(resolveApp(dir, 'app')) ||
@@ -972,6 +943,8 @@ const serverConfig = {
   ...sharedWebpackConfig,
   name: 'server',
   target: 'node', // Compile for Node.js
+  // Prevent webpack-dev-server from injecting HMR entry into the Node bundle.
+  devServer: false,
   entry: resolveApp(dir, `${config.buildDir}/server/app/app-router-server.js`),
   output: {
     path: resolveApp(dir, `${config.buildDir}/server`),
@@ -1014,7 +987,12 @@ const serverConfig = {
       },
     ],
   },
-  plugins: getPlugins(true),
+  plugins: [
+    new webpack.ProvidePlugin({
+      Ryunix: '@unsetsoft/ryunixjs',
+    }),
+    ...getPlugins(true),
+  ],
   externals: [
     {
       ryunix: '@unsetsoft/ryunixjs',
